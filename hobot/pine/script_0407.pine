@@ -1,0 +1,216 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ORITUBE
+
+//@version=6
+strategy("이동평균선 정배열 (PRD)", overlay=true, initial_capital=1000000, default_qty_type=strategy.percent_of_equity, default_qty_value=100, calc_on_every_tick=false)
+
+// Date Filter
+start = input.time(timestamp("2017-04-14"), "Start", group="Date Filter")
+finish = input.time(timestamp("2025-05-14"), "End", group="Date Filter")
+
+date_filter = time >= start and time <= finish ? true : false
+
+
+// ema variable set
+ema1 = ta.ema(close, 7)
+ema2 = ta.ema(close, 20)
+ema3 = ta.ema(close, 99)
+ema4 = ta.ema(close, 180)
+
+
+//plot ema
+plot(ema1, color = color.rgb(81, 209, 30))
+plot(ema2, color = color.rgb(92, 104, 51))
+plot(ema3, color = color.rgb(44, 16, 199))
+plot(ema4, color = color.rgb(0, 0, 0))
+
+// ------------------------------
+// * Bollinger Plot
+// ------------------------------
+bollinger_k = input.float(title = "BB K값", defval = 1 )
+[bbMiddle, bbUpper, bbLower] = ta.bb (close, 20, bollinger_k)
+
+bbLowerPlot = plot(bbLower, "Lower", color=color.rgb(121, 119, 119, 76))
+bbUpperPlot = plot(bbUpper, "Lower", color=color.rgb(121, 119, 119, 79))
+
+// ------------------------------
+// * Strategy1: ema Strategy
+// ------------------------------
+
+[bbMiddle_st1, bbUpper_st1, bbLower_st1] = ta.bb (close, 20, 2)
+bbLower2Plot = plot(bbLower_st1, "Lower", color=color.rgb(121, 119, 119, 76))
+bbUpper2Plot = plot(bbUpper_st1, "Lower", color=color.rgb(121, 119, 119, 79))
+
+rsi = ta.rsi(close, 14)
+rsi_ma2 = ta.ema(rsi,2)
+rsi_ma4 = ta.ema(rsi,4)
+
+ema_almost_crossunder = math.abs(ema1-ema2) * 100/ema1 < 0.5
+
+longCondition_ema = ema1 > ema2 and ema2 > ema3 and ema3 > ema4
+sellCondition_ema = not(ema1 > ema2 and ema2 > ema3 and ema3 > ema4)// or ema_almost_crossunder //or bbUpper_st1 < close
+
+
+almostCrossunder = ema3 > ema4 and ema_almost_crossunder
+
+// ------------------------------
+// * Strategy2: ema Strategy
+// ------------------------------
+sell_each_condition = ta.crossunder(close, bbLower_st1)
+sell_each_condition2 = ta.crossunder(ema1, ema2)
+
+longCondition_ema2 = ta.crossover(ema1, ema2) and ema4 > ema3 and ema3 > ema2
+sellCondition_ema2 = ta.crossover(close, ema3) or sell_each_condition or sell_each_condition2
+
+// ------------------------------
+// * Strategy3: bb, rsi
+// ------------------------------
+//매수조건1: rsi ema cross over
+rsi_crossover = rsi_ma2 > rsi_ma4//ta.crossover(rsi_ma2, rsi_ma4)
+
+//1-2 test
+use_almost_strategy = input.bool(title = "use_almost_strategy", defval = true)
+threshold = input.float(title = "1-2/threshold", defval = 1 )
+
+rsi_almost_crossover = false
+if use_almost_strategy
+    rsi_almost_crossover := math.abs(rsi-rsi_ma2) < threshold and math.abs(rsi-rsi_ma4) < threshold and math.abs(rsi_ma2-rsi_ma4) < threshold
+
+//매수조건2: rsi가 역배열 상태였는지 체크
+rsi_before2_crossover = rsi[1] < rsi_ma4[1] and rsi_ma2[1] < rsi_ma4[1]
+rsi_before3_crossover = rsi[2] < rsi_ma4[2] and rsi_ma2[2] < rsi_ma4[2]
+
+condition_rsi_before = rsi_before2_crossover or rsi_before3_crossover
+
+//매수조건3: 직전 low price들이 bb Lower에 위치했었는지
+bbLowerAroundUnder =  bbLower[3] > low[3] or bbLower[2] > low[2] or bbLower[1] > low[1] or bbLower > low //ta.crossunder(close, bbLower)
+
+//매수조건4: 직전 close가 ema1 위에 있는지?
+close_over_ema1 = close > ema1
+close_under_ema1 = close < ema1
+
+//매수조건5: ema1 or ema2 > ema3 > ema4
+ema_align_condition = not(ema3 > ema4 and (ema1 > ema3 or ema2 > ema3))
+
+//매도조건-bbrsi: low가 bbLower_st1 밑에있는지 
+bbrsi_close_bbLower_st1 = low < bbLower_st1
+bbrsi_close_bbLower = low < bbLower
+
+//bbrsi_under 조건
+longCondition_bbrsi_under = (rsi_crossover or rsi_almost_crossover) and bbLowerAroundUnder and close_under_ema1 and condition_rsi_before// and ema_align_condition
+closeCondition_bbrsi_under = ta.crossover(close, ema1) or bbrsi_close_bbLower_st1
+
+//bbrsi_over 조건
+longCondition_bbrsi_over = (rsi_crossover or rsi_almost_crossover) and bbLowerAroundUnder and close_over_ema1 and condition_rsi_before// and ema_align_condition
+closeCondition_bbrsi_over = ta.crossover(close, bbUpper) or bbrsi_close_bbLower_st1
+
+// ------------------------------
+// Final Entry Condition Setting
+// ------------------------------
+entryLongCondition = longCondition_ema and date_filter
+closeCondition = sellCondition_ema and date_filter
+almostCloseCondition = almostCrossunder and date_filter
+overBBCondition = close > bbUpper_st1 and date_filter
+
+entryLongCondition_ema2 = longCondition_ema2 and date_filter
+closeCondition_ema2 = sellCondition_ema2 and date_filter
+
+entryLongCondition_bbrsi_under = longCondition_bbrsi_under and date_filter and not(closeCondition_bbrsi_under)
+entryExitCondition_bbrsi_under = closeCondition_bbrsi_under and date_filter
+
+entryLongCondition_bbrsi_over = longCondition_bbrsi_over and date_filter and not(closeCondition_bbrsi_over)
+entryExitCondition_bbrsi_over = closeCondition_bbrsi_over and date_filter
+
+atr = ta.atr(20)
+
+use_ema_strategy = input.bool(title = "ema_strategy", defval = true)
+if use_ema_strategy
+    if entryLongCondition
+        strategy.entry("Long_ema", strategy.long)
+
+    if closeCondition 
+        strategy.close("Long_ema")
+
+    if almostCloseCondition
+        strategy.close("Long_ema")
+        
+    // if overBBCondition
+    //     strategy.exit(id = "Exit_ema", from_entry = "Long_ema", limit = high + atr*2)
+    // strategy.exit(id = "Exit_ema", from_entry = "Long_ema", stop = open * 0.90)    
+
+use_ema_strategy2 = input.bool(title = "ema_strategy2", defval = true)
+if use_ema_strategy2
+    if entryLongCondition_ema2
+        strategy.entry("Long_ema2", strategy.long)
+    strategy.exit(id = "Exit_ema2", from_entry = "Long_ema2", limit = high + atr*2, stop = close - atr*1)
+
+    if closeCondition_ema2
+        strategy.close("Long_ema2")
+// -----------------------------------------------------------------
+use_bbrsi_strategy_under = input.bool(title = "bbrsi_strategy_under", defval = true)
+if use_bbrsi_strategy_under
+    if entryLongCondition_bbrsi_under
+        strategy.entry("Long_bbrsi_under", strategy.long)
+
+    if entryExitCondition_bbrsi_under
+        strategy.close("Long_bbrsi_under")
+        
+    strategy.exit(id="Exit_bbrsi_under", from_entry = "Long_bbrsi_under", limit = high + atr*4, stop = open*0.88)
+
+// -----------------------------------------------------------------
+use_bbrsi_strategy_over = input.bool(title = "bbrsi_strategy_over", defval = true)
+if use_bbrsi_strategy_over
+    if entryLongCondition_bbrsi_over
+        strategy.entry("Long_bbrsi_over", strategy.long)
+        //strategy.exit(id="Long_bbrsi_over", stop = low - atr*1)
+
+    if entryExitCondition_bbrsi_over
+        strategy.close("Long_bbrsi_over")
+
+    strategy.exit(id="Exit_bbrsi_over", from_entry = "Long_bbrsi_over", limit = high + atr*4, stop = low - atr*1)
+
+    // if bbrsi_close_bbLower_st1
+    //     strategy.exit("Exit over", from_entry ="Long_bbrsi_over", stop = open * 0.95)
+// -------------------------------
+// text display
+// -------------------------------
+textbox_useflag = input.bool(title = "textbox 사용",defval = false)
+
+if textbox_useflag
+    var table rsiDisplay = table.new(position.top_right, 1, 27)
+
+
+        // We only populate the table on the last bar.
+    table.cell(rsiDisplay, 0, 0, "atr: " + str.tostring(atr), bgcolor = color.blue)
+    table.cell(rsiDisplay, 0, 1, "rsi_ma2(-1): " + str.tostring(rsi_ma2), bgcolor = color.blue)
+    table.cell(rsiDisplay, 0, 2, "rsi_ma4(-1): " + str.tostring(rsi_ma4), bgcolor = color.blue)
+
+    table.cell(rsiDisplay, 0, 4, "bbLower(-1): " + str.tostring(bbLower), bgcolor = color.rgb(39, 141, 8))
+    table.cell(rsiDisplay, 0, 5, "bbLower(-2): " + str.tostring(bbLower[1]), bgcolor = color.rgb(39, 141, 8))
+    table.cell(rsiDisplay, 0, 6, "bbLower(-3): " + str.tostring(bbLower[2]), bgcolor = color.rgb(39, 141, 8))
+    table.cell(rsiDisplay, 0, 7, "bbLower(-4): " + str.tostring(bbLower[3]), bgcolor = color.rgb(39, 141, 8))
+    table.cell(rsiDisplay, 0, 8, "bbLower(-5): " + str.tostring(bbLower[4]), bgcolor = color.rgb(39, 141, 8))
+
+    table.cell(rsiDisplay, 0, 9, "close(-1): " + str.tostring(close), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 10, "close(-2): " + str.tostring(close[1]), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 11, "close(-3): " + str.tostring(close[2]), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 12, "close(-4): " + str.tostring(close[3]), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 13, "close(-5): " + str.tostring(close[4]), bgcolor = color.rgb(48, 139, 185))
+
+    table.cell(rsiDisplay, 0, 14, "low(-1): " + str.tostring(low), bgcolor = color.rgb(48, 185, 94))
+    table.cell(rsiDisplay, 0, 15, "low(-2): " + str.tostring(low[1]), bgcolor = color.rgb(48, 185, 94))
+    table.cell(rsiDisplay, 0, 16, "low(-3): " + str.tostring(low[2]), bgcolor = color.rgb(48, 185, 94))
+    table.cell(rsiDisplay, 0, 17, "low(-4): " + str.tostring(low[3]), bgcolor = color.rgb(48, 185, 94))
+    table.cell(rsiDisplay, 0, 18, "low(-5): " + str.tostring(low[4]), bgcolor = color.rgb(48, 185, 94))
+
+    table.cell(rsiDisplay, 0, 19, "ma7: " + str.tostring(ema1), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 20, "ma20: " + str.tostring(ema2), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 21, "ma99: " + str.tostring(ema3), bgcolor = color.rgb(48, 139, 185))
+    table.cell(rsiDisplay, 0, 22, "ma180: " + str.tostring(ema4), bgcolor = color.rgb(48, 139, 185))
+
+    table.cell(rsiDisplay, 0, 23, "rsi(-2): " + str.tostring(rsi[1]), bgcolor = color.blue)
+    table.cell(rsiDisplay, 0, 24, "rsi_ma2(-2): " + str.tostring(rsi_ma2[1]), bgcolor = color.blue)
+    table.cell(rsiDisplay, 0, 25, "rsi_ma4(-2): " + str.tostring(rsi_ma4[1]), bgcolor = color.blue)
+
+    table.cell(rsiDisplay, 0, 26, "rsi_ma4(-1): " + str.tostring(bbLower_st1), bgcolor = color.blue)
+    

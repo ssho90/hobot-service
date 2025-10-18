@@ -1,0 +1,101 @@
+
+
+[주요 기술]
+DevOps, Cloud Infra 구축, Java Spring
+
+[기술 Tag]
+AWS, Azure, GCP, Java, Python, Kubernetes, Docker, Git, Jenkins, ElasticSearch
+
+[주요 프로젝트]
+1. 사내 솔루션 AI 서비스 도입 (2024.11 –현재)
+
+*역할
+•LLM, RAG 인프라구축및AI 서비스개발
+
+*기술스택
+•GCP, Python Langchain, Flask, Nginx, Java Spring, ElasticSearch, Jenkins, Git
+
+*주요성과
+•RAG 아키텍처구축
+a) LLM, Vector DB, Embedding 모델, GCP VM 및 Cloud Run에 서버 구성
+b) CICD 구축 (Jenkins로 GCP VM, Cloud Rn에 배포 Pipeline 생성)
+c) GCP PubSub으로 Storage Event를 Trigger하여 AI 서버로 Message 전달
+d) Elastic Cloud 임베딩 모델 검토 및 적용
+
+•AI Application 개발
+a) Langchain으로 RAG 서버 개발 (비정형 데이터, Json 등에서 Text 추출->임베딩-> ElasticSearch Vector DB 저장-> ElasticSearch Semantic 검색-> 프롬프트생성-> LLM 호출-> 응답결과User에게전달)
+b) AI 서비스 개발(Python Langchain, Java Spring)
+c) 솔루션 내의RAG 개발표준가이드작성, RAG서버API 사용가이드
+
+2. 사내 솔루션 운영 (2024.07 –2024.11)
+*역할
+•사내솔루션운영하며Framework Upgrade, DevOps, 개발자 지원 업무수행
+
+*기술스택
+•GCP, Java Spring, Git, Jenkins, Kubernetes, Docker, ElasticSearch
+
+*주요성과
+•Spring Framework Upgrade 
+a) Spring Boot 2.6 -> 3.3, Java 11 -> 17
+•CI/CD 배포 자동화Pipeline 구성 (Jenkins, Git)
+•GKE(Google Kubernetes Engine) 운영
+•WAS 모니터링및장애조치
+•개발표준가이드작성및개발자교육
+
+3. LG이노텍, Azure Landing Zone 및 보안 RAG 아키텍처 구축 (2024.02 –2024.6)
+*역할
+•Azure Landing Zone 및 보안 RAG 아키텍처 구축
+
+*기술스택
+•Azure
+
+*주요성과
+•Azure Landing Zone 구축
+a) 권한체계, 리소스생성규칙, 로깅/백업정책설계및구성
+b) Vnet, Subnet, Routes, AGW 등 인프라 아키텍처 설계 및구성
+c) 보안 구성(WAF, Firewall, Private Endpoint)
+•보안RAG 아키텍처구축
+a) Azure OpenAI, Document Intelligence, AI Search 등 Azure 서비스 사용하여
+RAG 아키텍처구성
+b) 모든Azure 자원들을Private Network로 통신하도록 Private Endpoint 연계
+
+4.한화금융생명서비스, 클라우드시스템확장구축  (2023.07 – 2023.12)
+*역할
+•Application Architect로써 Spring Framework 구축, DevOpos 업무 수행
+
+*기술스택
+•AWS, Kafka, Java Spring, Git, Gitlab
+
+*주요성과
+•Spring Framework 구축
+a) Spring Framework 설계 (application.yml, session, mybatis, kafka 등)
+b) 공통Util 개발
+c) 개발 표준가이드작성및개발자교육
+•CI/CD 배포 자동화Pipeline 운영 (Gitlab, Git)
+•WAS 모니터링및장애조치
+
+5.LG에너지솔루션, R&D Center Web 시스템 구축 (2022.01 – 2022.11)
+*역할
+•Backend 개발자
+
+*기술스택
+•Spring boot, Java, Mybatis, MySql
+
+*주요성과
+•고객요구사항분석/설계
+•외주Frontend 개발자 관리
+•시스템Backend 개발
+
+
+[학력]
+서울과학기술대학교 (2009.03 – 2016.08)
+기계시스템디자인공학부전공•학사
+3.2 / 4.5 학점
+
+[자격증]
+AWS Certified AI Practitioner (2025.04.06)
+Microsoft Certified Azure DevOps Engineer Expert (2024.10.04)
+Microsoft Certified Azure Administrator Associate  (2023.04.17)
+TensorFlow Developer Certificate (2021.07.21)
+
+
