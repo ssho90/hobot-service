@@ -6,7 +6,7 @@ from langchain_core.messages import ToolMessage, HumanMessage
 from typing import TypedDict, Annotated
 from langgraph.graph.message import add_messages
 
-load_dotenv()
+load_dotenv(override=True)
 
 # 1. 도구 정의
 tavily_tool = TavilySearch(

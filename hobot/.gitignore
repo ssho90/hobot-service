@@ -9,6 +9,8 @@ log.txt
 
 data/*
 
+daily_news.txt
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

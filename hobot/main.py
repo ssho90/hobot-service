@@ -10,6 +10,8 @@ from pydantic import BaseModel
 import logging
 from service.slack_bot import post_message
 from app import daily_news_summary
+from service.daily_news_agent import compiled
+from service import news_manager
 
 app = FastAPI(title="Hobot API", version="1.0.0")
 
@@ -46,11 +48,35 @@ async def health_check():
     res = health_check()
     return res
 
-@api_router.get("/news")
+@api_router.get("/news-sentiment")
 async def daily_news(query: str = Query(default="오늘의 뉴스 중 중요한 뉴스들을 알려줘. 경제 > 정치 > 과학(기술) > 사회 > 기타 순서로 중요도를 판단하면 돼")):
+    """기존 뉴스 시감 분석 (슬랙 전송용)"""
     news = daily_news_summary(query)
     res = post_message(news)
     return res
+
+@api_router.get("/news")
+async def get_daily_news():
+    """뉴스 파일에서 뉴스를 읽어옵니다. (브라우저용)"""
+    try:
+        result = news_manager.get_news_with_date()
+        
+        if result["news"]:
+            return result
+        else:
+            raise HTTPException(status_code=404, detail="No news available")
+    except Exception as e:
+        logging.error(f"Error getting daily news: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/news-update")
+async def update_daily_news():
+    """뉴스를 새로 수집하고 저장합니다. (스케줄러용 - Tavily API 호출)"""
+    try:
+        return news_manager.update_news_with_tavily(compiled)
+    except Exception as e:
+        logging.error(f"Error updating daily news: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/upbit/trading")
 async def upbit_trading():

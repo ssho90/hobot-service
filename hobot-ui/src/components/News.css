@@ -1,0 +1,98 @@
+.news-container {
+  padding: 20px;
+}
+
+.news-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.news-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.news-date {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.btn-refresh {
+  padding: 8px 20px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background-color: #1976D2;
+}
+
+.btn-refresh:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  padding: 15px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.loading-message {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+}
+
+.news-content {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  color: #333;
+}
+
+.news-header-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1976D2;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-top: 15px;
+}
+
+.news-item {
+  margin-left: 20px;
+  margin-bottom: 8px;
+  color: #555;
+  font-size: 15px;
+}
+
+.news-text {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .news-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .news-content {
+    font-size: 14px;
+  }
+}
+

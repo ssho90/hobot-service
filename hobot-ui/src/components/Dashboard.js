@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
+import News from './News';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const [currentStrategy, setCurrentStrategy] = useState('');
+  const [activeTab, setActiveTab] = useState('trading');
 
   // CurrentStrategy.txt 파일을 읽어서 상태 업데이트
   const fetchCurrentStrategy = async () => {
@@ -35,23 +38,48 @@ const Dashboard = () => {
   return (
     <div className="container">
       <div className="dashboard-header">
-        <h1>Upbit Panel</h1>
+        <h1>Hobot Panel</h1>
       </div>
 
-      <div className="status-section">
-        <div className="status-item">
-          <HobotStatus />
-        </div>
-        <div className="status-item">
-          <CurrentPosition currentStrategy={currentStrategy} />
-        </div>
+      <div className="tabs">
+        <button 
+          className={`tab ${activeTab === 'trading' ? 'active' : ''}`}
+          onClick={() => setActiveTab('trading')}
+        >
+          Trading
+        </button>
+        <button 
+          className={`tab ${activeTab === 'news' ? 'active' : ''}`}
+          onClick={() => setActiveTab('news')}
+        >
+          News
+        </button>
       </div>
 
-      <div className="tools-section">
-        <Tools 
-          currentStrategy={currentStrategy} 
-          onStrategyChange={handleStrategyChange}
-        />
+      <div className="tab-content">
+        {activeTab === 'trading' && (
+          <>
+            <div className="status-section">
+              <div className="status-item">
+                <HobotStatus />
+              </div>
+              <div className="status-item">
+                <CurrentPosition currentStrategy={currentStrategy} />
+              </div>
+            </div>
+
+            <div className="tools-section">
+              <Tools 
+                currentStrategy={currentStrategy} 
+                onStrategyChange={handleStrategyChange}
+              />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'news' && (
+          <News />
+        )}
       </div>
     </div>
   );
