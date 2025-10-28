@@ -74,7 +74,9 @@ def update_news_with_tavily(compiled):
         
         # 뉴스 수집
         logging.info("Starting news collection with Tavily API...")
-        final_state = compiled.invoke({})
+        # State 초기화 - messages를 빈 리스트로 초기화
+        initial_state = {"messages": []}
+        final_state = compiled.invoke(initial_state)
         last_message = final_state['messages'][-1]
         news_content = last_message.content
         
