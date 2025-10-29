@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './News.css';
 
 const News = () => {
@@ -96,30 +98,18 @@ const News = () => {
 
       {news && (
         <div className="news-content">
-          {news.split('\n').map((line, index) => {
-            // 헤더 스타일링
-            if (line.startsWith('## ') || line.startsWith('**')) {
-              return (
-                <h3 key={index} className="news-header-text">
-                  {line}
-                </h3>
-              );
-            }
-            // 부제목 스타일링
-            if (line.startsWith('### ') || line.startsWith('- ') || line.startsWith('* ')) {
-              return (
-                <div key={index} className="news-item">
-                  {line}
-                </div>
-              );
-            }
-            // 일반 텍스트
-            return (
-              <div key={index} className="news-text">
-                {line}
-              </div>
-            );
-          })}
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h3: ({node, ...props}) => <h3 className="news-header-text" {...props} />,
+              p: ({node, ...props}) => <p className="news-text" {...props} />,
+              strong: ({node, ...props}) => <strong className="news-bold" {...props} />,
+              ul: ({node, ...props}) => <ul className="news-list" {...props} />,
+              li: ({node, ...props}) => <li className="news-item" {...props} />,
+            }}
+          >
+            {news}
+          </ReactMarkdown>
         </div>
       )}
     </div>
