@@ -6,6 +6,7 @@ const News = () => {
   const [newsDate, setNewsDate] = useState('');
   const [isToday, setIsToday] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchNews = async () => {
@@ -28,6 +29,26 @@ const News = () => {
     }
   };
 
+  const updateNews = async () => {
+    setUpdating(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/news-update?force=true');
+      if (response.ok) {
+        const data = await response.json();
+        // 업데이트 성공 후 새 뉴스 불러오기
+        await fetchNews();
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        setError(`Failed to update news: ${errorData.detail || response.status}`);
+      }
+    } catch (err) {
+      setError(`Error updating news: ${err.message}`);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   useEffect(() => {
     fetchNews();
   }, []);
@@ -43,13 +64,22 @@ const News = () => {
             </p>
           )}
         </div>
-        <button 
-          className="btn btn-refresh" 
-          onClick={fetchNews}
-          disabled={loading}
-        >
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
+        <div className="news-buttons">
+          <button 
+            className="btn btn-update" 
+            onClick={updateNews}
+            disabled={updating || loading}
+          >
+            {updating ? 'Updating...' : 'Update News'}
+          </button>
+          <button 
+            className="btn btn-refresh" 
+            onClick={fetchNews}
+            disabled={loading || updating}
+          >
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {error && (
