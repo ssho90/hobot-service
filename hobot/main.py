@@ -70,10 +70,10 @@ async def get_daily_news():
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/news-update")
-async def update_daily_news():
-    """뉴스를 새로 수집하고 저장합니다. (스케줄러용 - Tavily API 호출)"""
+async def update_daily_news(force: bool = Query(default=False, description="강제 업데이트 여부")):
+    """뉴스를 새로 수집하고 저장합니다. (스케줄러/수동 업데이트용 - Tavily API 호출)"""
     try:
-        return news_manager.update_news_with_tavily(compiled)
+        return news_manager.update_news_with_tavily(compiled, force_update=force)
     except Exception as e:
         logging.error(f"Error updating daily news: {e}")
         raise HTTPException(status_code=500, detail=str(e))

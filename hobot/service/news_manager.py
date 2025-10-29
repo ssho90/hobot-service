@@ -61,11 +61,11 @@ def get_news_from_file():
         logging.error(f"Error reading news from file: {e}")
         return None
 
-def update_news_with_tavily(compiled):
+def update_news_with_tavily(compiled, force_update=False):
     """Tavily를 사용하여 뉴스를 수집하고 저장"""
     try:
-        # 오늘 날짜의 뉴스가 이미 있으면 업데이트하지 않음
-        if is_news_today():
+        # 강제 업데이트가 아니고 오늘 날짜의 뉴스가 이미 있으면 업데이트하지 않음
+        if not force_update and is_news_today():
             logging.info("News for today already exists, skipping update")
             return {
                 "status": "already_exists",
