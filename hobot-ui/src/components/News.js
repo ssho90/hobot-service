@@ -97,19 +97,21 @@ const News = () => {
       )}
 
       {news && (
-        <div className="news-content">
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            components={{
-              h3: ({node, ...props}) => <h3 className="news-header-text" {...props} />,
-              p: ({node, ...props}) => <p className="news-text" {...props} />,
-              strong: ({node, ...props}) => <strong className="news-bold" {...props} />,
-              ul: ({node, ...props}) => <ul className="news-list" {...props} />,
-              li: ({node, ...props}) => <li className="news-item" {...props} />,
-            }}
-          >
-            {news}
-          </ReactMarkdown>
+        <div className="card news-content-card">
+          <div className="news-content">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h3: ({node, ...props}) => <h3 className="news-header-text" {...props} />,
+                p: ({node, ...props}) => <p className="news-text" {...props} />,
+                strong: ({node, ...props}) => <strong className="news-bold" {...props} />,
+                ul: ({node, ...props}) => <ul className="news-list" {...props} />,
+                li: ({node, ...props}) => <li className="news-item" {...props} />,
+              }}
+            >
+              {news}
+            </ReactMarkdown>
+          </div>
         </div>
       )}
     </div>

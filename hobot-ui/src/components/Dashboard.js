@@ -3,6 +3,8 @@ import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
 import News from './News';
+import Sidebar from './Sidebar';
+import Header from './Header';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -36,50 +38,40 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="container">
-      <div className="dashboard-header">
-        <h1>Hobot Panel</h1>
-      </div>
+    <div className="dashboard-layout">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header />
+      <div className="main-content">
+        <div className="dashboard-header">
+          <h1>Welcome back</h1>
+          <p className="dashboard-subtitle">Monitor your trading and stay updated with the latest news</p>
+        </div>
 
-      <div className="tabs">
-        <button 
-          className={`tab ${activeTab === 'trading' ? 'active' : ''}`}
-          onClick={() => setActiveTab('trading')}
-        >
-          Trading
-        </button>
-        <button 
-          className={`tab ${activeTab === 'news' ? 'active' : ''}`}
-          onClick={() => setActiveTab('news')}
-        >
-          News
-        </button>
-      </div>
-
-      <div className="tab-content">
-        {activeTab === 'trading' && (
-          <>
-            <div className="status-section">
-              <div className="status-item">
-                <HobotStatus />
+        <div className="content-area">
+          {activeTab === 'trading' && (
+            <>
+              <div className="status-section">
+                <div className="status-item">
+                  <HobotStatus />
+                </div>
+                <div className="status-item">
+                  <CurrentPosition currentStrategy={currentStrategy} />
+                </div>
               </div>
-              <div className="status-item">
-                <CurrentPosition currentStrategy={currentStrategy} />
+
+              <div className="tools-section">
+                <Tools 
+                  currentStrategy={currentStrategy} 
+                  onStrategyChange={handleStrategyChange}
+                />
               </div>
-            </div>
+            </>
+          )}
 
-            <div className="tools-section">
-              <Tools 
-                currentStrategy={currentStrategy} 
-                onStrategyChange={handleStrategyChange}
-              />
-            </div>
-          </>
-        )}
-
-        {activeTab === 'news' && (
-          <News />
-        )}
+          {activeTab === 'news' && (
+            <News />
+          )}
+        </div>
       </div>
     </div>
   );

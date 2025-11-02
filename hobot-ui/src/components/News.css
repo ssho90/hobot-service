@@ -1,25 +1,27 @@
 .news-container {
-  padding: 20px;
+  padding: 0;
 }
 
 .news-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .news-header h2 {
   margin: 0;
-  color: #333;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .news-date {
   margin: 5px 0 0 0;
   font-size: 14px;
-  color: #666;
+  color: #6b7280;
 }
 
 .news-buttons {
@@ -29,84 +31,123 @@
 
 .btn-update {
   padding: 8px 20px;
-  background-color: #4CAF50;
+  background: #10b981;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .btn-update:hover:not(:disabled) {
-  background-color: #45a049;
+  background: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
 }
 
 .btn-update:disabled {
-  background-color: #ccc;
+  background: #d1d5db;
+  color: #9ca3af;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .btn-refresh {
   padding: 8px 20px;
-  background-color: #2196F3;
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .btn-refresh:hover:not(:disabled) {
-  background-color: #1976D2;
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
 }
 
 .btn-refresh:disabled {
-  background-color: #ccc;
+  background: #d1d5db;
+  color: #9ca3af;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .error-message {
   padding: 15px;
-  background-color: #ffebee;
-  color: #c62828;
-  border-radius: 4px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 8px;
   margin-bottom: 20px;
 }
 
 .loading-message {
   padding: 20px;
   text-align: center;
-  color: #666;
+  color: #6b7280;
   font-size: 16px;
+}
+
+.news-content-card {
+  margin-top: 20px;
 }
 
 .news-content {
   line-height: 1.8;
-  color: #333;
+  color: #374151;
   text-align: left;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
 .news-content * {
   text-align: left;
 }
 
+/* 스크롤바 스타일링 */
+.news-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.news-content::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.news-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.news-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 .news-header-text {
   font-size: 20px;
   font-weight: 700;
-  color: #1976D2;
+  color: #111827;
   margin-top: 30px;
   margin-bottom: 15px;
   padding-top: 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1px solid #e5e7eb;
   padding-bottom: 10px;
   text-align: left;
 }
 
 .news-bold {
   font-weight: 700;
-  color: #1976D2;
+  color: #3b82f6;
 }
 
 .news-list {
@@ -116,7 +157,7 @@
 
 .news-item {
   margin-bottom: 12px;
-  color: #555;
+  color: #6b7280;
   font-size: 15px;
   line-height: 1.7;
 }
@@ -124,7 +165,7 @@
 .news-text {
   margin-bottom: 8px;
   line-height: 1.8;
-  color: #333;
+  color: #374151;
 }
 
 @media (max-width: 768px) {

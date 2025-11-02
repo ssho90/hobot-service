@@ -1,34 +1,48 @@
-.tabs {
+.dashboard-layout {
   display: flex;
-  gap: 0;
-  border-bottom: 2px solid #e0e0e0;
-  margin-bottom: 20px;
+  min-height: 100vh;
+  background: #f9fafb;
 }
 
-.tab {
-  padding: 12px 24px;
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  color: #666;
-  transition: all 0.3s ease;
+.main-content {
+  margin-left: 260px;
+  margin-top: 70px;
+  flex: 1;
+  padding: 32px;
+  min-height: calc(100vh - 70px);
 }
 
-.tab:hover {
-  color: #333;
-  background-color: #f5f5f5;
+.dashboard-header {
+  margin-bottom: 32px;
 }
 
-.tab.active {
-  color: #2196F3;
-  border-bottom-color: #2196F3;
-  font-weight: 600;
+.dashboard-header h1 {
+  color: #111827;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
-.tab-content {
-  min-height: 400px;
+.dashboard-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.content-area {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 70px;
+    padding: 20px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
 }
 
