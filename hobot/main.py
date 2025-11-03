@@ -88,10 +88,22 @@ async def upbit_trading():
     logging.info(f"upbit_trading result: {res}")
     return res
 
-@api_router.get("/kis/healthcheck")
+@api_router.get("/kis/health")
 async def kis_health_check():
+    """한국투자증권 API 헬스체크"""
+    try:
+        from service.kis.kis import health_check as kis_health_check_func
+        result = kis_health_check_func()
+        logging.info(f"KIS health check result: {result}")
+        return result
+    except Exception as e:
+        logging.error(f"Error in KIS health check: {e}")
+        return {"status": "error", "message": str(e)}
+
+@api_router.get("/kis/healthcheck")
+async def kis_health_check_old():
+    """기존 엔드포인트 (하위 호환성 유지)"""
     from service.kis import connection_test
-    
     res = connection_test.run_connection_test()
     logging.info(f"kis health check result: {res}")
     return res
@@ -106,30 +118,48 @@ async def upbit_bbrsi_test2():
     logging.info(f"upbit_trading result: {res}")
     return {"res": res}
 
-@api_router.get("/current-strategy", response_class=PlainTextResponse)
-async def get_current_strategy():
-    strategy_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'service', 'CurrentStrategy.txt')
-    
+@api_router.get("/current-strategy")
+async def get_current_strategy(platform: str = Query(default="upbit", description="플랫폼 (upbit, binance, kis)")):
+    """플랫폼별 현재 전략을 반환합니다."""
     try:
-        with open(strategy_file_path, 'r', encoding='utf-8') as f:
-            strategy = f.read().strip()
-        return strategy
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Strategy file not found")
+        from service import strategy_manager
+        strategy = strategy_manager.read_strategy(platform)
+        return {"platform": platform, "strategy": strategy}
     except Exception as e:
         logging.error(f"Error reading current strategy: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/current-strategy/{platform}", response_class=PlainTextResponse)
+async def get_current_strategy_platform(platform: str):
+    """플랫폼별 현재 전략을 텍스트로 반환합니다. (하위 호환성)"""
+    try:
+        from service import strategy_manager
+        strategy = strategy_manager.read_strategy(platform)
+        return strategy
+    except Exception as e:
+        logging.error(f"Error reading current strategy: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/current-strategy")
 async def update_current_strategy(request: StrategyRequest):
-    strategy_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'service', 'CurrentStrategy.txt')
-    
+    """전략을 업데이트합니다. (기본값은 upbit, 하위 호환성 유지)"""
     try:
-        with open(strategy_file_path, 'w', encoding='utf-8') as f:
-            f.write(request.strategy)
-        
-        logging.info(f"Current strategy updated to: {request.strategy}")
-        return {"status": "success", "strategy": request.strategy}
+        from service import strategy_manager
+        strategy_manager.write_strategy('upbit', request.strategy)
+        logging.info(f"Current strategy updated (upbit): {request.strategy}")
+        return {"status": "success", "platform": "upbit", "strategy": request.strategy}
+    except Exception as e:
+        logging.error(f"Error updating current strategy: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/current-strategy/{platform}")
+async def update_current_strategy_platform(platform: str, request: StrategyRequest):
+    """플랫폼별 전략을 업데이트합니다."""
+    try:
+        from service import strategy_manager
+        strategy_manager.write_strategy(platform, request.strategy)
+        logging.info(f"Current strategy updated ({platform}): {request.strategy}")
+        return {"status": "success", "platform": platform, "strategy": request.strategy}
     except Exception as e:
         logging.error(f"Error updating current strategy: {e}")
         raise HTTPException(status_code=500, detail=str(e))

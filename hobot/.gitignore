@@ -10,6 +10,8 @@ log.txt
 data/*
 
 daily_news.txt
+CurrentStrategy.json
+CurrentStrategy_kis.txt
 
 
 # Byte-compiled / optimized / DLL files

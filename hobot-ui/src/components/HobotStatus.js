@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
-const HobotStatus = () => {
+const HobotStatus = ({ platform = 'upbit' }) => {
   const [status, setStatus] = useState('Loading...');
   const [isHealthy, setIsHealthy] = useState(false);
 
+  const platformNames = {
+    upbit: 'Upbit',
+    binance: 'Binance',
+    kis: '한국투자증권'
+  };
+
   const checkHealth = async () => {
     try {
-      const response = await fetch('/api/health');
+      // 플랫폼별 헬스체크 API 호출
+      let healthEndpoint = '/api/health';
+      
+      if (platform === 'kis') {
+        healthEndpoint = '/api/kis/health';
+      } else if (platform === 'binance') {
+        // Binance 헬스체크는 추후 구현
+        healthEndpoint = '/api/binance/health';
+      }
+      
+      const response = await fetch(healthEndpoint);
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') {
@@ -32,11 +48,11 @@ const HobotStatus = () => {
     // 30초마다 헬스체크 실행
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [platform]);
 
   return (
     <div className="card">
-      <h3>Hobot Status</h3>
+      <h3>{platformNames[platform]} Status</h3>
       <p className={isHealthy ? 'status-healthy' : 'status-error'}>
         {status}
       </p>
