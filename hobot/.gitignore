@@ -9,6 +9,12 @@ log.txt
 
 data/*
 
+# KIS API 토큰 파일 (보안 중요)
+**/kis/data/access_token.json
+service/kis/data/access_token.json
+**/kis/data/access_token.json.tmp
+service/kis/data/access_token.json.tmp
+
 daily_news.txt
 CurrentStrategy.json
 CurrentStrategy_kis.txt

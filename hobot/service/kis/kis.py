@@ -14,7 +14,7 @@ from service.kis.kis_utils import (
     current_time, read_current_strategy, get_buy_info, get_sell_info, calculate_atr
 )
 from service.slack_bot import post_message
-from config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME, INTERVAL
+from service.kis.config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME, INTERVAL
 
 # ===============================================
 # Helper Functions
@@ -228,7 +228,7 @@ def health_check():
         api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
         current_price = api.get_current_price(TARGET_TICKER)
         balance_data = api.get_balance()
-        bal_info, _, _ = get_balance_info(balance_data, TARGET_TICKER_NAME, current_price)
+        bal_info, _, _ = get_balance_info(balance_data, TARGET_TICKER, current_price)
         post_message(bal_info, channel="#auto-trading-logs")
         return {"status": "success", "message": "Health check success"}
     except Exception as e:

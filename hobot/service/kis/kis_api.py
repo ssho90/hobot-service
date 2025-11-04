@@ -3,9 +3,16 @@ import requests
 import json
 import pandas as pd
 import time
+import os
 from datetime import datetime
 
 class KISAPI:
+    # 토큰 파일 경로
+    _token_file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'data', 'access_token.json'
+    )
+
     def __init__(self, app_key, app_secret, account_no, base_url="https://openapi.koreainvestment.com:9443"):
         self.app_key = app_key
         self.app_secret = app_secret
@@ -13,8 +20,73 @@ class KISAPI:
         self.base_url = base_url
         self.access_token = self._get_access_token()
 
+    def _ensure_data_directory(self):
+        """data 디렉토리가 존재하는지 확인하고 없으면 생성"""
+        data_dir = os.path.dirname(self._token_file_path)
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir, exist_ok=True)
+
+    def _load_token_from_file(self):
+        """JSON 파일에서 토큰 정보 로드"""
+        try:
+            if not os.path.exists(self._token_file_path):
+                return None
+            
+            with open(self._token_file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data.get('access_token'), data.get('issued_date')
+        except Exception as e:
+            print(f"Error loading token from file: {e}")
+            return None
+
+    def _save_token_to_file(self, token, issued_date):
+        """토큰 정보를 JSON 파일에 저장 (보안: 파일 권한 제한)"""
+        try:
+            self._ensure_data_directory()
+            data = {
+                'access_token': token,
+                'issued_date': issued_date
+            }
+            # 파일 쓰기 (임시 파일로 먼저 쓰고 이동하여 원자성 보장)
+            temp_path = self._token_file_path + '.tmp'
+            with open(temp_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            
+            # 파일 권한 제한 (소유자만 읽기/쓰기 가능: 0o600)
+            os.chmod(temp_path, 0o600)
+            # 원자적으로 이동
+            os.replace(temp_path, self._token_file_path)
+            # 최종 파일 권한도 제한
+            os.chmod(self._token_file_path, 0o600)
+        except Exception as e:
+            print(f"Error saving token to file: {e}")
+
+    def _is_token_valid(self):
+        """파일에서 로드한 토큰이 아직 유효한지 확인 (하루 이내)"""
+        token_data = self._load_token_from_file()
+        if token_data is None or token_data[0] is None or token_data[1] is None:
+            return False
+        
+        token, issued_date_str = token_data
+        try:
+            issued_date = datetime.fromisoformat(issued_date_str)
+            # 발급일이 오늘과 같은 날인지 확인
+            today = datetime.now().date()
+            issued_date_only = issued_date.date()
+            return issued_date_only == today
+        except Exception as e:
+            print(f"Error parsing issued_date: {e}")
+            return False
+
     def _get_access_token(self):
-        """접근 토큰 발급"""
+        """접근 토큰 발급 (파일에 저장된 토큰이 있으면 재사용)"""
+        # 파일에서 토큰 로드 시도
+        if self._is_token_valid():
+            token_data = self._load_token_from_file()
+            if token_data and token_data[0]:
+                return token_data[0]
+        
+        # 새 토큰 발급
         headers = {"content-type": "application/json"}
         body = {
             "grant_type": "client_credentials",
@@ -25,7 +97,11 @@ class KISAPI:
         url = f"{self.base_url}{path}"
         res = requests.post(url, headers=headers, data=json.dumps(body))
         if res.status_code == 200:
-            return res.json()["access_token"]
+            token = res.json()["access_token"]
+            issued_date = datetime.now().isoformat()
+            # 토큰과 발급 시간을 파일에 저장
+            self._save_token_to_file(token, issued_date)
+            return token
         else:
             raise Exception(f"Error getting access token: {res.text}")
 
