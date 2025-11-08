@@ -107,238 +107,278 @@ jobs:
                   exit 1
                 fi
               fi
-              echo "✅ Virtual environment created with \$PYTHON_CMD"
+            echo "✅ Virtual environment created with \$PYTHON_CMD"
+          fi
+          
+          # 가상환경 활성화 확인
+          if [ ! -f "venv/bin/activate" ]; then
+            echo "❌ Error: venv/bin/activate not found"
+            echo "Virtual environment structure:"
+            ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
+            exit 1
+          fi
+          
+          # Python 실행 파일 존재 확인 (가상환경 생성 직후)
+          if [ ! -f "venv/bin/python" ]; then
+            echo "❌ Error: venv/bin/python not found after venv creation"
+            echo "📋 Contents of venv/bin:"
+            ls -la venv/bin/ 2>/dev/null || echo "venv/bin directory does not exist"
+            echo "🔧 Attempting to recreate venv..."
+            rm -rf venv
+            \$PYTHON_CMD -m venv venv
+            if [ ! -f "venv/bin/python" ]; then
+              echo "❌ Failed to create Python executable in venv"
+              exit 1
             fi
+            echo "✅ Python executable created after recreation"
+          else
+            echo "✅ Python executable found: venv/bin/python"
+            ls -la venv/bin/python
+          fi
+          
+          # Python 실행 권한 확인
+          if [ ! -x "venv/bin/python" ]; then
+            echo "⚠️ Python is not executable, fixing permissions..."
+            chmod +x venv/bin/python
+            if [ ! -x "venv/bin/python" ]; then
+              echo "❌ Failed to make Python executable"
+              exit 1
+            fi
+            echo "✅ Python permissions fixed"
+          fi
+          
+          # Python 버전 테스트
+          echo "🔍 Testing Python executable..."
+          if venv/bin/python --version 2>&1; then
+            echo "✅ Python executable works correctly"
+          else
+            echo "❌ Python executable test failed"
+            exit 1
+          fi
+          
+          source venv/bin/activate
+          
+          # Python 명령어 확인 (가상환경 내부)
+          if command -v python3.12 &> /dev/null; then
+            PYTHON_CMD="python3.12"
+          else
+            PYTHON_CMD="python3"
+          fi
+          
+          # pip가 없으면 설치
+          if ! command -v pip &> /dev/null; then
+            echo "📦 Installing pip..."
+            curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
+              echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
+              \$PYTHON_CMD -m ensurepip --upgrade --default-pip || {
+                echo "❌ Failed to install pip"
+                exit 1
+              }
+            }
+            if [ -f "get-pip.py" ]; then
+              \$PYTHON_CMD get-pip.py --user || \$PYTHON_CMD get-pip.py || {
+                echo "⚠️ get-pip.py failed, trying ensurepip..."
+                \$PYTHON_CMD -m ensurepip --upgrade --default-pip
+              }
+              rm -f get-pip.py
+              # pip를 가상환경에 복사
+              if [ -f ~/.local/bin/pip ]; then
+                cp ~/.local/bin/pip venv/bin/pip 2>/dev/null || true
+                cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
+              fi
+            fi
+          fi
+          
+          # 의존성 설치
+          echo "📦 Installing Python dependencies..."
+          pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
+          pip install -r requirements.txt
+          
+          # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
+          echo "⏸️ Initializing strategies to PAUSE..."
+          \$PYTHON_CMD service/utils/init_strategy_pause.py
+          
+          # 로그 디렉토리 생성
+          mkdir -p logs
+          
+          # Systemd 서비스 설정 (선택사항)
+          if [ -f "../.github/deploy/hobot.service" ]; then
+            echo "⚙️ Setting up systemd service..."
+            sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
+            # 경로 및 사용자 정보 업데이트 (모든 경로 치환)
+            sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
+            sudo sed -i "s|User=ec2-user|User=\$(whoami)|g" /etc/systemd/system/hobot.service
+            # ExecStartPre 명령 내부의 경로도 치환 (bash -c 내부의 경로)
+            sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
+            # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
+            sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
+            sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
+            # Python 실행 파일 경로 확인 및 수정 (상세 로깅)
+            echo "🔍 Checking Python executable path..."
+            PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
+            echo "📝 Expected Python path: \$PYTHON_PATH"
             
-            # 가상환경 활성화 확인
-            if [ ! -f "venv/bin/activate" ]; then
-              echo "❌ Error: venv/bin/activate not found"
-              echo "Virtual environment structure:"
-              ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
+            # 가상환경 디렉토리 확인
+            if [ ! -d "\${DEPLOY_PATH}/hobot/venv" ]; then
+              echo "❌ Virtual environment directory not found: \${DEPLOY_PATH}/hobot/venv"
+              echo "📁 Listing hobot directory:"
+              ls -la \${DEPLOY_PATH}/hobot/ 2>&1 || echo "hobot directory does not exist"
               exit 1
             fi
             
-            source venv/bin/activate
-            
-            # Python 명령어 확인 (가상환경 내부)
-            if command -v python3.12 &> /dev/null; then
-              PYTHON_CMD="python3.12"
-            else
-              PYTHON_CMD="python3"
+            # venv/bin 디렉토리 확인
+            if [ ! -d "\${DEPLOY_PATH}/hobot/venv/bin" ]; then
+              echo "❌ venv/bin directory not found: \${DEPLOY_PATH}/hobot/venv/bin"
+              echo "📁 Listing venv directory:"
+              ls -la \${DEPLOY_PATH}/hobot/venv/ 2>&1 || echo "venv directory does not exist"
+              exit 1
             fi
             
-            # pip가 없으면 설치
-            if ! command -v pip &> /dev/null; then
-              echo "📦 Installing pip..."
-              curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
-                echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
-                \$PYTHON_CMD -m ensurepip --upgrade --default-pip || {
-                  echo "❌ Failed to install pip"
-                  exit 1
-                }
-              }
-              if [ -f "get-pip.py" ]; then
-                \$PYTHON_CMD get-pip.py --user || \$PYTHON_CMD get-pip.py || {
-                  echo "⚠️ get-pip.py failed, trying ensurepip..."
-                  \$PYTHON_CMD -m ensurepip --upgrade --default-pip
-                }
-                rm -f get-pip.py
-                # pip를 가상환경에 복사
-                if [ -f ~/.local/bin/pip ]; then
-                  cp ~/.local/bin/pip venv/bin/pip 2>/dev/null || true
-                  cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
-                fi
-              fi
-            fi
+            # Python 파일 목록 출력
+            echo "📋 Python files in venv/bin:"
+            ls -la \${DEPLOY_PATH}/hobot/venv/bin/python* 2>&1 || echo "No Python files found"
             
-            # 의존성 설치
-            echo "📦 Installing Python dependencies..."
-            pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
-            pip install -r requirements.txt
-            
-            # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
-            echo "⏸️ Initializing strategies to PAUSE..."
-            \$PYTHON_CMD service/utils/init_strategy_pause.py
-            
-            # 로그 디렉토리 생성
-            mkdir -p logs
-            
-            # Systemd 서비스 설정 (선택사항)
-            if [ -f "../.github/deploy/hobot.service" ]; then
-              echo "⚙️ Setting up systemd service..."
-              sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
-              # 경로 및 사용자 정보 업데이트
-              sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
-              sudo sed -i "s|User=ec2-user|User=\$(whoami)|g" /etc/systemd/system/hobot.service
-              # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
-              sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
-              sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
-              # Python 실행 파일 경로 확인 및 수정 (상세 로깅)
-              echo "🔍 Checking Python executable path..."
-              PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
-              echo "📝 Expected Python path: \$PYTHON_PATH"
-              
-              # 가상환경 디렉토리 확인
-              if [ ! -d "\${DEPLOY_PATH}/hobot/venv" ]; then
-                echo "❌ Virtual environment directory not found: \${DEPLOY_PATH}/hobot/venv"
-                echo "📁 Listing hobot directory:"
-                ls -la \${DEPLOY_PATH}/hobot/ 2>&1 || echo "hobot directory does not exist"
-                exit 1
-              fi
-              
-              # venv/bin 디렉토리 확인
-              if [ ! -d "\${DEPLOY_PATH}/hobot/venv/bin" ]; then
-                echo "❌ venv/bin directory not found: \${DEPLOY_PATH}/hobot/venv/bin"
-                echo "📁 Listing venv directory:"
-                ls -la \${DEPLOY_PATH}/hobot/venv/ 2>&1 || echo "venv directory does not exist"
-                exit 1
-              fi
-              
-              # Python 파일 목록 출력
-              echo "📋 Python files in venv/bin:"
-              ls -la \${DEPLOY_PATH}/hobot/venv/bin/python* 2>&1 || echo "No Python files found"
-              
-              if [ ! -f "\$PYTHON_PATH" ]; then
-                echo "❌ Python not found at \$PYTHON_PATH"
-                echo "🔍 Searching for alternative Python..."
-                if command -v python3.12 &> /dev/null; then
-                  PYTHON_PATH=\$(which python3.12)
-                  echo "📝 Found python3.12 at: \$PYTHON_PATH"
-                elif command -v python3 &> /dev/null; then
-                  PYTHON_PATH=\$(which python3)
-                  echo "📝 Found python3 at: \$PYTHON_PATH"
-                else
-                  echo "❌ No Python found in system PATH"
-                  exit 1
-                fi
-                echo "📝 Updating systemd service to use: \$PYTHON_PATH"
-                sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+            if [ ! -f "\$PYTHON_PATH" ]; then
+              echo "❌ Python not found at \$PYTHON_PATH"
+              echo "🔍 Searching for alternative Python..."
+              if command -v python3.12 &> /dev/null; then
+                PYTHON_PATH=\$(which python3.12)
+                echo "📝 Found python3.12 at: \$PYTHON_PATH"
+              elif command -v python3 &> /dev/null; then
+                PYTHON_PATH=\$(which python3)
+                echo "📝 Found python3 at: \$PYTHON_PATH"
               else
-                echo "✅ Python found at: \$PYTHON_PATH"
+                echo "❌ No Python found in system PATH"
+                exit 1
               fi
-              
-              # Python 실행 권한 확인
-              echo "🔍 Checking Python executable permissions..."
+              echo "📝 Updating systemd service to use: \$PYTHON_PATH"
+              sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+            else
+              echo "✅ Python found at: \$PYTHON_PATH"
+            fi
+            
+            # Python 실행 권한 확인
+            echo "🔍 Checking Python executable permissions..."
+            if [ ! -x "\$PYTHON_PATH" ]; then
+              echo "❌ Python is not executable: \$PYTHON_PATH"
+              echo "📋 File permissions:"
+              ls -la "\$PYTHON_PATH" 2>&1
+              echo "🔧 Attempting to fix permissions..."
+              chmod +x "\$PYTHON_PATH" 2>&1 || sudo chmod +x "\$PYTHON_PATH" 2>&1
               if [ ! -x "\$PYTHON_PATH" ]; then
-                echo "❌ Python is not executable: \$PYTHON_PATH"
-                echo "📋 File permissions:"
-                ls -la "\$PYTHON_PATH" 2>&1
-                echo "🔧 Attempting to fix permissions..."
-                chmod +x "\$PYTHON_PATH" 2>&1 || sudo chmod +x "\$PYTHON_PATH" 2>&1
-                if [ ! -x "\$PYTHON_PATH" ]; then
-                  echo "❌ Failed to make Python executable"
-                  exit 1
-                fi
-                echo "✅ Permissions fixed"
-              else
-                echo "✅ Python is executable"
-              fi
-              
-              # Python 버전 확인
-              echo "🔍 Testing Python execution..."
-              if "\$PYTHON_PATH" --version 2>&1; then
-                echo "✅ Python version check successful"
-              else
-                echo "⚠️ Warning: Python version check failed, but continuing..."
-              fi
-              sudo systemctl daemon-reload
-              sudo systemctl enable hobot.service
-              echo "🔄 Restarting service..."
-              sudo systemctl restart hobot.service
-              sleep 3
-              # 서비스 상태 확인
-              if sudo systemctl is-active --quiet hobot.service; then
-                echo "✅ Service is running!"
-                sudo systemctl status hobot.service --no-pager -l
-              else
-                echo "❌ Service failed to start. Checking status..."
-                sudo systemctl status hobot.service --no-pager -l
-                echo ""
-                echo "📋 Recent service logs (last 50 lines):"
-                sudo journalctl -u hobot.service -n 50 --no-pager
-                echo ""
-                echo "🔍 Checking Python executable in systemd service file:"
-                sudo grep "ExecStart" /etc/systemd/system/hobot.service || echo "ExecStart not found in service file"
-                echo ""
-                echo "🔍 Verifying Python path exists:"
-                PYTHON_PATH=\$(sudo grep "ExecStart" /etc/systemd/system/hobot.service | awk '{print $2}' | head -1)
-                if [ ! -z "\$PYTHON_PATH" ]; then
-                  echo "Python path from service file: \$PYTHON_PATH"
-                  if [ -f "\$PYTHON_PATH" ]; then
-                    echo "✅ File exists"
-                    ls -la "\$PYTHON_PATH"
-                    if [ -x "\$PYTHON_PATH" ]; then
-                      echo "✅ File is executable"
-                      "\$PYTHON_PATH" --version 2>&1 || echo "⚠️ Cannot execute Python"
-                    else
-                      echo "❌ File is NOT executable"
-                    fi
-                  else
-                    echo "❌ File does NOT exist"
-                  fi
-                fi
-                echo ""
-                echo "🔍 Checking working directory:"
-                WORKING_DIR=\$(sudo grep "WorkingDirectory" /etc/systemd/system/hobot.service | awk '{print $2}')
-                echo "Working directory: \$WORKING_DIR"
-                if [ ! -z "\$WORKING_DIR" ]; then
-                  ls -la "\$WORKING_DIR" 2>&1 || echo "Working directory does not exist"
-                fi
+                echo "❌ Failed to make Python executable"
                 exit 1
               fi
+              echo "✅ Permissions fixed"
             else
-              # Systemd 없이 직접 실행
-              echo "🛑 Stopping existing services..."
-              PORT=8991
-              EXISTING_PIDS=\$(lsof -ti :\$PORT 2>/dev/null || true)
-              if [ ! -z "\$EXISTING_PIDS" ]; then
-                echo "Killing processes on port \$PORT: \$EXISTING_PIDS"
-                kill -9 \$EXISTING_PIDS 2>/dev/null || true
-                sleep 2
+              echo "✅ Python is executable"
+            fi
+            
+            # Python 버전 확인
+            echo "🔍 Testing Python execution..."
+            if "\$PYTHON_PATH" --version 2>&1; then
+              echo "✅ Python version check successful"
+            else
+              echo "⚠️ Warning: Python version check failed, but continuing..."
+            fi
+            sudo systemctl daemon-reload
+            sudo systemctl enable hobot.service
+            echo "🔄 Restarting service..."
+            sudo systemctl restart hobot.service
+            sleep 3
+            # 서비스 상태 확인
+            if sudo systemctl is-active --quiet hobot.service; then
+              echo "✅ Service is running!"
+              sudo systemctl status hobot.service --no-pager -l
+            else
+              echo "❌ Service failed to start. Checking status..."
+              sudo systemctl status hobot.service --no-pager -l
+              echo ""
+              echo "📋 Recent service logs (last 50 lines):"
+              sudo journalctl -u hobot.service -n 50 --no-pager
+              echo ""
+              echo "🔍 Checking Python executable in systemd service file:"
+              sudo grep "ExecStart" /etc/systemd/system/hobot.service || echo "ExecStart not found in service file"
+              echo ""
+              echo "🔍 Verifying Python path exists:"
+              PYTHON_PATH=\$(sudo grep "ExecStart" /etc/systemd/system/hobot.service | awk '{print $2}' | head -1)
+              if [ ! -z "\$PYTHON_PATH" ]; then
+                echo "Python path from service file: \$PYTHON_PATH"
+                if [ -f "\$PYTHON_PATH" ]; then
+                  echo "✅ File exists"
+                  ls -la "\$PYTHON_PATH"
+                  if [ -x "\$PYTHON_PATH" ]; then
+                    echo "✅ File is executable"
+                    "\$PYTHON_PATH" --version 2>&1 || echo "⚠️ Cannot execute Python"
+                  else
+                    echo "❌ File is NOT executable"
+                  fi
+                else
+                  echo "❌ File does NOT exist"
+                fi
               fi
-              
-              # Gunicorn으로 서버 시작 (백그라운드)
-              echo "🚀 Starting FastAPI server with Gunicorn..."
-              # 로그 디렉토리 확인
-              mkdir -p logs
-              # Gunicorn 실행 (로그 파일로 리다이렉트)
-              nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > logs/gunicorn.log 2>&1 &
-              GUNICORN_PID=\$!
-              echo "📝 Gunicorn started with PID: \$GUNICORN_PID"
-              # 프로세스가 실제로 실행되었는지 확인
+              echo ""
+              echo "🔍 Checking working directory:"
+              WORKING_DIR=\$(sudo grep "WorkingDirectory" /etc/systemd/system/hobot.service | awk '{print $2}')
+              echo "Working directory: \$WORKING_DIR"
+              if [ ! -z "\$WORKING_DIR" ]; then
+                ls -la "\$WORKING_DIR" 2>&1 || echo "Working directory does not exist"
+              fi
+              exit 1
+            fi
+          else
+            # Systemd 없이 직접 실행
+            echo "🛑 Stopping existing services..."
+            PORT=8991
+            EXISTING_PIDS=\$(lsof -ti :\$PORT 2>/dev/null || true)
+            if [ ! -z "\$EXISTING_PIDS" ]; then
+              echo "Killing processes on port \$PORT: \$EXISTING_PIDS"
+              kill -9 \$EXISTING_PIDS 2>/dev/null || true
               sleep 2
-              if ps -p \$GUNICORN_PID > /dev/null 2>&1; then
-                echo "✅ Gunicorn process is running (PID: \$GUNICORN_PID)"
-              else
-                echo "❌ Gunicorn process failed to start. Check logs/gunicorn.log for errors:"
-                tail -20 logs/gunicorn.log 2>/dev/null || echo "Log file not found"
-                exit 1
-              fi
             fi
             
-            echo "✅ Backend deployment completed!"
+            # Gunicorn으로 서버 시작 (백그라운드)
+            echo "🚀 Starting FastAPI server with Gunicorn..."
+            # 로그 디렉토리 확인
+            mkdir -p logs
+            # Gunicorn 실행 (로그 파일로 리다이렉트)
+            nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > logs/gunicorn.log 2>&1 &
+            GUNICORN_PID=\$!
+            echo "📝 Gunicorn started with PID: \$GUNICORN_PID"
+            # 프로세스가 실제로 실행되었는지 확인
+            sleep 2
+            if ps -p \$GUNICORN_PID > /dev/null 2>&1; then
+              echo "✅ Gunicorn process is running (PID: \$GUNICORN_PID)"
+            else
+              echo "❌ Gunicorn process failed to start. Check logs/gunicorn.log for errors:"
+              tail -20 logs/gunicorn.log 2>/dev/null || echo "Log file not found"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ Backend deployment completed!"
+          
+          # Frontend 배포 (선택사항)
+          if [ -d "../hobot-ui" ]; then
+            echo "🎨 Setting up frontend..."
+            cd ../hobot-ui
             
-            # Frontend 배포 (선택사항)
-            if [ -d "../hobot-ui" ]; then
-              echo "🎨 Setting up frontend..."
-              cd ../hobot-ui
+            # Node.js 확인
+            if command -v node &> /dev/null; then
+              echo "📦 Installing frontend dependencies..."
+              npm install --production
               
-              # Node.js 확인
-              if command -v node &> /dev/null; then
-                echo "📦 Installing frontend dependencies..."
-                npm install --production
-                
-                # 빌드 (프로덕션)
-                echo "🏗️ Building frontend..."
-                npm run build || echo "⚠️ Build script not found, skipping..."
-              else
-                echo "⚠️ Node.js not found, skipping frontend deployment"
-              fi
+              # 빌드 (프로덕션)
+              echo "🏗️ Building frontend..."
+              npm run build || echo "⚠️ Build script not found, skipping..."
+            else
+              echo "⚠️ Node.js not found, skipping frontend deployment"
             fi
-            
-            echo "🎉 Deployment completed successfully!"
+          fi
+          
+          echo "🎉 Deployment completed successfully!"
           ENDSSH
-        
+      
       - name: Health Check
         env:
           EC2_HOST: ${{ vars.EC2_HOST }}
