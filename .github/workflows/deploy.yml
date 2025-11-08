@@ -44,7 +44,7 @@ jobs:
           DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ vars.EC2_USER }}@${{ vars.EC2_HOST }} << 'ENDSSH'
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << ENDSSH
             set -e
             
             export DEPLOY_PATH="${DEPLOY_PATH}"
