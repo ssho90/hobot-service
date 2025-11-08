@@ -44,33 +44,39 @@ jobs:
         DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << ENDSSH
           set -e
           
+          export DEPLOY_PATH="${DEPLOY_PATH}"
+          export GH_TOKEN="${GH_TOKEN}"
+          
           echo "🚀 Starting deployment..."
+          echo "📁 Deploy path: \${DEPLOY_PATH}"
           
           # 배포 디렉토리로 이동
-          cd ${DEPLOY_PATH} || {
+          cd \${DEPLOY_PATH} || {
             echo "❌ Deploy directory not found. Creating..."
-            mkdir -p ${DEPLOY_PATH}
-            cd ${DEPLOY_PATH}
+            mkdir -p \${DEPLOY_PATH}
+            cd \${DEPLOY_PATH}
           }
           
           # Git pull (또는 초기 클론)
           if [ -d ".git" ]; then
             echo "📥 Pulling latest changes..."
-            git pull https://${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
+            git pull https://\${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
           else
             echo "📥 Cloning repository..."
             # 기존 디렉토리가 비어있지 않으면 백업 후 클론
-            if [ "$(ls -A . 2>/dev/null)" ]; then
+            if [ "\$(ls -A . 2>/dev/null)" ]; then
               echo "⚠️ Directory is not empty, backing up existing files..."
               cd ..
-              mv ${DEPLOY_PATH} ${DEPLOY_PATH}.backup.$(date +%s)
-              mkdir -p ${DEPLOY_PATH}
-              cd ${DEPLOY_PATH}
+              BACKUP_NAME="\${DEPLOY_PATH}.backup.\$(date +%s)"
+              echo "📦 Backing up to: \${BACKUP_NAME}"
+              mv \${DEPLOY_PATH} \${BACKUP_NAME}
+              mkdir -p \${DEPLOY_PATH}
+              cd \${DEPLOY_PATH}
             fi
-            git clone https://${GH_TOKEN}@github.com/${{ github.repository }}.git .
+            git clone https://\${GH_TOKEN}@github.com/${{ github.repository }}.git .
           fi
           
           # Backend 배포
@@ -101,7 +107,7 @@ jobs:
           if [ -f "../.github/deploy/hobot.service" ]; then
             echo "⚙️ Setting up systemd service..."
             sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
-            sudo sed -i "s|/home/ubuntu/hobot-service|${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
+            sudo sed -i "s|/home/ubuntu/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
             sudo systemctl daemon-reload
             sudo systemctl enable hobot.service
             echo "🔄 Restarting service..."
@@ -111,10 +117,10 @@ jobs:
             # Systemd 없이 직접 실행
             echo "🛑 Stopping existing services..."
             PORT=8991
-            EXISTING_PIDS=$(lsof -ti :$PORT 2>/dev/null || true)
-            if [ ! -z "$EXISTING_PIDS" ]; then
-              echo "Killing processes on port $PORT: $EXISTING_PIDS"
-              kill -9 $EXISTING_PIDS 2>/dev/null || true
+            EXISTING_PIDS=\$(lsof -ti :\$PORT 2>/dev/null || true)
+            if [ ! -z "\$EXISTING_PIDS" ]; then
+              echo "Killing processes on port \$PORT: \$EXISTING_PIDS"
+              kill -9 \$EXISTING_PIDS 2>/dev/null || true
               sleep 2
             fi
             
