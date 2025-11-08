@@ -124,6 +124,36 @@ jobs:
                 exit 1
               fi
               echo "✅ Virtual environment created successfully with uv"
+              
+              # 가상환경 파일 권한 설정
+              echo "🔧 Setting permissions for virtual environment files..."
+              chmod +x venv/bin/* 2>/dev/null || true
+              chmod +x venv/bin/activate 2>/dev/null || true
+              if [ -f "venv/bin/activate" ]; then
+                chmod 755 venv/bin/activate
+                echo "✅ activate script permissions set"
+              fi
+              
+              # pip 설치 (uv로 생성한 가상환경에는 pip가 없을 수 있음)
+              echo "📦 Installing pip in virtual environment..."
+              if [ -f "venv/bin/python" ]; then
+                venv/bin/python -m ensurepip --upgrade --default-pip 2>&1 || {
+                  echo "⚠️ ensurepip failed, trying get-pip.py..."
+                  curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+                  venv/bin/python get-pip.py 2>&1
+                  rm -f get-pip.py
+                }
+                # pip 설치 확인
+                if venv/bin/python -m pip --version 2>&1; then
+                  echo "✅ pip installed successfully"
+                else
+                  echo "❌ Error: Failed to install pip"
+                  exit 1
+                fi
+              else
+                echo "❌ Error: Python executable not found in venv"
+                exit 1
+              fi
             else
               echo "✅ Virtual environment already exists"
             fi
@@ -135,13 +165,26 @@ jobs:
             fi
             echo "✅ Virtual environment directory exists"
           
-          # 가상환경 활성화 확인
+          # 가상환경 활성화 확인 및 권한 설정
           if [ ! -f "venv/bin/activate" ]; then
             echo "❌ Error: venv/bin/activate not found"
             echo "Virtual environment structure:"
             ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
             exit 1
           fi
+          
+          # activate 스크립트 권한 확인 및 수정
+          echo "🔧 Checking activate script permissions..."
+          if [ ! -x "venv/bin/activate" ]; then
+            echo "⚠️ activate script is not executable, fixing permissions..."
+            chmod +x venv/bin/activate
+            chmod 755 venv/bin/activate
+          fi
+          
+          # venv/bin 디렉토리의 모든 실행 파일 권한 확인
+          echo "🔧 Setting permissions for venv/bin files..."
+          chmod +x venv/bin/* 2>/dev/null || true
+          echo "✅ Virtual environment permissions set"
           
           # Python 실행 파일 존재 확인 (가상환경 생성 직후)
           if [ ! -f "venv/bin/python" ]; then
@@ -238,10 +281,30 @@ jobs:
             fi
           fi
           
+          # pip 확인 및 설치
+          echo "🔍 Checking pip installation..."
+          if ! \$PYTHON_CMD -m pip --version 2>&1; then
+            echo "📦 pip not found, installing pip..."
+            \$PYTHON_CMD -m ensurepip --upgrade --default-pip 2>&1 || {
+              echo "⚠️ ensurepip failed, trying get-pip.py..."
+              curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+              \$PYTHON_CMD get-pip.py 2>&1
+              rm -f get-pip.py
+            }
+            if ! \$PYTHON_CMD -m pip --version 2>&1; then
+              echo "❌ Error: Failed to install pip"
+              exit 1
+            fi
+            echo "✅ pip installed successfully"
+          else
+            echo "✅ pip is available"
+            \$PYTHON_CMD -m pip --version
+          fi
+          
           # 의존성 설치
           echo "📦 Installing Python dependencies..."
-          pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
-          pip install -r requirements.txt
+          \$PYTHON_CMD -m pip install --upgrade pip || echo "⚠️ pip upgrade failed, continuing..."
+          \$PYTHON_CMD -m pip install -r requirements.txt
           
           # gunicorn 모듈 확인
           echo "🔍 Verifying gunicorn installation..."
