@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+      
     - name: Setup SSH
       env:
         EC2_HOST: ${{ vars.EC2_HOST }}
@@ -87,7 +87,22 @@ jobs:
           if [ ! -d "venv" ]; then
             echo "🐍 Creating virtual environment..."
             # ensurepip가 실패할 수 있으므로 --without-pip 옵션 사용 후 pip를 별도로 설치
-            python3 -m venv --without-pip venv || python3 -m venv venv
+            if ! python3 -m venv --without-pip venv 2>/dev/null; then
+              echo "⚠️ --without-pip failed, trying standard venv..."
+              if ! python3 -m venv venv 2>/dev/null; then
+                echo "❌ Failed to create virtual environment"
+                exit 1
+              fi
+            fi
+            echo "✅ Virtual environment created"
+          fi
+          
+          # 가상환경 활성화 확인
+          if [ ! -f "venv/bin/activate" ]; then
+            echo "❌ Error: venv/bin/activate not found"
+            echo "Virtual environment structure:"
+            ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
+            exit 1
           fi
           
           source venv/bin/activate
@@ -95,19 +110,30 @@ jobs:
           # pip가 없으면 설치
           if ! command -v pip &> /dev/null; then
             echo "📦 Installing pip..."
-            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            python3 get-pip.py --user || python3 get-pip.py
-            rm -f get-pip.py
-            # pip를 가상환경에 복사
-            if [ -f ~/.local/bin/pip ]; then
-              cp ~/.local/bin/pip venv/bin/pip
-              cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
+            curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
+              echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
+              python3 -m ensurepip --upgrade --default-pip || {
+                echo "❌ Failed to install pip"
+                exit 1
+              }
+            }
+            if [ -f "get-pip.py" ]; then
+              python3 get-pip.py --user || python3 get-pip.py || {
+                echo "⚠️ get-pip.py failed, trying ensurepip..."
+                python3 -m ensurepip --upgrade --default-pip
+              }
+              rm -f get-pip.py
+              # pip를 가상환경에 복사
+              if [ -f ~/.local/bin/pip ]; then
+                cp ~/.local/bin/pip venv/bin/pip 2>/dev/null || true
+                cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
+              fi
             fi
           fi
           
           # 의존성 설치
           echo "📦 Installing Python dependencies..."
-          pip install --upgrade pip || python3 -m ensurepip --upgrade || true
+          pip install --upgrade pip || python3 -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
           pip install -r requirements.txt
           
           # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
