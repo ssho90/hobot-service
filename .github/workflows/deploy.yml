@@ -243,6 +243,21 @@ jobs:
           pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
           pip install -r requirements.txt
           
+          # gunicorn 모듈 확인
+          echo "🔍 Verifying gunicorn installation..."
+          if ! \$PYTHON_CMD -m gunicorn --version 2>&1; then
+            echo "❌ Error: gunicorn module not found after installation"
+            echo "📋 Installed packages:"
+            \$PYTHON_CMD -m pip list | grep -i gunicorn || echo "gunicorn not found in pip list"
+            echo "📦 Attempting to install gunicorn explicitly..."
+            \$PYTHON_CMD -m pip install gunicorn[gevent] || \$PYTHON_CMD -m pip install gunicorn
+            if ! \$PYTHON_CMD -m gunicorn --version 2>&1; then
+              echo "❌ Error: Failed to install gunicorn"
+              exit 1
+            fi
+          fi
+          echo "✅ gunicorn module verified"
+          
           # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
           echo "⏸️ Initializing strategies to PAUSE..."
           \$PYTHON_CMD service/utils/init_strategy_pause.py

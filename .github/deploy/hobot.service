@@ -24,6 +24,10 @@ ExecStartPre=/bin/bash -c "echo '✅ Python executable found and is executable'"
 ExecStartPre=/bin/bash -c "/home/ec2-user/hobot-service/hobot/venv/bin/python --version 2>&1 || echo '⚠️ Could not get Python version'"
 ExecStartPre=/bin/bash -c "echo '📁 Working directory: /home/ec2-user/hobot-service/hobot'"
 ExecStartPre=/bin/bash -c "ls -la /home/ec2-user/hobot-service/hobot/venv/bin/python* 2>&1 || echo 'No Python files found in venv/bin'"
+ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Checking gunicorn module...' && /home/ec2-user/hobot-service/hobot/venv/bin/python -m gunicorn --version 2>&1 || (echo '❌ ERROR: gunicorn module not found'; /home/ec2-user/hobot-service/hobot/venv/bin/python -m pip list | grep -i gunicorn || echo 'gunicorn not in pip list'; exit 1)"
+ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Checking gunicorn.conf.py...' && if [ ! -f gunicorn.conf.py ]; then echo '❌ ERROR: gunicorn.conf.py not found'; ls -la *.py 2>&1; exit 1; else echo '✅ gunicorn.conf.py found'; fi"
+ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Checking asgi.py...' && if [ ! -f asgi.py ]; then echo '❌ ERROR: asgi.py not found'; ls -la *.py 2>&1; exit 1; else echo '✅ asgi.py found'; fi"
+ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Testing Python import...' && /home/ec2-user/hobot-service/hobot/venv/bin/python -c 'import gunicorn; import asgi; print(\"✅ All imports successful\")' 2>&1 || (echo '❌ ERROR: Import test failed'; exit 1)"
 
 # 로그 설정 (journal로 먼저 설정, 파일 리다이렉션은 gunicorn.conf.py에서 처리)
 StandardOutput=journal
