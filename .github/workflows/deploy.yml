@@ -62,6 +62,14 @@ jobs:
             git pull https://${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
           else
             echo "📥 Cloning repository..."
+            # 기존 디렉토리가 비어있지 않으면 백업 후 클론
+            if [ "$(ls -A . 2>/dev/null)" ]; then
+              echo "⚠️ Directory is not empty, backing up existing files..."
+              cd ..
+              mv ${DEPLOY_PATH} ${DEPLOY_PATH}.backup.$(date +%s)
+              mkdir -p ${DEPLOY_PATH}
+              cd ${DEPLOY_PATH}
+            fi
             git clone https://${GH_TOKEN}@github.com/${{ github.repository }}.git .
           fi
           
