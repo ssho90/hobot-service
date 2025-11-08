@@ -3,7 +3,8 @@ import logging
 from datetime import datetime
 
 # 뉴스 파일 경로
-NEWS_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'daily_news.txt')
+# news_manager.py는 service/news/ 디렉토리에 있으므로, hobot/ 디렉토리로 가려면 두 단계 상위로 이동
+NEWS_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'daily_news.txt')
 
 def get_today_date_str():
     """오늘 날짜를 YYYY-MM-DD 형식으로 반환"""

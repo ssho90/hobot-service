@@ -10,8 +10,8 @@ from pydantic import BaseModel
 import logging
 from service.slack_bot import post_message
 from app import daily_news_summary
-from service.daily_news_agent import compiled
-from service import news_manager
+from service.news.daily_news_agent import compiled
+from service.news import news_manager
 
 app = FastAPI(title="Hobot API", version="1.0.0")
 

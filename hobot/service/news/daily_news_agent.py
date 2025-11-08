@@ -110,3 +110,4 @@ if __name__ == "__main__":
 
     # AIMessage 객체의 내용(content)만 출력합니다.
     print(last_message.content)
+

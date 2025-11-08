@@ -42,7 +42,7 @@ def daily_news_summary(query):
         ]
     )
 
-    from service.news_scrapper import get_daily_news
+    from service.news.news_scrapper import get_daily_news
     import service.llm
     from langchain_core.runnables import RunnablePassthrough
     from langchain_core.documents import Document
@@ -89,7 +89,7 @@ def azure_cert():
         ]
     )
 
-    from service.news_scrapper import get_daily_news
+    from service.news.news_scrapper import get_daily_news
     import service.llm
     from langchain_core.runnables import RunnablePassthrough
     from langchain_core.documents import Document
@@ -157,7 +157,7 @@ def common_query():
         ]
     )
 
-    from service.news_scrapper import get_daily_news
+    from service.news.news_scrapper import get_daily_news
     import service.llm
     from langchain_core.runnables import RunnablePassthrough
     from langchain_core.documents import Document
