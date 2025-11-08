@@ -16,6 +16,15 @@ RestartSec=10
 ExecStartPre=/bin/mkdir -p /home/ec2-user/hobot-service/hobot/logs
 ExecStartPre=/bin/chmod 755 /home/ec2-user/hobot-service/hobot/logs
 
+# Python 실행 파일 검증 및 디버깅 정보 출력
+ExecStartPre=/bin/bash -c "echo '🔍 Checking Python executable...'"
+ExecStartPre=/bin/bash -c "if [ ! -f /home/ec2-user/hobot-service/hobot/venv/bin/python ]; then echo '❌ ERROR: Python executable NOT FOUND at /home/ec2-user/hobot-service/hobot/venv/bin/python'; ls -la /home/ec2-user/hobot-service/hobot/venv/bin/ 2>&1 || echo 'venv/bin directory does not exist'; exit 1; fi"
+ExecStartPre=/bin/bash -c "if [ ! -x /home/ec2-user/hobot-service/hobot/venv/bin/python ]; then echo '❌ ERROR: Python executable NOT EXECUTABLE (permissions issue)!'; ls -la /home/ec2-user/hobot-service/hobot/venv/bin/python; exit 1; fi"
+ExecStartPre=/bin/bash -c "echo '✅ Python executable found and is executable'"
+ExecStartPre=/bin/bash -c "/home/ec2-user/hobot-service/hobot/venv/bin/python --version 2>&1 || echo '⚠️ Could not get Python version'"
+ExecStartPre=/bin/bash -c "echo '📁 Working directory: /home/ec2-user/hobot-service/hobot'"
+ExecStartPre=/bin/bash -c "ls -la /home/ec2-user/hobot-service/hobot/venv/bin/python* 2>&1 || echo 'No Python files found in venv/bin'"
+
 # 로그 설정 (journal로 먼저 설정, 파일 리다이렉션은 gunicorn.conf.py에서 처리)
 StandardOutput=journal
 StandardError=journal

@@ -173,22 +173,73 @@ jobs:
               # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
               sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
               sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
-              # Python 실행 파일 경로 확인 및 수정
+              # Python 실행 파일 경로 확인 및 수정 (상세 로깅)
+              echo "🔍 Checking Python executable path..."
               PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
+              echo "📝 Expected Python path: \$PYTHON_PATH"
+              
+              # 가상환경 디렉토리 확인
+              if [ ! -d "\${DEPLOY_PATH}/hobot/venv" ]; then
+                echo "❌ Virtual environment directory not found: \${DEPLOY_PATH}/hobot/venv"
+                echo "📁 Listing hobot directory:"
+                ls -la \${DEPLOY_PATH}/hobot/ 2>&1 || echo "hobot directory does not exist"
+                exit 1
+              fi
+              
+              # venv/bin 디렉토리 확인
+              if [ ! -d "\${DEPLOY_PATH}/hobot/venv/bin" ]; then
+                echo "❌ venv/bin directory not found: \${DEPLOY_PATH}/hobot/venv/bin"
+                echo "📁 Listing venv directory:"
+                ls -la \${DEPLOY_PATH}/hobot/venv/ 2>&1 || echo "venv directory does not exist"
+                exit 1
+              fi
+              
+              # Python 파일 목록 출력
+              echo "📋 Python files in venv/bin:"
+              ls -la \${DEPLOY_PATH}/hobot/venv/bin/python* 2>&1 || echo "No Python files found"
+              
               if [ ! -f "\$PYTHON_PATH" ]; then
-                echo "❌ Python not found at \$PYTHON_PATH, trying python3.12..."
+                echo "❌ Python not found at \$PYTHON_PATH"
+                echo "🔍 Searching for alternative Python..."
                 if command -v python3.12 &> /dev/null; then
                   PYTHON_PATH=\$(which python3.12)
-                else
+                  echo "📝 Found python3.12 at: \$PYTHON_PATH"
+                elif command -v python3 &> /dev/null; then
                   PYTHON_PATH=\$(which python3)
+                  echo "📝 Found python3 at: \$PYTHON_PATH"
+                else
+                  echo "❌ No Python found in system PATH"
+                  exit 1
                 fi
-                echo "📝 Using Python: \$PYTHON_PATH"
+                echo "📝 Updating systemd service to use: \$PYTHON_PATH"
                 sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+              else
+                echo "✅ Python found at: \$PYTHON_PATH"
               fi
+              
               # Python 실행 권한 확인
+              echo "🔍 Checking Python executable permissions..."
               if [ ! -x "\$PYTHON_PATH" ]; then
                 echo "❌ Python is not executable: \$PYTHON_PATH"
-                exit 1
+                echo "📋 File permissions:"
+                ls -la "\$PYTHON_PATH" 2>&1
+                echo "🔧 Attempting to fix permissions..."
+                chmod +x "\$PYTHON_PATH" 2>&1 || sudo chmod +x "\$PYTHON_PATH" 2>&1
+                if [ ! -x "\$PYTHON_PATH" ]; then
+                  echo "❌ Failed to make Python executable"
+                  exit 1
+                fi
+                echo "✅ Permissions fixed"
+              else
+                echo "✅ Python is executable"
+              fi
+              
+              # Python 버전 확인
+              echo "🔍 Testing Python execution..."
+              if "\$PYTHON_PATH" --version 2>&1; then
+                echo "✅ Python version check successful"
+              else
+                echo "⚠️ Warning: Python version check failed, but continuing..."
               fi
               sudo systemctl daemon-reload
               sudo systemctl enable hobot.service
@@ -202,8 +253,37 @@ jobs:
               else
                 echo "❌ Service failed to start. Checking status..."
                 sudo systemctl status hobot.service --no-pager -l
-                echo "📋 Recent service logs:"
-                sudo journalctl -u hobot.service -n 20 --no-pager
+                echo ""
+                echo "📋 Recent service logs (last 50 lines):"
+                sudo journalctl -u hobot.service -n 50 --no-pager
+                echo ""
+                echo "🔍 Checking Python executable in systemd service file:"
+                sudo grep "ExecStart" /etc/systemd/system/hobot.service || echo "ExecStart not found in service file"
+                echo ""
+                echo "🔍 Verifying Python path exists:"
+                PYTHON_PATH=\$(sudo grep "ExecStart" /etc/systemd/system/hobot.service | awk '{print $2}' | head -1)
+                if [ ! -z "\$PYTHON_PATH" ]; then
+                  echo "Python path from service file: \$PYTHON_PATH"
+                  if [ -f "\$PYTHON_PATH" ]; then
+                    echo "✅ File exists"
+                    ls -la "\$PYTHON_PATH"
+                    if [ -x "\$PYTHON_PATH" ]; then
+                      echo "✅ File is executable"
+                      "\$PYTHON_PATH" --version 2>&1 || echo "⚠️ Cannot execute Python"
+                    else
+                      echo "❌ File is NOT executable"
+                    fi
+                  else
+                    echo "❌ File does NOT exist"
+                  fi
+                fi
+                echo ""
+                echo "🔍 Checking working directory:"
+                WORKING_DIR=\$(sudo grep "WorkingDirectory" /etc/systemd/system/hobot.service | awk '{print $2}')
+                echo "Working directory: \$WORKING_DIR"
+                if [ ! -z "\$WORKING_DIR" ]; then
+                  ls -la "\$WORKING_DIR" 2>&1 || echo "Working directory does not exist"
+                fi
                 exit 1
               fi
             else
