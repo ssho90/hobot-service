@@ -62,6 +62,12 @@ npm start
 - **백엔드 API**: http://localhost:8991
 - **API 문서**: http://localhost:8991/docs
 
+## 🚢 배포
+
+AWS EC2에 자동 배포하는 방법은 [DEPLOYMENT.md](./DEPLOYMENT.md)를 참고하세요.
+
+GitHub Actions를 통해 `main` 브랜치에 푸시하면 자동으로 EC2에 배포됩니다.
+
 ## 🔐 로그인 정보
 
 - **사용자명**: `admin`

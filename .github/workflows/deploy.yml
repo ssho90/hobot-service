@@ -15,17 +15,24 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Setup SSH
+      env:
+        EC2_HOST: ${{ vars.EC2_HOST }}
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        if [ -z "$EC2_HOST" ]; then
+          echo "❌ Error: EC2_HOST variable is not set"
+          exit 1
+        fi
+        ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
     
     - name: Deploy to EC2
       env:
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
-        DEPLOY_PATH: ${{ secrets.EC2_DEPLOY_PATH || '/home/ubuntu/hobot-service' }}
+        EC2_HOST: ${{ vars.EC2_HOST }}
+        EC2_USER: ${{ vars.EC2_USER }}
+        DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
           set -e
@@ -42,10 +49,10 @@ jobs:
           # Git pull (또는 초기 클론)
           if [ -d ".git" ]; then
             echo "📥 Pulling latest changes..."
-            git pull origin main || true
+            git pull https://${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
           else
             echo "📥 Cloning repository..."
-            git clone https://github.com/${{ github.repository }}.git .
+            git clone https://${GH_TOKEN}@github.com/${{ github.repository }}.git .
           fi
           
           # Backend 배포
@@ -64,6 +71,10 @@ jobs:
           echo "📦 Installing Python dependencies..."
           pip install --upgrade pip
           pip install -r requirements.txt
+          
+          # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
+          echo "⏸️ Initializing strategies to PAUSE..."
+          python3 service/utils/init_strategy_pause.py
           
           # 로그 디렉토리 생성
           mkdir -p logs
@@ -118,9 +129,12 @@ jobs:
         ENDSSH
     
     - name: Health Check
+      env:
+        EC2_HOST: ${{ vars.EC2_HOST }}
+        EC2_USER: ${{ vars.EC2_USER }}
       run: |
         sleep 10  # 서버 시작 대기
-        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
           echo "🔍 Checking server health..."
           if curl -f http://localhost:8991/ > /dev/null 2>&1; then
             echo "✅ Backend server is healthy!"

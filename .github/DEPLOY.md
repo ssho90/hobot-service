@@ -11,19 +11,23 @@ GitHub Actions를 사용하여 AWS EC2에 자동 배포하는 방법입니다.
 - Python 3, pip가 설치되어 있어야 합니다
 - (선택) Node.js가 설치되어 있으면 프론트엔드도 배포됩니다
 
-### 2. GitHub Secrets 설정
+### 2. GitHub Secrets 및 Variables 설정
 
-GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음 Secrets를 추가하세요:
+GitHub 저장소의 Settings > Secrets and variables > Actions에서 설정하세요:
 
-#### 필수 Secrets
+#### 필수 Secrets (민감한 정보)
 
 - `EC2_SSH_PRIVATE_KEY`: EC2 접속용 SSH 개인키 (전체 내용)
+- `GH_TOKEN`: GitHub Personal Access Token (private repository 접근용)
+
+#### 필수 Variables (일반 설정값)
+
 - `EC2_HOST`: EC2 Public IP (예: `3.34.13.230`)
 - `EC2_USER`: EC2 사용자명 (일반적으로 `ubuntu` 또는 `ec2-user`)
 
-#### 선택 Secrets
+#### 선택 Variables (일반 설정값)
 
-- `EC2_DEPLOY_PATH`: 배포 경로 (기본값: `/home/ubuntu/hobot-service`)
+- `EC2_DEPLOYMENT_PATH`: 배포 경로 (기본값: `/home/ec2-user/hobot-service`)
 
 ### 3. SSH 키 생성 및 설정
 
@@ -46,6 +50,31 @@ cat ~/.ssh/github_deploy
 ```
 
 복사한 내용을 GitHub Secrets의 `EC2_SSH_PRIVATE_KEY`에 추가하세요.
+
+> **참고**: Secrets는 암호화되어 저장되며, Variables는 일반 텍스트로 저장됩니다. 민감한 정보는 반드시 Secrets에 저장하세요.
+
+#### GitHub Personal Access Token 생성 및 설정
+
+Private repository를 사용하는 경우 GitHub Personal Access Token이 필요합니다:
+
+1. GitHub에서 Settings > Developer settings > Personal access tokens > Tokens (classic) 이동
+2. "Generate new token (classic)" 클릭
+3. 다음 권한 선택:
+   - `repo` (전체 권한) - private repository 접근용
+4. 토큰 생성 후 복사
+5. GitHub Secrets의 `GH_TOKEN`에 추가
+
+### 4. Variables 설정
+
+일반 설정값들은 Variables에 추가하세요:
+
+1. GitHub 저장소의 Settings > Secrets and variables > Actions 이동
+2. "Variables" 탭 클릭
+3. "New repository variable" 버튼 클릭
+4. 다음 변수들을 추가:
+   - `EC2_HOST`: EC2 Public IP 주소
+   - `EC2_USER`: EC2 사용자명
+   - `EC2_DEPLOYMENT_PATH`: (선택) 배포 경로
 
 ## 배포 방법
 
