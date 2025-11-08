@@ -85,16 +85,29 @@ jobs:
           
           # Python 가상환경 설정
           if [ ! -d "venv" ]; then
-            echo "🐍 Creating virtual environment..."
+            echo "🐍 Creating virtual environment with Python 3.12..."
+            # Python 3.12가 설치되어 있는지 확인
+            if command -v python3.12 &> /dev/null; then
+              PYTHON_CMD="python3.12"
+            elif command -v python3 &> /dev/null; then
+              PYTHON_CMD="python3"
+              PYTHON_VERSION=\$(\$PYTHON_CMD --version 2>&1 | awk '{print \$2}' | cut -d. -f1,2)
+              if [ "\$PYTHON_VERSION" != "3.12" ]; then
+                echo "⚠️ Warning: Python 3.12 not found, using \$PYTHON_VERSION instead"
+              fi
+            else
+              echo "❌ Error: Python 3 not found"
+              exit 1
+            fi
             # ensurepip가 실패할 수 있으므로 --without-pip 옵션 사용 후 pip를 별도로 설치
-            if ! python3 -m venv --without-pip venv 2>/dev/null; then
+            if ! \$PYTHON_CMD -m venv --without-pip venv 2>/dev/null; then
               echo "⚠️ --without-pip failed, trying standard venv..."
-              if ! python3 -m venv venv 2>/dev/null; then
+              if ! \$PYTHON_CMD -m venv venv 2>/dev/null; then
                 echo "❌ Failed to create virtual environment"
                 exit 1
               fi
             fi
-            echo "✅ Virtual environment created"
+            echo "✅ Virtual environment created with \$PYTHON_CMD"
           fi
           
           # 가상환경 활성화 확인
@@ -107,20 +120,27 @@ jobs:
           
           source venv/bin/activate
           
+          # Python 명령어 확인 (가상환경 내부)
+          if command -v python3.12 &> /dev/null; then
+            PYTHON_CMD="python3.12"
+          else
+            PYTHON_CMD="python3"
+          fi
+          
           # pip가 없으면 설치
           if ! command -v pip &> /dev/null; then
             echo "📦 Installing pip..."
             curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
               echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
-              python3 -m ensurepip --upgrade --default-pip || {
+              \$PYTHON_CMD -m ensurepip --upgrade --default-pip || {
                 echo "❌ Failed to install pip"
                 exit 1
               }
             }
             if [ -f "get-pip.py" ]; then
-              python3 get-pip.py --user || python3 get-pip.py || {
+              \$PYTHON_CMD get-pip.py --user || \$PYTHON_CMD get-pip.py || {
                 echo "⚠️ get-pip.py failed, trying ensurepip..."
-                python3 -m ensurepip --upgrade --default-pip
+                \$PYTHON_CMD -m ensurepip --upgrade --default-pip
               }
               rm -f get-pip.py
               # pip를 가상환경에 복사
@@ -133,12 +153,12 @@ jobs:
           
           # 의존성 설치
           echo "📦 Installing Python dependencies..."
-          pip install --upgrade pip || python3 -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
+          pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
           pip install -r requirements.txt
           
           # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
           echo "⏸️ Initializing strategies to PAUSE..."
-          python3 service/utils/init_strategy_pause.py
+          \$PYTHON_CMD service/utils/init_strategy_pause.py
           
           # 로그 디렉토리 생성
           mkdir -p logs
@@ -166,7 +186,7 @@ jobs:
             
             # Gunicorn으로 서버 시작 (백그라운드)
             echo "🚀 Starting FastAPI server with Gunicorn..."
-            nohup python3 -m gunicorn -c gunicorn.conf.py asgi:asgi_app > /dev/null 2>&1 &
+            nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > /dev/null 2>&1 &
           fi
           
           echo "✅ Backend deployment completed!"
