@@ -1,0 +1,19 @@
+[Unit]
+Description=Hobot FastAPI Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hobot-service/hobot
+Environment="PATH=/home/ubuntu/hobot-service/hobot/venv/bin"
+ExecStart=/home/ubuntu/hobot-service/hobot/venv/bin/gunicorn -c gunicorn.conf.py asgi:asgi_app
+Restart=always
+RestartSec=10
+
+# 로그 설정
+StandardOutput=append:/home/ubuntu/hobot-service/hobot/logs/service.log
+StandardError=append:/home/ubuntu/hobot-service/hobot/logs/service.error.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,132 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push될 때 배포
+  workflow_dispatch:  # 수동 실행도 가능
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        DEPLOY_PATH: ${{ secrets.EC2_DEPLOY_PATH || '/home/ubuntu/hobot-service' }}
+      run: |
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+          set -e
+          
+          echo "🚀 Starting deployment..."
+          
+          # 배포 디렉토리로 이동
+          cd ${DEPLOY_PATH} || {
+            echo "❌ Deploy directory not found. Creating..."
+            mkdir -p ${DEPLOY_PATH}
+            cd ${DEPLOY_PATH}
+          }
+          
+          # Git pull (또는 초기 클론)
+          if [ -d ".git" ]; then
+            echo "📥 Pulling latest changes..."
+            git pull origin main || true
+          else
+            echo "📥 Cloning repository..."
+            git clone https://github.com/${{ github.repository }}.git .
+          fi
+          
+          # Backend 배포
+          echo "🔧 Setting up backend..."
+          cd hobot
+          
+          # Python 가상환경 설정
+          if [ ! -d "venv" ]; then
+            echo "🐍 Creating virtual environment..."
+            python3 -m venv venv
+          fi
+          
+          source venv/bin/activate
+          
+          # 의존성 설치
+          echo "📦 Installing Python dependencies..."
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          
+          # 로그 디렉토리 생성
+          mkdir -p logs
+          
+          # Systemd 서비스 설정 (선택사항)
+          if [ -f "../.github/deploy/hobot.service" ]; then
+            echo "⚙️ Setting up systemd service..."
+            sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
+            sudo sed -i "s|/home/ubuntu/hobot-service|${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
+            sudo systemctl daemon-reload
+            sudo systemctl enable hobot.service
+            echo "🔄 Restarting service..."
+            sudo systemctl restart hobot.service
+            echo "✅ Service restarted!"
+          else
+            # Systemd 없이 직접 실행
+            echo "🛑 Stopping existing services..."
+            PORT=8991
+            EXISTING_PIDS=$(lsof -ti :$PORT 2>/dev/null || true)
+            if [ ! -z "$EXISTING_PIDS" ]; then
+              echo "Killing processes on port $PORT: $EXISTING_PIDS"
+              kill -9 $EXISTING_PIDS 2>/dev/null || true
+              sleep 2
+            fi
+            
+            # Gunicorn으로 서버 시작 (백그라운드)
+            echo "🚀 Starting FastAPI server with Gunicorn..."
+            nohup python3 -m gunicorn -c gunicorn.conf.py asgi:asgi_app > /dev/null 2>&1 &
+          fi
+          
+          echo "✅ Backend deployment completed!"
+          
+          # Frontend 배포 (선택사항)
+          if [ -d "../hobot-ui" ]; then
+            echo "🎨 Setting up frontend..."
+            cd ../hobot-ui
+            
+            # Node.js 확인
+            if command -v node &> /dev/null; then
+              echo "📦 Installing frontend dependencies..."
+              npm install --production
+              
+              # 빌드 (프로덕션)
+              echo "🏗️ Building frontend..."
+              npm run build || echo "⚠️ Build script not found, skipping..."
+            else
+              echo "⚠️ Node.js not found, skipping frontend deployment"
+            fi
+          fi
+          
+          echo "🎉 Deployment completed successfully!"
+        ENDSSH
+    
+    - name: Health Check
+      run: |
+        sleep 10  # 서버 시작 대기
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          echo "🔍 Checking server health..."
+          if curl -f http://localhost:8991/ > /dev/null 2>&1; then
+            echo "✅ Backend server is healthy!"
+          else
+            echo "❌ Backend server health check failed"
+            exit 1
+          fi
+        ENDSSH
+
