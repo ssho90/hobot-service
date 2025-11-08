@@ -170,6 +170,9 @@ jobs:
             # 경로 및 사용자 정보 업데이트
             sudo sed -i "s|/home/ubuntu/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
             sudo sed -i "s|User=ubuntu|User=\$(whoami)|g" /etc/systemd/system/hobot.service
+            # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
+            sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
+            sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
             sudo systemctl daemon-reload
             sudo systemctl enable hobot.service
             echo "🔄 Restarting service..."
