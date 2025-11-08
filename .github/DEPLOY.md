@@ -23,7 +23,7 @@ GitHub 저장소의 Settings > Secrets and variables > Actions에서 설정하�
 #### 필수 Variables (일반 설정값)
 
 - `EC2_HOST`: EC2 Public IP (예: `3.34.13.230`)
-- `EC2_USER`: EC2 사용자명 (일반적으로 `ubuntu` 또는 `ec2-user`)
+- `EC2_USER`: EC2 사용자명 (`ec2-user`)
 
 #### 선택 Variables (일반 설정값)
 
@@ -35,7 +35,7 @@ GitHub 저장소의 Settings > Secrets and variables > Actions에서 설정하�
 
 ```bash
 # EC2에 접속
-ssh ubuntu@3.34.13.230
+ssh ec2-user@3.34.13.230
 
 # 배포용 SSH 키 생성
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/github_deploy -N ""
@@ -128,7 +128,7 @@ lsof -ti :8991
 kill -9 $(lsof -ti :8991)
 
 # 수동 시작
-cd /home/ubuntu/hobot-service/hobot
+cd /home/ec2-user/hobot-service/hobot
 source venv/bin/activate
 python3 -m gunicorn -c gunicorn.conf.py asgi:asgi_app
 ```
@@ -137,13 +137,13 @@ python3 -m gunicorn -c gunicorn.conf.py asgi:asgi_app
 
 ```bash
 # 애플리케이션 로그
-tail -f /home/ubuntu/hobot-service/hobot/log.txt
+tail -f /home/ec2-user/hobot-service/hobot/log.txt
 
 # Gunicorn 액세스 로그
-tail -f /home/ubuntu/hobot-service/hobot/logs/access.log
+tail -f /home/ec2-user/hobot-service/hobot/logs/access.log
 
 # Gunicorn 에러 로그
-tail -f /home/ubuntu/hobot-service/hobot/logs/error.log
+tail -f /home/ec2-user/hobot-service/hobot/logs/error.log
 
 # Systemd 서비스 로그 (systemd 사용 시)
 sudo journalctl -u hobot -f
@@ -156,8 +156,8 @@ sudo journalctl -u hobot -f
 1. GitHub Actions 로그 확인
 2. EC2에 직접 접속하여 수동으로 확인:
    ```bash
-   ssh ubuntu@3.34.13.230
-   cd /home/ubuntu/hobot-service
+   ssh ec2-user@3.34.13.230
+   cd /home/ec2-user/hobot-service
    ```
 
 ### 서비스가 시작되지 않는 경우
@@ -169,7 +169,7 @@ sudo journalctl -u hobot -f
 
 2. 의존성 확인:
    ```bash
-   cd /home/ubuntu/hobot-service/hobot
+   cd /home/ec2-user/hobot-service/hobot
    source venv/bin/activate
    pip list
    ```
@@ -177,7 +177,7 @@ sudo journalctl -u hobot -f
 3. 환경 변수 확인:
    ```bash
    # .env 파일이 있는지 확인
-   ls -la /home/ubuntu/hobot-service/hobot/.env
+   ls -la /home/ec2-user/hobot-service/hobot/.env
    ```
 
 ### SSH 연결 실패 시

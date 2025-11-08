@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
     - name: Setup SSH
       env:
         EC2_HOST: ${{ vars.EC2_HOST }}
-      run: |
-        mkdir -p ~/.ssh
+        run: |
+          mkdir -p ~/.ssh
         echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
         if [ -z "$EC2_HOST" ]; then
           echo "❌ Error: EC2_HOST variable is not set"
           exit 1
@@ -43,7 +43,7 @@ jobs:
         EC2_USER: ${{ vars.EC2_USER }}
         DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      run: |
+        run: |
         ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << ENDSSH
           set -e
           
@@ -168,13 +168,28 @@ jobs:
             echo "⚙️ Setting up systemd service..."
             sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
             # 경로 및 사용자 정보 업데이트
-            sudo sed -i "s|/home/ubuntu/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
             sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
-            sudo sed -i "s|User=ubuntu|User=\$(whoami)|g" /etc/systemd/system/hobot.service
             sudo sed -i "s|User=ec2-user|User=\$(whoami)|g" /etc/systemd/system/hobot.service
             # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
             sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
             sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
+            # Python 실행 파일 경로 확인 및 수정
+            PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
+            if [ ! -f "\$PYTHON_PATH" ]; then
+              echo "❌ Python not found at \$PYTHON_PATH, trying python3.12..."
+              if command -v python3.12 &> /dev/null; then
+                PYTHON_PATH=\$(which python3.12)
+              else
+                PYTHON_PATH=\$(which python3)
+              fi
+              echo "📝 Using Python: \$PYTHON_PATH"
+              sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+            fi
+            # Python 실행 권한 확인
+            if [ ! -x "\$PYTHON_PATH" ]; then
+              echo "❌ Python is not executable: \$PYTHON_PATH"
+              exit 1
+            fi
             sudo systemctl daemon-reload
             sudo systemctl enable hobot.service
             echo "🔄 Restarting service..."
@@ -243,12 +258,12 @@ jobs:
           
           echo "🎉 Deployment completed successfully!"
         ENDSSH
-    
-    - name: Health Check
-      env:
+      
+      - name: Health Check
+        env:
         EC2_HOST: ${{ vars.EC2_HOST }}
         EC2_USER: ${{ vars.EC2_USER }}
-      run: |
+        run: |
         sleep 10  # 서버 시작 대기
         ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
           echo "🔍 Checking server health..."
