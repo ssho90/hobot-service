@@ -86,14 +86,28 @@ jobs:
           # Python 가상환경 설정
           if [ ! -d "venv" ]; then
             echo "🐍 Creating virtual environment..."
-            python3 -m venv venv
+            # ensurepip가 실패할 수 있으므로 --without-pip 옵션 사용 후 pip를 별도로 설치
+            python3 -m venv --without-pip venv || python3 -m venv venv
           fi
           
           source venv/bin/activate
           
+          # pip가 없으면 설치
+          if ! command -v pip &> /dev/null; then
+            echo "📦 Installing pip..."
+            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+            python3 get-pip.py --user || python3 get-pip.py
+            rm -f get-pip.py
+            # pip를 가상환경에 복사
+            if [ -f ~/.local/bin/pip ]; then
+              cp ~/.local/bin/pip venv/bin/pip
+              cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
+            fi
+          fi
+          
           # 의존성 설치
           echo "📦 Installing Python dependencies..."
-          pip install --upgrade pip
+          pip install --upgrade pip || python3 -m ensurepip --upgrade || true
           pip install -r requirements.txt
           
           # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
