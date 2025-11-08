@@ -14,264 +14,264 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-    - name: Setup SSH
-      env:
-        EC2_HOST: ${{ vars.EC2_HOST }}
+      - name: Setup SSH
+        env:
+          EC2_HOST: ${{ vars.EC2_HOST }}
         run: |
           mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-        if [ -z "$EC2_HOST" ]; then
-          echo "❌ Error: EC2_HOST variable is not set"
-          exit 1
-        fi
-        echo "🔍 Attempting to connect to EC2 host: ${EC2_HOST}"
-        if ! ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts 2>&1; then
-          echo "❌ Error: Failed to connect to EC2 host ${EC2_HOST}"
-          echo "Please check:"
-          echo "  1. EC2 instance is running"
-          echo "  2. IP address is correct (current: ${EC2_HOST})"
-          echo "  3. Security Group allows SSH (port 22) from GitHub Actions IPs"
-          echo "  4. Network connectivity"
-          exit 1
-        fi
-        echo "✅ Successfully added ${EC2_HOST} to known_hosts"
-    
-    - name: Deploy to EC2
-      env:
-        EC2_HOST: ${{ vars.EC2_HOST }}
-        EC2_USER: ${{ vars.EC2_USER }}
-        DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          if [ -z "$EC2_HOST" ]; then
+            echo "❌ Error: EC2_HOST variable is not set"
+            exit 1
+          fi
+          echo "🔍 Attempting to connect to EC2 host: ${EC2_HOST}"
+          if ! ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts 2>&1; then
+            echo "❌ Error: Failed to connect to EC2 host ${EC2_HOST}"
+            echo "Please check:"
+            echo "  1. EC2 instance is running"
+            echo "  2. IP address is correct (current: ${EC2_HOST})"
+            echo "  3. Security Group allows SSH (port 22) from GitHub Actions IPs"
+            echo "  4. Network connectivity"
+            exit 1
+          fi
+          echo "✅ Successfully added ${EC2_HOST} to known_hosts"
+      
+      - name: Deploy to EC2
+        env:
+          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << ENDSSH
-          set -e
-          
-          export DEPLOY_PATH="${DEPLOY_PATH}"
-          export GH_TOKEN="${GH_TOKEN}"
-          
-          echo "🚀 Starting deployment..."
-          echo "📁 Deploy path: \${DEPLOY_PATH}"
-          
-          # 배포 디렉토리로 이동
-          cd \${DEPLOY_PATH} || {
-            echo "❌ Deploy directory not found. Creating..."
-            mkdir -p \${DEPLOY_PATH}
-            cd \${DEPLOY_PATH}
-          }
-          
-          # Git pull (또는 초기 클론)
-          if [ -d ".git" ]; then
-            echo "📥 Pulling latest changes..."
-            git pull https://\${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
-          else
-            echo "📥 Cloning repository..."
-            # 기존 디렉토리가 비어있지 않으면 백업 후 클론
-            if [ "\$(ls -A . 2>/dev/null)" ]; then
-              echo "⚠️ Directory is not empty, backing up existing files..."
-              cd ..
-              BACKUP_NAME="\${DEPLOY_PATH}.backup.\$(date +%s)"
-              echo "📦 Backing up to: \${BACKUP_NAME}"
-              mv \${DEPLOY_PATH} \${BACKUP_NAME}
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ vars.EC2_USER }}@${{ vars.EC2_HOST }} << 'ENDSSH'
+            set -e
+            
+            export DEPLOY_PATH="${DEPLOY_PATH}"
+            export GH_TOKEN="${GH_TOKEN}"
+            
+            echo "🚀 Starting deployment..."
+            echo "📁 Deploy path: \${DEPLOY_PATH}"
+            
+            # 배포 디렉토리로 이동
+            cd \${DEPLOY_PATH} || {
+              echo "❌ Deploy directory not found. Creating..."
               mkdir -p \${DEPLOY_PATH}
               cd \${DEPLOY_PATH}
+            }
+            
+            # Git pull (또는 초기 클론)
+            if [ -d ".git" ]; then
+              echo "📥 Pulling latest changes..."
+              git pull https://\${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
+            else
+              echo "📥 Cloning repository..."
+              # 기존 디렉토리가 비어있지 않으면 백업 후 클론
+              if [ "\$(ls -A . 2>/dev/null)" ]; then
+                echo "⚠️ Directory is not empty, backing up existing files..."
+                cd ..
+                BACKUP_NAME="\${DEPLOY_PATH}.backup.\$(date +%s)"
+                echo "📦 Backing up to: \${BACKUP_NAME}"
+                mv \${DEPLOY_PATH} \${BACKUP_NAME}
+                mkdir -p \${DEPLOY_PATH}
+                cd \${DEPLOY_PATH}
+              fi
+              git clone https://\${GH_TOKEN}@github.com/${{ github.repository }}.git .
             fi
-            git clone https://\${GH_TOKEN}@github.com/${{ github.repository }}.git .
-          fi
-          
-          # Backend 배포
-          echo "🔧 Setting up backend..."
-          cd hobot
-          
-          # Python 가상환경 설정
-          if [ ! -d "venv" ]; then
-            echo "🐍 Creating virtual environment with Python 3.12..."
-            # Python 3.12가 설치되어 있는지 확인
+            
+            # Backend 배포
+            echo "🔧 Setting up backend..."
+            cd hobot
+            
+            # Python 가상환경 설정
+            if [ ! -d "venv" ]; then
+              echo "🐍 Creating virtual environment with Python 3.12..."
+              # Python 3.12가 설치되어 있는지 확인
+              if command -v python3.12 &> /dev/null; then
+                PYTHON_CMD="python3.12"
+              elif command -v python3 &> /dev/null; then
+                PYTHON_CMD="python3"
+                PYTHON_VERSION=\$(\$PYTHON_CMD --version 2>&1 | awk '{print \$2}' | cut -d. -f1,2)
+                if [ "\$PYTHON_VERSION" != "3.12" ]; then
+                  echo "⚠️ Warning: Python 3.12 not found, using \$PYTHON_VERSION instead"
+                fi
+              else
+                echo "❌ Error: Python 3 not found"
+                exit 1
+              fi
+              # ensurepip가 실패할 수 있으므로 --without-pip 옵션 사용 후 pip를 별도로 설치
+              if ! \$PYTHON_CMD -m venv --without-pip venv 2>/dev/null; then
+                echo "⚠️ --without-pip failed, trying standard venv..."
+                if ! \$PYTHON_CMD -m venv venv 2>/dev/null; then
+                  echo "❌ Failed to create virtual environment"
+                  exit 1
+                fi
+              fi
+              echo "✅ Virtual environment created with \$PYTHON_CMD"
+            fi
+            
+            # 가상환경 활성화 확인
+            if [ ! -f "venv/bin/activate" ]; then
+              echo "❌ Error: venv/bin/activate not found"
+              echo "Virtual environment structure:"
+              ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
+              exit 1
+            fi
+            
+            source venv/bin/activate
+            
+            # Python 명령어 확인 (가상환경 내부)
             if command -v python3.12 &> /dev/null; then
               PYTHON_CMD="python3.12"
-            elif command -v python3 &> /dev/null; then
+            else
               PYTHON_CMD="python3"
-              PYTHON_VERSION=\$(\$PYTHON_CMD --version 2>&1 | awk '{print \$2}' | cut -d. -f1,2)
-              if [ "\$PYTHON_VERSION" != "3.12" ]; then
-                echo "⚠️ Warning: Python 3.12 not found, using \$PYTHON_VERSION instead"
-              fi
-            else
-              echo "❌ Error: Python 3 not found"
-              exit 1
-            fi
-            # ensurepip가 실패할 수 있으므로 --without-pip 옵션 사용 후 pip를 별도로 설치
-            if ! \$PYTHON_CMD -m venv --without-pip venv 2>/dev/null; then
-              echo "⚠️ --without-pip failed, trying standard venv..."
-              if ! \$PYTHON_CMD -m venv venv 2>/dev/null; then
-                echo "❌ Failed to create virtual environment"
-                exit 1
-              fi
-            fi
-            echo "✅ Virtual environment created with \$PYTHON_CMD"
-          fi
-          
-          # 가상환경 활성화 확인
-          if [ ! -f "venv/bin/activate" ]; then
-            echo "❌ Error: venv/bin/activate not found"
-            echo "Virtual environment structure:"
-            ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
-            exit 1
-          fi
-          
-          source venv/bin/activate
-          
-          # Python 명령어 확인 (가상환경 내부)
-          if command -v python3.12 &> /dev/null; then
-            PYTHON_CMD="python3.12"
-          else
-            PYTHON_CMD="python3"
-          fi
-          
-          # pip가 없으면 설치
-          if ! command -v pip &> /dev/null; then
-            echo "📦 Installing pip..."
-            curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
-              echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
-              \$PYTHON_CMD -m ensurepip --upgrade --default-pip || {
-                echo "❌ Failed to install pip"
-                exit 1
-              }
-            }
-            if [ -f "get-pip.py" ]; then
-              \$PYTHON_CMD get-pip.py --user || \$PYTHON_CMD get-pip.py || {
-                echo "⚠️ get-pip.py failed, trying ensurepip..."
-                \$PYTHON_CMD -m ensurepip --upgrade --default-pip
-              }
-              rm -f get-pip.py
-              # pip를 가상환경에 복사
-              if [ -f ~/.local/bin/pip ]; then
-                cp ~/.local/bin/pip venv/bin/pip 2>/dev/null || true
-                cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
-              fi
-            fi
-          fi
-          
-          # 의존성 설치
-          echo "📦 Installing Python dependencies..."
-          pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
-          pip install -r requirements.txt
-          
-          # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
-          echo "⏸️ Initializing strategies to PAUSE..."
-          \$PYTHON_CMD service/utils/init_strategy_pause.py
-          
-          # 로그 디렉토리 생성
-          mkdir -p logs
-          
-          # Systemd 서비스 설정 (선택사항)
-          if [ -f "../.github/deploy/hobot.service" ]; then
-            echo "⚙️ Setting up systemd service..."
-            sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
-            # 경로 및 사용자 정보 업데이트
-            sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
-            sudo sed -i "s|User=ec2-user|User=\$(whoami)|g" /etc/systemd/system/hobot.service
-            # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
-            sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
-            sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
-            # Python 실행 파일 경로 확인 및 수정
-            PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
-            if [ ! -f "\$PYTHON_PATH" ]; then
-              echo "❌ Python not found at \$PYTHON_PATH, trying python3.12..."
-              if command -v python3.12 &> /dev/null; then
-                PYTHON_PATH=\$(which python3.12)
-              else
-                PYTHON_PATH=\$(which python3)
-              fi
-              echo "📝 Using Python: \$PYTHON_PATH"
-              sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-            fi
-            # Python 실행 권한 확인
-            if [ ! -x "\$PYTHON_PATH" ]; then
-              echo "❌ Python is not executable: \$PYTHON_PATH"
-              exit 1
-            fi
-            sudo systemctl daemon-reload
-            sudo systemctl enable hobot.service
-            echo "🔄 Restarting service..."
-            sudo systemctl restart hobot.service
-            sleep 3
-            # 서비스 상태 확인
-            if sudo systemctl is-active --quiet hobot.service; then
-              echo "✅ Service is running!"
-              sudo systemctl status hobot.service --no-pager -l
-            else
-              echo "❌ Service failed to start. Checking status..."
-              sudo systemctl status hobot.service --no-pager -l
-              echo "📋 Recent service logs:"
-              sudo journalctl -u hobot.service -n 20 --no-pager
-              exit 1
-            fi
-          else
-            # Systemd 없이 직접 실행
-            echo "🛑 Stopping existing services..."
-            PORT=8991
-            EXISTING_PIDS=\$(lsof -ti :\$PORT 2>/dev/null || true)
-            if [ ! -z "\$EXISTING_PIDS" ]; then
-              echo "Killing processes on port \$PORT: \$EXISTING_PIDS"
-              kill -9 \$EXISTING_PIDS 2>/dev/null || true
-              sleep 2
             fi
             
-            # Gunicorn으로 서버 시작 (백그라운드)
-            echo "🚀 Starting FastAPI server with Gunicorn..."
-            # 로그 디렉토리 확인
+            # pip가 없으면 설치
+            if ! command -v pip &> /dev/null; then
+              echo "📦 Installing pip..."
+              curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
+                echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
+                \$PYTHON_CMD -m ensurepip --upgrade --default-pip || {
+                  echo "❌ Failed to install pip"
+                  exit 1
+                }
+              }
+              if [ -f "get-pip.py" ]; then
+                \$PYTHON_CMD get-pip.py --user || \$PYTHON_CMD get-pip.py || {
+                  echo "⚠️ get-pip.py failed, trying ensurepip..."
+                  \$PYTHON_CMD -m ensurepip --upgrade --default-pip
+                }
+                rm -f get-pip.py
+                # pip를 가상환경에 복사
+                if [ -f ~/.local/bin/pip ]; then
+                  cp ~/.local/bin/pip venv/bin/pip 2>/dev/null || true
+                  cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
+                fi
+              fi
+            fi
+            
+            # 의존성 설치
+            echo "📦 Installing Python dependencies..."
+            pip install --upgrade pip || \$PYTHON_CMD -m ensurepip --upgrade || echo "⚠️ pip upgrade failed, continuing..."
+            pip install -r requirements.txt
+            
+            # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
+            echo "⏸️ Initializing strategies to PAUSE..."
+            \$PYTHON_CMD service/utils/init_strategy_pause.py
+            
+            # 로그 디렉토리 생성
             mkdir -p logs
-            # Gunicorn 실행 (로그 파일로 리다이렉트)
-            nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > logs/gunicorn.log 2>&1 &
-            GUNICORN_PID=\$!
-            echo "📝 Gunicorn started with PID: \$GUNICORN_PID"
-            # 프로세스가 실제로 실행되었는지 확인
-            sleep 2
-            if ps -p \$GUNICORN_PID > /dev/null 2>&1; then
-              echo "✅ Gunicorn process is running (PID: \$GUNICORN_PID)"
-            else
-              echo "❌ Gunicorn process failed to start. Check logs/gunicorn.log for errors:"
-              tail -20 logs/gunicorn.log 2>/dev/null || echo "Log file not found"
-              exit 1
-            fi
-          fi
-          
-          echo "✅ Backend deployment completed!"
-          
-          # Frontend 배포 (선택사항)
-          if [ -d "../hobot-ui" ]; then
-            echo "🎨 Setting up frontend..."
-            cd ../hobot-ui
             
-            # Node.js 확인
-            if command -v node &> /dev/null; then
-              echo "📦 Installing frontend dependencies..."
-              npm install --production
-              
-              # 빌드 (프로덕션)
-              echo "🏗️ Building frontend..."
-              npm run build || echo "⚠️ Build script not found, skipping..."
+            # Systemd 서비스 설정 (선택사항)
+            if [ -f "../.github/deploy/hobot.service" ]; then
+              echo "⚙️ Setting up systemd service..."
+              sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
+              # 경로 및 사용자 정보 업데이트
+              sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
+              sudo sed -i "s|User=ec2-user|User=\$(whoami)|g" /etc/systemd/system/hobot.service
+              # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
+              sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
+              sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
+              # Python 실행 파일 경로 확인 및 수정
+              PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
+              if [ ! -f "\$PYTHON_PATH" ]; then
+                echo "❌ Python not found at \$PYTHON_PATH, trying python3.12..."
+                if command -v python3.12 &> /dev/null; then
+                  PYTHON_PATH=\$(which python3.12)
+                else
+                  PYTHON_PATH=\$(which python3)
+                fi
+                echo "📝 Using Python: \$PYTHON_PATH"
+                sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+              fi
+              # Python 실행 권한 확인
+              if [ ! -x "\$PYTHON_PATH" ]; then
+                echo "❌ Python is not executable: \$PYTHON_PATH"
+                exit 1
+              fi
+              sudo systemctl daemon-reload
+              sudo systemctl enable hobot.service
+              echo "🔄 Restarting service..."
+              sudo systemctl restart hobot.service
+              sleep 3
+              # 서비스 상태 확인
+              if sudo systemctl is-active --quiet hobot.service; then
+                echo "✅ Service is running!"
+                sudo systemctl status hobot.service --no-pager -l
+              else
+                echo "❌ Service failed to start. Checking status..."
+                sudo systemctl status hobot.service --no-pager -l
+                echo "📋 Recent service logs:"
+                sudo journalctl -u hobot.service -n 20 --no-pager
+                exit 1
+              fi
             else
-              echo "⚠️ Node.js not found, skipping frontend deployment"
+              # Systemd 없이 직접 실행
+              echo "🛑 Stopping existing services..."
+              PORT=8991
+              EXISTING_PIDS=\$(lsof -ti :\$PORT 2>/dev/null || true)
+              if [ ! -z "\$EXISTING_PIDS" ]; then
+                echo "Killing processes on port \$PORT: \$EXISTING_PIDS"
+                kill -9 \$EXISTING_PIDS 2>/dev/null || true
+                sleep 2
+              fi
+              
+              # Gunicorn으로 서버 시작 (백그라운드)
+              echo "🚀 Starting FastAPI server with Gunicorn..."
+              # 로그 디렉토리 확인
+              mkdir -p logs
+              # Gunicorn 실행 (로그 파일로 리다이렉트)
+              nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > logs/gunicorn.log 2>&1 &
+              GUNICORN_PID=\$!
+              echo "📝 Gunicorn started with PID: \$GUNICORN_PID"
+              # 프로세스가 실제로 실행되었는지 확인
+              sleep 2
+              if ps -p \$GUNICORN_PID > /dev/null 2>&1; then
+                echo "✅ Gunicorn process is running (PID: \$GUNICORN_PID)"
+              else
+                echo "❌ Gunicorn process failed to start. Check logs/gunicorn.log for errors:"
+                tail -20 logs/gunicorn.log 2>/dev/null || echo "Log file not found"
+                exit 1
+              fi
             fi
-          fi
-          
-          echo "🎉 Deployment completed successfully!"
-        ENDSSH
-      
+            
+            echo "✅ Backend deployment completed!"
+            
+            # Frontend 배포 (선택사항)
+            if [ -d "../hobot-ui" ]; then
+              echo "🎨 Setting up frontend..."
+              cd ../hobot-ui
+              
+              # Node.js 확인
+              if command -v node &> /dev/null; then
+                echo "📦 Installing frontend dependencies..."
+                npm install --production
+                
+                # 빌드 (프로덕션)
+                echo "🏗️ Building frontend..."
+                npm run build || echo "⚠️ Build script not found, skipping..."
+              else
+                echo "⚠️ Node.js not found, skipping frontend deployment"
+              fi
+            fi
+            
+            echo "🎉 Deployment completed successfully!"
+          ENDSSH
+        
       - name: Health Check
         env:
-        EC2_HOST: ${{ vars.EC2_HOST }}
-        EC2_USER: ${{ vars.EC2_USER }}
+          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
         run: |
-        sleep 10  # 서버 시작 대기
-        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
-          echo "🔍 Checking server health..."
-          if curl -f http://localhost:8991/ > /dev/null 2>&1; then
-            echo "✅ Backend server is healthy!"
-          else
-            echo "❌ Backend server health check failed"
-            exit 1
-          fi
-        ENDSSH
+          sleep 10  # 서버 시작 대기
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+            echo "🔍 Checking server health..."
+            if curl -f http://localhost:8991/ > /dev/null 2>&1; then
+              echo "✅ Backend server is healthy!"
+            else
+              echo "❌ Backend server health check failed"
+              exit 1
+            fi
+          ENDSSH
 
