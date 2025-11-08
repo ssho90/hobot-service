@@ -83,80 +83,17 @@ jobs:
             echo "🔧 Setting up backend..."
             cd hobot
             
-            # Python 3.12 설치 확인 및 설치
+            # Python 3.12 확인
             echo "🐍 Checking for Python 3.12..."
             if ! command -v python3.12 &> /dev/null; then
-              echo "⚠️ Python 3.12 not found. Installing Python 3.12..."
-              
-              # OS 확인 및 Python 3.12 설치
-              if [ -f /etc/os-release ]; then
-                . /etc/os-release
-                OS=\$ID
-              else
-                OS="unknown"
-              fi
-              
-              if [ "\$OS" = "rhel" ] || [ "\$OS" = "redhat" ] || [ "\$OS" = "centos" ] || [ "\$OS" = "rocky" ] || [ "\$OS" = "almalinux" ]; then
-                # Red Hat Enterprise Linux / CentOS / Rocky Linux / AlmaLinux
-                echo "📦 Installing Python 3.12 on RHEL/CentOS/Rocky/AlmaLinux..."
-                # dnf 사용 (RHEL 9는 dnf 사용)
-                sudo dnf update -y
-                sudo dnf install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel readline-devel sqlite-devel xz-devel wget make
-                cd /tmp
-                # 최신 Python 3.12 버전 다운로드
-                PYTHON_VER="3.12.7"
-                wget https://www.python.org/ftp/python/\${PYTHON_VER}/Python-\${PYTHON_VER}.tgz
-                tar xzf Python-\${PYTHON_VER}.tgz
-                cd Python-\${PYTHON_VER}
-                ./configure --enable-optimizations --prefix=/usr/local
-                make -j\$(nproc)
-                sudo make altinstall
-                cd ~
-                rm -rf /tmp/Python-\${PYTHON_VER}*
-                # python3.12 심볼릭 링크 확인
-                if [ ! -f /usr/local/bin/python3.12 ]; then
-                  echo "⚠️ Warning: python3.12 not found at /usr/local/bin/python3.12"
-                  ls -la /usr/local/bin/python* 2>&1
-                fi
-              elif [ "\$OS" = "amzn" ] || [ "\$OS" = "amazon" ]; then
-                # Amazon Linux
-                echo "📦 Installing Python 3.12 on Amazon Linux..."
-                sudo yum update -y
-                sudo yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel readline-devel sqlite-devel xz-devel wget make
-                cd /tmp
-                PYTHON_VER="3.12.7"
-                wget https://www.python.org/ftp/python/\${PYTHON_VER}/Python-\${PYTHON_VER}.tgz
-                tar xzf Python-\${PYTHON_VER}.tgz
-                cd Python-\${PYTHON_VER}
-                ./configure --enable-optimizations --prefix=/usr/local
-                make -j\$(nproc)
-                sudo make altinstall
-                cd ~
-                rm -rf /tmp/Python-\${PYTHON_VER}*
-              elif [ "\$OS" = "ubuntu" ] || [ "\$OS" = "debian" ]; then
-                # Ubuntu/Debian
-                echo "📦 Installing Python 3.12 on Ubuntu/Debian..."
-                sudo apt-get update -y
-                sudo apt-get install -y software-properties-common
-                sudo add-apt-repository -y ppa:deadsnakes/ppa
-                sudo apt-get update -y
-                sudo apt-get install -y python3.12 python3.12-venv python3.12-dev
-              else
-                echo "❌ Error: Unsupported OS (\$OS). Cannot install Python 3.12 automatically."
-                echo "Please install Python 3.12 manually and try again."
-                exit 1
-              fi
-              
-              # Python 3.12 설치 확인
-              if command -v python3.12 &> /dev/null; then
-                echo "✅ Python 3.12 installed successfully"
-                python3.12 --version
-              else
-                echo "❌ Error: Python 3.12 installation failed"
-                exit 1
-              fi
+              echo "❌ Error: Python 3.12 is not installed"
+              echo "Please install Python 3.12 manually before deployment."
+              echo "Available Python versions:"
+              command -v python3 &> /dev/null && python3 --version || echo "python3 not found"
+              command -v python &> /dev/null && python --version || echo "python not found"
+              exit 1
             else
-              echo "✅ Python 3.12 is already installed"
+              echo "✅ Python 3.12 is installed"
               python3.12 --version
             fi
             
