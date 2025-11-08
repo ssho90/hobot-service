@@ -186,7 +186,21 @@ jobs:
             
             # Gunicorn으로 서버 시작 (백그라운드)
             echo "🚀 Starting FastAPI server with Gunicorn..."
-            nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > /dev/null 2>&1 &
+            # 로그 디렉토리 확인
+            mkdir -p logs
+            # Gunicorn 실행 (로그 파일로 리다이렉트)
+            nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > logs/gunicorn.log 2>&1 &
+            GUNICORN_PID=\$!
+            echo "📝 Gunicorn started with PID: \$GUNICORN_PID"
+            # 프로세스가 실제로 실행되었는지 확인
+            sleep 2
+            if ps -p \$GUNICORN_PID > /dev/null 2>&1; then
+              echo "✅ Gunicorn process is running (PID: \$GUNICORN_PID)"
+            else
+              echo "❌ Gunicorn process failed to start. Check logs/gunicorn.log for errors:"
+              tail -20 logs/gunicorn.log 2>/dev/null || echo "Log file not found"
+              exit 1
+            fi
           fi
           
           echo "✅ Backend deployment completed!"
