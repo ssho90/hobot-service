@@ -167,12 +167,25 @@ jobs:
           if [ -f "../.github/deploy/hobot.service" ]; then
             echo "⚙️ Setting up systemd service..."
             sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
+            # 경로 및 사용자 정보 업데이트
             sudo sed -i "s|/home/ubuntu/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
+            sudo sed -i "s|User=ubuntu|User=\$(whoami)|g" /etc/systemd/system/hobot.service
             sudo systemctl daemon-reload
             sudo systemctl enable hobot.service
             echo "🔄 Restarting service..."
             sudo systemctl restart hobot.service
-            echo "✅ Service restarted!"
+            sleep 3
+            # 서비스 상태 확인
+            if sudo systemctl is-active --quiet hobot.service; then
+              echo "✅ Service is running!"
+              sudo systemctl status hobot.service --no-pager -l
+            else
+              echo "❌ Service failed to start. Checking status..."
+              sudo systemctl status hobot.service --no-pager -l
+              echo "📋 Recent service logs:"
+              sudo journalctl -u hobot.service -n 20 --no-pager
+              exit 1
+            fi
           else
             # Systemd 없이 직접 실행
             echo "🛑 Stopping existing services..."
