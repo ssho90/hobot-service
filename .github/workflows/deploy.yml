@@ -101,16 +101,50 @@ jobs:
             if [ ! -d "venv" ]; then
               echo "🐍 Creating virtual environment with Python 3.12..."
               PYTHON_CMD="python3.12"
-              # ensurepip가 실패할 수 있으므로 --without-pip 옵션 사용 후 pip를 별도로 설치
-              if ! \$PYTHON_CMD -m venv --without-pip venv 2>/dev/null; then
-                echo "⚠️ --without-pip failed, trying standard venv..."
-                if ! \$PYTHON_CMD -m venv venv 2>/dev/null; then
-                  echo "❌ Failed to create virtual environment"
-                  exit 1
-                fi
+              
+              # Python venv 모듈 확인
+              echo "🔍 Checking venv module..."
+              if ! \$PYTHON_CMD -m venv --help &> /dev/null; then
+                echo "❌ Error: venv module not available"
+                echo "📋 Python modules:"
+                \$PYTHON_CMD -c "import sys; print(sys.path)" 2>&1
+                exit 1
               fi
-            echo "✅ Virtual environment created with \$PYTHON_CMD"
-          fi
+              
+              # 가상환경 생성 시도 (에러 메시지 출력)
+              echo "🔧 Attempting to create virtual environment..."
+              if ! \$PYTHON_CMD -m venv venv 2>&1; then
+                echo "❌ Failed to create virtual environment with standard method"
+                echo "🔍 Checking Python installation..."
+                \$PYTHON_CMD --version
+                \$PYTHON_CMD -c "import sys; print('Python executable:', sys.executable); print('Python version:', sys.version)"
+                echo "📋 Current directory:"
+                pwd
+                echo "📋 Directory permissions:"
+                ls -la . | head -5
+                echo "🔍 Trying alternative method..."
+                # ensurepip 없이 시도
+                if ! \$PYTHON_CMD -m venv --without-pip venv 2>&1; then
+                  echo "❌ Failed to create virtual environment with --without-pip"
+                  echo "📋 Checking for venv module:"
+                  \$PYTHON_CMD -c "import venv; print('venv module found')" 2>&1 || echo "venv module not found"
+                  exit 1
+                else
+                  echo "✅ Virtual environment created with --without-pip"
+                fi
+              else
+                echo "✅ Virtual environment created successfully"
+              fi
+            else
+              echo "✅ Virtual environment already exists"
+            fi
+            
+            # 가상환경 확인
+            if [ ! -d "venv" ]; then
+              echo "❌ Error: venv directory was not created"
+              exit 1
+            fi
+            echo "✅ Virtual environment directory exists"
           
           # 가상환경 활성화 확인
           if [ ! -f "venv/bin/activate" ]; then
