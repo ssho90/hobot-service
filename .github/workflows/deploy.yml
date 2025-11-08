@@ -25,7 +25,17 @@ jobs:
           echo "❌ Error: EC2_HOST variable is not set"
           exit 1
         fi
-        ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
+        echo "🔍 Attempting to connect to EC2 host: ${EC2_HOST}"
+        if ! ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts 2>&1; then
+          echo "❌ Error: Failed to connect to EC2 host ${EC2_HOST}"
+          echo "Please check:"
+          echo "  1. EC2 instance is running"
+          echo "  2. IP address is correct (current: ${EC2_HOST})"
+          echo "  3. Security Group allows SSH (port 22) from GitHub Actions IPs"
+          echo "  4. Network connectivity"
+          exit 1
+        fi
+        echo "✅ Successfully added ${EC2_HOST} to known_hosts"
     
     - name: Deploy to EC2
       env:
