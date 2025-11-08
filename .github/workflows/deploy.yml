@@ -97,44 +97,33 @@ jobs:
               python3.12 --version
             fi
             
-            # Python 가상환경 설정 (Python 3.12 사용)
+            # Python 가상환경 설정 (uv 사용)
             if [ ! -d "venv" ]; then
-              echo "🐍 Creating virtual environment with Python 3.12..."
-              PYTHON_CMD="python3.12"
+              echo "🐍 Creating virtual environment with uv..."
               
-              # Python venv 모듈 확인
-              echo "🔍 Checking venv module..."
-              if ! \$PYTHON_CMD -m venv --help &> /dev/null; then
-                echo "❌ Error: venv module not available"
-                echo "📋 Python modules:"
-                \$PYTHON_CMD -c "import sys; print(sys.path)" 2>&1
+              # uv 설치 확인
+              if ! command -v uv &> /dev/null; then
+                echo "📦 uv not found. Installing uv..."
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+                export PATH="\$HOME/.cargo/bin:\$PATH"
+                # 설치 확인
+                if ! command -v uv &> /dev/null; then
+                  echo "❌ Error: Failed to install uv"
+                  exit 1
+                fi
+                echo "✅ uv installed successfully"
+              else
+                echo "✅ uv is already installed"
+                uv --version
+              fi
+              
+              # uv로 가상환경 생성
+              echo "🔧 Creating virtual environment with uv venv venv --python 3.12..."
+              if ! uv venv venv --python 3.12 2>&1; then
+                echo "❌ Failed to create virtual environment with uv"
                 exit 1
               fi
-              
-              # 가상환경 생성 시도 (에러 메시지 출력)
-              echo "🔧 Attempting to create virtual environment..."
-              if ! \$PYTHON_CMD -m venv venv 2>&1; then
-                echo "❌ Failed to create virtual environment with standard method"
-                echo "🔍 Checking Python installation..."
-                \$PYTHON_CMD --version
-                \$PYTHON_CMD -c "import sys; print('Python executable:', sys.executable); print('Python version:', sys.version)"
-                echo "📋 Current directory:"
-                pwd
-                echo "📋 Directory permissions:"
-                ls -la . | head -5
-                echo "🔍 Trying alternative method..."
-                # ensurepip 없이 시도
-                if ! \$PYTHON_CMD -m venv --without-pip venv 2>&1; then
-                  echo "❌ Failed to create virtual environment with --without-pip"
-                  echo "📋 Checking for venv module:"
-                  \$PYTHON_CMD -c "import venv; print('venv module found')" 2>&1 || echo "venv module not found"
-                  exit 1
-                else
-                  echo "✅ Virtual environment created with --without-pip"
-                fi
-              else
-                echo "✅ Virtual environment created successfully"
-              fi
+              echo "✅ Virtual environment created successfully with uv"
             else
               echo "✅ Virtual environment already exists"
             fi
@@ -159,9 +148,12 @@ jobs:
             echo "❌ Error: venv/bin/python not found after venv creation"
             echo "📋 Contents of venv/bin:"
             ls -la venv/bin/ 2>/dev/null || echo "venv/bin directory does not exist"
-            echo "🔧 Attempting to recreate venv..."
+            echo "🔧 Attempting to recreate venv with uv..."
             rm -rf venv
-            \$PYTHON_CMD -m venv venv
+            if ! uv venv venv --python 3.12 2>&1; then
+              echo "❌ Failed to recreate venv with uv"
+              exit 1
+            fi
             if [ ! -f "venv/bin/python" ]; then
               echo "❌ Failed to create Python executable in venv"
               exit 1
