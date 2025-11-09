@@ -486,17 +486,106 @@ jobs:
                 echo "📋 All files in /etc/nginx/conf.d/:"
                 sudo ls -la /etc/nginx/conf.d/ | head -20
                 
-                # nginx.conf의 기본 서버 블록 확인
-                echo "📋 Checking nginx.conf for default server blocks..."
+                # nginx.conf의 기본 서버 블록 확인 및 비활성화
+                echo "📋 Checking and disabling default server blocks in nginx.conf..."
                 if [ -f "/etc/nginx/nginx.conf" ]; then
-                  echo "   nginx.conf content (relevant parts):"
-                  sudo grep -A 10 "server {" /etc/nginx/nginx.conf | head -15 || echo "   No server block found in nginx.conf"
+                  # 백업 생성
+                  if [ ! -f "/etc/nginx/nginx.conf.backup" ]; then
+                    echo "   Creating backup of nginx.conf..."
+                    sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
+                  fi
+                  
+                  # 기본 server 블록 찾기 및 비활성화
+                  echo "   Checking for default server blocks..."
+                  # nginx.conf에서 http 블록 내의 server 블록 확인
+                  if sudo grep -q "^\s*server\s*{" /etc/nginx/nginx.conf; then
+                    echo "   Found server block in nginx.conf main file"
+                    echo "   Creating Python script to safely disable it..."
+                    # 임시 Python 스크립트 생성
+                    cat > /tmp/disable_nginx_server.py << 'PYEOF'
+import re
+import sys
+
+try:
+    with open('/etc/nginx/nginx.conf', 'r') as f:
+        lines = f.readlines()
+    
+    in_http = False
+    http_depth = 0
+    in_server = False
+    server_depth = 0
+    result = []
+    modified = False
+    
+    for line in lines:
+        stripped = line.lstrip()
+        
+        # http 블록 진입
+        if re.match(r'^\s*http\s*{', line):
+            in_http = True
+            http_depth = line.count('{') - line.count('}')
+            result.append(line)
+            continue
+        
+        if in_http:
+            http_depth += line.count('{') - line.count('}')
+            
+            # server 블록 시작 (주석 처리되지 않은 것만)
+            if re.match(r'^\s*server\s*{', line) and not stripped.startswith('#'):
+                in_server = True
+                server_depth = 1
+                result.append('    # DISABLED BY DEPLOYMENT: ' + line.lstrip())
+                modified = True
+                continue
+            
+            # server 블록 내부
+            if in_server:
+                server_depth += line.count('{') - line.count('}')
+                if not stripped.startswith('#'):
+                    result.append('    # ' + line)
+                else:
+                    result.append(line)
+                if server_depth == 0:
+                    in_server = False
+                continue
+            
+            # http 블록 종료
+            if http_depth == 0 and stripped.startswith('}'):
+                in_http = False
+            
+            result.append(line)
+        else:
+            result.append(line)
+    
+    if modified:
+        with open('/etc/nginx/nginx.conf', 'w') as f:
+            f.writelines(result)
+        print("   ✅ Disabled default server block")
+        sys.exit(0)
+    else:
+        print("   ℹ️ No default server block found")
+        sys.exit(0)
+        
+except Exception as e:
+    print(f"   ⚠️ Error: {e}")
+    sys.exit(1)
+PYEOF
+                    sudo python3 /tmp/disable_nginx_server.py
+                    rm -f /tmp/disable_nginx_server.py
+                  else
+                    echo "   ℹ️ No default server block found in nginx.conf"
+                  fi
+                  
                   # conf.d가 포함되어 있는지 확인
                   if sudo grep -q "include.*conf.d" /etc/nginx/nginx.conf; then
                     echo "   ✅ conf.d directory is included in nginx.conf"
                   else
                     echo "   ⚠️ conf.d directory may not be included"
                   fi
+                  
+                  # 수정된 nginx.conf 확인
+                  echo "   Active server blocks in nginx.conf:"
+                  sudo grep -B 2 -A 3 "^[^#]*server\s*{" /etc/nginx/nginx.conf | head -10 || echo "   No active server blocks found (good!)"
                 fi
                 
                 # nginx 설정 테스트
