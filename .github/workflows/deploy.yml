@@ -381,7 +381,8 @@ jobs:
                   echo "⏳ Build in progress... (\$ELAPSED seconds / \$BUILD_TIMEOUT seconds)"
                   # 메모리 사용량 확인
                   if command -v free &> /dev/null; then
-                    echo "   Memory: \$(free -h | grep Mem | awk '{print \$3\"/\"\$2}')"
+                    MEM_INFO=\$(free -h | grep Mem)
+                    echo "   Memory: \${MEM_INFO}"
                   fi
                 fi
               done
@@ -467,8 +468,12 @@ jobs:
                     sudo usermod -a -G ec2-user nginx 2>/dev/null || true
                   fi
                   echo "   Build directory permissions:"
-                  ls -ld "\$BUILD_DIR" | awk '{print "     " $0}'
-                  ls -l "\$BUILD_DIR/index.html" 2>/dev/null | awk '{print "     " $0}' || echo "     index.html not found"
+                  ls -ld "\$BUILD_DIR"
+                  if [ -f "\$BUILD_DIR/index.html" ]; then
+                    ls -l "\$BUILD_DIR/index.html"
+                  else
+                    echo "     index.html not found"
+                  fi
                 else
                   echo "   ⚠️ Build directory not found at \$BUILD_DIR"
                 fi
