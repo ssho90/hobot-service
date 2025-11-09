@@ -421,21 +421,28 @@ jobs:
                 
                 # 기본 nginx 설정 비활성화 (Red Hat Enterprise Linux)
                 echo "🛑 Disabling default nginx configurations..."
-                for conf_file in default.conf welcome.conf; do
-                  if [ -f "/etc/nginx/conf.d/${conf_file}" ]; then
-                    echo "   Disabling ${conf_file}..."
-                    sudo mv /etc/nginx/conf.d/${conf_file} /etc/nginx/conf.d/${conf_file}.disabled 2>/dev/null || true
+                # conf.d 디렉토리의 모든 기본 설정 파일 비활성화 (우리 파일 제외)
+                for conf_file in /etc/nginx/conf.d/*.conf; do
+                  if [ -f "$conf_file" ] && [ "$(basename $conf_file)" != "00-hobot.conf" ] && [ "$(basename $conf_file)" != "hobot.conf" ]; then
+                    echo "   Disabling $(basename $conf_file)..."
+                    sudo mv "$conf_file" "${conf_file}.disabled" 2>/dev/null || true
                   fi
                 done
                 
-                # nginx.conf의 기본 서버 블록도 확인
-                if grep -q "listen.*80.*default_server" /etc/nginx/nginx.conf 2>/dev/null; then
-                  echo "   Found default_server in nginx.conf, our config will override it"
+                # 기존 hobot.conf가 있으면 제거 (00-hobot.conf로 통일)
+                if [ -f "/etc/nginx/conf.d/hobot.conf" ] && [ ! -f "/etc/nginx/conf.d/00-hobot.conf" ]; then
+                  echo "   Moving existing hobot.conf to 00-hobot.conf..."
+                  sudo mv /etc/nginx/conf.d/hobot.conf /etc/nginx/conf.d/00-hobot.conf
                 fi
                 
-                # 우리의 설정 파일 복사
-                sudo cp ../.github/deploy/nginx.conf /etc/nginx/conf.d/hobot.conf
-                sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/nginx/conf.d/hobot.conf
+                # 우리의 설정 파일 복사 (가장 먼저 로드되도록 00- 접두사 사용)
+                echo "📝 Copying nginx configuration..."
+                sudo cp ../.github/deploy/nginx.conf /etc/nginx/conf.d/00-hobot.conf
+                sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/nginx/conf.d/00-hobot.conf
+                
+                # 설정 파일 내용 확인
+                echo "📋 Nginx configuration file content (first 15 lines):"
+                sudo head -15 /etc/nginx/conf.d/00-hobot.conf
                 
                 # nginx 설정 테스트
                 echo "🔍 Testing nginx configuration..."
@@ -452,6 +459,14 @@ jobs:
                     # 설정 파일 확인
                     echo "📋 Active nginx configuration files:"
                     sudo ls -la /etc/nginx/conf.d/*.conf 2>/dev/null || echo "No .conf files found"
+                    echo "📋 Disabled nginx configuration files:"
+                    sudo ls -la /etc/nginx/conf.d/*.disabled 2>/dev/null || echo "No disabled files found"
+                    # nginx가 실제로 어떤 설정을 사용하는지 확인
+                    echo "📋 Testing nginx configuration with our settings..."
+                    echo "   Checking which server block is active..."
+                    sudo nginx -T 2>/dev/null | grep -B 2 -A 10 "listen.*80.*default_server" | head -15 || echo "Could not dump config"
+                    echo "   Testing if our root directory is set..."
+                    sudo nginx -T 2>/dev/null | grep -A 2 "root.*hobot-ui" | head -5 || echo "Root directory not found in config"
                   else
                     echo "❌ Nginx failed to start"
                     sudo systemctl status nginx --no-pager -l
