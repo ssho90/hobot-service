@@ -366,6 +366,9 @@ jobs:
             echo "# OpenAI API"
             echo "OPENAI_API_KEY=\${OPENAI_API_KEY}"
             echo ""
+            echo "# Google API"
+            echo "GOOGLE_API_KEY=\${GOOGLE_API_KEY}"
+            echo ""
             echo "# Gemini API"
             echo "GEMINI_API_KEY=\${GEMINI_API_KEY}"
             echo ""
@@ -454,7 +457,9 @@ jobs:
                       exit 1
                     fi
                   fi
-                  sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+                  # bash -c 형식 유지하면서 Python 경로만 교체
+                  sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+                  sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
                 else
                   echo "❌ Real Python path does not exist: \$REAL_PYTHON"
                   exit 1
@@ -470,7 +475,9 @@ jobs:
                   exit 1
                 fi
                 echo "📝 Updating systemd service to use: \$PYTHON_PATH"
-                sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+                # bash -c 형식 유지하면서 Python 경로만 교체
+                sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+                sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
               fi
             else
               echo "✅ Python found at: \$PYTHON_PATH"
@@ -484,7 +491,9 @@ jobs:
                   PYTHON_PATH=\$(which python3.12)
                   echo "✅ Found Python 3.12 at: \$PYTHON_PATH"
                   echo "📝 Updating systemd service to use: \$PYTHON_PATH"
-                  sudo sed -i "s|ExecStart=.*venv/bin/python|ExecStart=\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+                  # bash -c 형식 유지하면서 Python 경로만 교체
+                  sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+                  sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
                 else
                   echo "❌ Python 3.12 not found. Please install Python 3.12 first."
                   exit 1

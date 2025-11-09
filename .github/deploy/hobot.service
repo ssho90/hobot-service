@@ -9,7 +9,8 @@ WorkingDirectory=/home/ec2-user/hobot-service/hobot
 Environment="PATH=/home/ec2-user/hobot-service/hobot/venv/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="PYTHONPATH=/home/ec2-user/hobot-service/hobot"
 # Python 모듈로 실행하여 가상환경의 Python을 사용
-ExecStart=/home/ec2-user/hobot-service/hobot/venv/bin/python -m gunicorn -c gunicorn.conf.py asgi:asgi_app
+# bash를 사용하여 명시적으로 실행 (203/EXEC 에러 방지)
+ExecStart=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && /home/ec2-user/hobot-service/hobot/venv/bin/python -m gunicorn -c gunicorn.conf.py asgi:asgi_app"
 Restart=always
 RestartSec=10
 

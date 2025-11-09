@@ -20,22 +20,6 @@ GitHub 저장소의 Settings > Secrets and variables > Actions에서 설정하�
 - `EC2_SSH_PRIVATE_KEY`: EC2 접속용 SSH 개인키 (전체 내용)
 - `GH_TOKEN`: GitHub Personal Access Token (private repository 접근용)
 
-#### 애플리케이션 환경 변수 Secrets (필수)
-
-다음 환경 변수들은 배포 시 `.env` 파일로 자동 생성됩니다 (모두 `ENV_` 접두사를 사용):
-
-- `ENV_SL_TOKEN`: Slack API 토큰
-- `ENV_UP_ACCESS_KEY`: Upbit API Access Key
-- `ENV_UP_SECRET_KEY`: Upbit API Secret Key
-- `ENV_HT_API_KEY`: 한국투자증권 API Key
-- `ENV_HT_SECRET_KEY`: 한국투자증권 API Secret Key
-- `ENV_HT_ACCOUNT`: 한국투자증권 계좌번호
-- `ENV_HT_ID`: 한국투자증권 ID
-- `ENV_OPENAI_API_KEY`: OpenAI API Key
-- `ENV_GOOGLE_API_KEY`: Google API Key
-- `ENV_GEMINI_API_KEY`: Google Gemini API Key
-- `ENV_TAVILY_API_KEY`: Tavily API Key
-
 #### 필수 Variables (일반 설정값)
 
 - `EC2_HOST`: EC2 Public IP (예: `3.34.13.230`)
