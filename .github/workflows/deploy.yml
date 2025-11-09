@@ -612,11 +612,44 @@ jobs:
             # Node.js 확인
             if command -v node &> /dev/null; then
               echo "📦 Installing frontend dependencies..."
-              npm install --production
+              npm install
               
-              # 빌드 (프로덕션)
-              echo "🏗️ Building frontend..."
-              npm run build || echo "⚠️ Build script not found, skipping..."
+              # 기존 프론트엔드 프로세스 종료
+              echo "🛑 Stopping existing frontend services..."
+              FRONTEND_PORT=3000
+              EXISTING_PIDS=\$(lsof -ti :\$FRONTEND_PORT 2>/dev/null || true)
+              if [ ! -z "\$EXISTING_PIDS" ]; then
+                echo "Killing processes on port \$FRONTEND_PORT: \$EXISTING_PIDS"
+                kill -9 \$EXISTING_PIDS 2>/dev/null || true
+                sleep 2
+              fi
+              
+              # npm start 프로세스도 확인 (포트가 아닌 프로세스 이름으로)
+              NPM_PIDS=\$(ps aux | grep -E '[n]pm start|[n]ode.*react-scripts' | awk '{print \$2}' || true)
+              if [ ! -z "\$NPM_PIDS" ]; then
+                echo "Killing existing npm start processes: \$NPM_PIDS"
+                kill -9 \$NPM_PIDS 2>/dev/null || true
+                sleep 2
+              fi
+              
+              # 프론트엔드 시작 (백그라운드)
+              echo "🚀 Starting frontend in background..."
+              # 로그 디렉토리 생성
+              mkdir -p ../hobot/logs
+              # npm start를 백그라운드로 실행
+              nohup npm start > ../hobot/logs/frontend.log 2>&1 &
+              FRONTEND_PID=\$!
+              echo "📝 Frontend started with PID: \$FRONTEND_PID"
+              
+              # 프로세스가 실제로 실행되었는지 확인
+              sleep 3
+              if ps -p \$FRONTEND_PID > /dev/null 2>&1; then
+                echo "✅ Frontend process is running (PID: \$FRONTEND_PID)"
+              else
+                echo "❌ Frontend process failed to start. Check logs/frontend.log for errors:"
+                tail -20 ../hobot/logs/frontend.log 2>/dev/null || echo "Log file not found"
+                echo "⚠️ Frontend deployment failed, but continuing..."
+              fi
             else
               echo "⚠️ Node.js not found, skipping frontend deployment"
             fi
