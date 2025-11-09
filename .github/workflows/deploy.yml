@@ -187,140 +187,23 @@ jobs:
             fi
             echo "✅ Virtual environment directory exists"
           
-          # 가상환경 활성화 확인 및 권한 설정
-          if [ ! -f "venv/bin/activate" ]; then
-            echo "❌ Error: venv/bin/activate not found"
-            echo "Virtual environment structure:"
-            ls -la venv/ 2>/dev/null || echo "venv directory does not exist"
-            exit 1
-          fi
-          
-          # activate 스크립트 권한 확인 및 수정
-          echo "🔧 Checking activate script permissions..."
-          if [ ! -x "venv/bin/activate" ]; then
-            echo "⚠️ activate script is not executable, fixing permissions..."
-            chmod +x venv/bin/activate
-            chmod 755 venv/bin/activate
-          fi
-          
-          # venv/bin 디렉토리의 모든 실행 파일 권한 확인
-          echo "🔧 Setting permissions for venv/bin files..."
+          # Python 실행 파일 확인 및 권한 설정
           chmod +x venv/bin/* 2>/dev/null || true
-          echo "✅ Virtual environment permissions set"
-          
-          # Python 실행 파일 존재 확인 (가상환경 생성 직후)
-          if [ ! -f "venv/bin/python" ]; then
-            echo "❌ Error: venv/bin/python not found after venv creation"
-            echo "📋 Contents of venv/bin:"
-            ls -la venv/bin/ 2>/dev/null || echo "venv/bin directory does not exist"
-            echo "🔧 Attempting to recreate venv with uv..."
-            rm -rf venv
-            if ! uv venv venv --python 3.12 2>&1; then
-              echo "❌ Failed to recreate venv with uv"
-              exit 1
-            fi
-            if [ ! -f "venv/bin/python" ]; then
-              echo "❌ Failed to create Python executable in venv"
-              exit 1
-            fi
-            echo "✅ Python executable created after recreation"
-          else
-            echo "✅ Python executable found: venv/bin/python"
-            ls -la venv/bin/python
-          fi
-          
-          # Python 실행 권한 확인
-          if [ ! -x "venv/bin/python" ]; then
-            echo "⚠️ Python is not executable, fixing permissions..."
-            chmod +x venv/bin/python
-            if [ ! -x "venv/bin/python" ]; then
-              echo "❌ Failed to make Python executable"
-              exit 1
-            fi
-            echo "✅ Python permissions fixed"
-          fi
-          
-          # Python 버전 테스트
-          echo "🔍 Testing Python executable..."
-          if venv/bin/python --version 2>&1; then
-            echo "✅ Python executable works correctly"
-          else
-            echo "❌ Python executable test failed"
+          if [ ! -f "venv/bin/python" ] || [ ! -x "venv/bin/python" ]; then
+            echo "❌ Error: Python executable not found or not executable"
             exit 1
           fi
           
           source venv/bin/activate
-          
-          # Python 명령어 확인 (가상환경 내부에서는 가상환경의 Python 사용)
-          # 가상환경이 활성화되면 'python'이 가상환경의 Python을 가리킴
-          # 하지만 Python 3.12를 명시적으로 사용
-          if command -v python3.12 &> /dev/null; then
-            PYTHON_CMD="python3.12"
-          elif command -v python &> /dev/null; then
-            PYTHON_CMD="python"
-          elif command -v python3 &> /dev/null; then
-            PYTHON_CMD="python3"
-          else
-            # 가상환경의 Python 직접 사용
-            PYTHON_CMD="venv/bin/python"
-          fi
+          PYTHON_CMD="venv/bin/python"
           echo "📝 Using Python: \$PYTHON_CMD"
-          \$PYTHON_CMD --version
-          
-          # Python 버전 확인 (3.12인지 확인)
-          PYTHON_VERSION=\$(\$PYTHON_CMD --version 2>&1 | awk '{print \$2}' | cut -d. -f1,2)
-          if [ "\$PYTHON_VERSION" != "3.12" ]; then
-            echo "⚠️ Warning: Expected Python 3.12, but got \$PYTHON_VERSION"
-            echo "🔍 Checking venv Python version..."
-            if [ -f "venv/bin/python" ]; then
-              venv/bin/python --version
-            fi
-          else
-            echo "✅ Python 3.12 confirmed"
-          fi
-          
-          # pip가 없으면 설치
-          if ! command -v pip &> /dev/null; then
-            echo "📦 Installing pip..."
-            curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py || {
-              echo "⚠️ Failed to download get-pip.py, trying ensurepip..."
-              \$PYTHON_CMD -m ensurepip --upgrade --default-pip || {
-                echo "❌ Failed to install pip"
-                exit 1
-              }
-            }
-            if [ -f "get-pip.py" ]; then
-              \$PYTHON_CMD get-pip.py --user || \$PYTHON_CMD get-pip.py || {
-                echo "⚠️ get-pip.py failed, trying ensurepip..."
-                \$PYTHON_CMD -m ensurepip --upgrade --default-pip
-              }
-              rm -f get-pip.py
-              # pip를 가상환경에 복사
-              if [ -f ~/.local/bin/pip ]; then
-                cp ~/.local/bin/pip venv/bin/pip 2>/dev/null || true
-                cp -r ~/.local/lib/python*/site-packages/pip* venv/lib/python*/site-packages/ 2>/dev/null || true
-              fi
-            fi
-          fi
           
           # pip 확인 및 설치
-          echo "🔍 Checking pip installation..."
           if ! \$PYTHON_CMD -m pip --version 2>&1; then
-            echo "📦 pip not found, installing pip..."
+            echo "📦 Installing pip..."
             \$PYTHON_CMD -m ensurepip --upgrade --default-pip 2>&1 || {
-              echo "⚠️ ensurepip failed, trying get-pip.py..."
-              curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-              \$PYTHON_CMD get-pip.py 2>&1
-              rm -f get-pip.py
+              curl -s https://bootstrap.pypa.io/get-pip.py | \$PYTHON_CMD
             }
-            if ! \$PYTHON_CMD -m pip --version 2>&1; then
-              echo "❌ Error: Failed to install pip"
-              exit 1
-            fi
-            echo "✅ pip installed successfully"
-          else
-            echo "✅ pip is available"
-            \$PYTHON_CMD -m pip --version
           fi
           
           # 의존성 설치
@@ -366,9 +249,6 @@ jobs:
             echo "# OpenAI API"
             echo "OPENAI_API_KEY=\${OPENAI_API_KEY}"
             echo ""
-            echo "# Google API"
-            echo "GOOGLE_API_KEY=\${GOOGLE_API_KEY}"
-            echo ""
             echo "# Gemini API"
             echo "GEMINI_API_KEY=\${GEMINI_API_KEY}"
             echo ""
@@ -378,17 +258,6 @@ jobs:
           # .env 파일 권한 설정 (소유자만 읽기/쓰기)
           chmod 600 .env
           echo "✅ .env file created successfully"
-          # .env 파일 내용 확인 (민감 정보는 마스킹)
-          echo "🔍 Verifying .env file (masked)..."
-          if [ -f .env ]; then
-            echo "✅ .env file exists"
-            # 환경 변수 개수 확인 (빈 줄 제외)
-            ENV_COUNT=\$(grep -v '^#' .env | grep -v '^$' | wc -l)
-            echo "📊 Environment variables count: \$ENV_COUNT"
-          else
-            echo "❌ .env file was not created"
-            exit 1
-          fi
           
           # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
           echo "⏸️ Initializing strategies to PAUSE..."
@@ -409,124 +278,15 @@ jobs:
             # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
             sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
             sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
-            # Python 실행 파일 경로 확인 및 수정 (상세 로깅)
-            echo "🔍 Checking Python executable path..."
+            # Python 경로 확인 및 업데이트
             PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
-            echo "📝 Expected Python path: \$PYTHON_PATH"
-            
-            # 가상환경 디렉토리 확인
-            if [ ! -d "\${DEPLOY_PATH}/hobot/venv" ]; then
-              echo "❌ Virtual environment directory not found: \${DEPLOY_PATH}/hobot/venv"
-              echo "📁 Listing hobot directory:"
-              ls -la \${DEPLOY_PATH}/hobot/ 2>&1 || echo "hobot directory does not exist"
+            if [ ! -f "\$PYTHON_PATH" ] || [ ! -x "\$PYTHON_PATH" ]; then
+              echo "❌ Python not found or not executable at \$PYTHON_PATH"
               exit 1
             fi
-            
-            # venv/bin 디렉토리 확인
-            if [ ! -d "\${DEPLOY_PATH}/hobot/venv/bin" ]; then
-              echo "❌ venv/bin directory not found: \${DEPLOY_PATH}/hobot/venv/bin"
-              echo "📁 Listing venv directory:"
-              ls -la \${DEPLOY_PATH}/hobot/venv/ 2>&1 || echo "venv directory does not exist"
-              exit 1
-            fi
-            
-            # Python 파일 목록 출력
-            echo "📋 Python files in venv/bin:"
-            ls -la \${DEPLOY_PATH}/hobot/venv/bin/python* 2>&1 || echo "No Python files found"
-            
-            if [ ! -f "\$PYTHON_PATH" ]; then
-              echo "❌ Python not found at \$PYTHON_PATH"
-              echo "🔍 Checking actual Python version in venv..."
-              # 가상환경의 Python 심볼릭 링크 확인
-              if [ -L "\${DEPLOY_PATH}/hobot/venv/bin/python" ]; then
-                REAL_PYTHON=\$(readlink -f \${DEPLOY_PATH}/hobot/venv/bin/python)
-                echo "📝 venv/bin/python is a symlink to: \$REAL_PYTHON"
-                if [ -f "\$REAL_PYTHON" ]; then
-                  PYTHON_PATH="\$REAL_PYTHON"
-                  echo "✅ Using real Python path: \$PYTHON_PATH"
-                  # Python 3.12인지 확인
-                  PYTHON_VER=\$("\$PYTHON_PATH" --version 2>&1 | awk '{print \$2}' | cut -d. -f1,2)
-                  if [ "\$PYTHON_VER" != "3.12" ]; then
-                    echo "⚠️ Warning: venv Python is \$PYTHON_VER, not 3.12"
-                    echo "🔍 Looking for Python 3.12..."
-                    if command -v python3.12 &> /dev/null; then
-                      PYTHON_PATH=\$(which python3.12)
-                      echo "✅ Found Python 3.12 at: \$PYTHON_PATH"
-                    else
-                      echo "❌ Python 3.12 not found. Please install Python 3.12 first."
-                      exit 1
-                    fi
-                  fi
-                  # bash -c 형식 유지하면서 Python 경로만 교체
-                  sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-                  sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-                else
-                  echo "❌ Real Python path does not exist: \$REAL_PYTHON"
-                  exit 1
-                fi
-              else
-                echo "❌ venv/bin/python is not a symlink and does not exist"
-                echo "🔍 Searching for Python 3.12..."
-                if command -v python3.12 &> /dev/null; then
-                  PYTHON_PATH=\$(which python3.12)
-                  echo "✅ Found Python 3.12 at: \$PYTHON_PATH"
-                else
-                  echo "❌ Python 3.12 not found. Please install Python 3.12 first."
-                  exit 1
-                fi
-                echo "📝 Updating systemd service to use: \$PYTHON_PATH"
-                # bash -c 형식 유지하면서 Python 경로만 교체
-                sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-                sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-              fi
-            else
-              echo "✅ Python found at: \$PYTHON_PATH"
-              # 실제 Python 버전 확인 (3.12인지 확인)
-              PYTHON_VER=\$("\$PYTHON_PATH" --version 2>&1 | awk '{print \$2}' | cut -d. -f1,2)
-              echo "📝 Python version: \$PYTHON_VER"
-              if [ "\$PYTHON_VER" != "3.12" ]; then
-                echo "⚠️ Warning: Python at \$PYTHON_PATH is \$PYTHON_VER, not 3.12"
-                echo "🔍 Looking for Python 3.12..."
-                if command -v python3.12 &> /dev/null; then
-                  PYTHON_PATH=\$(which python3.12)
-                  echo "✅ Found Python 3.12 at: \$PYTHON_PATH"
-                  echo "📝 Updating systemd service to use: \$PYTHON_PATH"
-                  # bash -c 형식 유지하면서 Python 경로만 교체
-                  sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-                  sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-                else
-                  echo "❌ Python 3.12 not found. Please install Python 3.12 first."
-                  exit 1
-                fi
-              else
-                echo "✅ Python 3.12 confirmed"
-              fi
-            fi
-            
-            # Python 실행 권한 확인
-            echo "🔍 Checking Python executable permissions..."
-            if [ ! -x "\$PYTHON_PATH" ]; then
-              echo "❌ Python is not executable: \$PYTHON_PATH"
-              echo "📋 File permissions:"
-              ls -la "\$PYTHON_PATH" 2>&1
-              echo "🔧 Attempting to fix permissions..."
-              chmod +x "\$PYTHON_PATH" 2>&1 || sudo chmod +x "\$PYTHON_PATH" 2>&1
-              if [ ! -x "\$PYTHON_PATH" ]; then
-                echo "❌ Failed to make Python executable"
-                exit 1
-              fi
-              echo "✅ Permissions fixed"
-            else
-              echo "✅ Python is executable"
-            fi
-            
-            # Python 버전 확인
-            echo "🔍 Testing Python execution..."
-            if "\$PYTHON_PATH" --version 2>&1; then
-              echo "✅ Python version check successful"
-            else
-              echo "⚠️ Warning: Python version check failed, but continuing..."
-            fi
+            # bash -c 형식 유지하면서 Python 경로만 교체
+            sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
+            sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
             sudo systemctl daemon-reload
             sudo systemctl enable hobot.service
             echo "🔄 Restarting service..."
@@ -537,39 +297,9 @@ jobs:
               echo "✅ Service is running!"
               sudo systemctl status hobot.service --no-pager -l
             else
-              echo "❌ Service failed to start. Checking status..."
+              echo "❌ Service failed to start"
               sudo systemctl status hobot.service --no-pager -l
-              echo ""
-              echo "📋 Recent service logs (last 50 lines):"
-              sudo journalctl -u hobot.service -n 50 --no-pager
-              echo ""
-              echo "🔍 Checking Python executable in systemd service file:"
-              sudo grep "ExecStart" /etc/systemd/system/hobot.service || echo "ExecStart not found in service file"
-              echo ""
-              echo "🔍 Verifying Python path exists:"
-              PYTHON_PATH=\$(sudo grep "ExecStart" /etc/systemd/system/hobot.service | awk '{print $2}' | head -1)
-              if [ ! -z "\$PYTHON_PATH" ]; then
-                echo "Python path from service file: \$PYTHON_PATH"
-                if [ -f "\$PYTHON_PATH" ]; then
-                  echo "✅ File exists"
-                  ls -la "\$PYTHON_PATH"
-                  if [ -x "\$PYTHON_PATH" ]; then
-                    echo "✅ File is executable"
-                    "\$PYTHON_PATH" --version 2>&1 || echo "⚠️ Cannot execute Python"
-                  else
-                    echo "❌ File is NOT executable"
-                  fi
-                else
-                  echo "❌ File does NOT exist"
-                fi
-              fi
-              echo ""
-              echo "🔍 Checking working directory:"
-              WORKING_DIR=\$(sudo grep "WorkingDirectory" /etc/systemd/system/hobot.service | awk '{print $2}')
-              echo "Working directory: \$WORKING_DIR"
-              if [ ! -z "\$WORKING_DIR" ]; then
-                ls -la "\$WORKING_DIR" 2>&1 || echo "Working directory does not exist"
-              fi
+              sudo journalctl -u hobot.service -n 30 --no-pager
               exit 1
             fi
           else
