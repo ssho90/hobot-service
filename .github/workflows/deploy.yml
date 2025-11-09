@@ -3,8 +3,8 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main  # main 브랜치에 push될 때 배포
-  workflow_dispatch:  # 수동 실행도 가능
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,21 +21,18 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          
           if [ -z "$EC2_HOST" ]; then
             echo "❌ Error: EC2_HOST variable is not set"
             exit 1
           fi
-          echo "🔍 Attempting to connect to EC2 host: ${EC2_HOST}"
-          if ! ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts 2>&1; then
-            echo "❌ Error: Failed to connect to EC2 host ${EC2_HOST}"
-            echo "Please check:"
-            echo "  1. EC2 instance is running"
-            echo "  2. IP address is correct (current: ${EC2_HOST})"
-            echo "  3. Security Group allows SSH (port 22) from GitHub Actions IPs"
-            echo "  4. Network connectivity"
+          
+          echo "🔍 Connecting to EC2 host: ${EC2_HOST}"
+          ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts 2>&1 || {
+            echo "❌ Failed to connect to EC2 host"
             exit 1
-          fi
-          echo "✅ Successfully added ${EC2_HOST} to known_hosts"
+          }
+          echo "✅ SSH connection ready"
       
       - name: Deploy to EC2
         env:
@@ -43,7 +40,6 @@ jobs:
           EC2_USER: ${{ vars.EC2_USER }}
           DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          # 환경 변수 secrets (ENV_ 접두사 사용)
           SL_TOKEN: ${{ secrets.ENV_SL_TOKEN }}
           UP_ACCESS_KEY: ${{ secrets.ENV_UP_ACCESS_KEY }}
           UP_SECRET_KEY: ${{ secrets.ENV_UP_SECRET_KEY }}
@@ -55,12 +51,16 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.ENV_TAVILY_API_KEY }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << ENDSSH
+          # 배포 스크립트 전송 및 실행
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            .github/deploy/deploy.sh \
+            ${EC2_USER}@${EC2_HOST}:/tmp/deploy.sh
+          
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} bash << ENDSSH
             set -e
             
             export DEPLOY_PATH="${DEPLOY_PATH}"
             export GH_TOKEN="${GH_TOKEN}"
-            # 환경 변수 export (SSH 세션 내에서 사용)
             export SL_TOKEN="${SL_TOKEN}"
             export UP_ACCESS_KEY="${UP_ACCESS_KEY}"
             export UP_SECRET_KEY="${UP_SECRET_KEY}"
@@ -72,682 +72,64 @@ jobs:
             export GEMINI_API_KEY="${GEMINI_API_KEY}"
             export TAVILY_API_KEY="${TAVILY_API_KEY}"
             
-            echo "🚀 Starting deployment..."
-            echo "📁 Deploy path: \${DEPLOY_PATH}"
-            
-            # 배포 디렉토리로 이동
-            cd \${DEPLOY_PATH} || {
-              echo "❌ Deploy directory not found. Creating..."
-              mkdir -p \${DEPLOY_PATH}
-              cd \${DEPLOY_PATH}
-            }
-            
-            # Git pull (또는 초기 클론)
-            if [ -d ".git" ]; then
-              echo "📥 Pulling latest changes..."
-              git pull https://\${GH_TOKEN}@github.com/${{ github.repository }}.git main || true
-            else
-              echo "📥 Cloning repository..."
-              # 기존 디렉토리가 비어있지 않으면 백업 후 클론
-              if [ "\$(ls -A . 2>/dev/null)" ]; then
-                echo "⚠️ Directory is not empty, backing up existing files..."
-                cd ..
-                BACKUP_NAME="\${DEPLOY_PATH}.backup.\$(date +%s)"
-                echo "📦 Backing up to: \${BACKUP_NAME}"
-                mv \${DEPLOY_PATH} \${BACKUP_NAME}
-                mkdir -p \${DEPLOY_PATH}
-                cd \${DEPLOY_PATH}
-              fi
-              git clone https://\${GH_TOKEN}@github.com/${{ github.repository }}.git .
-            fi
-            
-            # Backend 배포
-            echo "🔧 Setting up backend..."
-            cd hobot
-            
-            # Python 3.12 확인
-            echo "🐍 Checking for Python 3.12..."
-            if ! command -v python3.12 &> /dev/null; then
-              echo "❌ Error: Python 3.12 is not installed"
-              echo "Please install Python 3.12 manually before deployment."
-              echo "Available Python versions:"
-              command -v python3 &> /dev/null && python3 --version || echo "python3 not found"
-              command -v python &> /dev/null && python --version || echo "python not found"
-              exit 1
-            else
-              echo "✅ Python 3.12 is installed"
-              python3.12 --version
-            fi
-            
-            # Python 가상환경 설정 (uv 사용)
-            if [ ! -d "venv" ]; then
-              echo "🐍 Creating virtual environment with uv..."
-              
-              # uv 설치 확인
-              if ! command -v uv &> /dev/null; then
-                echo "📦 uv not found. Installing uv..."
-                curl -LsSf https://astral.sh/uv/install.sh | sh
-                export PATH="\$HOME/.cargo/bin:\$PATH"
-                # 설치 확인
-                if ! command -v uv &> /dev/null; then
-                  echo "❌ Error: Failed to install uv"
-                  exit 1
-                fi
-                echo "✅ uv installed successfully"
-              else
-                echo "✅ uv is already installed"
-                uv --version
-              fi
-              
-              # uv로 가상환경 생성
-              echo "🔧 Creating virtual environment with uv venv venv --python 3.12..."
-              if ! uv venv venv --python 3.12 2>&1; then
-                echo "❌ Failed to create virtual environment with uv"
-                exit 1
-              fi
-              echo "✅ Virtual environment created successfully with uv"
-              
-              # 가상환경 파일 권한 설정
-              echo "🔧 Setting permissions for virtual environment files..."
-              chmod +x venv/bin/* 2>/dev/null || true
-              chmod +x venv/bin/activate 2>/dev/null || true
-              if [ -f "venv/bin/activate" ]; then
-                chmod 755 venv/bin/activate
-                echo "✅ activate script permissions set"
-              fi
-              
-              # pip 설치 (uv로 생성한 가상환경에는 pip가 없을 수 있음)
-              echo "📦 Installing pip in virtual environment..."
-              if [ -f "venv/bin/python" ]; then
-                venv/bin/python -m ensurepip --upgrade --default-pip 2>&1 || {
-                  echo "⚠️ ensurepip failed, trying get-pip.py..."
-                  curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-                  venv/bin/python get-pip.py 2>&1
-                  rm -f get-pip.py
-                }
-                # pip 설치 확인
-                if venv/bin/python -m pip --version 2>&1; then
-                  echo "✅ pip installed successfully"
-                else
-                  echo "❌ Error: Failed to install pip"
-                  exit 1
-                fi
-              else
-                echo "❌ Error: Python executable not found in venv"
-                exit 1
-              fi
-            else
-              echo "✅ Virtual environment already exists"
-            fi
-            
-            # 가상환경 확인
-            if [ ! -d "venv" ]; then
-              echo "❌ Error: venv directory was not created"
-              exit 1
-            fi
-            echo "✅ Virtual environment directory exists"
-          
-          # Python 실행 파일 확인 및 권한 설정
-          chmod +x venv/bin/* 2>/dev/null || true
-          if [ ! -f "venv/bin/python" ] || [ ! -x "venv/bin/python" ]; then
-            echo "❌ Error: Python executable not found or not executable"
-            exit 1
-          fi
-          
-          source venv/bin/activate
-          PYTHON_CMD="venv/bin/python"
-          echo "📝 Using Python: \$PYTHON_CMD"
-          
-          # pip 확인 및 설치
-          if ! \$PYTHON_CMD -m pip --version 2>&1; then
-            echo "📦 Installing pip..."
-            \$PYTHON_CMD -m ensurepip --upgrade --default-pip 2>&1 || {
-              curl -s https://bootstrap.pypa.io/get-pip.py | \$PYTHON_CMD
-            }
-          fi
-          
-          # 의존성 설치
-          echo "📦 Installing Python dependencies..."
-          \$PYTHON_CMD -m pip install --upgrade pip || echo "⚠️ pip upgrade failed, continuing..."
-          \$PYTHON_CMD -m pip install -r requirements.txt
-          
-          # gunicorn 모듈 확인
-          echo "🔍 Verifying gunicorn installation..."
-          if ! \$PYTHON_CMD -m gunicorn --version 2>&1; then
-            echo "❌ Error: gunicorn module not found after installation"
-            echo "📋 Installed packages:"
-            \$PYTHON_CMD -m pip list | grep -i gunicorn || echo "gunicorn not found in pip list"
-            echo "📦 Attempting to install gunicorn explicitly..."
-            \$PYTHON_CMD -m pip install gunicorn[gevent] || \$PYTHON_CMD -m pip install gunicorn
-            if ! \$PYTHON_CMD -m gunicorn --version 2>&1; then
-              echo "❌ Error: Failed to install gunicorn"
-              exit 1
-            fi
-          fi
-          echo "✅ gunicorn module verified"
-          
-          # .env 파일 생성 (GitHub Actions secrets에서)
-          echo "🔐 Creating .env file from GitHub Actions secrets..."
-          {
-            echo "# Environment variables for Hobot service"
-            echo "# This file is generated automatically during deployment"
-            echo "# Do not commit this file to git"
-            echo ""
-            echo "# Slack API"
-            echo "SL_TOKEN=\${SL_TOKEN}"
-            echo ""
-            echo "# Upbit API"
-            echo "UP_ACCESS_KEY=\${UP_ACCESS_KEY}"
-            echo "UP_SECRET_KEY=\${UP_SECRET_KEY}"
-            echo ""
-            echo "# KIS (한국투자증권) API"
-            echo "HT_API_KEY=\${HT_API_KEY}"
-            echo "HT_SECRET_KEY=\${HT_SECRET_KEY}"
-            echo "HT_ACCOUNT=\${HT_ACCOUNT}"
-            echo "HT_ID=\${HT_ID}"
-            echo ""
-            echo "# OpenAI API"
-            echo "OPENAI_API_KEY=\${OPENAI_API_KEY}"
-            echo ""
-            echo "# Gemini API"
-            echo "GEMINI_API_KEY=\${GEMINI_API_KEY}"
-            echo ""
-            echo "# Tavily API"
-            echo "TAVILY_API_KEY=\${TAVILY_API_KEY}"
-          } > .env
-          # .env 파일 권한 설정 (소유자만 읽기/쓰기)
-          chmod 600 .env
-          echo "✅ .env file created successfully"
-          
-          # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
-          echo "⏸️ Initializing strategies to PAUSE..."
-          \$PYTHON_CMD service/utils/init_strategy_pause.py
-          
-          # 로그 디렉토리 생성
-          mkdir -p logs
-          
-          # Systemd 서비스 설정 (선택사항)
-          if [ -f "../.github/deploy/hobot.service" ]; then
-            echo "⚙️ Setting up systemd service..."
-            sudo cp ../.github/deploy/hobot.service /etc/systemd/system/hobot.service
-            # 경로 및 사용자 정보 업데이트 (모든 경로 치환)
-            sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
-            sudo sed -i "s|User=ec2-user|User=\$(whoami)|g" /etc/systemd/system/hobot.service
-            # ExecStartPre 명령 내부의 경로도 치환 (bash -c 내부의 경로)
-            sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/systemd/system/hobot.service
-            # 로그 디렉토리 미리 생성 (ExecStartPre가 제대로 작동하도록)
-            sudo mkdir -p \${DEPLOY_PATH}/hobot/logs
-            sudo chown -R \$(whoami):\$(whoami) \${DEPLOY_PATH}/hobot/logs
-            # Python 경로 확인 및 업데이트
-            PYTHON_PATH=\${DEPLOY_PATH}/hobot/venv/bin/python
-            if [ ! -f "\$PYTHON_PATH" ] || [ ! -x "\$PYTHON_PATH" ]; then
-              echo "❌ Python not found or not executable at \$PYTHON_PATH"
-              exit 1
-            fi
-            # bash -c 형식 유지하면서 Python 경로만 교체
-            sudo sed -i "s|/home/ec2-user/hobot-service/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-            sudo sed -i "s|\${DEPLOY_PATH}/hobot/venv/bin/python|\$PYTHON_PATH|g" /etc/systemd/system/hobot.service
-            sudo systemctl daemon-reload
-            sudo systemctl enable hobot.service
-            echo "🔄 Restarting service..."
-            sudo systemctl restart hobot.service
-            sleep 3
-            # 서비스 상태 확인
-            if sudo systemctl is-active --quiet hobot.service; then
-              echo "✅ Service is running!"
-              sudo systemctl status hobot.service --no-pager -l
-            else
-              echo "❌ Service failed to start"
-              sudo systemctl status hobot.service --no-pager -l
-              sudo journalctl -u hobot.service -n 30 --no-pager
-              exit 1
-            fi
-          else
-            # Systemd 없이 직접 실행
-            echo "🛑 Stopping existing services..."
-            PORT=8991
-            EXISTING_PIDS=\$(lsof -ti :\$PORT 2>/dev/null || true)
-            if [ ! -z "\$EXISTING_PIDS" ]; then
-              echo "Killing processes on port \$PORT: \$EXISTING_PIDS"
-              kill -9 \$EXISTING_PIDS 2>/dev/null || true
-              sleep 2
-            fi
-            
-            # Gunicorn으로 서버 시작 (백그라운드)
-            echo "🚀 Starting FastAPI server with Gunicorn..."
-            # 로그 디렉토리 확인
-            mkdir -p logs
-            # Gunicorn 실행 (로그 파일로 리다이렉트)
-            nohup \$PYTHON_CMD -m gunicorn -c gunicorn.conf.py asgi:asgi_app > logs/gunicorn.log 2>&1 &
-            GUNICORN_PID=\$!
-            echo "📝 Gunicorn started with PID: \$GUNICORN_PID"
-            # 프로세스가 실제로 실행되었는지 확인
-            sleep 2
-            if ps -p \$GUNICORN_PID > /dev/null 2>&1; then
-              echo "✅ Gunicorn process is running (PID: \$GUNICORN_PID)"
-            else
-              echo "❌ Gunicorn process failed to start. Check logs/gunicorn.log for errors:"
-              tail -20 logs/gunicorn.log 2>/dev/null || echo "Log file not found"
-              exit 1
-            fi
-          fi
-          
-          echo "✅ Backend deployment completed!"
-          
-          # Frontend 배포 (nginx 사용)
-          if [ -d "../hobot-ui" ]; then
-            echo "🎨 Setting up frontend with nginx..."
-            cd ../hobot-ui
-            
-            # Node.js 확인
-            if command -v node &> /dev/null; then
-              echo "📦 Installing frontend dependencies..."
-              npm install
-              
-              # 프론트엔드 빌드 (t3.small 최적화: 2 vCPU, 2GB RAM)
-              echo "🏗️ Building frontend for production..."
-              echo "✅ Using t3.small instance (2 vCPU, 2GB RAM) - optimized build settings"
-              
-              # 빌드 완료 플래그 파일 삭제
-              rm -f ../hobot/logs/frontend-build-complete.flag
-              # 빌드 시작 플래그 생성
-              touch ../hobot/logs/frontend-build-started.flag
-              
-              # t3.small을 위한 메모리 제한 설정 (1.5GB - 시스템 여유 공간 확보)
-              # Node.js 메모리 제한: 1.5GB (전체 2GB 중 여유 공간 확보)
-              export NODE_OPTIONS="--max-old-space-size=1536"
-              
-              # nohup으로 빌드 실행 (SSH 세션이 끊어져도 계속 실행)
-              nohup bash -c "export NODE_OPTIONS='--max-old-space-size=1536' && npm run build && touch ../hobot/logs/frontend-build-complete.flag || touch ../hobot/logs/frontend-build-failed.flag" > ../hobot/logs/frontend-build.log 2>&1 &
-              BUILD_PID=\$!
-              echo "📝 Build started with PID: \$BUILD_PID (running in background with 1.5GB memory limit)"
-              
-              # 빌드 완료 대기 (t3.small에서는 10분이면 충분, 10초마다 체크)
-              BUILD_TIMEOUT=600
-              ELAPSED=0
-              while [ \$ELAPSED -lt \$BUILD_TIMEOUT ]; do
-                if [ -f "../hobot/logs/frontend-build-complete.flag" ]; then
-                  echo "✅ Frontend build completed"
-                  break
-                elif [ -f "../hobot/logs/frontend-build-failed.flag" ]; then
-                  echo "❌ Frontend build failed"
-                  echo "📋 Build log:"
-                  tail -50 ../hobot/logs/frontend-build.log 2>/dev/null || echo "Log file not found"
-                  exit 1
-                fi
-                sleep 10
-                ELAPSED=\$((ELAPSED + 10))
-                if [ \$((ELAPSED % 30)) -eq 0 ]; then
-                  echo "⏳ Build in progress... (\$ELAPSED seconds / \$BUILD_TIMEOUT seconds)"
-                  # 메모리 사용량 확인
-                  if command -v free &> /dev/null; then
-                    MEM_INFO=\$(free -h | grep Mem)
-                    echo "   Memory: \${MEM_INFO}"
-                  fi
-                fi
-              done
-              
-              # 타임아웃 체크
-              if [ \$ELAPSED -ge \$BUILD_TIMEOUT ]; then
-                echo "⚠️ Build timeout after 10 minutes, but continuing deployment..."
-                echo "💡 Build is still running in background. Check status later with:"
-                echo "   ps aux | grep 'npm run build'"
-                echo "   tail -f \${DEPLOY_PATH}/hobot/logs/frontend-build.log"
-                # 빌드 디렉토리가 있으면 계속 진행
-                if [ ! -d "build" ]; then
-                  echo "⚠️ Build directory not found yet, but build may still be running"
-                fi
-              fi
-              
-              # 최종 확인
-              if [ ! -d "build" ]; then
-                echo "❌ Frontend build failed - build directory not found"
-                if [ -f "../hobot/logs/frontend-build.log" ]; then
-                  echo "📋 Last 50 lines of build log:"
-                  tail -50 ../hobot/logs/frontend-build.log
-                fi
-                exit 1
-              fi
-              echo "✅ Frontend build directory found"
-              
-              # 빌드 디렉토리 권한 설정 (nginx가 읽을 수 있도록)
-              echo "🔐 Setting permissions for frontend build directory..."
-              sudo chown -R ec2-user:ec2-user build 2>/dev/null || true
-              sudo chmod -R 755 build
-              # nginx 사용자가 읽을 수 있도록 그룹 권한 추가
-              if id nginx &>/dev/null; then
-                echo "   Adding nginx user to ec2-user group or setting world-readable..."
-                sudo chmod -R o+rX build || true
-              fi
-              echo "✅ Build directory permissions set"
-              
-              # nginx 설치 확인
-              if ! command -v nginx &> /dev/null; then
-                echo "📦 Installing nginx..."
-                sudo yum install -y nginx || sudo apt-get update && sudo apt-get install -y nginx
-              fi
-              
-              # nginx 설정 파일 복사
-              if [ -f "../.github/deploy/nginx.conf" ]; then
-                echo "⚙️ Configuring nginx..."
-                
-                # 기본 nginx 설정 비활성화 (Red Hat Enterprise Linux)
-                echo "🛑 Disabling ALL default nginx configurations..."
-                # conf.d 디렉토리의 모든 .conf 파일을 먼저 비활성화
-                for conf_file in /etc/nginx/conf.d/*.conf; do
-                  if [ -f "$conf_file" ]; then
-                    CONF_NAME=$(basename "$conf_file")
-                    echo "   Disabling ${CONF_NAME}..."
-                    sudo mv "$conf_file" "${conf_file}.disabled" 2>/dev/null || true
-                  fi
-                done
-                
-                # 우리의 설정 파일 복사 (가장 먼저 로드되도록 00- 접두사 사용)
-                echo "📝 Copying nginx configuration..."
-                sudo cp ../.github/deploy/nginx.conf /etc/nginx/conf.d/00-hobot.conf
-                sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/nginx/conf.d/00-hobot.conf
-                
-                # 설정 파일 권한 확인
-                sudo chmod 644 /etc/nginx/conf.d/00-hobot.conf
-                sudo chown root:root /etc/nginx/conf.d/00-hobot.conf
-                
-                # 빌드 디렉토리 권한 재확인 및 설정 (nginx가 읽을 수 있도록)
-                echo "🔐 Ensuring nginx can access build directory..."
-                BUILD_DIR="\${DEPLOY_PATH}/hobot-ui/build"
-                if [ -d "\$BUILD_DIR" ]; then
-                  # 디렉토리와 파일에 읽기 권한 부여
-                  sudo chmod -R 755 "\$BUILD_DIR"
-                  sudo chmod -R o+rX "\$BUILD_DIR" 2>/dev/null || true
-                  # nginx 사용자가 읽을 수 있도록 확인
-                  if id nginx &>/dev/null; then
-                    echo "   Testing nginx user access..."
-                    sudo -u nginx test -r "\$BUILD_DIR/index.html" && echo "   ✅ nginx can read build files" || echo "   ⚠️ nginx cannot read build files, setting permissions..."
-                    # nginx 사용자에게 읽기 권한 부여
-                    sudo chmod -R o+rX "\$BUILD_DIR" || true
-                    # 또는 nginx를 ec2-user 그룹에 추가 (더 안전)
-                    sudo usermod -a -G ec2-user nginx 2>/dev/null || true
-                  fi
-                  echo "   Build directory permissions:"
-                  ls -ld "\$BUILD_DIR"
-                  if [ -f "\$BUILD_DIR/index.html" ]; then
-                    ls -l "\$BUILD_DIR/index.html"
-                  else
-                    echo "     index.html not found"
-                  fi
-                else
-                  echo "   ⚠️ Build directory not found at \$BUILD_DIR"
-                fi
-                
-                # 설정 파일 내용 확인
-                echo "📋 Nginx configuration file content (first 15 lines):"
-                sudo head -15 /etc/nginx/conf.d/00-hobot.conf
-                
-                # conf.d 디렉토리 상태 확인
-                echo "📋 All files in /etc/nginx/conf.d/:"
-                sudo ls -la /etc/nginx/conf.d/ | head -20
-                
-                # nginx.conf의 기본 서버 블록 확인 및 비활성화
-                echo "📋 Checking and disabling default server blocks in nginx.conf..."
-                if [ -f "/etc/nginx/nginx.conf" ]; then
-                  # 백업 생성
-                  if [ ! -f "/etc/nginx/nginx.conf.backup" ]; then
-                    echo "   Creating backup of nginx.conf..."
-                    sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
-                  fi
-                  
-                  # 기본 server 블록 찾기 및 비활성화
-                  echo "   Checking for default server blocks..."
-                  # nginx.conf에서 http 블록 내의 server 블록 확인
-                  if sudo grep -q "^\s*server\s*{" /etc/nginx/nginx.conf; then
-                    echo "   Found server block in nginx.conf main file"
-                    echo "   Creating Python script to safely disable it..."
-                    # 임시 Python 스크립트 생성
-                    cat > /tmp/disable_nginx_server.py << 'PYEOF'
-import re
-import sys
-
-try:
-    with open('/etc/nginx/nginx.conf', 'r') as f:
-        lines = f.readlines()
-    
-    in_http = False
-    http_depth = 0
-    in_server = False
-    server_depth = 0
-    result = []
-    modified = False
-    
-    for line in lines:
-        stripped = line.lstrip()
-        
-        # http 블록 진입
-        if re.match(r'^\s*http\s*{', line):
-            in_http = True
-            http_depth = line.count('{') - line.count('}')
-            result.append(line)
-            continue
-        
-        if in_http:
-            http_depth += line.count('{') - line.count('}')
-            
-            # server 블록 시작 (주석 처리되지 않은 것만)
-            if re.match(r'^\s*server\s*{', line) and not stripped.startswith('#'):
-                in_server = True
-                server_depth = 1
-                result.append('    # DISABLED BY DEPLOYMENT: ' + line.lstrip())
-                modified = True
-                continue
-            
-            # server 블록 내부
-            if in_server:
-                server_depth += line.count('{') - line.count('}')
-                if not stripped.startswith('#'):
-                    result.append('    # ' + line)
-                else:
-                    result.append(line)
-                if server_depth == 0:
-                    in_server = False
-                continue
-            
-            # http 블록 종료
-            if http_depth == 0 and stripped.startswith('}'):
-                in_http = False
-            
-            result.append(line)
-        else:
-            result.append(line)
-    
-    if modified:
-        with open('/etc/nginx/nginx.conf', 'w') as f:
-            f.writelines(result)
-        print("   ✅ Disabled default server block")
-        sys.exit(0)
-    else:
-        print("   ℹ️ No default server block found")
-        sys.exit(0)
-        
-except Exception as e:
-    print(f"   ⚠️ Error: {e}")
-    sys.exit(1)
-PYEOF
-                    sudo python3 /tmp/disable_nginx_server.py
-                    rm -f /tmp/disable_nginx_server.py
-                  else
-                    echo "   ℹ️ No default server block found in nginx.conf"
-                  fi
-                  
-                  # conf.d가 포함되어 있는지 확인
-                  if sudo grep -q "include.*conf.d" /etc/nginx/nginx.conf; then
-                    echo "   ✅ conf.d directory is included in nginx.conf"
-                  else
-                    echo "   ⚠️ conf.d directory may not be included"
-                  fi
-                  
-                  # 수정된 nginx.conf 확인
-                  echo "   Active server blocks in nginx.conf:"
-                  sudo grep -B 2 -A 3 "^[^#]*server\s*{" /etc/nginx/nginx.conf | head -10 || echo "   No active server blocks found (good!)"
-                fi
-                
-                # nginx 설정 테스트
-                echo "🔍 Testing nginx configuration..."
-                if sudo nginx -t; then
-                  echo "✅ Nginx configuration is valid"
-                  # nginx 재시작
-                  echo "🔄 Restarting nginx..."
-                  sudo systemctl enable nginx
-                  sudo systemctl restart nginx
-                  sleep 3
-                  
-                  # nginx가 실제로 재시작되었는지 확인
-                  if sudo systemctl is-active --quiet nginx; then
-                    echo "✅ Nginx restarted successfully"
-                  else
-                    echo "❌ Nginx failed to restart"
-                    sudo systemctl status nginx --no-pager -l | head -30
-                    echo "   Attempting to restore nginx.conf backup if exists..."
-                    sudo ls -la /etc/nginx/nginx.conf.backup.* 2>/dev/null | tail -1 || echo "   No backup found"
-                  fi
-                  
-                  # nginx 상태 확인
-                  if sudo systemctl is-active --quiet nginx; then
-                    echo "✅ Nginx is running"
-                    # 설정 파일 확인
-                    echo "📋 Active nginx configuration files:"
-                    sudo ls -la /etc/nginx/conf.d/*.conf 2>/dev/null || echo "No .conf files found"
-                    echo "📋 Disabled nginx configuration files:"
-                    sudo ls -la /etc/nginx/conf.d/*.disabled 2>/dev/null || echo "No disabled files found"
-                    # nginx가 실제로 어떤 설정을 사용하는지 확인
-                    echo "📋 Testing nginx configuration with our settings..."
-                    echo "   Checking which server block is active..."
-                    sudo nginx -T 2>/dev/null | grep -B 2 -A 10 "listen.*80.*default_server" | head -15 || echo "Could not dump config"
-                    echo "   Testing if our root directory is set..."
-                    sudo nginx -T 2>/dev/null | grep -A 2 "root.*hobot-ui" | head -5 || echo "Root directory not found in config"
-                    echo "   Testing if /api location is configured..."
-                    sudo nginx -T 2>/dev/null | grep -A 5 "location /api" | head -10 || echo "/api location not found"
-                    
-                    # 실제 테스트 요청
-                    echo "   Testing actual requests..."
-                    echo "   - Root request:"
-                    curl -s -o /dev/null -w "     HTTP %{http_code}\n" http://localhost/ || echo "     Failed"
-                    echo "   - API request:"
-                    curl -s -o /dev/null -w "     HTTP %{http_code}\n" http://localhost/api/health || echo "     Failed"
-                  else
-                    echo "❌ Nginx failed to start"
-                    sudo systemctl status nginx --no-pager -l
-                    exit 1
-                  fi
-                else
-                  echo "❌ Nginx configuration test failed"
-                  sudo nginx -t
-                  exit 1
-                fi
-              else
-                echo "⚠️ nginx.conf not found, skipping nginx setup"
-              fi
-            else
-              echo "⚠️ Node.js not found, skipping frontend deployment"
-            fi
-          fi
-          
-          echo "🎉 Deployment completed successfully!"
+            chmod +x /tmp/deploy.sh
+            /tmp/deploy.sh "${DEPLOY_PATH}" "${{ github.repository }}" "${GH_TOKEN}"
           ENDSSH
       
       - name: Health Check
         env:
           EC2_HOST: ${{ vars.EC2_HOST }}
           EC2_USER: ${{ vars.EC2_USER }}
+          DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
         run: |
-          sleep 10  # 서버 시작 대기
+          sleep 10
+          
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
-            echo "🔍 Checking server health..."
+            echo "🔍 Health Check"
             
-            # 백엔드 서비스 상태 확인
-            echo "📋 Checking backend service..."
+            # 백엔드 서비스
             if sudo systemctl is-active --quiet hobot.service; then
-              echo "✅ Backend service (hobot.service) is running"
+              echo "✅ Backend service: running"
             else
-              echo "❌ Backend service is not running"
-              sudo systemctl status hobot.service --no-pager -l | head -20
+              echo "❌ Backend service: not running"
+              sudo systemctl status hobot.service --no-pager -l | head -10
             fi
             
-            # 백엔드 직접 접근 확인 (실제 경로는 /api/health)
-            echo "📋 Checking backend directly on port 8991..."
+            # 백엔드 직접 접근
             if curl -f http://localhost:8991/api/health > /dev/null 2>&1; then
-              echo "✅ Backend is responding on port 8991 (/api/health)"
-            elif curl -f http://localhost:8991/ > /dev/null 2>&1; then
-              echo "✅ Backend is responding on port 8991 (root endpoint)"
-              echo "   Note: /api/health endpoint may have issues"
+              echo "✅ Backend API: responding"
             else
-              echo "⚠️ Backend not responding on port 8991"
-              echo "   Checking if process is running..."
-              ps aux | grep gunicorn | grep -v grep || echo "   No gunicorn process found"
-              echo "   Checking backend logs..."
-              tail -20 ${DEPLOY_PATH}/hobot/logs/gunicorn.log 2>/dev/null || echo "   Log file not found"
+              echo "⚠️  Backend API: not responding"
             fi
             
-            # nginx 상태 확인
-            echo "📋 Checking nginx service..."
+            # nginx 서비스
             if sudo systemctl is-active --quiet nginx; then
-              echo "✅ Nginx service is running"
+              echo "✅ Nginx service: running"
             else
-              echo "❌ Nginx service is not running"
-              sudo systemctl status nginx --no-pager -l | head -20
+              echo "❌ Nginx service: not running"
             fi
             
-            # nginx 설정 확인
-            echo "📋 Checking nginx configuration..."
-            sudo nginx -t 2>&1 || echo "   Nginx config test failed"
-            echo "📋 Active nginx config files:"
-            sudo ls -la /etc/nginx/conf.d/*.conf 2>/dev/null || echo "   No config files found"
-            echo "📋 Disabled nginx config files:"
-            sudo ls -la /etc/nginx/conf.d/*.disabled 2>/dev/null || echo "   No disabled files found"
-            
-            # nginx가 실제로 사용하는 설정 확인
-            echo "📋 Checking which server block nginx is using..."
-            echo "   Server blocks listening on port 80:"
-            sudo nginx -T 2>/dev/null | grep -B 5 "listen.*80" | head -20 || echo "   Could not dump config"
-            echo "   Location blocks for /api:"
-            sudo nginx -T 2>/dev/null | grep -A 10 "location /api" | head -15 || echo "   /api location not found"
-            
-            # nginx 에러 로그 확인
-            echo "📋 Recent nginx error log:"
-            sudo tail -20 /var/log/nginx/error.log 2>/dev/null || echo "   Error log not found"
-            echo "📋 Recent nginx access log:"
-            sudo tail -10 /var/log/nginx/access.log 2>/dev/null || echo "   Access log not found"
-            
-            # 프론트엔드 빌드 디렉토리 확인
+            # 프론트엔드
             DEPLOY_PATH="${DEPLOY_PATH:-/home/ec2-user/hobot-service}"
-            echo "📋 Checking frontend build directory..."
             if [ -d "${DEPLOY_PATH}/hobot-ui/build" ]; then
-              echo "✅ Frontend build directory exists"
-              ls -la ${DEPLOY_PATH}/hobot-ui/build/ | head -5
+              echo "✅ Frontend build: exists"
             else
-              echo "❌ Frontend build directory not found at ${DEPLOY_PATH}/hobot-ui/build"
+              echo "❌ Frontend build: not found"
             fi
             
-            # nginx를 통한 프론트엔드 체크
-            echo "📋 Testing frontend via nginx..."
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>&1)
-            if [ "$RESPONSE" = "200" ]; then
-              echo "✅ Frontend (nginx) is healthy! (HTTP $RESPONSE)"
+            # nginx를 통한 테스트
+            FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>&1)
+            API_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health 2>&1)
+            
+            if [ "$FRONTEND_RESPONSE" = "200" ]; then
+              echo "✅ Frontend (via nginx): HTTP $FRONTEND_RESPONSE"
             else
-              echo "❌ Frontend (nginx) health check failed (HTTP $RESPONSE)"
-              echo "   Response preview:"
-              curl -s http://localhost/ | head -10
+              echo "❌ Frontend (via nginx): HTTP $FRONTEND_RESPONSE"
             fi
             
-            # 백엔드 API 체크
-            echo "📋 Testing backend API via nginx..."
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health 2>&1)
-            if [ "$RESPONSE" = "200" ]; then
-              echo "✅ Backend API is healthy! (HTTP $RESPONSE)"
+            if [ "$API_RESPONSE" = "200" ]; then
+              echo "✅ Backend API (via nginx): HTTP $API_RESPONSE"
             else
-              echo "❌ Backend API health check failed (HTTP $RESPONSE)"
-              echo "   Trying direct connection to /api/health..."
-              curl -v http://localhost:8991/api/health 2>&1 | head -20
-              echo ""
-              echo "   Trying root endpoint..."
-              curl -s http://localhost:8991/ | head -5
+              echo "❌ Backend API (via nginx): HTTP $API_RESPONSE"
             fi
           ENDSSH
-
