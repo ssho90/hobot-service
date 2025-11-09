@@ -43,12 +43,34 @@ jobs:
           EC2_USER: ${{ vars.EC2_USER }}
           DEPLOY_PATH: ${{ vars.EC2_DEPLOYMENT_PATH || '/home/ec2-user/hobot-service' }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          # 환경 변수 secrets (ENV_ 접두사 사용)
+          SL_TOKEN: ${{ secrets.ENV_SL_TOKEN }}
+          UP_ACCESS_KEY: ${{ secrets.ENV_UP_ACCESS_KEY }}
+          UP_SECRET_KEY: ${{ secrets.ENV_UP_SECRET_KEY }}
+          HT_API_KEY: ${{ secrets.ENV_HT_API_KEY }}
+          HT_SECRET_KEY: ${{ secrets.ENV_HT_SECRET_KEY }}
+          HT_ACCOUNT: ${{ secrets.ENV_HT_ACCOUNT }}
+          HT_ID: ${{ secrets.ENV_HT_ID }}
+          OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.ENV_TAVILY_API_KEY }}
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << ENDSSH
             set -e
             
             export DEPLOY_PATH="${DEPLOY_PATH}"
             export GH_TOKEN="${GH_TOKEN}"
+            # 환경 변수 export (SSH 세션 내에서 사용)
+            export SL_TOKEN="${SL_TOKEN}"
+            export UP_ACCESS_KEY="${UP_ACCESS_KEY}"
+            export UP_SECRET_KEY="${UP_SECRET_KEY}"
+            export HT_API_KEY="${HT_API_KEY}"
+            export HT_SECRET_KEY="${HT_SECRET_KEY}"
+            export HT_ACCOUNT="${HT_ACCOUNT}"
+            export HT_ID="${HT_ID}"
+            export OPENAI_API_KEY="${OPENAI_API_KEY}"
+            export GEMINI_API_KEY="${GEMINI_API_KEY}"
+            export TAVILY_API_KEY="${TAVILY_API_KEY}"
             
             echo "🚀 Starting deployment..."
             echo "📁 Deploy path: \${DEPLOY_PATH}"
@@ -320,6 +342,50 @@ jobs:
             fi
           fi
           echo "✅ gunicorn module verified"
+          
+          # .env 파일 생성 (GitHub Actions secrets에서)
+          echo "🔐 Creating .env file from GitHub Actions secrets..."
+          {
+            echo "# Environment variables for Hobot service"
+            echo "# This file is generated automatically during deployment"
+            echo "# Do not commit this file to git"
+            echo ""
+            echo "# Slack API"
+            echo "SL_TOKEN=\${SL_TOKEN}"
+            echo ""
+            echo "# Upbit API"
+            echo "UP_ACCESS_KEY=\${UP_ACCESS_KEY}"
+            echo "UP_SECRET_KEY=\${UP_SECRET_KEY}"
+            echo ""
+            echo "# KIS (한국투자증권) API"
+            echo "HT_API_KEY=\${HT_API_KEY}"
+            echo "HT_SECRET_KEY=\${HT_SECRET_KEY}"
+            echo "HT_ACCOUNT=\${HT_ACCOUNT}"
+            echo "HT_ID=\${HT_ID}"
+            echo ""
+            echo "# OpenAI API"
+            echo "OPENAI_API_KEY=\${OPENAI_API_KEY}"
+            echo ""
+            echo "# Gemini API"
+            echo "GEMINI_API_KEY=\${GEMINI_API_KEY}"
+            echo ""
+            echo "# Tavily API"
+            echo "TAVILY_API_KEY=\${TAVILY_API_KEY}"
+          } > .env
+          # .env 파일 권한 설정 (소유자만 읽기/쓰기)
+          chmod 600 .env
+          echo "✅ .env file created successfully"
+          # .env 파일 내용 확인 (민감 정보는 마스킹)
+          echo "🔍 Verifying .env file (masked)..."
+          if [ -f .env ]; then
+            echo "✅ .env file exists"
+            # 환경 변수 개수 확인 (빈 줄 제외)
+            ENV_COUNT=\$(grep -v '^#' .env | grep -v '^$' | wc -l)
+            echo "📊 Environment variables count: \$ENV_COUNT"
+          else
+            echo "❌ .env file was not created"
+            exit 1
+          fi
           
           # 전략 초기화 (KIS와 Upbit를 PAUSE로 설정)
           echo "⏸️ Initializing strategies to PAUSE..."
