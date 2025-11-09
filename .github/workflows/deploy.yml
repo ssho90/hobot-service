@@ -409,6 +409,17 @@ jobs:
               fi
               echo "✅ Frontend build directory found"
               
+              # 빌드 디렉토리 권한 설정 (nginx가 읽을 수 있도록)
+              echo "🔐 Setting permissions for frontend build directory..."
+              sudo chown -R ec2-user:ec2-user build 2>/dev/null || true
+              sudo chmod -R 755 build
+              # nginx 사용자가 읽을 수 있도록 그룹 권한 추가
+              if id nginx &>/dev/null; then
+                echo "   Adding nginx user to ec2-user group or setting world-readable..."
+                sudo chmod -R o+rX build || true
+              fi
+              echo "✅ Build directory permissions set"
+              
               # nginx 설치 확인
               if ! command -v nginx &> /dev/null; then
                 echo "📦 Installing nginx..."
@@ -438,6 +449,29 @@ jobs:
                 # 설정 파일 권한 확인
                 sudo chmod 644 /etc/nginx/conf.d/00-hobot.conf
                 sudo chown root:root /etc/nginx/conf.d/00-hobot.conf
+                
+                # 빌드 디렉토리 권한 재확인 및 설정 (nginx가 읽을 수 있도록)
+                echo "🔐 Ensuring nginx can access build directory..."
+                BUILD_DIR="\${DEPLOY_PATH}/hobot-ui/build"
+                if [ -d "\$BUILD_DIR" ]; then
+                  # 디렉토리와 파일에 읽기 권한 부여
+                  sudo chmod -R 755 "\$BUILD_DIR"
+                  sudo chmod -R o+rX "\$BUILD_DIR" 2>/dev/null || true
+                  # nginx 사용자가 읽을 수 있도록 확인
+                  if id nginx &>/dev/null; then
+                    echo "   Testing nginx user access..."
+                    sudo -u nginx test -r "\$BUILD_DIR/index.html" && echo "   ✅ nginx can read build files" || echo "   ⚠️ nginx cannot read build files, setting permissions..."
+                    # nginx 사용자에게 읽기 권한 부여
+                    sudo chmod -R o+rX "\$BUILD_DIR" || true
+                    # 또는 nginx를 ec2-user 그룹에 추가 (더 안전)
+                    sudo usermod -a -G ec2-user nginx 2>/dev/null || true
+                  fi
+                  echo "   Build directory permissions:"
+                  ls -ld "\$BUILD_DIR" | awk '{print "     " $0}'
+                  ls -l "\$BUILD_DIR/index.html" 2>/dev/null | awk '{print "     " $0}' || echo "     index.html not found"
+                else
+                  echo "   ⚠️ Build directory not found at \$BUILD_DIR"
+                fi
                 
                 # 설정 파일 내용 확인
                 echo "📋 Nginx configuration file content (first 15 lines):"
