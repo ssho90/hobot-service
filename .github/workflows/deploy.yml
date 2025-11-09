@@ -420,13 +420,17 @@ jobs:
                 echo "⚙️ Configuring nginx..."
                 
                 # 기본 nginx 설정 비활성화 (Red Hat Enterprise Linux)
-                if [ -f "/etc/nginx/conf.d/default.conf" ]; then
-                  echo "🛑 Disabling default nginx configuration..."
-                  sudo mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.disabled 2>/dev/null || true
-                fi
-                if [ -f "/etc/nginx/conf.d/welcome.conf" ]; then
-                  echo "🛑 Disabling welcome page..."
-                  sudo mv /etc/nginx/conf.d/welcome.conf /etc/nginx/conf.d/welcome.conf.disabled 2>/dev/null || true
+                echo "🛑 Disabling default nginx configurations..."
+                for conf_file in default.conf welcome.conf; do
+                  if [ -f "/etc/nginx/conf.d/${conf_file}" ]; then
+                    echo "   Disabling ${conf_file}..."
+                    sudo mv /etc/nginx/conf.d/${conf_file} /etc/nginx/conf.d/${conf_file}.disabled 2>/dev/null || true
+                  fi
+                done
+                
+                # nginx.conf의 기본 서버 블록도 확인
+                if grep -q "listen.*80.*default_server" /etc/nginx/nginx.conf 2>/dev/null; then
+                  echo "   Found default_server in nginx.conf, our config will override it"
                 fi
                 
                 # 우리의 설정 파일 복사
@@ -487,14 +491,19 @@ jobs:
               sudo systemctl status hobot.service --no-pager -l | head -20
             fi
             
-            # 백엔드 직접 접근 확인
+            # 백엔드 직접 접근 확인 (실제 경로는 /api/health)
             echo "📋 Checking backend directly on port 8991..."
-            if curl -f http://localhost:8991/health > /dev/null 2>&1; then
-              echo "✅ Backend is responding on port 8991"
+            if curl -f http://localhost:8991/api/health > /dev/null 2>&1; then
+              echo "✅ Backend is responding on port 8991 (/api/health)"
+            elif curl -f http://localhost:8991/ > /dev/null 2>&1; then
+              echo "✅ Backend is responding on port 8991 (root endpoint)"
+              echo "   Note: /api/health endpoint may have issues"
             else
               echo "⚠️ Backend not responding on port 8991"
               echo "   Checking if process is running..."
               ps aux | grep gunicorn | grep -v grep || echo "   No gunicorn process found"
+              echo "   Checking backend logs..."
+              tail -20 ${DEPLOY_PATH}/hobot/logs/gunicorn.log 2>/dev/null || echo "   Log file not found"
             fi
             
             # nginx 상태 확인
@@ -540,8 +549,11 @@ jobs:
               echo "✅ Backend API is healthy! (HTTP $RESPONSE)"
             else
               echo "❌ Backend API health check failed (HTTP $RESPONSE)"
-              echo "   Trying direct connection..."
-              curl -v http://localhost:8991/health 2>&1 | head -20
+              echo "   Trying direct connection to /api/health..."
+              curl -v http://localhost:8991/api/health 2>&1 | head -20
+              echo ""
+              echo "   Trying root endpoint..."
+              curl -s http://localhost:8991/ | head -5
             fi
           ENDSSH
 
