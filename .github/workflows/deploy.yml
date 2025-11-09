@@ -344,15 +344,53 @@ jobs:
               echo "📦 Installing frontend dependencies..."
               npm install
               
-              # 프론트엔드 빌드
+              # 프론트엔드 빌드 (타임아웃 방지를 위해 백그라운드로 실행)
               echo "🏗️ Building frontend for production..."
-              npm run build
+              # 빌드 로그를 파일로 저장
+              npm run build > ../hobot/logs/frontend-build.log 2>&1 &
+              BUILD_PID=\$!
+              echo "📝 Build started with PID: \$BUILD_PID"
+              
+              # 빌드 완료 대기 (최대 10분)
+              BUILD_TIMEOUT=600
+              ELAPSED=0
+              while [ \$ELAPSED -lt \$BUILD_TIMEOUT ]; do
+                if ! ps -p \$BUILD_PID > /dev/null 2>&1; then
+                  # 프로세스가 종료됨
+                  if [ -d "build" ]; then
+                    echo "✅ Frontend build completed"
+                    break
+                  else
+                    echo "❌ Frontend build failed"
+                    echo "📋 Build log:"
+                    tail -50 ../hobot/logs/frontend-build.log 2>/dev/null || echo "Log file not found"
+                    exit 1
+                  fi
+                fi
+                sleep 5
+                ELAPSED=\$((ELAPSED + 5))
+                if [ \$((ELAPSED % 30)) -eq 0 ]; then
+                  echo "⏳ Build in progress... (\$ELAPSED seconds)"
+                fi
+              done
+              
+              # 타임아웃 체크
+              if [ \$ELAPSED -ge \$BUILD_TIMEOUT ]; then
+                echo "⚠️ Build timeout, but checking if build directory exists..."
+                if [ -d "build" ]; then
+                  echo "✅ Build directory found (may have completed)"
+                else
+                  echo "❌ Build timeout and no build directory found"
+                  tail -50 ../hobot/logs/frontend-build.log 2>/dev/null || echo "Log file not found"
+                  exit 1
+                fi
+              fi
               
               if [ ! -d "build" ]; then
-                echo "❌ Frontend build failed"
+                echo "❌ Frontend build failed - build directory not found"
+                tail -50 ../hobot/logs/frontend-build.log 2>/dev/null || echo "Log file not found"
                 exit 1
               fi
-              echo "✅ Frontend build completed"
               
               # nginx 설치 확인
               if ! command -v nginx &> /dev/null; then
