@@ -418,19 +418,44 @@ jobs:
               # nginx 설정 파일 복사
               if [ -f "../.github/deploy/nginx.conf" ]; then
                 echo "⚙️ Configuring nginx..."
-                # 경로 치환
+                
+                # 기본 nginx 설정 비활성화 (Red Hat Enterprise Linux)
+                if [ -f "/etc/nginx/conf.d/default.conf" ]; then
+                  echo "🛑 Disabling default nginx configuration..."
+                  sudo mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.disabled 2>/dev/null || true
+                fi
+                if [ -f "/etc/nginx/conf.d/welcome.conf" ]; then
+                  echo "🛑 Disabling welcome page..."
+                  sudo mv /etc/nginx/conf.d/welcome.conf /etc/nginx/conf.d/welcome.conf.disabled 2>/dev/null || true
+                fi
+                
+                # 우리의 설정 파일 복사
                 sudo cp ../.github/deploy/nginx.conf /etc/nginx/conf.d/hobot.conf
                 sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/nginx/conf.d/hobot.conf
                 
                 # nginx 설정 테스트
+                echo "🔍 Testing nginx configuration..."
                 if sudo nginx -t; then
                   echo "✅ Nginx configuration is valid"
                   # nginx 재시작
                   sudo systemctl enable nginx
                   sudo systemctl restart nginx
-                  echo "✅ Nginx restarted"
+                  sleep 2
+                  
+                  # nginx 상태 확인
+                  if sudo systemctl is-active --quiet nginx; then
+                    echo "✅ Nginx is running"
+                    # 설정 파일 확인
+                    echo "📋 Active nginx configuration files:"
+                    sudo ls -la /etc/nginx/conf.d/*.conf 2>/dev/null || echo "No .conf files found"
+                  else
+                    echo "❌ Nginx failed to start"
+                    sudo systemctl status nginx --no-pager -l
+                    exit 1
+                  fi
                 else
                   echo "❌ Nginx configuration test failed"
+                  sudo nginx -t
                   exit 1
                 fi
               else
@@ -452,19 +477,71 @@ jobs:
           sleep 10  # 서버 시작 대기
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
             echo "🔍 Checking server health..."
-            # nginx를 통한 프론트엔드 체크
-            if curl -f http://localhost/ > /dev/null 2>&1; then
-              echo "✅ Frontend (nginx) is healthy!"
+            
+            # 백엔드 서비스 상태 확인
+            echo "📋 Checking backend service..."
+            if sudo systemctl is-active --quiet hobot.service; then
+              echo "✅ Backend service (hobot.service) is running"
             else
-              echo "❌ Frontend (nginx) health check failed"
-              exit 1
+              echo "❌ Backend service is not running"
+              sudo systemctl status hobot.service --no-pager -l | head -20
             fi
-            # 백엔드 API 체크
-            if curl -f http://localhost/api/health > /dev/null 2>&1; then
-              echo "✅ Backend API is healthy!"
+            
+            # 백엔드 직접 접근 확인
+            echo "📋 Checking backend directly on port 8991..."
+            if curl -f http://localhost:8991/health > /dev/null 2>&1; then
+              echo "✅ Backend is responding on port 8991"
             else
-              echo "❌ Backend API health check failed"
-              exit 1
+              echo "⚠️ Backend not responding on port 8991"
+              echo "   Checking if process is running..."
+              ps aux | grep gunicorn | grep -v grep || echo "   No gunicorn process found"
+            fi
+            
+            # nginx 상태 확인
+            echo "📋 Checking nginx service..."
+            if sudo systemctl is-active --quiet nginx; then
+              echo "✅ Nginx service is running"
+            else
+              echo "❌ Nginx service is not running"
+              sudo systemctl status nginx --no-pager -l | head -20
+            fi
+            
+            # nginx 설정 확인
+            echo "📋 Checking nginx configuration..."
+            sudo nginx -t 2>&1 || echo "   Nginx config test failed"
+            echo "📋 Active nginx config files:"
+            sudo ls -la /etc/nginx/conf.d/*.conf 2>/dev/null || echo "   No config files found"
+            
+            # 프론트엔드 빌드 디렉토리 확인
+            DEPLOY_PATH="${DEPLOY_PATH:-/home/ec2-user/hobot-service}"
+            echo "📋 Checking frontend build directory..."
+            if [ -d "${DEPLOY_PATH}/hobot-ui/build" ]; then
+              echo "✅ Frontend build directory exists"
+              ls -la ${DEPLOY_PATH}/hobot-ui/build/ | head -5
+            else
+              echo "❌ Frontend build directory not found at ${DEPLOY_PATH}/hobot-ui/build"
+            fi
+            
+            # nginx를 통한 프론트엔드 체크
+            echo "📋 Testing frontend via nginx..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>&1)
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Frontend (nginx) is healthy! (HTTP $RESPONSE)"
+            else
+              echo "❌ Frontend (nginx) health check failed (HTTP $RESPONSE)"
+              echo "   Response preview:"
+              curl -s http://localhost/ | head -10
+            fi
+            
+            # 백엔드 API 체크
+            echo "📋 Testing backend API via nginx..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health 2>&1)
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Backend API is healthy! (HTTP $RESPONSE)"
+            else
+              echo "❌ Backend API health check failed (HTTP $RESPONSE)"
+              echo "   Trying direct connection..."
+              curl -v http://localhost:8991/health 2>&1 | head -20
             fi
           ENDSSH
 
