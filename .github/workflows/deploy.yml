@@ -420,38 +420,65 @@ jobs:
                 echo "⚙️ Configuring nginx..."
                 
                 # 기본 nginx 설정 비활성화 (Red Hat Enterprise Linux)
-                echo "🛑 Disabling default nginx configurations..."
-                # conf.d 디렉토리의 모든 기본 설정 파일 비활성화 (우리 파일 제외)
+                echo "🛑 Disabling ALL default nginx configurations..."
+                # conf.d 디렉토리의 모든 .conf 파일을 먼저 비활성화
                 for conf_file in /etc/nginx/conf.d/*.conf; do
-                  if [ -f "$conf_file" ] && [ "$(basename $conf_file)" != "00-hobot.conf" ] && [ "$(basename $conf_file)" != "hobot.conf" ]; then
-                    echo "   Disabling $(basename $conf_file)..."
+                  if [ -f "$conf_file" ]; then
+                    CONF_NAME=$(basename "$conf_file")
+                    echo "   Disabling ${CONF_NAME}..."
                     sudo mv "$conf_file" "${conf_file}.disabled" 2>/dev/null || true
                   fi
                 done
-                
-                # 기존 hobot.conf가 있으면 제거 (00-hobot.conf로 통일)
-                if [ -f "/etc/nginx/conf.d/hobot.conf" ] && [ ! -f "/etc/nginx/conf.d/00-hobot.conf" ]; then
-                  echo "   Moving existing hobot.conf to 00-hobot.conf..."
-                  sudo mv /etc/nginx/conf.d/hobot.conf /etc/nginx/conf.d/00-hobot.conf
-                fi
                 
                 # 우리의 설정 파일 복사 (가장 먼저 로드되도록 00- 접두사 사용)
                 echo "📝 Copying nginx configuration..."
                 sudo cp ../.github/deploy/nginx.conf /etc/nginx/conf.d/00-hobot.conf
                 sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/nginx/conf.d/00-hobot.conf
                 
+                # 설정 파일 권한 확인
+                sudo chmod 644 /etc/nginx/conf.d/00-hobot.conf
+                sudo chown root:root /etc/nginx/conf.d/00-hobot.conf
+                
                 # 설정 파일 내용 확인
                 echo "📋 Nginx configuration file content (first 15 lines):"
                 sudo head -15 /etc/nginx/conf.d/00-hobot.conf
+                
+                # conf.d 디렉토리 상태 확인
+                echo "📋 All files in /etc/nginx/conf.d/:"
+                sudo ls -la /etc/nginx/conf.d/ | head -20
+                
+                # nginx.conf의 기본 서버 블록 확인
+                echo "📋 Checking nginx.conf for default server blocks..."
+                if [ -f "/etc/nginx/nginx.conf" ]; then
+                  echo "   nginx.conf content (relevant parts):"
+                  sudo grep -A 10 "server {" /etc/nginx/nginx.conf | head -15 || echo "   No server block found in nginx.conf"
+                  # conf.d가 포함되어 있는지 확인
+                  if sudo grep -q "include.*conf.d" /etc/nginx/nginx.conf; then
+                    echo "   ✅ conf.d directory is included in nginx.conf"
+                  else
+                    echo "   ⚠️ conf.d directory may not be included"
+                  fi
+                fi
                 
                 # nginx 설정 테스트
                 echo "🔍 Testing nginx configuration..."
                 if sudo nginx -t; then
                   echo "✅ Nginx configuration is valid"
                   # nginx 재시작
+                  echo "🔄 Restarting nginx..."
                   sudo systemctl enable nginx
                   sudo systemctl restart nginx
-                  sleep 2
+                  sleep 3
+                  
+                  # nginx가 실제로 재시작되었는지 확인
+                  if sudo systemctl is-active --quiet nginx; then
+                    echo "✅ Nginx restarted successfully"
+                  else
+                    echo "❌ Nginx failed to restart"
+                    sudo systemctl status nginx --no-pager -l | head -30
+                    echo "   Attempting to restore nginx.conf backup if exists..."
+                    sudo ls -la /etc/nginx/nginx.conf.backup.* 2>/dev/null | tail -1 || echo "   No backup found"
+                  fi
                   
                   # nginx 상태 확인
                   if sudo systemctl is-active --quiet nginx; then
@@ -467,6 +494,15 @@ jobs:
                     sudo nginx -T 2>/dev/null | grep -B 2 -A 10 "listen.*80.*default_server" | head -15 || echo "Could not dump config"
                     echo "   Testing if our root directory is set..."
                     sudo nginx -T 2>/dev/null | grep -A 2 "root.*hobot-ui" | head -5 || echo "Root directory not found in config"
+                    echo "   Testing if /api location is configured..."
+                    sudo nginx -T 2>/dev/null | grep -A 5 "location /api" | head -10 || echo "/api location not found"
+                    
+                    # 실제 테스트 요청
+                    echo "   Testing actual requests..."
+                    echo "   - Root request:"
+                    curl -s -o /dev/null -w "     HTTP %{http_code}\n" http://localhost/ || echo "     Failed"
+                    echo "   - API request:"
+                    curl -s -o /dev/null -w "     HTTP %{http_code}\n" http://localhost/api/health || echo "     Failed"
                   else
                     echo "❌ Nginx failed to start"
                     sudo systemctl status nginx --no-pager -l
@@ -535,6 +571,21 @@ jobs:
             sudo nginx -t 2>&1 || echo "   Nginx config test failed"
             echo "📋 Active nginx config files:"
             sudo ls -la /etc/nginx/conf.d/*.conf 2>/dev/null || echo "   No config files found"
+            echo "📋 Disabled nginx config files:"
+            sudo ls -la /etc/nginx/conf.d/*.disabled 2>/dev/null || echo "   No disabled files found"
+            
+            # nginx가 실제로 사용하는 설정 확인
+            echo "📋 Checking which server block nginx is using..."
+            echo "   Server blocks listening on port 80:"
+            sudo nginx -T 2>/dev/null | grep -B 5 "listen.*80" | head -20 || echo "   Could not dump config"
+            echo "   Location blocks for /api:"
+            sudo nginx -T 2>/dev/null | grep -A 10 "location /api" | head -15 || echo "   /api location not found"
+            
+            # nginx 에러 로그 확인
+            echo "📋 Recent nginx error log:"
+            sudo tail -20 /var/log/nginx/error.log 2>/dev/null || echo "   Error log not found"
+            echo "📋 Recent nginx access log:"
+            sudo tail -10 /var/log/nginx/access.log 2>/dev/null || echo "   Access log not found"
             
             # 프론트엔드 빌드 디렉토리 확인
             DEPLOY_PATH="${DEPLOY_PATH:-/home/ec2-user/hobot-service}"
