@@ -6,7 +6,8 @@ After=network.target
 Type=simple
 User=ec2-user
 WorkingDirectory=/home/ec2-user/hobot-service/hobot
-Environment="PATH=/home/ec2-user/hobot-service/hobot/venv/bin"
+Environment="PATH=/home/ec2-user/hobot-service/hobot/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/home/ec2-user/hobot-service/hobot"
 # Python 모듈로 실행하여 가상환경의 Python을 사용
 ExecStart=/home/ec2-user/hobot-service/hobot/venv/bin/python -m gunicorn -c gunicorn.conf.py asgi:asgi_app
 Restart=always
@@ -27,7 +28,7 @@ ExecStartPre=/bin/bash -c "ls -la /home/ec2-user/hobot-service/hobot/venv/bin/py
 ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Checking gunicorn module...' && /home/ec2-user/hobot-service/hobot/venv/bin/python -m gunicorn --version 2>&1 || (echo '❌ ERROR: gunicorn module not found'; /home/ec2-user/hobot-service/hobot/venv/bin/python -m pip list | grep -i gunicorn || echo 'gunicorn not in pip list'; exit 1)"
 ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Checking gunicorn.conf.py...' && if [ ! -f gunicorn.conf.py ]; then echo '❌ ERROR: gunicorn.conf.py not found'; ls -la *.py 2>&1; exit 1; else echo '✅ gunicorn.conf.py found'; fi"
 ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Checking asgi.py...' && if [ ! -f asgi.py ]; then echo '❌ ERROR: asgi.py not found'; ls -la *.py 2>&1; exit 1; else echo '✅ asgi.py found'; fi"
-ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Testing Python import...' && /home/ec2-user/hobot-service/hobot/venv/bin/python -c 'import gunicorn; import asgi; print(\"✅ All imports successful\")' 2>&1 || (echo '❌ ERROR: Import test failed'; exit 1)"
+ExecStartPre=/bin/bash -c "cd /home/ec2-user/hobot-service/hobot && echo '🔍 Testing Python import...' && export PYTHONPATH=/home/ec2-user/hobot-service/hobot && /home/ec2-user/hobot-service/hobot/venv/bin/python -c 'import sys; sys.path.insert(0, \"/home/ec2-user/hobot-service/hobot\"); import gunicorn; import asgi; from main import app; print(\"✅ All imports successful\")' 2>&1 || (echo '❌ ERROR: Import test failed'; /home/ec2-user/hobot-service/hobot/venv/bin/python -c 'import sys; print(\"Python path:\", sys.path)' 2>&1; exit 1)"
 
 # 로그 설정 (journal로 먼저 설정, 파일 리다이렉션은 gunicorn.conf.py에서 처리)
 StandardOutput=journal
