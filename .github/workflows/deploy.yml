@@ -334,9 +334,9 @@ jobs:
           
           echo "✅ Backend deployment completed!"
           
-          # Frontend 배포 (선택사항)
+          # Frontend 배포 (nginx 사용)
           if [ -d "../hobot-ui" ]; then
-            echo "🎨 Setting up frontend..."
+            echo "🎨 Setting up frontend with nginx..."
             cd ../hobot-ui
             
             # Node.js 확인
@@ -344,41 +344,42 @@ jobs:
               echo "📦 Installing frontend dependencies..."
               npm install
               
-              # 기존 프론트엔드 프로세스 종료
-              echo "🛑 Stopping existing frontend services..."
-              FRONTEND_PORT=3000
-              EXISTING_PIDS=\$(lsof -ti :\$FRONTEND_PORT 2>/dev/null || true)
-              if [ ! -z "\$EXISTING_PIDS" ]; then
-                echo "Killing processes on port \$FRONTEND_PORT: \$EXISTING_PIDS"
-                kill -9 \$EXISTING_PIDS 2>/dev/null || true
-                sleep 2
+              # 프론트엔드 빌드
+              echo "🏗️ Building frontend for production..."
+              npm run build
+              
+              if [ ! -d "build" ]; then
+                echo "❌ Frontend build failed"
+                exit 1
+              fi
+              echo "✅ Frontend build completed"
+              
+              # nginx 설치 확인
+              if ! command -v nginx &> /dev/null; then
+                echo "📦 Installing nginx..."
+                sudo yum install -y nginx || sudo apt-get update && sudo apt-get install -y nginx
               fi
               
-              # npm start 프로세스도 확인 (포트가 아닌 프로세스 이름으로)
-              NPM_PIDS=\$(ps aux | grep -E '[n]pm start|[n]ode.*react-scripts' | awk '{print \$2}' || true)
-              if [ ! -z "\$NPM_PIDS" ]; then
-                echo "Killing existing npm start processes: \$NPM_PIDS"
-                kill -9 \$NPM_PIDS 2>/dev/null || true
-                sleep 2
-              fi
-              
-              # 프론트엔드 시작 (백그라운드)
-              echo "🚀 Starting frontend in background..."
-              # 로그 디렉토리 생성
-              mkdir -p ../hobot/logs
-              # npm start를 백그라운드로 실행
-              nohup npm start > ../hobot/logs/frontend.log 2>&1 &
-              FRONTEND_PID=\$!
-              echo "📝 Frontend started with PID: \$FRONTEND_PID"
-              
-              # 프로세스가 실제로 실행되었는지 확인
-              sleep 3
-              if ps -p \$FRONTEND_PID > /dev/null 2>&1; then
-                echo "✅ Frontend process is running (PID: \$FRONTEND_PID)"
+              # nginx 설정 파일 복사
+              if [ -f "../.github/deploy/nginx.conf" ]; then
+                echo "⚙️ Configuring nginx..."
+                # 경로 치환
+                sudo cp ../.github/deploy/nginx.conf /etc/nginx/conf.d/hobot.conf
+                sudo sed -i "s|/home/ec2-user/hobot-service|\${DEPLOY_PATH}|g" /etc/nginx/conf.d/hobot.conf
+                
+                # nginx 설정 테스트
+                if sudo nginx -t; then
+                  echo "✅ Nginx configuration is valid"
+                  # nginx 재시작
+                  sudo systemctl enable nginx
+                  sudo systemctl restart nginx
+                  echo "✅ Nginx restarted"
+                else
+                  echo "❌ Nginx configuration test failed"
+                  exit 1
+                fi
               else
-                echo "❌ Frontend process failed to start. Check logs/frontend.log for errors:"
-                tail -20 ../hobot/logs/frontend.log 2>/dev/null || echo "Log file not found"
-                echo "⚠️ Frontend deployment failed, but continuing..."
+                echo "⚠️ nginx.conf not found, skipping nginx setup"
               fi
             else
               echo "⚠️ Node.js not found, skipping frontend deployment"
@@ -396,10 +397,18 @@ jobs:
           sleep 10  # 서버 시작 대기
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
             echo "🔍 Checking server health..."
-            if curl -f http://localhost:8991/ > /dev/null 2>&1; then
-              echo "✅ Backend server is healthy!"
+            # nginx를 통한 프론트엔드 체크
+            if curl -f http://localhost/ > /dev/null 2>&1; then
+              echo "✅ Frontend (nginx) is healthy!"
             else
-              echo "❌ Backend server health check failed"
+              echo "❌ Frontend (nginx) health check failed"
+              exit 1
+            fi
+            # 백엔드 API 체크
+            if curl -f http://localhost/api/health > /dev/null 2>&1; then
+              echo "✅ Backend API is healthy!"
+            else
+              echo "❌ Backend API health check failed"
               exit 1
             fi
           ENDSSH
