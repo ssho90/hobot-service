@@ -288,24 +288,104 @@ setup_nginx() {
     sudo yum install -y nginx 2>/dev/null || sudo apt-get update && sudo apt-get install -y nginx
   fi
   
-  # 기본 설정 비활성화
+  # sites-available, sites-enabled 디렉토리 생성 (없는 경우)
+  sudo mkdir -p /etc/nginx/sites-available
+  sudo mkdir -p /etc/nginx/sites-enabled
+  
+  # nginx.conf에 sites-enabled include 추가 (없는 경우)
+  if [ -f "/etc/nginx/nginx.conf" ]; then
+    [ ! -f "/etc/nginx/nginx.conf.backup" ] && sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
+    
+    # sites-enabled include가 없으면 추가
+    if ! sudo grep -q "include.*sites-enabled" /etc/nginx/nginx.conf; then
+      log_info "Adding sites-enabled include to nginx.conf..."
+      # Python으로 안전하게 추가
+      cat > /tmp/add_nginx_include.py << 'PYEOF'
+import re
+import sys
+
+try:
+    with open('/etc/nginx/nginx.conf', 'r') as f:
+        lines = f.readlines()
+    
+    # 이미 include가 있는지 확인
+    for line in lines:
+        if 'include /etc/nginx/sites-enabled' in line:
+            print("ℹ️  sites-enabled include already exists")
+            sys.exit(0)
+    
+    # http 블록 찾기
+    in_http = False
+    http_brace_count = 0
+    insert_pos = -1
+    
+    for i, line in enumerate(lines):
+        if re.match(r'^\s*http\s*{', line):
+            in_http = True
+            http_brace_count = line.count('{') - line.count('}')
+            insert_pos = i + 1
+            continue
+        
+        if in_http:
+            http_brace_count += line.count('{') - line.count('}')
+            if http_brace_count == 0:
+                # http 블록이 닫히기 전에 추가
+                insert_pos = i
+                break
+    
+    if insert_pos > 0:
+        # include 문 추가
+        indent = '    '  # 4 spaces
+        include_line = indent + 'include /etc/nginx/sites-enabled/*;\n'
+        lines.insert(insert_pos, include_line)
+        
+        with open('/etc/nginx/nginx.conf', 'w') as f:
+            f.writelines(lines)
+        print("✅ Added sites-enabled include to nginx.conf")
+        sys.exit(0)
+    else:
+        print("⚠️  Could not find http block in nginx.conf")
+        sys.exit(1)
+        
+except Exception as e:
+    print(f"⚠️  Error: {e}")
+    sys.exit(1)
+PYEOF
+      sudo python3 /tmp/add_nginx_include.py || log_warn "Failed to add sites-enabled include (may already exist)"
+      rm -f /tmp/add_nginx_include.py
+    fi
+    
+    # nginx.conf의 기본 server 블록 비활성화
+    sudo grep -q "^\s*server\s*{" /etc/nginx/nginx.conf && disable_default_nginx_config || true
+  fi
+  
+  # 기본 설정 비활성화 (conf.d의 기본 설정들)
   for conf_file in /etc/nginx/conf.d/*.conf; do
     [ -f "$conf_file" ] && sudo mv "$conf_file" "${conf_file}.disabled" 2>/dev/null || true
   done
   
-  # 우리 설정 복사
-  sudo cp "${DEPLOY_PATH}/.github/deploy/nginx.conf" /etc/nginx/conf.d/00-hobot.conf
-  sudo sed -i "s|/home/ec2-user/hobot-service|${DEPLOY_PATH}|g" /etc/nginx/conf.d/00-hobot.conf
-  sudo chmod 644 /etc/nginx/conf.d/00-hobot.conf
-  
-  # nginx.conf의 기본 server 블록 비활성화
-  if [ -f "/etc/nginx/nginx.conf" ]; then
-    [ ! -f "/etc/nginx/nginx.conf.backup" ] && sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
-    sudo grep -q "^\s*server\s*{" /etc/nginx/nginx.conf && disable_default_nginx_config || true
+  # sites-enabled의 default 설정 삭제 (가이드 3단계 A)
+  if [ -f "/etc/nginx/sites-enabled/default" ]; then
+    log_info "Removing default site from sites-enabled..."
+    sudo rm -f /etc/nginx/sites-enabled/default
   fi
   
-  # 설정 테스트 및 재시작
+  # 우리 설정을 sites-available에 복사 (가이드 2단계 A)
+  log_info "Creating nginx configuration in sites-available..."
+  sudo cp "${DEPLOY_PATH}/.github/deploy/nginx.conf" /etc/nginx/sites-available/hobot
+  sudo sed -i "s|/home/ec2-user/hobot-service|${DEPLOY_PATH}|g" /etc/nginx/sites-available/hobot
+  sudo chmod 644 /etc/nginx/sites-available/hobot
+  
+  # sites-enabled에 심볼릭 링크 생성 (가이드 3단계 A)
+  log_info "Enabling hobot site..."
+  sudo ln -sf /etc/nginx/sites-available/hobot /etc/nginx/sites-enabled/hobot
+  
+  # 설정 테스트 (가이드 3단계 B)
+  log_info "Testing nginx configuration..."
   sudo nginx -t || log_error "Nginx configuration test failed"
+  
+  # Nginx 재시작 (가이드 3단계 C)
+  log_info "Restarting nginx..."
   sudo systemctl enable nginx
   sudo systemctl restart nginx
   sleep 3
