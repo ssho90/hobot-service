@@ -20,11 +20,11 @@ export OPENAI_API_KEY="${OPENAI_API_KEY}"
 export GEMINI_API_KEY="${GEMINI_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
 
-# 유틸리티 함수
-log_info() { echo "ℹ️  $*"; }
-log_success() { echo "✅ $*"; }
-log_error() { echo "❌ $*"; exit 1; }
-log_warn() { echo "⚠️  $*"; }
+# 유틸리티 함수 (stderr로 출력하여 stdout과 분리)
+log_info() { echo "ℹ️  $*" >&2; }
+log_success() { echo "✅ $*" >&2; }
+log_error() { echo "❌ $*" >&2; exit 1; }
+log_warn() { echo "⚠️  $*" >&2; }
 
 # Git 업데이트
 update_repository() {
