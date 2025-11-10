@@ -203,11 +203,32 @@ build_frontend() {
   
   [ ! -d "build" ] && log_error "Frontend build directory not found"
   
-  # 권한 설정
+  # 권한 설정 (nginx가 읽을 수 있도록)
+  log_info "Setting permissions for nginx..."
+  
+  # 빌드 디렉토리 소유권 설정
   sudo chown -R "$(whoami):$(whoami)" build
+  
+  # 빌드 디렉토리 권한 설정 (소유자: 읽기/쓰기/실행, 그룹: 읽기/실행, 기타: 읽기/실행)
   sudo chmod -R 755 build
-  sudo chmod -R o+rX build 2>/dev/null || true
-  id nginx &>/dev/null && sudo usermod -a -G "$(whoami)" nginx 2>/dev/null || true
+  
+  # nginx 사용자가 읽을 수 있도록 기타 사용자 읽기 권한 추가
+  sudo chmod -R o+rX build
+  
+  # 상위 디렉토리들도 nginx가 접근할 수 있도록 권한 설정
+  # /home/ec2-user/hobot-service/hobot-ui/build 경로의 모든 디렉토리에 실행 권한 필요
+  sudo chmod o+x "${DEPLOY_PATH}" 2>/dev/null || true
+  sudo chmod o+x "${DEPLOY_PATH}/hobot-ui" 2>/dev/null || true
+  sudo chmod o+x "${DEPLOY_PATH}/hobot-ui/build" 2>/dev/null || true
+  
+  # nginx 사용자 확인 및 그룹 추가 (선택적)
+  if id nginx &>/dev/null; then
+    # nginx 사용자를 현재 사용자 그룹에 추가
+    sudo usermod -a -G "$(whoami)" nginx 2>/dev/null || true
+    # 또는 빌드 디렉토리를 nginx 그룹 소유로 변경
+    sudo chgrp -R nginx build 2>/dev/null || true
+    sudo chmod -R g+rX build 2>/dev/null || true
+  fi
   
   log_success "Frontend build completed"
 }
@@ -383,6 +404,18 @@ PYEOF
   # sites-enabled에 심볼릭 링크 생성 (가이드 3단계 A)
   log_info "Enabling hobot site..."
   sudo ln -sf /etc/nginx/sites-available/hobot /etc/nginx/sites-enabled/hobot
+  
+  # 프론트엔드 빌드 디렉토리 권한 확인 및 설정
+  FRONTEND_BUILD_DIR="${DEPLOY_PATH}/hobot-ui/build"
+  if [ -d "${FRONTEND_BUILD_DIR}" ]; then
+    log_info "Verifying frontend build directory permissions..."
+    # 상위 디렉토리들 실행 권한 확인
+    sudo chmod o+x "${DEPLOY_PATH}" 2>/dev/null || true
+    sudo chmod o+x "${DEPLOY_PATH}/hobot-ui" 2>/dev/null || true
+    sudo chmod o+x "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
+    # 빌드 디렉토리 권한 설정
+    sudo chmod -R o+rX "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
+  fi
   
   # 설정 테스트 (가이드 3단계 B)
   log_info "Testing nginx configuration..."
