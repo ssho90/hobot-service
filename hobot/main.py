@@ -327,6 +327,8 @@ async def delete_user(user_id: int, admin_user: dict = Depends(require_admin)):
 async def get_logs(
     log_type: str = Query(..., description="로그 타입: backend, frontend, nginx"),
     lines: int = Query(100, description="읽을 줄 수"),
+    start_time: Optional[str] = Query(None, description="시작 시간 (YYYY-MM-DDTHH:MM 형식)"),
+    end_time: Optional[str] = Query(None, description="종료 시간 (YYYY-MM-DDTHH:MM 형식)"),
     admin_user: dict = Depends(require_admin)
 ):
     """로그 조회 (admin 전용)"""
@@ -443,8 +445,38 @@ async def get_logs(
             ]
             
             # 모든 로그 파일을 읽어서 통합
-            all_log_content = []
+            all_log_entries = []  # (timestamp, log_line, file_name) 튜플 리스트
             found_files = []
+            
+            import re
+            from datetime import datetime
+            
+            # 타임스탬프 파싱을 위한 정규식
+            # log.txt 형식: 2025-11-01 21:51:25,255 - INFO - ...
+            timestamp_pattern = re.compile(r'^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:,\d+)?)')
+            # access.log/error.log 형식 (Gunicorn): IP - - [01/Nov/2025:21:51:25 +0000] ...
+            gunicorn_timestamp_pattern = re.compile(r'\[(\d{2}/\w+/\d{4}:\d{2}:\d{2}:\d{2})')
+            
+            def parse_timestamp(line, log_name):
+                """로그 라인에서 타임스탬프를 파싱하여 datetime 객체로 반환"""
+                try:
+                    # log.txt 형식: 2025-11-01 21:51:25,255
+                    match = timestamp_pattern.match(line)
+                    if match:
+                        ts_str = match.group(1).replace(',', '.')
+                        return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S.%f')
+                    
+                    # Gunicorn access.log/error.log 형식: [01/Nov/2025:21:51:25:00]
+                    match = gunicorn_timestamp_pattern.search(line)
+                    if match:
+                        ts_str = match.group(1)
+                        return datetime.strptime(ts_str, '%d/%b/%Y:%H:%M:%S')
+                    
+                    # 타임스탬프를 찾을 수 없으면 현재 시간 반환 (맨 뒤로 정렬)
+                    return datetime.now()
+                except:
+                    # 파싱 실패 시 현재 시간 반환
+                    return datetime.now()
             
             for log_name, log_path in backend_logs:
                 if os.path.exists(log_path):
@@ -452,30 +484,69 @@ async def get_logs(
                         with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
                             file_lines = f.readlines()
                             if file_lines:
-                                all_log_content.append(f"\n=== {log_name} ===\n")
-                                # 각 파일에서 최근 N줄만 가져오기
-                                recent_lines = file_lines[-lines:] if len(file_lines) > lines else file_lines
-                                all_log_content.extend(recent_lines)
+                                for line in file_lines:
+                                    line = line.rstrip('\n\r')
+                                    if line.strip():  # 빈 줄 제외
+                                        timestamp = parse_timestamp(line, log_name)
+                                        all_log_entries.append((timestamp, line, log_name))
                                 found_files.append(log_name)
                     except Exception as e:
                         logging.warning(f"Could not read {log_path}: {e}")
                         continue
             
-            if all_log_content:
-                # 모든 로그를 시간순으로 정렬 (타임스탬프가 있는 경우)
-                combined_content = ''.join(all_log_content)
-                # 최근 N줄만 반환
-                combined_lines = combined_content.split('\n')
-                log_content = '\n'.join(combined_lines[-lines:])
-                log_file = f"Combined: {', '.join(found_files)}"
+            if all_log_entries:
+                # 타임스탬프 기준으로 정렬 (오래된 것부터 최신 순)
+                all_log_entries.sort(key=lambda x: x[0])
                 
-                # backend 로그는 이미 읽었으므로 바로 반환
+                # 시간 필터 적용
+                filtered_entries = all_log_entries
+                if start_time or end_time:
+                    try:
+                        if start_time:
+                            start_dt = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+                            filtered_entries = [entry for entry in filtered_entries if entry[0] >= start_dt]
+                        if end_time:
+                            end_dt = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+                            # 종료 시간에 59초 59밀리초 추가하여 해당 시간대까지 포함
+                            end_dt = end_dt.replace(second=59, microsecond=999999)
+                            filtered_entries = [entry for entry in filtered_entries if entry[0] <= end_dt]
+                    except ValueError as e:
+                        logging.warning(f"Invalid time format: {e}")
+                        # 시간 파싱 실패 시 필터링하지 않음
+                
+                # 최근 N줄만 선택 (시간 필터 적용 후)
+                recent_entries = filtered_entries[-lines:] if len(filtered_entries) > lines else filtered_entries
+                
+                # 로그 내용 구성 (파일별로 그룹화하여 표시)
+                log_content_parts = []
+                current_file = None
+                for timestamp, line, file_name in recent_entries:
+                    if current_file != file_name:
+                        if current_file is not None:
+                            log_content_parts.append('')
+                        log_content_parts.append(f"=== {file_name} ===")
+                        current_file = file_name
+                    log_content_parts.append(line)
+                
+                log_content = '\n'.join(log_content_parts)
+                
+                # 파일 정보 구성
+                file_info = f"Combined: {', '.join(found_files)}"
+                file_info += f" (Total: {len(all_log_entries)} lines"
+                if start_time or end_time:
+                    file_info += f", Filtered: {len(filtered_entries)} lines"
+                file_info += f", Showing: {len(recent_entries)} lines)"
+                if start_time or end_time:
+                    file_info += f" | Time Range: {start_time or 'N/A'} ~ {end_time or 'N/A'}"
+                
+                log_file = file_info
+                
                 return {
                     "status": "success",
                     "log_type": log_type,
                     "content": log_content,
                     "file": log_file,
-                    "lines": len(log_content.split('\n'))
+                    "lines": len(recent_entries)
                 }
             else:
                 return {"status": "success", "log_type": log_type, "content": "No backend log file found", "file": ""}

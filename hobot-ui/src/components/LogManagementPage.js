@@ -10,13 +10,23 @@ const LogManagementPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [useTimeFilter, setUseTimeFilter] = useState(false);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const { getAuthHeaders } = useAuth();
 
   const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch(`/api/admin/logs?log_type=${selectedLogType}&lines=${lines}`, {
+      
+      // 시간 필터 파라미터 구성
+      let url = `/api/admin/logs?log_type=${selectedLogType}&lines=${lines}`;
+      if (useTimeFilter && startTime && endTime) {
+        url += `&start_time=${encodeURIComponent(startTime)}&end_time=${encodeURIComponent(endTime)}`;
+      }
+      
+      const response = await fetch(url, {
         headers: getAuthHeaders()
       });
 
@@ -37,7 +47,7 @@ const LogManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedLogType, lines, getAuthHeaders]);
+  }, [selectedLogType, lines, useTimeFilter, startTime, endTime, getAuthHeaders]);
 
   useEffect(() => {
     fetchLogs();
@@ -115,6 +125,107 @@ const LogManagementPage = () => {
           />
           <span>자동 새로고침 (5초)</span>
         </label>
+      </div>
+
+      <div className="time-filter-section" style={{ 
+        marginBottom: '20px', 
+        padding: '16px', 
+        backgroundColor: '#f9fafb', 
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
+            <input
+              type="checkbox"
+              checked={useTimeFilter}
+              onChange={(e) => {
+                setUseTimeFilter(e.target.checked);
+                if (!e.target.checked) {
+                  setStartTime('');
+                  setEndTime('');
+                }
+              }}
+            />
+            <span>시간대 필터 사용</span>
+          </label>
+        </div>
+        
+        {useTimeFilter && (
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <label htmlFor="start-time" style={{ fontWeight: 600, minWidth: '80px' }}>시작 시간:</label>
+              <input
+                id="start-time"
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                style={{ 
+                  padding: '8px 12px', 
+                  borderRadius: '8px', 
+                  border: '1px solid #d1d5db', 
+                  fontSize: '14px',
+                  backgroundColor: '#ffffff'
+                }}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <label htmlFor="end-time" style={{ fontWeight: 600, minWidth: '80px' }}>종료 시간:</label>
+              <input
+                id="end-time"
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                style={{ 
+                  padding: '8px 12px', 
+                  borderRadius: '8px', 
+                  border: '1px solid #d1d5db', 
+                  fontSize: '14px',
+                  backgroundColor: '#ffffff'
+                }}
+              />
+            </div>
+            
+            <button
+              onClick={() => {
+                const now = new Date();
+                const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+                setEndTime(now.toISOString().slice(0, 16));
+                setStartTime(oneHourAgo.toISOString().slice(0, 16));
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                backgroundColor: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              최근 1시간
+            </button>
+            
+            <button
+              onClick={() => {
+                const now = new Date();
+                const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                setEndTime(now.toISOString().slice(0, 16));
+                setStartTime(oneDayAgo.toISOString().slice(0, 16));
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                backgroundColor: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              최근 24시간
+            </button>
+          </div>
+        )}
       </div>
 
       {error && (
