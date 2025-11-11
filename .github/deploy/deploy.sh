@@ -203,34 +203,32 @@ build_frontend() {
   
   [ ! -d "build" ] && log_error "Frontend build directory not found"
   
-  # 권한 설정 (nginx가 읽을 수 있도록)
-  log_info "Setting permissions for nginx..."
+  # 빌드 디렉토리를 /var/www/hobot로 복사 (nginx가 접근하기 쉬운 표준 위치)
+  log_info "Copying build directory to /var/www/hobot..."
+  sudo mkdir -p /var/www/hobot
+  sudo rm -rf /var/www/hobot/*
+  sudo cp -r build/* /var/www/hobot/
   
-  # 빌드 디렉토리 소유권 설정
-  sudo chown -R "$(whoami):$(whoami)" build
-  
-  # 빌드 디렉토리 권한 설정 (소유자: 읽기/쓰기/실행, 그룹: 읽기/실행, 기타: 읽기/실행)
-  sudo chmod -R 755 build
-  
-  # nginx 사용자가 읽을 수 있도록 기타 사용자 읽기 권한 추가
-  sudo chmod -R o+rX build
-  
-  # 상위 디렉토리들도 nginx가 접근할 수 있도록 권한 설정
-  # /home/ec2-user/hobot-service/hobot-ui/build 경로의 모든 디렉토리에 실행 권한 필요
-  sudo chmod o+x "${DEPLOY_PATH}" 2>/dev/null || true
-  sudo chmod o+x "${DEPLOY_PATH}/hobot-ui" 2>/dev/null || true
-  sudo chmod o+x "${DEPLOY_PATH}/hobot-ui/build" 2>/dev/null || true
-  
-  # nginx 사용자 확인 및 그룹 추가 (선택적)
+  # nginx 사용자/그룹으로 소유권 변경
   if id nginx &>/dev/null; then
-    # nginx 사용자를 현재 사용자 그룹에 추가
-    sudo usermod -a -G "$(whoami)" nginx 2>/dev/null || true
-    # 또는 빌드 디렉토리를 nginx 그룹 소유로 변경
-    sudo chgrp -R nginx build 2>/dev/null || true
-    sudo chmod -R g+rX build 2>/dev/null || true
+    sudo chown -R nginx:nginx /var/www/hobot
+  else
+    # nginx 사용자가 없으면 www-data 사용 (Ubuntu/Debian)
+    if id www-data &>/dev/null; then
+      sudo chown -R www-data:www-data /var/www/hobot
+    else
+      # 둘 다 없으면 root 소유로 설정하고 기타 사용자 읽기 권한 부여
+      sudo chown -R root:root /var/www/hobot
+      sudo chmod -R 755 /var/www/hobot
+    fi
   fi
   
-  log_success "Frontend build completed"
+  # 권한 설정
+  sudo chmod -R 755 /var/www/hobot
+  sudo find /var/www/hobot -type f -exec chmod 644 {} \;
+  sudo find /var/www/hobot -type d -exec chmod 755 {} \;
+  
+  log_success "Frontend build completed and copied to /var/www/hobot"
 }
 
 # nginx 설정 비활성화 스크립트
@@ -406,15 +404,28 @@ PYEOF
   sudo ln -sf /etc/nginx/sites-available/hobot /etc/nginx/sites-enabled/hobot
   
   # 프론트엔드 빌드 디렉토리 권한 확인 및 설정
-  FRONTEND_BUILD_DIR="${DEPLOY_PATH}/hobot-ui/build"
+  FRONTEND_BUILD_DIR="/var/www/hobot"
   if [ -d "${FRONTEND_BUILD_DIR}" ]; then
     log_info "Verifying frontend build directory permissions..."
-    # 상위 디렉토리들 실행 권한 확인
-    sudo chmod o+x "${DEPLOY_PATH}" 2>/dev/null || true
-    sudo chmod o+x "${DEPLOY_PATH}/hobot-ui" 2>/dev/null || true
-    sudo chmod o+x "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
-    # 빌드 디렉토리 권한 설정
-    sudo chmod -R o+rX "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
+    # nginx 사용자/그룹으로 소유권 확인
+    if id nginx &>/dev/null; then
+      sudo chown -R nginx:nginx "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
+    elif id www-data &>/dev/null; then
+      sudo chown -R www-data:www-data "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
+    fi
+    # 권한 설정
+    sudo chmod -R 755 "${FRONTEND_BUILD_DIR}" 2>/dev/null || true
+    sudo find "${FRONTEND_BUILD_DIR}" -type f -exec chmod 644 {} \; 2>/dev/null || true
+    sudo find "${FRONTEND_BUILD_DIR}" -type d -exec chmod 755 {} \; 2>/dev/null || true
+  fi
+  
+  # SELinux 설정 (있는 경우)
+  if command -v getenforce &>/dev/null && [ "$(getenforce)" = "Enforcing" ]; then
+    log_info "SELinux is enabled, setting context for web files..."
+    sudo setsebool -P httpd_can_network_connect 1 2>/dev/null || true
+    sudo setsebool -P httpd_can_network_relay 1 2>/dev/null || true
+    # nginx가 /var/www/hobot에 접근할 수 있도록 설정
+    sudo chcon -R -t httpd_sys_content_t /var/www/hobot 2>/dev/null || true
   fi
   
   # 설정 테스트 (가이드 3단계 B)
