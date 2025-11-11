@@ -50,6 +50,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.ENV_TAVILY_API_KEY }}
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
         run: |
           # 배포 스크립트 전송 및 실행
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
@@ -71,6 +72,7 @@ jobs:
             export OPENAI_API_KEY="${OPENAI_API_KEY}"
             export GEMINI_API_KEY="${GEMINI_API_KEY}"
             export TAVILY_API_KEY="${TAVILY_API_KEY}"
+            export DOMAIN_NAME="${DOMAIN_NAME}"
             
             chmod +x /tmp/deploy.sh
             /tmp/deploy.sh "${DEPLOY_PATH}" "${{ github.repository }}" "${GH_TOKEN}"

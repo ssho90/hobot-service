@@ -19,6 +19,7 @@ export HT_ID="${HT_ID}"
 export OPENAI_API_KEY="${OPENAI_API_KEY}"
 export GEMINI_API_KEY="${GEMINI_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
+export DOMAIN_NAME="${DOMAIN_NAME}"
 
 # 유틸리티 함수 (stderr로 출력하여 stdout과 분리)
 log_info() { echo "ℹ️  $*" >&2; }
@@ -397,6 +398,16 @@ PYEOF
   log_info "Creating nginx configuration in sites-available..."
   sudo cp "${DEPLOY_PATH}/.github/deploy/nginx.conf" /etc/nginx/sites-available/hobot
   sudo sed -i "s|/home/ec2-user/hobot-service|${DEPLOY_PATH}|g" /etc/nginx/sites-available/hobot
+  
+  # 도메인 이름 설정 (가이드 3단계)
+  if [ -n "${DOMAIN_NAME}" ] && [ "${DOMAIN_NAME}" != "" ]; then
+    log_info "Setting server_name to domain: ${DOMAIN_NAME} www.${DOMAIN_NAME}"
+    # server_name _; 를 도메인으로 변경
+    sudo sed -i "s|server_name _;|server_name ${DOMAIN_NAME} www.${DOMAIN_NAME};|g" /etc/nginx/sites-available/hobot
+  else
+    log_info "No domain name provided, using default server_name (_)"
+  fi
+  
   sudo chmod 644 /etc/nginx/sites-available/hobot
   
   # sites-enabled에 심볼릭 링크 생성 (가이드 3단계 A)
