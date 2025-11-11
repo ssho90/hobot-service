@@ -89,12 +89,16 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
+      const requestBody = { username, password };
+      if (email) {
+        requestBody.email = email;
+      }
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, email, password })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -113,6 +117,13 @@ export const AuthProvider = ({ children }) => {
     return user && user.role === 'admin';
   };
 
+  const isSystemAdmin = () => {
+    // 시스템 어드민: ssho, admin 사용자명 또는 is_system_admin 플래그
+    if (!user) return false;
+    const username = user.username || '';
+    return user.is_system_admin === true || username === 'ssho' || username === 'admin';
+  };
+
   const getAuthHeaders = () => {
     if (!token) return {};
     return {
@@ -128,6 +139,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     isAdmin,
+    isSystemAdmin,
     getAuthHeaders
   };
 

@@ -3,13 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isSystemAdmin } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState({});
   
-  const menuItems = [
-    { id: 'trading', label: 'Trading', icon: '📊' },
-    { id: 'news', label: 'News', icon: '📰' },
-  ];
+  // 시스템 어드민만 Trading 메뉴 접근 가능
+  const menuItems = [];
+  if (isSystemAdmin()) {
+    menuItems.push({ id: 'trading', label: 'Trading', icon: '📊' });
+  }
+  menuItems.push({ id: 'news', label: 'News', icon: '📰' });
 
   // Admin 메뉴와 하위 메뉴
   const adminMenu = {
@@ -71,7 +73,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           </button>
         ))}
 
-        {isAdmin() && (
+        {isSystemAdmin() && (
           <div className="nav-menu-group">
             <button
               className={`nav-item ${isActiveMenu('admin') ? 'active' : ''}`}

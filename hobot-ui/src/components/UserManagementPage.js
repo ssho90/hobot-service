@@ -167,9 +167,12 @@ const UserManagementPage = () => {
                     >
                       <option value="user">user</option>
                       <option value="admin">admin</option>
+                      <option value="system_admin">system_admin</option>
                     </select>
                   ) : (
-                    <span className={`role-badge ${user.role}`}>{user.role}</span>
+                    <span className={`role-badge ${user.role}`}>
+                      {user.role === 'system_admin' ? 'system_admin' : user.role}
+                    </span>
                   )}
                 </td>
                 <td>{new Date(user.created_at).toLocaleDateString('ko-KR')}</td>

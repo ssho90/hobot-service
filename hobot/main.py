@@ -41,7 +41,7 @@ class StrategyRequest(BaseModel):
 
 class RegisterRequest(BaseModel):
     username: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     password: str
 
 class LoginRequest(BaseModel):
@@ -70,6 +70,11 @@ def require_admin(current_user: dict = Depends(get_current_user)):
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
+
+def is_system_admin(current_user: dict = Depends(get_current_user)) -> bool:
+    """시스템 어드민 여부 확인 (ssho, admin 사용자)"""
+    username = current_user.get("username", "")
+    return auth.is_system_admin(username)
 
 # 기본 페이지 (루트)
 @app.get("/", response_class=HTMLResponse)
@@ -204,9 +209,11 @@ async def update_current_strategy_platform(platform: str, request: StrategyReque
 async def register(request: RegisterRequest):
     """회원가입"""
     try:
+        # 이메일이 없으면 사용자명@hobot.local로 설정
+        email = request.email or f"{request.username}@hobot.local"
         user = auth.create_user(
             username=request.username,
-            email=request.email,
+            email=email,
             password=request.password,
             role="user"
         )
@@ -234,6 +241,9 @@ async def login(request: LoginRequest):
             "role": user["role"]
         })
         
+        username = user["username"]
+        is_sys_admin = auth.is_system_admin(username)
+        
         return {
             "status": "success",
             "token": token,
@@ -241,7 +251,8 @@ async def login(request: LoginRequest):
                 "id": user["id"],
                 "username": user["username"],
                 "email": user["email"],
-                "role": user["role"]
+                "role": user["role"],
+                "is_system_admin": is_sys_admin
             }
         }
     except HTTPException:
@@ -253,11 +264,15 @@ async def login(request: LoginRequest):
 @api_router.get("/auth/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     """현재 로그인한 사용자 정보 조회"""
+    username = current_user.get("username", "")
+    is_sys_admin = auth.is_system_admin(username)
+    
     return {
         "id": current_user["id"],
         "username": current_user["username"],
         "email": current_user["email"],
-        "role": current_user["role"]
+        "role": current_user["role"],
+        "is_system_admin": is_sys_admin
     }
 
 # Admin 전용 API
@@ -320,21 +335,141 @@ async def get_logs(
         log_content = ""
         log_file = ""
         
-        if log_type == "backend":
-            # 백엔드 로그: log.txt 우선, 없으면 error.log
-            log_file = os.path.join(base_path, "log.txt")
-            if not os.path.exists(log_file):
-                # error.log 시도
-                error_log = os.path.join(base_path, "logs", "error.log")
-                if os.path.exists(error_log):
-                    log_file = error_log
+        # nginx 로그는 별도로 처리
+        if log_type == "nginx":
+            import subprocess
+            try:
+                # journalctl을 사용하여 nginx 로그 읽기
+                result = subprocess.run(
+                    ['journalctl', '-u', 'nginx', '-n', str(lines), '--no-pager'],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                if result.returncode == 0:
+                    return {
+                        "status": "success",
+                        "log_type": log_type,
+                        "content": result.stdout,
+                        "file": "journalctl -u nginx",
+                        "lines": len(result.stdout.split('\n'))
+                    }
                 else:
-                    # access.log 시도
-                    access_log = os.path.join(base_path, "logs", "access.log")
-                    if os.path.exists(access_log):
-                        log_file = access_log
-                    else:
-                        return {"status": "success", "log_type": log_type, "content": "No backend log file found", "file": ""}
+                    # journalctl 실패 시 파일 직접 읽기 시도
+                    nginx_logs = [
+                        "/var/log/nginx/hobot-access.log",
+                        "/var/log/nginx/hobot-error.log",
+                        "/var/log/nginx/access.log",
+                        "/var/log/nginx/error.log"
+                    ]
+                    for nginx_log in nginx_logs:
+                        if os.path.exists(nginx_log):
+                            try:
+                                with open(nginx_log, 'r', encoding='utf-8', errors='ignore') as f:
+                                    all_lines = f.readlines()
+                                    log_content = ''.join(all_lines[-lines:])
+                                    return {
+                                        "status": "success",
+                                        "log_type": log_type,
+                                        "content": log_content,
+                                        "file": nginx_log,
+                                        "lines": len(log_content.split('\n'))
+                                    }
+                            except PermissionError:
+                                continue
+                            except Exception:
+                                continue
+                    
+                    return {
+                        "status": "error",
+                        "message": "nginx 로그를 읽을 수 없습니다. 권한이 필요합니다. 서버에서 다음 명령어로 확인하세요: sudo journalctl -u nginx -n 100",
+                        "file": "",
+                        "log_type": log_type
+                    }
+            except FileNotFoundError:
+                # journalctl이 없는 경우 파일 직접 읽기 시도
+                nginx_logs = [
+                    "/var/log/nginx/hobot-access.log",
+                    "/var/log/nginx/hobot-error.log",
+                    "/var/log/nginx/access.log",
+                    "/var/log/nginx/error.log"
+                ]
+                for nginx_log in nginx_logs:
+                    if os.path.exists(nginx_log):
+                        try:
+                            with open(nginx_log, 'r', encoding='utf-8', errors='ignore') as f:
+                                all_lines = f.readlines()
+                                log_content = ''.join(all_lines[-lines:])
+                                return {
+                                    "status": "success",
+                                    "log_type": log_type,
+                                    "content": log_content,
+                                    "file": nginx_log,
+                                    "lines": len(log_content.split('\n'))
+                                }
+                        except PermissionError:
+                            continue
+                        except Exception:
+                            continue
+                
+                return {
+                    "status": "error",
+                    "message": "nginx 로그를 읽을 수 없습니다. 권한이 필요합니다. 서버에서 다음 명령어로 확인하세요: sudo tail -n 100 /var/log/nginx/access.log",
+                    "file": "",
+                    "log_type": log_type
+                }
+            except subprocess.TimeoutExpired:
+                return {
+                    "status": "error",
+                    "message": "nginx 로그 읽기 시간 초과",
+                    "file": "",
+                    "log_type": log_type
+                }
+            except Exception as e:
+                logging.error(f"Error reading nginx logs: {e}")
+                return {
+                    "status": "error",
+                    "message": f"nginx 로그를 읽는 중 오류가 발생했습니다: {str(e)}",
+                    "file": "",
+                    "log_type": log_type
+                }
+        
+        if log_type == "backend":
+            # 백엔드 로그 파일들 (우선순위 순서)
+            backend_logs = [
+                ("log.txt", os.path.join(base_path, "log.txt")),
+                ("error.log", os.path.join(base_path, "logs", "error.log")),
+                ("access.log", os.path.join(base_path, "logs", "access.log"))
+            ]
+            
+            # 모든 로그 파일을 읽어서 통합
+            all_log_content = []
+            found_files = []
+            
+            for log_name, log_path in backend_logs:
+                if os.path.exists(log_path):
+                    try:
+                        with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                            file_lines = f.readlines()
+                            if file_lines:
+                                all_log_content.append(f"\n=== {log_name} ===\n")
+                                # 각 파일에서 최근 N줄만 가져오기
+                                recent_lines = file_lines[-lines:] if len(file_lines) > lines else file_lines
+                                all_log_content.extend(recent_lines)
+                                found_files.append(log_name)
+                    except Exception as e:
+                        logging.warning(f"Could not read {log_path}: {e}")
+                        continue
+            
+            if all_log_content:
+                # 모든 로그를 시간순으로 정렬 (타임스탬프가 있는 경우)
+                combined_content = ''.join(all_log_content)
+                # 최근 N줄만 반환
+                combined_lines = combined_content.split('\n')
+                log_content = '\n'.join(combined_lines[-lines:])
+                log_file = f"Combined: {', '.join(found_files)}"
+            else:
+                return {"status": "success", "log_type": log_type, "content": "No backend log file found", "file": ""}
         elif log_type == "frontend":
             # 프론트엔드 빌드 로그
             log_file = os.path.join(base_path, "..", "hobot-ui", "build", "asset-manifest.json")
@@ -344,25 +479,10 @@ async def get_logs(
                 log_file = frontend_log
             else:
                 return {"status": "success", "log_type": log_type, "content": "No frontend build log available", "file": ""}
-        elif log_type == "nginx":
-            # nginx 로그
-            nginx_logs = [
-                "/var/log/nginx/access.log",
-                "/var/log/nginx/error.log",
-                "/var/log/nginx/hobot-access.log",
-                "/var/log/nginx/hobot-error.log"
-            ]
-            log_file = None
-            for nginx_log in nginx_logs:
-                if os.path.exists(nginx_log):
-                    log_file = nginx_log
-                    break
-            
-            if not log_file:
-                return {"status": "success", "log_type": log_type, "content": "No nginx log available", "file": ""}
         else:
             raise HTTPException(status_code=400, detail="Invalid log_type. Must be: backend, frontend, or nginx")
         
+        # backend와 frontend 로그 파일 읽기
         if log_file and os.path.exists(log_file):
             try:
                 with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:

@@ -1,19 +1,48 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
 import News from './News';
 import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
-import Sidebar from './Sidebar';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const { isSystemAdmin } = useAuth();
+  const navigate = useNavigate();
   const [currentStrategy, setCurrentStrategy] = useState('');
-  const [activeTab, setActiveTab] = useState('trading');
+  const [activeTab, setActiveTab] = useState('news');
   const [activePlatform, setActivePlatform] = useState('upbit');
+  
+  // 시스템 어드민이 아니면 trading 탭 접근 불가
+  useEffect(() => {
+    if (activeTab === 'trading' && !isSystemAdmin()) {
+      setActiveTab('news');
+    }
+  }, [activeTab, isSystemAdmin]);
+  
+  // 시스템 어드민이 아니면 admin 탭 접근 불가
+  useEffect(() => {
+    if ((activeTab === 'admin-users' || activeTab === 'admin-logs') && !isSystemAdmin()) {
+      setActiveTab('news');
+    }
+  }, [activeTab, isSystemAdmin]);
+  
+  // Header 탭 클릭에 따라 초기 탭 설정
+  useEffect(() => {
+    // URL에서 탭 정보 확인 (예: /dashboard?tab=trading)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam === 'trading' && isSystemAdmin()) {
+      setActiveTab('trading');
+    } else if (tabParam === 'admin' && isSystemAdmin()) {
+      setActiveTab('admin-users');
+    }
+  }, [isSystemAdmin]);
 
   // CurrentStrategy.json 파일을 읽어서 상태 업데이트
   const fetchCurrentStrategy = async (platform) => {
@@ -48,10 +77,17 @@ const Dashboard = () => {
       const tab = event.detail?.tab || 'admin-users';
       setActiveTab(tab);
     };
+    
+    const handleSwitchToTab = (event) => {
+      const tab = event.detail?.tab || 'news';
+      setActiveTab(tab);
+    };
 
     window.addEventListener('switchToAdmin', handleSwitchToAdmin);
+    window.addEventListener('switchToTab', handleSwitchToTab);
     return () => {
       window.removeEventListener('switchToAdmin', handleSwitchToAdmin);
+      window.removeEventListener('switchToTab', handleSwitchToTab);
     };
   }, []);
 
@@ -60,17 +96,17 @@ const Dashboard = () => {
     // API 호출도 업데이트
     fetchCurrentStrategy(activePlatform);
   };
+  
+  // activeTab 변경 시 Header에 알림
+  useEffect(() => {
+    const event = new CustomEvent('dashboardTabChange', { detail: { tab: activeTab } });
+    window.dispatchEvent(event);
+  }, [activeTab]);
 
   return (
     <div className="dashboard-layout">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <Header />
       <div className="main-content">
-        <div className="dashboard-header">
-          <h1>Welcome back</h1>
-          <p className="dashboard-subtitle">Monitor your trading and stay updated with the latest news</p>
-        </div>
-
         <div className="content-area">
           {activeTab === 'trading' && (
             <>

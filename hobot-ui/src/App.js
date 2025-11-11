@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import Dashboard from './components/Dashboard';
+import MainPage from './components/MainPage';
 import './App.css';
 
 // Protected Route 컴포넌트
@@ -68,7 +69,7 @@ function AppRoutes() {
       />
       <Route 
         path="/" 
-        element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
+        element={<MainPage />} 
       />
     </Routes>
   );

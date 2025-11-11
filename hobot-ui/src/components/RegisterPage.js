@@ -5,7 +5,6 @@ import './LoginPage.css';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -34,7 +33,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      const result = await register(username, email, password);
+      const result = await register(username, null, password);
       
       if (result.success) {
         setSuccess(result.message);
@@ -73,17 +72,6 @@ const RegisterPage = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
               minLength={3}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="email">이메일</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
             />
           </div>
           

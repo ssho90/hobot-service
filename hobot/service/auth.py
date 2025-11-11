@@ -159,7 +159,8 @@ def create_user(username: str, email: str, password: str, role: str = "user") ->
             detail="Username already exists"
         )
     
-    if get_user_by_email(email):
+    # 이메일이 있는 경우에만 중복 확인
+    if email and get_user_by_email(email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already exists"
@@ -282,6 +283,12 @@ def delete_user(user_id: int) -> bool:
     save_users(users)
     
     return True
+
+
+def is_system_admin(username: str) -> bool:
+    """시스템 어드민 여부 확인 (ssho, admin 사용자)"""
+    SYSTEM_ADMINS = ['ssho', 'admin']
+    return username in SYSTEM_ADMINS
 
 
 # 데이터베이스 초기화

@@ -1,11 +1,12 @@
 .dashboard-layout {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: #f9fafb;
 }
 
 .main-content {
-  margin-left: 260px;
+  margin-left: 0;
   margin-top: 70px;
   flex: 1;
   padding: 32px;
@@ -37,7 +38,7 @@
 
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 70px;
+    margin-left: 0;
     padding: 20px;
   }
 
