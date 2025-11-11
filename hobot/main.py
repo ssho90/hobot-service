@@ -3,15 +3,18 @@ import os
 
 load_dotenv(override=True)
 
-from fastapi import FastAPI, HTTPException, Query, APIRouter
+from fastapi import FastAPI, HTTPException, Query, APIRouter, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, PlainTextResponse
-from pydantic import BaseModel
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel, EmailStr
 import logging
 from service.slack_bot import post_message
 from app import daily_news_summary
 from service.news.daily_news_agent import compiled
 from service.news import news_manager
+from service import auth
+from typing import Optional
 
 app = FastAPI(title="Hobot API", version="1.0.0")
 
@@ -35,6 +38,38 @@ logging.basicConfig(filename=log_file_path, level=logging.INFO,
 # Pydantic 모델
 class StrategyRequest(BaseModel):
     strategy: str
+
+class RegisterRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserUpdateRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    role: Optional[str] = None
+
+# JWT 인증
+security = HTTPBearer()
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """현재 사용자 정보 가져오기"""
+    token = credentials.credentials
+    payload = auth.verify_token(token)
+    user = auth.get_user_by_username(payload.get("username"))
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+def require_admin(current_user: dict = Depends(get_current_user)):
+    """Admin 권한 확인"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
 
 # 기본 페이지 (루트)
 @app.get("/", response_class=HTMLResponse)
@@ -162,6 +197,114 @@ async def update_current_strategy_platform(platform: str, request: StrategyReque
         return {"status": "success", "platform": platform, "strategy": request.strategy}
     except Exception as e:
         logging.error(f"Error updating current strategy: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 인증 관련 API
+@api_router.post("/auth/register")
+async def register(request: RegisterRequest):
+    """회원가입"""
+    try:
+        user = auth.create_user(
+            username=request.username,
+            email=request.email,
+            password=request.password,
+            role="user"
+        )
+        return {"status": "success", "user": user}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error registering user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/auth/login")
+async def login(request: LoginRequest):
+    """로그인"""
+    try:
+        user = auth.get_user_by_username(request.username)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        if not auth.verify_password(request.password, user["password_hash"]):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        # JWT 토큰 생성
+        token = auth.create_access_token({
+            "username": user["username"],
+            "role": user["role"]
+        })
+        
+        return {
+            "status": "success",
+            "token": token,
+            "user": {
+                "id": user["id"],
+                "username": user["username"],
+                "email": user["email"],
+                "role": user["role"]
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error logging in: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/auth/me")
+async def get_current_user_info(current_user: dict = Depends(get_current_user)):
+    """현재 로그인한 사용자 정보 조회"""
+    return {
+        "id": current_user["id"],
+        "username": current_user["username"],
+        "email": current_user["email"],
+        "role": current_user["role"]
+    }
+
+# Admin 전용 API
+@api_router.get("/admin/users")
+async def get_all_users(admin_user: dict = Depends(require_admin)):
+    """모든 사용자 조회 (admin 전용)"""
+    try:
+        users = auth.get_all_users()
+        return {"status": "success", "users": users}
+    except Exception as e:
+        logging.error(f"Error getting users: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.put("/admin/users/{user_id}")
+async def update_user(user_id: int, request: UserUpdateRequest, admin_user: dict = Depends(require_admin)):
+    """사용자 정보 업데이트 (admin 전용)"""
+    try:
+        user = auth.update_user(
+            user_id=user_id,
+            username=request.username,
+            email=request.email,
+            role=request.role
+        )
+        return {"status": "success", "user": user}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: int, admin_user: dict = Depends(require_admin)):
+    """사용자 삭제 (admin 전용)"""
+    try:
+        # 자기 자신은 삭제 불가
+        if user_id == admin_user["id"]:
+            raise HTTPException(status_code=400, detail="Cannot delete yourself")
+        
+        deleted = auth.delete_user(user_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"status": "success", "message": "User deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # API 라우터를 앱에 포함
