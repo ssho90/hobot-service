@@ -37,7 +37,6 @@ const News = () => {
     try {
       const response = await fetch('/api/news-update?force=true');
       if (response.ok) {
-        const data = await response.json();
         // 업데이트 성공 후 새 뉴스 불러오기
         await fetchNews();
       } else {
@@ -102,7 +101,7 @@ const News = () => {
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
-                h3: ({node, ...props}) => <h3 className="news-header-text" {...props} />,
+                h3: ({node, children, ...props}) => <h3 className="news-header-text" {...props}>{children}</h3>,
                 p: ({node, ...props}) => <p className="news-text" {...props} />,
                 strong: ({node, ...props}) => <strong className="news-bold" {...props} />,
                 ul: ({node, ...props}) => <ul className="news-list" {...props} />,

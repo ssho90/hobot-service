@@ -112,69 +112,7 @@ code {
   font-weight: 600;
 }
 
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f9fafb;
-  position: relative;
-  overflow: hidden;
-}
-
-.login-form {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-  z-index: 1;
-  position: relative;
-}
-
-.login-form h2 {
-  color: #111827;
-  margin-bottom: 8px;
-}
-
-.login-form p {
-  color: #6b7280;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #374151;
-  font-size: 14px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px 12px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #111827;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group input::placeholder {
-  color: #9ca3af;
-}
+/* Login styles moved to components/LoginPage.css */
 
 /* Dashboard header styles moved to Dashboard.css */
 

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -15,22 +15,14 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // localStorage에서 토큰과 사용자 정보 복원
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      // 토큰 유효성 확인
-      verifyToken(savedToken);
-    } else {
-      setLoading(false);
-    }
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }, []);
 
-  const verifyToken = async (tokenToVerify) => {
+  const verifyToken = useCallback(async (tokenToVerify) => {
     try {
       const response = await fetch('/api/auth/me', {
         headers: {
@@ -52,7 +44,22 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logout]);
+
+  useEffect(() => {
+    // localStorage에서 토큰과 사용자 정보 복원
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
+      // 토큰 유효성 확인
+      verifyToken(savedToken);
+    } else {
+      setLoading(false);
+    }
+  }, [verifyToken]);
 
   const login = async (username, password) => {
     try {
@@ -100,13 +107,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: '서버 연결에 실패했습니다.' };
     }
-  };
-
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
   };
 
   const isAdmin = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const HobotStatus = ({ platform = 'upbit' }) => {
   const [status, setStatus] = useState('Loading...');
@@ -10,7 +10,7 @@ const HobotStatus = ({ platform = 'upbit' }) => {
     kis: '한국투자증권'
   };
 
-  const checkHealth = async () => {
+  const checkHealth = useCallback(async () => {
     try {
       // 플랫폼별 헬스체크 API 호출
       let healthEndpoint = '/api/health';
@@ -41,14 +41,14 @@ const HobotStatus = ({ platform = 'upbit' }) => {
       setStatus('Error');
       setIsHealthy(false);
     }
-  };
+  }, [platform]);
 
   useEffect(() => {
     checkHealth();
     // 30초마다 헬스체크 실행
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
-  }, [platform]);
+  }, [checkHealth]);
 
   return (
     <div className="card">

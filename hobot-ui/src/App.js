@@ -17,7 +17,8 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// Admin Protected Route 컴포넌트
+// Admin Protected Route 컴포넌트 (향후 사용 예정)
+// eslint-disable-next-line no-unused-vars
 const AdminRoute = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
 

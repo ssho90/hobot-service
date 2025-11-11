@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './AdminPage.css';
 
@@ -10,11 +10,7 @@ const AdminPage = () => {
   const [editForm, setEditForm] = useState({ username: '', email: '', role: '' });
   const { getAuthHeaders } = useAuth();
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/users', {
@@ -32,7 +28,11 @@ const AdminPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAuthHeaders]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleEdit = (user) => {
     setEditingUser(user.id);
