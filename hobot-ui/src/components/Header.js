@@ -34,9 +34,9 @@ const Header = () => {
 
   const handleUserManagement = () => {
     navigate('/dashboard');
-    // Dashboard에서 admin 탭으로 전환
+    // Dashboard에서 admin-users 탭으로 전환
     setTimeout(() => {
-      const event = new CustomEvent('switchToAdmin');
+      const event = new CustomEvent('switchToAdmin', { detail: { tab: 'admin-users' } });
       window.dispatchEvent(event);
     }, 100);
     setShowMenu(false);

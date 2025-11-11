@@ -3,7 +3,8 @@ import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
 import News from './News';
-import AdminPage from './AdminPage';
+import UserManagementPage from './UserManagementPage';
+import LogManagementPage from './LogManagementPage';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
@@ -43,8 +44,9 @@ const Dashboard = () => {
 
   // Header에서 사용자 관리 클릭 시 admin 탭으로 전환
   useEffect(() => {
-    const handleSwitchToAdmin = () => {
-      setActiveTab('admin');
+    const handleSwitchToAdmin = (event) => {
+      const tab = event.detail?.tab || 'admin-users';
+      setActiveTab(tab);
     };
 
     window.addEventListener('switchToAdmin', handleSwitchToAdmin);
@@ -103,8 +105,12 @@ const Dashboard = () => {
             <News />
           )}
 
-          {activeTab === 'admin' && (
-            <AdminPage />
+          {activeTab === 'admin-users' && (
+            <UserManagementPage />
+          )}
+
+          {activeTab === 'admin-logs' && (
+            <LogManagementPage />
           )}
         </div>
       </div>

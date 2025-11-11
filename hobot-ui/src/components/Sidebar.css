@@ -92,6 +92,37 @@
   flex: 1;
 }
 
+.nav-arrow {
+  font-size: 10px;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.nav-menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-submenu {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+  margin-top: 4px;
+  gap: 2px;
+  border-left: 2px solid #e5e7eb;
+  padding-left: 8px;
+}
+
+.nav-subitem {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.nav-subitem.active {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 70px;

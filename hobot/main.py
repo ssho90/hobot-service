@@ -307,6 +307,87 @@ async def delete_user(user_id: int, admin_user: dict = Depends(require_admin)):
         logging.error(f"Error deleting user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# 로그 조회 API (admin 전용)
+@api_router.get("/admin/logs")
+async def get_logs(
+    log_type: str = Query(..., description="로그 타입: backend, frontend, nginx"),
+    lines: int = Query(100, description="읽을 줄 수"),
+    admin_user: dict = Depends(require_admin)
+):
+    """로그 조회 (admin 전용)"""
+    try:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        log_content = ""
+        log_file = ""
+        
+        if log_type == "backend":
+            # 백엔드 로그: log.txt 우선, 없으면 error.log
+            log_file = os.path.join(base_path, "log.txt")
+            if not os.path.exists(log_file):
+                # error.log 시도
+                error_log = os.path.join(base_path, "logs", "error.log")
+                if os.path.exists(error_log):
+                    log_file = error_log
+                else:
+                    # access.log 시도
+                    access_log = os.path.join(base_path, "logs", "access.log")
+                    if os.path.exists(access_log):
+                        log_file = access_log
+                    else:
+                        return {"status": "success", "log_type": log_type, "content": "No backend log file found", "file": ""}
+        elif log_type == "frontend":
+            # 프론트엔드 빌드 로그
+            log_file = os.path.join(base_path, "..", "hobot-ui", "build", "asset-manifest.json")
+            # 실제로는 빌드 로그가 없을 수 있으므로, logs 디렉토리 확인
+            frontend_log = os.path.join(base_path, "logs", "frontend-build.log")
+            if os.path.exists(frontend_log):
+                log_file = frontend_log
+            else:
+                return {"status": "success", "log_type": log_type, "content": "No frontend build log available", "file": ""}
+        elif log_type == "nginx":
+            # nginx 로그
+            nginx_logs = [
+                "/var/log/nginx/access.log",
+                "/var/log/nginx/error.log",
+                "/var/log/nginx/hobot-access.log",
+                "/var/log/nginx/hobot-error.log"
+            ]
+            log_file = None
+            for nginx_log in nginx_logs:
+                if os.path.exists(nginx_log):
+                    log_file = nginx_log
+                    break
+            
+            if not log_file:
+                return {"status": "success", "log_type": log_type, "content": "No nginx log available", "file": ""}
+        else:
+            raise HTTPException(status_code=400, detail="Invalid log_type. Must be: backend, frontend, or nginx")
+        
+        if log_file and os.path.exists(log_file):
+            try:
+                with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    all_lines = f.readlines()
+                    # 최근 N줄만 반환
+                    log_content = ''.join(all_lines[-lines:])
+            except Exception as e:
+                logging.error(f"Error reading log file {log_file}: {e}")
+                return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_file}
+        else:
+            return {"status": "success", "log_type": log_type, "content": "Log file not found", "file": log_file or "unknown"}
+        
+        return {
+            "status": "success",
+            "log_type": log_type,
+            "content": log_content,
+            "file": log_file,
+            "lines": len(log_content.split('\n'))
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting logs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # API 라우터를 앱에 포함
 app.include_router(api_router)
 
