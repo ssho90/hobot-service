@@ -4,6 +4,7 @@ import './AdminPage.css';
 
 const LogManagementPage = () => {
   const [selectedLogType, setSelectedLogType] = useState('backend');
+  const [selectedBackendLogFile, setSelectedBackendLogFile] = useState('log.txt');
   const [logContent, setLogContent] = useState('');
   const [logFile, setLogFile] = useState('');
   const [lines, setLines] = useState(100);
@@ -22,6 +23,12 @@ const LogManagementPage = () => {
       
       // 시간 필터 파라미터 구성
       let url = `/api/admin/logs?log_type=${selectedLogType}&lines=${lines}`;
+      
+      // 백엔드 로그인 경우 특정 파일 선택
+      if (selectedLogType === 'backend') {
+        url += `&log_file=${encodeURIComponent(selectedBackendLogFile)}`;
+      }
+      
       if (useTimeFilter && startTime && endTime) {
         url += `&start_time=${encodeURIComponent(startTime)}&end_time=${encodeURIComponent(endTime)}`;
       }
@@ -47,7 +54,7 @@ const LogManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedLogType, lines, useTimeFilter, startTime, endTime, getAuthHeaders]);
+  }, [selectedLogType, selectedBackendLogFile, lines, useTimeFilter, startTime, endTime, getAuthHeaders]);
 
   useEffect(() => {
     fetchLogs();
@@ -94,6 +101,22 @@ const LogManagementPage = () => {
             ))}
           </select>
         </div>
+
+        {selectedLogType === 'backend' && (
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <label htmlFor="backend-log-file" style={{ fontWeight: 600 }}>로그 파일:</label>
+            <select
+              id="backend-log-file"
+              value={selectedBackendLogFile}
+              onChange={(e) => setSelectedBackendLogFile(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px' }}
+            >
+              <option value="log.txt">📝 log.txt (애플리케이션 로그)</option>
+              <option value="error.log">❌ error.log (에러 로그)</option>
+              <option value="access.log">📊 access.log (접근 로그)</option>
+            </select>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <label htmlFor="lines" style={{ fontWeight: 600 }}>줄 수:</label>

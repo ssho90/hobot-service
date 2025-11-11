@@ -327,6 +327,7 @@ async def delete_user(user_id: int, admin_user: dict = Depends(require_admin)):
 async def get_logs(
     log_type: str = Query(..., description="로그 타입: backend, frontend, nginx"),
     lines: int = Query(100, description="읽을 줄 수"),
+    log_file: Optional[str] = Query(None, description="백엔드 로그 파일명 (log.txt, error.log, access.log)"),
     start_time: Optional[str] = Query(None, description="시작 시간 (YYYY-MM-DDTHH:MM 형식)"),
     end_time: Optional[str] = Query(None, description="종료 시간 (YYYY-MM-DDTHH:MM 형식)"),
     admin_user: dict = Depends(require_admin)
@@ -335,7 +336,7 @@ async def get_logs(
     try:
         base_path = os.path.dirname(os.path.abspath(__file__))
         log_content = ""
-        log_file = ""
+        log_file_name = ""
         
         # nginx 로그는 별도로 처리
         if log_type == "nginx":
@@ -437,16 +438,24 @@ async def get_logs(
                 }
         
         if log_type == "backend":
-            # 백엔드 로그 파일들 (우선순위 순서)
-            backend_logs = [
-                ("log.txt", os.path.join(base_path, "log.txt")),
-                ("error.log", os.path.join(base_path, "logs", "error.log")),
-                ("access.log", os.path.join(base_path, "logs", "access.log"))
-            ]
+            # 백엔드 로그 파일 매핑
+            backend_log_map = {
+                "log.txt": os.path.join(base_path, "log.txt"),
+                "error.log": os.path.join(base_path, "logs", "error.log"),
+                "access.log": os.path.join(base_path, "logs", "access.log")
+            }
             
-            # 모든 로그 파일을 읽어서 통합
-            all_log_entries = []  # (timestamp, log_line, file_name) 튜플 리스트
-            found_files = []
+            # 특정 파일이 지정된 경우 해당 파일만 읽기
+            if log_file and log_file in backend_log_map:
+                log_path = backend_log_map[log_file]
+                log_name = log_file
+            else:
+                # 기본값: log.txt
+                log_path = backend_log_map.get("log.txt")
+                log_name = "log.txt"
+            
+            if not log_path or not os.path.exists(log_path):
+                return {"status": "success", "log_type": log_type, "content": f"Log file {log_name} not found", "file": log_name}
             
             import re
             from datetime import datetime
@@ -457,7 +466,7 @@ async def get_logs(
             # access.log/error.log 형식 (Gunicorn): IP - - [01/Nov/2025:21:51:25 +0000] ...
             gunicorn_timestamp_pattern = re.compile(r'\[(\d{2}/\w+/\d{4}:\d{2}:\d{2}:\d{2})')
             
-            def parse_timestamp(line, log_name):
+            def parse_timestamp(line):
                 """로그 라인에서 타임스탬프를 파싱하여 datetime 객체로 반환"""
                 try:
                     # log.txt 형식: 2025-11-01 21:51:25,255
@@ -478,21 +487,20 @@ async def get_logs(
                     # 파싱 실패 시 현재 시간 반환
                     return datetime.now()
             
-            for log_name, log_path in backend_logs:
-                if os.path.exists(log_path):
-                    try:
-                        with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
-                            file_lines = f.readlines()
-                            if file_lines:
-                                for line in file_lines:
-                                    line = line.rstrip('\n\r')
-                                    if line.strip():  # 빈 줄 제외
-                                        timestamp = parse_timestamp(line, log_name)
-                                        all_log_entries.append((timestamp, line, log_name))
-                                found_files.append(log_name)
-                    except Exception as e:
-                        logging.warning(f"Could not read {log_path}: {e}")
-                        continue
+            # 로그 파일 읽기
+            all_log_entries = []  # (timestamp, log_line) 튜플 리스트
+            try:
+                with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    file_lines = f.readlines()
+                    if file_lines:
+                        for line in file_lines:
+                            line = line.rstrip('\n\r')
+                            if line.strip():  # 빈 줄 제외
+                                timestamp = parse_timestamp(line)
+                                all_log_entries.append((timestamp, line))
+            except Exception as e:
+                logging.warning(f"Could not read {log_path}: {e}")
+                return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_name}
             
             if all_log_entries:
                 # 타임스탬프 기준으로 정렬 (오래된 것부터 최신 순)
@@ -517,21 +525,11 @@ async def get_logs(
                 # 최근 N줄만 선택 (시간 필터 적용 후)
                 recent_entries = filtered_entries[-lines:] if len(filtered_entries) > lines else filtered_entries
                 
-                # 로그 내용 구성 (파일별로 그룹화하여 표시)
-                log_content_parts = []
-                current_file = None
-                for timestamp, line, file_name in recent_entries:
-                    if current_file != file_name:
-                        if current_file is not None:
-                            log_content_parts.append('')
-                        log_content_parts.append(f"=== {file_name} ===")
-                        current_file = file_name
-                    log_content_parts.append(line)
-                
-                log_content = '\n'.join(log_content_parts)
+                # 로그 내용 구성
+                log_content = '\n'.join([line for _, line in recent_entries])
                 
                 # 파일 정보 구성
-                file_info = f"Combined: {', '.join(found_files)}"
+                file_info = log_name
                 file_info += f" (Total: {len(all_log_entries)} lines"
                 if start_time or end_time:
                     file_info += f", Filtered: {len(filtered_entries)} lines"
@@ -539,17 +537,17 @@ async def get_logs(
                 if start_time or end_time:
                     file_info += f" | Time Range: {start_time or 'N/A'} ~ {end_time or 'N/A'}"
                 
-                log_file = file_info
+                log_file_name = file_info
                 
                 return {
                     "status": "success",
                     "log_type": log_type,
                     "content": log_content,
-                    "file": log_file,
+                    "file": log_file_name,
                     "lines": len(recent_entries)
                 }
             else:
-                return {"status": "success", "log_type": log_type, "content": "No backend log file found", "file": ""}
+                return {"status": "success", "log_type": log_type, "content": f"No content in {log_name}", "file": log_name}
         elif log_type == "frontend":
             # 프론트엔드 빌드 로그
             frontend_log = os.path.join(base_path, "logs", "frontend-build.log")
