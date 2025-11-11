@@ -468,40 +468,41 @@ async def get_logs(
                 combined_lines = combined_content.split('\n')
                 log_content = '\n'.join(combined_lines[-lines:])
                 log_file = f"Combined: {', '.join(found_files)}"
+                
+                # backend 로그는 이미 읽었으므로 바로 반환
+                return {
+                    "status": "success",
+                    "log_type": log_type,
+                    "content": log_content,
+                    "file": log_file,
+                    "lines": len(log_content.split('\n'))
+                }
             else:
                 return {"status": "success", "log_type": log_type, "content": "No backend log file found", "file": ""}
         elif log_type == "frontend":
             # 프론트엔드 빌드 로그
-            log_file = os.path.join(base_path, "..", "hobot-ui", "build", "asset-manifest.json")
-            # 실제로는 빌드 로그가 없을 수 있으므로, logs 디렉토리 확인
             frontend_log = os.path.join(base_path, "logs", "frontend-build.log")
             if os.path.exists(frontend_log):
                 log_file = frontend_log
+                try:
+                    with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
+                        all_lines = f.readlines()
+                        # 최근 N줄만 반환
+                        log_content = ''.join(all_lines[-lines:])
+                    return {
+                        "status": "success",
+                        "log_type": log_type,
+                        "content": log_content,
+                        "file": log_file,
+                        "lines": len(log_content.split('\n'))
+                    }
+                except Exception as e:
+                    logging.error(f"Error reading log file {log_file}: {e}")
+                    return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_file}
             else:
                 return {"status": "success", "log_type": log_type, "content": "No frontend build log available", "file": ""}
         else:
             raise HTTPException(status_code=400, detail="Invalid log_type. Must be: backend, frontend, or nginx")
-        
-        # backend와 frontend 로그 파일 읽기
-        if log_file and os.path.exists(log_file):
-            try:
-                with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
-                    all_lines = f.readlines()
-                    # 최근 N줄만 반환
-                    log_content = ''.join(all_lines[-lines:])
-            except Exception as e:
-                logging.error(f"Error reading log file {log_file}: {e}")
-                return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_file}
-        else:
-            return {"status": "success", "log_type": log_type, "content": "Log file not found", "file": log_file or "unknown"}
-        
-        return {
-            "status": "success",
-            "log_type": log_type,
-            "content": log_content,
-            "file": log_file,
-            "lines": len(log_content.split('\n'))
-        }
     except HTTPException:
         raise
     except Exception as e:
