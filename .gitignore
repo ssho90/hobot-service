@@ -132,3 +132,7 @@ tmp/
 # Backup files
 *.bak
 *.backup
+
+# Database files
+**/service/database/users.json
+hobot/service/database/users.json

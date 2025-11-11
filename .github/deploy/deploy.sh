@@ -37,7 +37,33 @@ update_repository() {
   }
   
   if [ -d ".git" ]; then
-    git pull "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" main || true
+    # 로컬 변경사항 처리
+    git fetch "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" main || true
+    
+    # 로컬 변경사항이 있으면 stash 또는 reset
+    if ! git diff-index --quiet HEAD --; then
+      log_warn "Local changes detected, stashing..."
+      git stash || true
+    fi
+    
+    # untracked 파일 중 merge를 방해하는 파일 제거
+    if [ -f "hobot/service/database/users.json" ]; then
+      log_warn "Removing untracked users.json file..."
+      rm -f "hobot/service/database/users.json" || true
+    fi
+    
+    # package-lock.json 변경사항 무시
+    if [ -f "hobot-ui/package-lock.json" ]; then
+      git checkout -- "hobot-ui/package-lock.json" 2>/dev/null || true
+    fi
+    
+    # 강제로 pull (로컬 변경사항 덮어쓰기)
+    git reset --hard "origin/main" 2>/dev/null || git reset --hard "main" 2>/dev/null || true
+    git pull "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" main || {
+      log_warn "Git pull failed, trying reset and pull..."
+      git fetch "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" main
+      git reset --hard "origin/main" || git reset --hard "main"
+    }
   else
     if [ "$(ls -A . 2>/dev/null)" ]; then
       log_warn "Directory is not empty, backing up..."
@@ -179,28 +205,105 @@ deploy_backend() {
   fi
 }
 
+# Node.js 버전 확인 및 업그레이드
+setup_nodejs() {
+  log_info "Checking Node.js version..."
+  
+  # 현재 Node.js 버전 확인
+  CURRENT_NODE_VERSION=$(node --version 2>/dev/null || echo "")
+  if [ -n "${CURRENT_NODE_VERSION}" ]; then
+    CURRENT_NODE_MAJOR=$(echo "${CURRENT_NODE_VERSION}" | cut -d'v' -f2 | cut -d'.' -f1)
+    if [ "${CURRENT_NODE_MAJOR}" -ge 18 ]; then
+      log_info "Node.js version is sufficient: ${CURRENT_NODE_VERSION}"
+      return
+    fi
+  fi
+  
+  # nvm 설치 확인
+  export NVM_DIR="$HOME/.nvm"
+  if [ ! -d "$NVM_DIR" ]; then
+    log_info "Installing nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash || {
+      log_warn "Failed to install nvm, using system Node.js"
+      if ! command -v node &>/dev/null; then
+        log_error "Node.js is not installed and nvm installation failed"
+      fi
+      return
+    }
+  fi
+  
+  # nvm 로드
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  
+  # Node.js 18 이상 설치
+  if type nvm &>/dev/null; then
+    log_info "Installing Node.js 18 via nvm..."
+    nvm install 18 || nvm install 20 || {
+      log_warn "Failed to install Node.js 18/20 via nvm, trying system Node.js"
+      if ! command -v node &>/dev/null; then
+        log_error "Node.js is not installed"
+      fi
+      return
+    }
+    nvm use 18 || nvm use 20 || true
+    nvm alias default 18 || nvm alias default 20 || true
+  fi
+  
+  # Node.js 버전 확인
+  NODE_VERSION=$(node --version 2>/dev/null || echo "unknown")
+  log_info "Node.js version: ${NODE_VERSION}"
+  
+  if ! command -v node &>/dev/null; then
+    log_error "Node.js is not installed"
+  fi
+}
+
 # 프론트엔드 빌드
 build_frontend() {
   log_info "Building frontend..."
   cd "${DEPLOY_PATH}/hobot-ui"
   
-  npm install
+  # Node.js 설정
+  setup_nodejs
+  
+  # nvm이 설치되어 있으면 사용
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  
+  # npm 캐시 정리
+  npm cache clean --force 2>/dev/null || true
+  
+  log_info "Installing dependencies..."
+  npm install || log_error "Failed to install npm dependencies"
+  
   export NODE_OPTIONS="--max-old-space-size=1536"
   
   # 백그라운드 빌드
   rm -f ../hobot/logs/frontend-build-*.flag
-  nohup bash -c "export NODE_OPTIONS='--max-old-space-size=1536' && npm run build && touch ../hobot/logs/frontend-build-complete.flag || touch ../hobot/logs/frontend-build-failed.flag" > ../hobot/logs/frontend-build.log 2>&1 &
+  nohup bash -c "export NVM_DIR=\"\$HOME/.nvm\" && [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\" && export NODE_OPTIONS='--max-old-space-size=1536' && npm run build && touch ../hobot/logs/frontend-build-complete.flag || (echo 'Build failed' && cat ../hobot/logs/frontend-build.log && touch ../hobot/logs/frontend-build-failed.flag)" > ../hobot/logs/frontend-build.log 2>&1 &
   
   # 빌드 완료 대기
   BUILD_TIMEOUT=600
   ELAPSED=0
   while [ ${ELAPSED} -lt ${BUILD_TIMEOUT} ]; do
     [ -f "../hobot/logs/frontend-build-complete.flag" ] && break
-    [ -f "../hobot/logs/frontend-build-failed.flag" ] && log_error "Frontend build failed"
+    if [ -f "../hobot/logs/frontend-build-failed.flag" ]; then
+      log_error "Frontend build failed. Check logs:"
+      tail -50 ../hobot/logs/frontend-build.log >&2
+      exit 1
+    fi
     sleep 10
     ELAPSED=$((ELAPSED + 10))
     [ $((ELAPSED % 60)) -eq 0 ] && log_info "Build in progress... (${ELAPSED}s)"
   done
+  
+  if [ ! -f "../hobot/logs/frontend-build-complete.flag" ]; then
+    log_error "Frontend build timeout. Check logs:"
+    tail -50 ../hobot/logs/frontend-build.log >&2
+    exit 1
+  fi
   
   [ ! -d "build" ] && log_error "Frontend build directory not found"
   
