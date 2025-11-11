@@ -1,39 +1,87 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
 import Dashboard from './components/Dashboard';
 import './App.css';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+// Protected Route 컴포넌트
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>로딩 중...</div>;
+  }
+
+  return user ? children : <Navigate to="/login" replace />;
+};
+
+// Admin Protected Route 컴포넌트
+const AdminRoute = ({ children }) => {
+  const { user, loading, isAdmin } = useAuth();
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>로딩 중...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+function AppRoutes() {
+  const { user } = useAuth();
 
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route 
-            path="/login" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <LoginPage onLogin={() => setIsAuthenticated(true)} />
-            } 
-          />
-          <Route 
-            path="/dashboard" 
-            element={
-              isAuthenticated ? 
-                <Dashboard /> : 
-                <Navigate to="/login" replace />
-            } 
-          />
-          <Route 
-            path="/" 
-            element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} 
-          />
-        </Routes>
-      </div>
-    </Router>
+    <Routes>
+      <Route 
+        path="/login" 
+        element={
+          user ? 
+            <Navigate to="/dashboard" replace /> : 
+            <LoginPage />
+        } 
+      />
+      <Route 
+        path="/register" 
+        element={
+          user ? 
+            <Navigate to="/dashboard" replace /> : 
+            <RegisterPage />
+        } 
+      />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/" 
+        element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
+      />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <AppRoutes />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

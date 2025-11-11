@@ -1,18 +1,33 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // 간단한 인증 로직 (실제 환경에서는 서버 인증을 사용해야 함)
-    if (username === 'admin' && password === 'admin') {
-      onLogin();
-    } else {
-      setError('잘못된 사용자명 또는 비밀번호입니다.');
+    setError('');
+    setLoading(true);
+
+    try {
+      const result = await login(username, password);
+      
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('로그인 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,10 +66,35 @@ const LoginPage = ({ onLogin }) => {
             </div>
           )}
           
-          <button type="submit" className="btn" style={{ width: '100%' }}>
-            로그인
+          <button 
+            type="submit" 
+            className="btn" 
+            style={{ width: '100%' }}
+            disabled={loading}
+          >
+            {loading ? '로그인 중...' : '로그인'}
           </button>
         </form>
+        
+        <div style={{ marginTop: '24px', textAlign: 'center' }}>
+          <div style={{ marginBottom: '16px', color: '#6b7280', fontSize: '14px' }}>
+            계정이 없으신가요?
+          </div>
+          <Link to="/register">
+            <button 
+              type="button"
+              className="btn btn-secondary"
+              style={{ 
+                width: '100%',
+                backgroundColor: '#f3f4f6',
+                color: '#1f2937',
+                border: '1px solid #e5e7eb'
+              }}
+            >
+              회원가입
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );

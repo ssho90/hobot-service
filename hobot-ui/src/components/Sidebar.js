@@ -1,11 +1,19 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
+  const { isAdmin } = useAuth();
+  
   const menuItems = [
     { id: 'trading', label: 'Trading', icon: '📊' },
     { id: 'news', label: 'News', icon: '📰' },
   ];
+
+  // Admin 메뉴 추가
+  if (isAdmin()) {
+    menuItems.push({ id: 'admin', label: 'Admin', icon: '⚙️' });
+  }
 
   return (
     <div className="sidebar">

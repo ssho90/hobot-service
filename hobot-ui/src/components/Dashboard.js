@@ -3,6 +3,7 @@ import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
 import News from './News';
+import AdminPage from './AdminPage';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
@@ -39,6 +40,18 @@ const Dashboard = () => {
     const interval = setInterval(() => fetchCurrentStrategy(activePlatform), 60000);
     return () => clearInterval(interval);
   }, [activePlatform]);
+
+  // Header에서 사용자 관리 클릭 시 admin 탭으로 전환
+  useEffect(() => {
+    const handleSwitchToAdmin = () => {
+      setActiveTab('admin');
+    };
+
+    window.addEventListener('switchToAdmin', handleSwitchToAdmin);
+    return () => {
+      window.removeEventListener('switchToAdmin', handleSwitchToAdmin);
+    };
+  }, []);
 
   const handleStrategyChange = (newStrategy) => {
     setCurrentStrategy(newStrategy);
@@ -88,6 +101,10 @@ const Dashboard = () => {
 
           {activeTab === 'news' && (
             <News />
+          )}
+
+          {activeTab === 'admin' && (
+            <AdminPage />
           )}
         </div>
       </div>
