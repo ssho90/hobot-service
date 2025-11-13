@@ -28,6 +28,7 @@ _db_lock = threading.Lock()
 
 def ensure_backup_dir():
     """백업 디렉토리 생성"""
+    global BACKUP_DIR
     try:
         os.makedirs(BACKUP_DIR, exist_ok=True)
         # 백업 디렉토리에 쓰기 권한이 있는지 확인
@@ -38,13 +39,11 @@ def ensure_backup_dir():
             os.remove(test_file)
         except (PermissionError, OSError):
             # /var/backups에 쓰기 권한이 없으면 프로젝트 내부에 백업
-            global BACKUP_DIR
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             BACKUP_DIR = os.path.join(BASE_DIR, "service", "database", "backups")
             os.makedirs(BACKUP_DIR, exist_ok=True)
     except (PermissionError, OSError):
         # 시스템 경로에 접근할 수 없으면 프로젝트 내부에 백업
-        global BACKUP_DIR
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         BACKUP_DIR = os.path.join(BASE_DIR, "service", "database", "backups")
         os.makedirs(BACKUP_DIR, exist_ok=True)
