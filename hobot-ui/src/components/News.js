@@ -50,9 +50,10 @@ const News = () => {
     }
   };
 
-  useEffect(() => {
-    fetchNews();
-  }, []);
+  // 자동 로드 제거 - 사용자가 명시적으로 요청할 때만 로드
+  // useEffect(() => {
+  //   fetchNews();
+  // }, []);
 
   return (
     <div className="news-container">

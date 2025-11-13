@@ -104,47 +104,25 @@ async def daily_news(query: str = Query(default="오늘의 뉴스 중 중요한 
 
 @api_router.get("/news")
 async def get_daily_news():
-    """뉴스 파일에서 뉴스를 읽어옵니다. (브라우저용)"""
+    """뉴스 파일에서 뉴스를 읽어옵니다. (브라우저용) - 자동 업데이트 없음"""
     logging.info("=== GET /api/news - Starting news retrieval ===")
     try:
         logging.info("Step 1: Calling news_manager.get_news_with_date()...")
         result = news_manager.get_news_with_date()
         logging.info(f"Step 1 Result: news exists={result['news'] is not None}, date={result.get('date')}, is_today={result.get('is_today')}")
         
-        # 뉴스가 없으면 자동으로 업데이트 시도
+        # 뉴스가 없으면 에러 반환 (자동 업데이트 제거)
         if not result["news"]:
-            logging.warning("Step 2: No news available in file, attempting auto-update...")
-            try:
-                logging.info("Step 2.1: Calling update_news_with_tavily(force_update=False)...")
-                update_result = news_manager.update_news_with_tavily(compiled, force_update=False)
-                logging.info(f"Step 2.1 Result: status={update_result.get('status')}, message={update_result.get('message')}")
-                
-                if update_result.get("status") == "success":
-                    logging.info("Step 2.2: Update successful, re-reading news from file...")
-                    # 업데이트 후 다시 읽기
-                    result = news_manager.get_news_with_date()
-                    logging.info(f"Step 2.2 Result: news exists={result['news'] is not None}, date={result.get('date')}")
-                    if result["news"]:
-                        logging.info("Step 2.3: Successfully retrieved news after auto-update")
-                        return result
-                    else:
-                        logging.error("Step 2.3: News still empty after successful update")
-                else:
-                    logging.warning(f"Step 2.1: Update returned non-success status: {update_result.get('status')}")
-            except Exception as update_error:
-                logging.error(f"Step 2: Auto-update failed with exception: {type(update_error).__name__}: {str(update_error)}", exc_info=True)
-            
-            # 업데이트 실패하거나 여전히 뉴스가 없으면 에러 반환
-            logging.error("Step 3: No news available after all attempts")
-            raise HTTPException(status_code=404, detail="No news available. Please try /api/news-update to fetch news.")
+            logging.warning("Step 2: No news available in file")
+            raise HTTPException(status_code=404, detail="No news available. Please use /api/news-update to fetch news.")
         
-        logging.info("Step 4: Successfully returning news from file")
+        logging.info("Step 3: Successfully returning news from file")
         return result
     except HTTPException:
-        logging.error("Step 5: HTTPException raised, re-raising...")
+        logging.error("Step 4: HTTPException raised, re-raising...")
         raise
     except Exception as e:
-        logging.error(f"Step 5: Unexpected error getting daily news: {type(e).__name__}: {str(e)}", exc_info=True)
+        logging.error(f"Step 4: Unexpected error getting daily news: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/news-update")
