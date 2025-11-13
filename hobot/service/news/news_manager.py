@@ -16,22 +16,22 @@ def get_today_date_str():
 
 def get_news_date_from_file():
     """뉴스 파일에서 날짜를 읽어옴"""
-    logging.debug(f"get_news_date_from_file: Checking file at {NEWS_FILE_PATH}")
+    logging.info(f"get_news_date_from_file: Checking file at {NEWS_FILE_PATH}")
     try:
         if not os.path.exists(NEWS_FILE_PATH):
-            logging.debug(f"get_news_date_from_file: File does not exist at {NEWS_FILE_PATH}")
+            logging.info(f"get_news_date_from_file: File does not exist at {NEWS_FILE_PATH}")
             return None
         
-        logging.debug(f"get_news_date_from_file: File exists, reading first line...")
+        logging.info(f"get_news_date_from_file: File exists, reading first line...")
         with open(NEWS_FILE_PATH, 'r', encoding='utf-8') as f:
             first_line = f.readline().strip()
-            logging.debug(f"get_news_date_from_file: First line = '{first_line}'")
+            logging.info(f"get_news_date_from_file: First line = '{first_line}'")
             # 날짜 형식: "=== 2024-01-01 ==="
             if first_line.startswith("===") and first_line.endswith("==="):
                 date_str = first_line.replace("===", "").strip()
-                logging.debug(f"get_news_date_from_file: Extracted date = '{date_str}'")
+                logging.info(f"get_news_date_from_file: Extracted date = '{date_str}'")
                 return date_str
-        logging.debug(f"get_news_date_from_file: First line does not match date format")
+        logging.info(f"get_news_date_from_file: First line does not match date format")
         return None
     except Exception as e:
         logging.error(f"get_news_date_from_file: Error reading news date from file: {type(e).__name__}: {str(e)}", exc_info=True)
@@ -42,7 +42,7 @@ def is_news_today():
     file_date = get_news_date_from_file()
     today_date = get_today_date_str()
     is_today = file_date == today_date
-    logging.debug(f"is_news_today: file_date={file_date}, today_date={today_date}, is_today={is_today}")
+    logging.info(f"is_news_today: file_date={file_date}, today_date={today_date}, is_today={is_today}")
     return is_today
 
 def save_news_to_file(news_content):
@@ -66,27 +66,27 @@ def save_news_to_file(news_content):
 
 def get_news_from_file():
     """뉴스 파일에서 내용을 읽어옴"""
-    logging.debug(f"get_news_from_file: Checking file at {NEWS_FILE_PATH}")
+    logging.info(f"get_news_from_file: Checking file at {NEWS_FILE_PATH}")
     try:
         if not os.path.exists(NEWS_FILE_PATH):
-            logging.debug(f"get_news_from_file: File does not exist at {NEWS_FILE_PATH}")
+            logging.info(f"get_news_from_file: File does not exist at {NEWS_FILE_PATH}")
             return None
         
-        logging.debug(f"get_news_from_file: File exists, reading content...")
+        logging.info(f"get_news_from_file: File exists, reading content...")
         with open(NEWS_FILE_PATH, 'r', encoding='utf-8') as f:
             content = f.read()
             content_length = len(content)
-            logging.debug(f"get_news_from_file: Read {content_length} characters from file")
+            logging.info(f"get_news_from_file: Read {content_length} characters from file")
             
             # 첫 번째 줄(날짜) 제거
             lines = content.split('\n')
-            logging.debug(f"get_news_from_file: File has {len(lines)} lines")
+            logging.info(f"get_news_from_file: File has {len(lines)} lines")
             if len(lines) > 1:
                 news_content = '\n'.join(lines[2:])  # 날짜 줄과 빈 줄 제거
                 news_length = len(news_content) if news_content else 0
-                logging.debug(f"get_news_from_file: Extracted news content length={news_length} characters")
+                logging.info(f"get_news_from_file: Extracted news content length={news_length} characters")
                 return news_content
-        logging.debug(f"get_news_from_file: File has insufficient lines (<=1)")
+        logging.info(f"get_news_from_file: File has insufficient lines (<=1)")
         return None
     except Exception as e:
         logging.error(f"get_news_from_file: Error reading news from file: {type(e).__name__}: {str(e)}", exc_info=True)
@@ -160,7 +160,7 @@ def update_news_with_tavily(compiled, force_update=False):
 
 def get_news_with_date():
     """뉴스와 날짜 정보를 함께 반환"""
-    logging.debug("get_news_with_date: Starting to get news with date")
+    logging.info("get_news_with_date: Starting to get news with date")
     file_date = get_news_date_from_file()
     today_date = get_today_date_str()
     news_content = get_news_from_file()
@@ -171,6 +171,6 @@ def get_news_with_date():
         "is_today": file_date == today_date if file_date else False
     }
     
-    logging.debug(f"get_news_with_date: Result - news exists={news_content is not None}, date={file_date}, is_today={result['is_today']}")
+    logging.info(f"get_news_with_date: Result - news exists={news_content is not None}, date={file_date}, is_today={result['is_today']}")
     return result
 

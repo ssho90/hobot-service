@@ -34,8 +34,13 @@ app.add_middleware(
 
 # Configure logging
 log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'log.txt')
-logging.basicConfig(filename=log_file_path, level=logging.INFO, 
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# 로깅 설정 (기존 설정이 있어도 덮어쓰기)
+logging.basicConfig(
+    filename=log_file_path, 
+    level=logging.DEBUG,  # DEBUG 레벨로 변경하여 모든 로그 출력
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    force=True  # 기존 핸들러가 있어도 재설정
+)
 
 # Pydantic 모델
 class StrategyRequest(BaseModel):
