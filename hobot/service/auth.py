@@ -1,88 +1,57 @@
 """
-사용자 인증 및 권한 관리 모듈 (JSON 파일 기반)
+사용자 인증 및 권한 관리 모듈 (SQLite 기반)
 """
 import os
-import json
 import hashlib
 import secrets
-import threading
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
 import jwt
 from fastapi import HTTPException, status
+from service.database.db import get_db_connection
 
 # JWT 시크릿 키 (환경 변수에서 가져오거나 기본값 사용)
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
-# 데이터베이스 디렉토리 및 파일 경로
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATABASE_DIR = os.path.join(BASE_DIR, "service", "database")
-USERS_FILE = os.path.join(DATABASE_DIR, "users.json")
 
-# 파일 접근 동기화를 위한 Lock
-_file_lock = threading.Lock()
-
-
-def ensure_database_dir():
-    """데이터베이스 디렉토리 생성"""
-    os.makedirs(DATABASE_DIR, exist_ok=True)
-
-
-def load_users() -> List[Dict]:
-    """JSON 파일에서 사용자 목록 로드"""
-    ensure_database_dir()
-    
-    if not os.path.exists(USERS_FILE):
-        return []
-    
-    try:
-        with _file_lock:
-            with open(USERS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return data.get('users', [])
-    except (json.JSONDecodeError, FileNotFoundError):
-        return []
-
-
-def save_users(users: List[Dict]):
-    """사용자 목록을 JSON 파일에 저장"""
-    ensure_database_dir()
-    
-    with _file_lock:
-        with open(USERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump({'users': users}, f, indent=2, ensure_ascii=False)
-
-
-def get_next_id(users: List[Dict]) -> int:
-    """다음 사용자 ID 생성"""
-    if not users:
-        return 1
-    return max(user.get('id', 0) for user in users) + 1
+def _row_to_dict(row) -> Dict:
+    """MySQL Row를 딕셔너리로 변환"""
+    return dict(row) if row else None
 
 
 def init_db():
     """데이터베이스 초기화"""
-    ensure_database_dir()
+    from service.database.db import init_database, migrate_from_json
     
-    users = load_users()
+    # 데이터베이스 초기화
+    init_database()
+    
+    # JSON에서 마이그레이션 (최초 1회만)
+    migrate_from_json()
     
     # 기본 admin 사용자 확인 및 생성
-    admin_exists = any(user.get('role') == 'admin' for user in users)
-    
-    if not admin_exists:
-        admin_user = {
-            'id': get_next_id(users),
-            'username': 'admin',
-            'email': 'admin@hobot.com',
-            'password_hash': hash_password('admin'),
-            'role': 'admin',
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat()
-        }
-        users.append(admin_user)
-        save_users(users)
+    # get_user_by_username이 아직 정의되지 않았을 수 있으므로 직접 쿼리
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = %s", ('admin',))
+        admin_user = cursor.fetchone()
+        
+        if not admin_user:
+            now = datetime.now()
+            cursor.execute("""
+                INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                'admin',
+                'admin@hobot.com',
+                hash_password('admin'),
+                'admin',
+                now,
+                now
+            ))
+            conn.commit()
 
 
 def hash_password(password: str) -> str:
@@ -123,35 +92,33 @@ def verify_token(token: str) -> Optional[Dict]:
 
 def get_user_by_username(username: str) -> Optional[Dict]:
     """사용자명으로 사용자 조회"""
-    users = load_users()
-    for user in users:
-        if user.get('username') == username:
-            return user
-    return None
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        return _row_to_dict(row)
 
 
 def get_user_by_email(email: str) -> Optional[Dict]:
     """이메일로 사용자 조회"""
-    users = load_users()
-    for user in users:
-        if user.get('email') == email:
-            return user
-    return None
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        row = cursor.fetchone()
+        return _row_to_dict(row)
 
 
 def get_user_by_id(user_id: int) -> Optional[Dict]:
     """ID로 사용자 조회"""
-    users = load_users()
-    for user in users:
-        if user.get('id') == user_id:
-            return user
-    return None
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        return _row_to_dict(row)
 
 
 def create_user(username: str, email: str, password: str, role: str = "user") -> Dict:
     """새 사용자 생성"""
-    users = load_users()
-    
     # 중복 확인
     if get_user_by_username(username):
         raise HTTPException(
@@ -167,69 +134,63 @@ def create_user(username: str, email: str, password: str, role: str = "user") ->
         )
     
     password_hash = hash_password(password)
-    now = datetime.now().isoformat()
+    now = datetime.now()
     
-    new_user = {
-        'id': get_next_id(users),
-        'username': username,
-        'email': email,
-        'password_hash': password_hash,
-        'role': role,
-        'created_at': now,
-        'updated_at': now
-    }
-    
-    users.append(new_user)
-    save_users(users)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (username, email, password_hash, role, now, now))
+        user_id = cursor.lastrowid
+        conn.commit()
     
     # 비밀번호 해시 제외하고 반환
     return {
-        'id': new_user['id'],
-        'username': new_user['username'],
-        'email': new_user['email'],
-        'role': new_user['role'],
-        'created_at': new_user['created_at'],
-        'updated_at': new_user['updated_at']
+        'id': user_id,
+        'username': username,
+        'email': email,
+        'role': role,
+        'created_at': now,
+        'updated_at': now
     }
 
 
 def get_all_users() -> List[Dict]:
     """모든 사용자 조회 (admin 전용)"""
-    users = load_users()
-    # 비밀번호 해시 제외하고 반환
-    return [
-        {
-            'id': user.get('id'),
-            'username': user.get('username'),
-            'email': user.get('email'),
-            'role': user.get('role'),
-            'created_at': user.get('created_at'),
-            'updated_at': user.get('updated_at')
-        }
-        for user in users
-    ]
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, email, role, created_at, updated_at FROM users")
+        rows = cursor.fetchall()
+        # 비밀번호 해시 제외하고 반환
+        return [
+            {
+                'id': row['id'],
+                'username': row['username'],
+                'email': row['email'],
+                'role': row['role'],
+                'created_at': row['created_at'],
+                'updated_at': row['updated_at']
+            }
+            for row in rows
+        ]
 
 
 def update_user(user_id: int, username: Optional[str] = None, 
                 email: Optional[str] = None, role: Optional[str] = None) -> Dict:
     """사용자 정보 업데이트"""
-    users = load_users()
-    
-    user_index = None
-    for i, user in enumerate(users):
-        if user.get('id') == user_id:
-            user_index = i
-            break
-    
-    if user_index is None:
+    # 사용자 존재 확인
+    user = get_user_by_id(user_id)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
     
-    user = users[user_index]
-    
     # 중복 확인 및 업데이트
+    update_fields = []
+    update_values = []
+    
     if username is not None:
         existing = get_user_by_username(username)
         if existing and existing.get('id') != user_id:
@@ -237,7 +198,8 @@ def update_user(user_id: int, username: Optional[str] = None,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already exists"
             )
-        user['username'] = username
+        update_fields.append("username = %s")
+        update_values.append(username)
     
     if email is not None:
         existing = get_user_by_email(email)
@@ -246,43 +208,48 @@ def update_user(user_id: int, username: Optional[str] = None,
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already exists"
             )
-        user['email'] = email
+        update_fields.append("email = %s")
+        update_values.append(email)
     
     if role is not None:
-        user['role'] = role
+        update_fields.append("role = %s")
+        update_values.append(role)
     
-    user['updated_at'] = datetime.now().isoformat()
+    if update_fields:
+        update_fields.append("updated_at = %s")
+        update_values.append(datetime.now())
+        update_values.append(user_id)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            # MySQL에서는 마지막 값이 WHERE 조건
+            where_value = update_values.pop()
+            update_values.append(where_value)
+            cursor.execute(
+                f"UPDATE users SET {', '.join(update_fields)} WHERE id = %s",
+                update_values
+            )
+            conn.commit()
     
-    save_users(users)
-    
-    # 비밀번호 해시 제외하고 반환
+    # 업데이트된 사용자 정보 반환
+    updated_user = get_user_by_id(user_id)
     return {
-        'id': user['id'],
-        'username': user['username'],
-        'email': user['email'],
-        'role': user['role'],
-        'created_at': user['created_at'],
-        'updated_at': user['updated_at']
+        'id': updated_user['id'],
+        'username': updated_user['username'],
+        'email': updated_user['email'],
+        'role': updated_user['role'],
+        'created_at': updated_user['created_at'],
+        'updated_at': updated_user['updated_at']
     }
 
 
 def delete_user(user_id: int) -> bool:
     """사용자 삭제"""
-    users = load_users()
-    
-    user_index = None
-    for i, user in enumerate(users):
-        if user.get('id') == user_id:
-            user_index = i
-            break
-    
-    if user_index is None:
-        return False
-    
-    users.pop(user_index)
-    save_users(users)
-    
-    return True
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        return cursor.rowcount > 0
 
 
 def is_system_admin(username: str) -> bool:

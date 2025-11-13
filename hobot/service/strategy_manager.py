@@ -1,35 +1,22 @@
-import os
-import json
 import logging
-
-# 전략 파일 경로
-STRATEGY_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'service', 'CurrentStrategy.json')
+from datetime import datetime
+from service.database.db import get_db_connection
 
 def read_strategy(platform='upbit'):
     """플랫폼별 현재 전략을 읽어옵니다."""
     try:
-        if not os.path.exists(STRATEGY_FILE_PATH):
-            # 파일이 없으면 기본값으로 생성
-            default_strategies = {
-                'upbit': 'STRATEGY_NULL',
-                'binance': 'STRATEGY_NULL',
-                'kis': 'STRATEGY_NULL'
-            }
-            write_strategies(default_strategies)
-            return default_strategies.get(platform, 'STRATEGY_NULL')
-        
-        with open(STRATEGY_FILE_PATH, 'r', encoding='utf-8') as f:
-            strategies = json.load(f)
-            return strategies.get(platform, 'STRATEGY_NULL')
-    except json.JSONDecodeError:
-        logging.error("Invalid JSON in strategy file, resetting to defaults")
-        default_strategies = {
-            'upbit': 'STRATEGY_NULL',
-            'binance': 'STRATEGY_NULL',
-            'kis': 'STRATEGY_NULL'
-        }
-        write_strategies(default_strategies)
-        return default_strategies.get(platform, 'STRATEGY_NULL')
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT strategy FROM strategies WHERE platform = %s", (platform,))
+            row = cursor.fetchone()
+            
+            if row:
+                return row['strategy']
+            else:
+                # 기본값으로 생성
+                default_strategy = 'STRATEGY_NULL'
+                write_strategy(platform, default_strategy)
+                return default_strategy
     except Exception as e:
         logging.error(f"Error reading strategy: {e}")
         return 'STRATEGY_NULL'
@@ -37,26 +24,18 @@ def read_strategy(platform='upbit'):
 def write_strategy(platform, strategy):
     """플랫폼별 전략을 업데이트합니다."""
     try:
-        # 기존 전략 읽기
-        if os.path.exists(STRATEGY_FILE_PATH):
-            with open(STRATEGY_FILE_PATH, 'r', encoding='utf-8') as f:
-                strategies = json.load(f)
-        else:
-            strategies = {
-                'upbit': 'STRATEGY_NULL',
-                'binance': 'STRATEGY_NULL',
-                'kis': 'STRATEGY_NULL'
-            }
-        
-        # 특정 플랫폼의 전략만 업데이트
-        strategies[platform] = strategy
-        
-        # 파일에 저장
-        with open(STRATEGY_FILE_PATH, 'w', encoding='utf-8') as f:
-            json.dump(strategies, f, indent=2, ensure_ascii=False)
+        now = datetime.now()
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO strategies (platform, strategy, updated_at)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE strategy = %s, updated_at = %s
+            """, (platform, strategy, now, strategy, now))
+            conn.commit()
         
         logging.info(f"Strategy updated: {platform} = {strategy}")
-        return strategies
+        return get_all_strategies()
     except Exception as e:
         logging.error(f"Error writing strategy: {e}")
         raise
@@ -64,8 +43,16 @@ def write_strategy(platform, strategy):
 def write_strategies(strategies_dict):
     """모든 플랫폼의 전략을 한번에 업데이트합니다."""
     try:
-        with open(STRATEGY_FILE_PATH, 'w', encoding='utf-8') as f:
-            json.dump(strategies_dict, f, indent=2, ensure_ascii=False)
+        now = datetime.now()
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            for platform, strategy in strategies_dict.items():
+                cursor.execute("""
+                    INSERT INTO strategies (platform, strategy, updated_at)
+                    VALUES (%s, %s, %s)
+                    ON DUPLICATE KEY UPDATE strategy = %s, updated_at = %s
+                """, (platform, strategy, now, strategy, now))
+            conn.commit()
         logging.info(f"All strategies updated: {strategies_dict}")
     except Exception as e:
         logging.error(f"Error writing strategies: {e}")
@@ -74,26 +61,21 @@ def write_strategies(strategies_dict):
 def get_all_strategies():
     """모든 플랫폼의 전략을 반환합니다."""
     try:
-        if not os.path.exists(STRATEGY_FILE_PATH):
-            default_strategies = {
-                'upbit': 'STRATEGY_NULL',
-                'binance': 'STRATEGY_NULL',
-                'kis': 'STRATEGY_NULL'
-            }
-            write_strategies(default_strategies)
-            return default_strategies
-        
-        with open(STRATEGY_FILE_PATH, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        logging.error("Invalid JSON in strategy file, resetting to defaults")
-        default_strategies = {
-            'upbit': 'STRATEGY_NULL',
-            'binance': 'STRATEGY_NULL',
-            'kis': 'STRATEGY_NULL'
-        }
-        write_strategies(default_strategies)
-        return default_strategies
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT platform, strategy FROM strategies")
+            rows = cursor.fetchall()
+            
+            strategies = {row['platform']: row['strategy'] for row in rows}
+            
+            # 기본 플랫폼이 없으면 기본값으로 생성
+            default_platforms = ['upbit', 'binance', 'kis']
+            for platform in default_platforms:
+                if platform not in strategies:
+                    strategies[platform] = 'STRATEGY_NULL'
+                    write_strategy(platform, 'STRATEGY_NULL')
+            
+            return strategies
     except Exception as e:
         logging.error(f"Error reading all strategies: {e}")
         return {

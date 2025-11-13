@@ -1,0 +1,419 @@
+"""
+MySQL 데이터베이스 관리 모듈
+"""
+import os
+import json
+import threading
+from typing import Optional, Dict, List, Any
+from contextlib import contextmanager
+from datetime import datetime
+import pymysql
+from pymysql.cursors import DictCursor
+from pymysql.err import OperationalError, IntegrityError
+
+# MySQL 연결 설정 (환경 변수에서 가져오기)
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = int(os.getenv("DB_PORT", "3306"))
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+DB_NAME = os.getenv("DB_NAME", "hobot")
+DB_CHARSET = os.getenv("DB_CHARSET", "utf8mb4")
+
+# 백업 디렉토리 (시스템 경로)
+BACKUP_DIR = "/var/backups/hobot"
+
+# 파일 접근 동기화를 위한 Lock
+_db_lock = threading.Lock()
+
+
+def ensure_backup_dir():
+    """백업 디렉토리 생성"""
+    try:
+        os.makedirs(BACKUP_DIR, exist_ok=True)
+        # 백업 디렉토리에 쓰기 권한이 있는지 확인
+        test_file = os.path.join(BACKUP_DIR, ".test_write")
+        try:
+            with open(test_file, 'w') as f:
+                f.write("test")
+            os.remove(test_file)
+        except (PermissionError, OSError):
+            # /var/backups에 쓰기 권한이 없으면 프로젝트 내부에 백업
+            global BACKUP_DIR
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            BACKUP_DIR = os.path.join(BASE_DIR, "service", "database", "backups")
+            os.makedirs(BACKUP_DIR, exist_ok=True)
+    except (PermissionError, OSError):
+        # 시스템 경로에 접근할 수 없으면 프로젝트 내부에 백업
+        global BACKUP_DIR
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        BACKUP_DIR = os.path.join(BASE_DIR, "service", "database", "backups")
+        os.makedirs(BACKUP_DIR, exist_ok=True)
+
+
+@contextmanager
+def get_db_connection():
+    """데이터베이스 연결 컨텍스트 매니저"""
+    conn = None
+    try:
+        conn = pymysql.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            charset=DB_CHARSET,
+            cursorclass=DictCursor,
+            autocommit=False
+        )
+        yield conn
+        conn.commit()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise
+    finally:
+        if conn:
+            conn.close()
+
+
+def init_database():
+    """데이터베이스 및 테이블 초기화"""
+    # 먼저 데이터베이스가 없으면 생성
+    try:
+        conn = pymysql.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            charset=DB_CHARSET
+        )
+        with conn.cursor() as cursor:
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} CHARACTER SET {DB_CHARSET} COLLATE {DB_CHARSET}_unicode_ci")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️  데이터베이스 생성 실패: {e}")
+        raise
+    
+    # 테이블 생성
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # 사용자 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                email VARCHAR(255) UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
+                role VARCHAR(50) NOT NULL DEFAULT 'user',
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME NOT NULL,
+                INDEX idx_username (username),
+                INDEX idx_email (email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """)
+        
+        # 메모리 저장소 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS memory_store (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                topic VARCHAR(255) NOT NULL,
+                summary TEXT NOT NULL,
+                created_at DATETIME NOT NULL,
+                INDEX idx_topic (topic)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """)
+        
+        # 전략 설정 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS strategies (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                platform VARCHAR(50) UNIQUE NOT NULL,
+                strategy VARCHAR(255) NOT NULL,
+                updated_at DATETIME NOT NULL,
+                INDEX idx_platform (platform)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """)
+        
+        # 토큰 저장 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS tokens (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                token_type VARCHAR(50) NOT NULL,
+                token_data TEXT NOT NULL,
+                expires_at DATETIME,
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME NOT NULL,
+                INDEX idx_token_type (token_type)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """)
+        
+        # 마이그레이션 메타데이터 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS migration_metadata (
+                `key` VARCHAR(255) PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at DATETIME NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """)
+        
+        conn.commit()
+
+
+def is_migration_completed():
+    """마이그레이션이 완료되었는지 확인"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT value FROM migration_metadata WHERE `key` = %s", ('json_migration_completed',))
+            row = cursor.fetchone()
+            return row is not None and row['value'] == 'true'
+    except Exception:
+        return False
+
+
+def mark_migration_completed():
+    """마이그레이션 완료 표시"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            now = datetime.now()
+            cursor.execute("""
+                INSERT INTO migration_metadata (`key`, value, updated_at)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE value = %s, updated_at = %s
+            """, ('json_migration_completed', 'true', now, 'true', now))
+            conn.commit()
+    except Exception as e:
+        print(f"⚠️  마이그레이션 완료 표시 실패: {e}")
+
+
+def migrate_from_json():
+    """JSON 파일에서 MySQL로 데이터 마이그레이션 (최초 1회만 실행)"""
+    # 이미 마이그레이션이 완료되었으면 스킵
+    if is_migration_completed():
+        return
+    
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    DATABASE_DIR = os.path.join(BASE_DIR, "service", "database")
+    
+    # 사용자 데이터 마이그레이션
+    users_file = os.path.join(DATABASE_DIR, "users.json")
+    if os.path.exists(users_file):
+        try:
+            with open(users_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                users = data.get('users', [])
+                
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                for user in users:
+                    try:
+                        cursor.execute("""
+                            INSERT IGNORE INTO users 
+                            (id, username, email, password_hash, role, created_at, updated_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            user.get('id'),
+                            user.get('username'),
+                            user.get('email'),
+                            user.get('password_hash'),
+                            user.get('role', 'user'),
+                            user.get('created_at', datetime.now().isoformat()),
+                            user.get('updated_at', datetime.now().isoformat())
+                        ))
+                    except IntegrityError:
+                        # 이미 존재하는 사용자는 스킵
+                        pass
+                conn.commit()
+            print("✅ Users migrated from JSON to MySQL")
+        except Exception as e:
+            print(f"⚠️  Error migrating users: {e}")
+    
+    # 메모리 저장소 마이그레이션
+    memory_file = os.path.join(BASE_DIR, "memory_store.json")
+    if os.path.exists(memory_file):
+        try:
+            with open(memory_file, 'r', encoding='utf-8') as f:
+                memories = json.load(f)
+                
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                for mem in memories:
+                    cursor.execute("""
+                        INSERT IGNORE INTO memory_store (topic, summary, created_at)
+                        VALUES (%s, %s, %s)
+                    """, (
+                        mem.get('topic', ''),
+                        mem.get('summary', ''),
+                        mem.get('created_at', datetime.now().isoformat())
+                    ))
+                conn.commit()
+            print("✅ Memory store migrated from JSON to MySQL")
+        except Exception as e:
+            print(f"⚠️  Error migrating memory store: {e}")
+    
+    # 전략 설정 마이그레이션
+    strategy_file = os.path.join(BASE_DIR, "service", "CurrentStrategy.json")
+    if os.path.exists(strategy_file):
+        try:
+            with open(strategy_file, 'r', encoding='utf-8') as f:
+                strategies = json.load(f)
+                
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                now = datetime.now()
+                for platform, strategy in strategies.items():
+                    cursor.execute("""
+                        INSERT INTO strategies (platform, strategy, updated_at)
+                        VALUES (%s, %s, %s)
+                        ON DUPLICATE KEY UPDATE strategy = %s, updated_at = %s
+                    """, (platform, strategy, now, strategy, now))
+                conn.commit()
+            print("✅ Strategies migrated from JSON to MySQL")
+        except Exception as e:
+            print(f"⚠️  Error migrating strategies: {e}")
+    
+    # 마이그레이션 완료 표시
+    mark_migration_completed()
+    print("✅ JSON to MySQL migration completed")
+
+
+def backup_database():
+    """데이터베이스 백업 (mysqldump 사용)"""
+    ensure_backup_dir()
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_filename = f"hobot_backup_{timestamp}.sql"
+    backup_path = os.path.join(BACKUP_DIR, backup_filename)
+    
+    try:
+        import subprocess
+        cmd = [
+            'mysqldump',
+            f'--host={DB_HOST}',
+            f'--port={DB_PORT}',
+            f'--user={DB_USER}',
+            f'--password={DB_PASSWORD}',
+            '--single-transaction',
+            '--routines',
+            '--triggers',
+            DB_NAME
+        ]
+        
+        with open(backup_path, 'w', encoding='utf-8') as f:
+            result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, text=True)
+            
+        if result.returncode == 0:
+            print(f"✅ 데이터베이스 백업 완료: {backup_path}")
+            cleanup_old_backups(days=30)
+            return backup_path
+        else:
+            print(f"❌ 백업 실패: {result.stderr}")
+            return None
+    except FileNotFoundError:
+        print("⚠️  mysqldump를 찾을 수 없습니다. MySQL 클라이언트가 설치되어 있는지 확인하세요.")
+        return None
+    except Exception as e:
+        print(f"❌ 백업 실패: {e}")
+        return None
+
+
+def cleanup_old_backups(days=30):
+    """오래된 백업 파일 정리"""
+    try:
+        import time
+        current_time = time.time()
+        cutoff_time = current_time - (days * 24 * 60 * 60)
+        
+        if not os.path.exists(BACKUP_DIR):
+            return
+        
+        for filename in os.listdir(BACKUP_DIR):
+            if filename.startswith("hobot_backup_") and filename.endswith(".sql"):
+                file_path = os.path.join(BACKUP_DIR, filename)
+                try:
+                    file_time = os.path.getmtime(file_path)
+                    if file_time < cutoff_time:
+                        os.remove(file_path)
+                        print(f"🗑️  오래된 백업 파일 삭제: {filename}")
+                except Exception as e:
+                    print(f"⚠️  백업 파일 삭제 실패 ({filename}): {e}")
+    except Exception as e:
+        print(f"⚠️  백업 정리 실패: {e}")
+
+
+def restore_database(backup_path: str):
+    """데이터베이스 복원"""
+    if not os.path.exists(backup_path):
+        raise FileNotFoundError(f"백업 파일을 찾을 수 없습니다: {backup_path}")
+    
+    try:
+        import subprocess
+        
+        # 현재 데이터베이스 백업
+        current_backup = backup_database()
+        if current_backup:
+            print(f"✅ 현재 데이터베이스 백업 완료: {current_backup}")
+        
+        # 백업 파일로 복원
+        cmd = [
+            'mysql',
+            f'--host={DB_HOST}',
+            f'--port={DB_PORT}',
+            f'--user={DB_USER}',
+            f'--password={DB_PASSWORD}',
+            DB_NAME
+        ]
+        
+        with open(backup_path, 'r', encoding='utf-8') as f:
+            result = subprocess.run(cmd, stdin=f, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode == 0:
+            print(f"✅ 데이터베이스 복원 완료: {backup_path}")
+            return True
+        else:
+            raise Exception(f"복원 실패: {result.stderr}")
+    except FileNotFoundError:
+        raise Exception("mysql 클라이언트를 찾을 수 없습니다. MySQL 클라이언트가 설치되어 있는지 확인하세요.")
+    except Exception as e:
+        print(f"❌ 복원 실패: {e}")
+        raise
+
+
+def list_backups():
+    """백업 파일 목록 조회"""
+    ensure_backup_dir()
+    
+    if not os.path.exists(BACKUP_DIR):
+        return []
+    
+    backups = []
+    for filename in os.listdir(BACKUP_DIR):
+        if filename.startswith("hobot_backup_") and filename.endswith(".sql"):
+            file_path = os.path.join(BACKUP_DIR, filename)
+            try:
+                import time
+                file_time = os.path.getmtime(file_path)
+                file_size = os.path.getsize(file_path)
+                backups.append({
+                    'filename': filename,
+                    'path': file_path,
+                    'size': file_size,
+                    'created_at': datetime.fromtimestamp(file_time).isoformat()
+                })
+            except Exception:
+                pass
+    
+    # 생성 시간 기준으로 정렬 (최신순)
+    backups.sort(key=lambda x: x['created_at'], reverse=True)
+    return backups
+
+
+# 데이터베이스 초기화
+try:
+    init_database()
+except Exception as e:
+    print(f"⚠️  데이터베이스 초기화 실패: {e}")
+    print("MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")

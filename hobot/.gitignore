@@ -19,6 +19,17 @@ daily_news.txt
 CurrentStrategy.json
 CurrentStrategy_kis.txt
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+service/database/*.db
+service/database/*.db-shm
+service/database/*.db-wal
+**/service/database/*.db
+**/service/database/*.db-shm
+**/service/database/*.db-wal
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

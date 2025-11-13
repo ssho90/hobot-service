@@ -33,36 +33,15 @@ class MemoryEntry(TypedDict):
     created_at: str
 
 # -----------------------------
-# 기억 저장소 (요약 기반 구조, 파일 저장)
+# 기억 저장소 (요약 기반 구조, SQLite 저장)
 # -----------------------------
-class MemoryStore:
-    def __init__(self, file_path: str = MEMORY_FILE):
-        self.file_path = file_path
-        self.memory: List[MemoryEntry] = self.load()
+from service.database.memory_db import MemoryStore as SQLiteMemoryStore
 
-    def load(self) -> List[MemoryEntry]:
-        if os.path.exists(self.file_path):
-            with open(self.file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return []
-
-    def save_to_file(self) -> None:
-        with open(self.file_path, 'w', encoding='utf-8') as f:
-            json.dump(self.memory, f, ensure_ascii=False, indent=2)
-
-    def save(self, topic: str, summary: str) -> None:
-        self.memory.append({
-            "topic": topic,
-            "summary": summary,
-            "created_at": datetime.now().isoformat()
-        })
-        self.save_to_file()
-
-    def recall(self, query: str) -> str:
-        for mem in reversed(self.memory):
-            if mem["topic"] in query or query in mem["summary"]:
-                return mem["summary"]
-        return ""
+# SQLite 기반 MemoryStore 사용
+class MemoryStore(SQLiteMemoryStore):
+    def __init__(self, file_path: str = None):
+        # file_path는 호환성을 위해 받지만 사용하지 않음
+        super().__init__()
 
 # -----------------------------
 # GPT 호출 함수 (multi-turn 대응)

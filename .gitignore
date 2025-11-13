@@ -136,3 +136,14 @@ tmp/
 # Database files
 **/service/database/users.json
 hobot/service/database/users.json
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+hobot/service/database/*.db
+hobot/service/database/*.db-shm
+hobot/service/database/*.db-wal
+**/service/database/*.db
+**/service/database/*.db-shm
+**/service/database/*.db-wal
