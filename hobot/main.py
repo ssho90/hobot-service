@@ -103,10 +103,25 @@ async def get_daily_news():
     try:
         result = news_manager.get_news_with_date()
         
-        if result["news"]:
-            return result
-        else:
-            raise HTTPException(status_code=404, detail="No news available")
+        # 뉴스가 없으면 자동으로 업데이트 시도
+        if not result["news"]:
+            logging.info("No news available, attempting to update...")
+            try:
+                update_result = news_manager.update_news_with_tavily(compiled, force_update=False)
+                if update_result.get("status") == "success":
+                    # 업데이트 후 다시 읽기
+                    result = news_manager.get_news_with_date()
+                    if result["news"]:
+                        return result
+            except Exception as update_error:
+                logging.warning(f"Auto-update failed: {update_error}")
+            
+            # 업데이트 실패하거나 여전히 뉴스가 없으면 에러 반환
+            raise HTTPException(status_code=404, detail="No news available. Please try /api/news-update to fetch news.")
+        
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         logging.error(f"Error getting daily news: {e}")
         raise HTTPException(status_code=500, detail=str(e))
