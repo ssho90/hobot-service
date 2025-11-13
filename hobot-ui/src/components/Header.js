@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoginModal from './LoginModal';
 import './Header.css';
 
 const Header = () => {
@@ -10,6 +11,7 @@ const Header = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAdminSubmenu, setShowAdminSubmenu] = useState(false);
   const [dashboardActiveTab, setDashboardActiveTab] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const menuRef = useRef(null);
   const adminMenuRef = useRef(null);
   
@@ -31,11 +33,7 @@ const Header = () => {
   }, []);
   
   const handleLogin = () => {
-    navigate('/login');
-  };
-  
-  const handleRegister = () => {
-    navigate('/register');
+    setShowLoginModal(true);
   };
   
   const handleTabClick = (tab) => {
@@ -223,24 +221,20 @@ const Header = () => {
             </div>
           </>
         ) : (
-            <>
-              <button 
-                className="btn btn-secondary"
-                onClick={handleLogin}
-                style={{ marginRight: '10px', padding: '8px 16px' }}
-              >
-                로그인
-              </button>
-              <button 
-                className="btn"
-                onClick={handleRegister}
-                style={{ padding: '8px 16px' }}
-              >
-                회원가입
-              </button>
-            </>
+            <button 
+              className="btn btn-secondary"
+              onClick={handleLogin}
+              style={{ padding: '8px 16px' }}
+            >
+              로그인
+            </button>
           )}
       </div>
+      
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
     </header>
   );
 };
