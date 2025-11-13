@@ -53,6 +53,9 @@ def ensure_backup_dir():
 @contextmanager
 def get_db_connection():
     """데이터베이스 연결 컨텍스트 매니저"""
+    # 데이터베이스 초기화 확인
+    ensure_database_initialized()
+    
     conn = None
     try:
         conn = pymysql.connect(
@@ -411,9 +414,18 @@ def list_backups():
     return backups
 
 
-# 데이터베이스 초기화
-try:
-    init_database()
-except Exception as e:
-    print(f"⚠️  데이터베이스 초기화 실패: {e}")
-    print("MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")
+# 데이터베이스 초기화는 지연 초기화로 변경
+# 모듈 import 시점에는 실행하지 않고, 실제 사용 시점에 초기화
+_db_initialized = False
+
+def ensure_database_initialized():
+    """데이터베이스가 초기화되었는지 확인하고, 필요시 초기화"""
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            init_database()
+            _db_initialized = True
+        except Exception as e:
+            print(f"⚠️  데이터베이스 초기화 실패: {e}")
+            print("MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")
+            # 초기화 실패해도 예외를 발생시키지 않음 (서비스 시작은 계속)

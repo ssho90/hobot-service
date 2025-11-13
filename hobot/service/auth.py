@@ -21,37 +21,50 @@ def _row_to_dict(row) -> Dict:
     return dict(row) if row else None
 
 
+_db_initialized = False
+
 def init_db():
-    """데이터베이스 초기화"""
-    from service.database.db import init_database, migrate_from_json
+    """데이터베이스 초기화 (지연 초기화)"""
+    global _db_initialized
+    if _db_initialized:
+        return
     
-    # 데이터베이스 초기화
-    init_database()
+    from service.database.db import init_database, migrate_from_json, ensure_database_initialized
+    
+    # 데이터베이스 초기화 (이미 ensure_database_initialized에서 처리됨)
+    ensure_database_initialized()
     
     # JSON에서 마이그레이션 (최초 1회만)
-    migrate_from_json()
+    try:
+        migrate_from_json()
+    except Exception as e:
+        print(f"⚠️  마이그레이션 실패 (무시하고 계속): {e}")
     
     # 기본 admin 사용자 확인 및 생성
-    # get_user_by_username이 아직 정의되지 않았을 수 있으므로 직접 쿼리
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = %s", ('admin',))
-        admin_user = cursor.fetchone()
-        
-        if not admin_user:
-            now = datetime.now()
-            cursor.execute("""
-                INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (
-                'admin',
-                'admin@hobot.com',
-                hash_password('admin'),
-                'admin',
-                now,
-                now
-            ))
-            conn.commit()
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE username = %s", ('admin',))
+            admin_user = cursor.fetchone()
+            
+            if not admin_user:
+                now = datetime.now()
+                cursor.execute("""
+                    INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    'admin',
+                    'admin@hobot.com',
+                    hash_password('admin'),
+                    'admin',
+                    now,
+                    now
+                ))
+                conn.commit()
+    except Exception as e:
+        print(f"⚠️  Admin 사용자 생성 실패 (무시하고 계속): {e}")
+    
+    _db_initialized = True
 
 
 def hash_password(password: str) -> str:
@@ -92,6 +105,7 @@ def verify_token(token: str) -> Optional[Dict]:
 
 def get_user_by_username(username: str) -> Optional[Dict]:
     """사용자명으로 사용자 조회"""
+    init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
@@ -101,6 +115,7 @@ def get_user_by_username(username: str) -> Optional[Dict]:
 
 def get_user_by_email(email: str) -> Optional[Dict]:
     """이메일로 사용자 조회"""
+    init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
@@ -110,6 +125,7 @@ def get_user_by_email(email: str) -> Optional[Dict]:
 
 def get_user_by_id(user_id: int) -> Optional[Dict]:
     """ID로 사용자 조회"""
+    init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
@@ -119,6 +135,7 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
 
 def create_user(username: str, email: str, password: str, role: str = "user") -> Dict:
     """새 사용자 생성"""
+    init_db()  # 지연 초기화
     # 중복 확인
     if get_user_by_username(username):
         raise HTTPException(
@@ -158,6 +175,7 @@ def create_user(username: str, email: str, password: str, role: str = "user") ->
 
 def get_all_users() -> List[Dict]:
     """모든 사용자 조회 (admin 전용)"""
+    init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id, username, email, role, created_at, updated_at FROM users")
@@ -179,6 +197,7 @@ def get_all_users() -> List[Dict]:
 def update_user(user_id: int, username: Optional[str] = None, 
                 email: Optional[str] = None, role: Optional[str] = None) -> Dict:
     """사용자 정보 업데이트"""
+    init_db()  # 지연 초기화
     # 사용자 존재 확인
     user = get_user_by_id(user_id)
     if not user:
@@ -245,6 +264,7 @@ def update_user(user_id: int, username: Optional[str] = None,
 
 def delete_user(user_id: int) -> bool:
     """사용자 삭제"""
+    init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
@@ -258,5 +278,5 @@ def is_system_admin(username: str) -> bool:
     return username in SYSTEM_ADMINS
 
 
-# 데이터베이스 초기화
-init_db()
+# 데이터베이스 초기화는 지연 초기화로 변경
+# 실제 사용 시점에 초기화됨 (get_db_connection 호출 시)

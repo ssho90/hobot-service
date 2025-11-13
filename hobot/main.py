@@ -14,6 +14,8 @@ from app import daily_news_summary
 from service.news.daily_news_agent import compiled
 from service.news import news_manager
 from service import auth
+# 서비스 시작 시 데이터베이스 초기화 (지연 초기화)
+# 실제 사용 시점에 자동으로 초기화됨
 from typing import Optional
 
 app = FastAPI(title="Hobot API", version="1.0.0")
