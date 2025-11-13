@@ -35,16 +35,34 @@ const News = () => {
     setUpdating(true);
     setError(null);
     try {
-      const response = await fetch('/api/news-update?force=true');
+      // 타임아웃을 3분(180초)으로 설정
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 180000); // 3분
+      
+      const response = await fetch('/api/news-update?force=true', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
-        // 업데이트 성공 후 새 뉴스 불러오기
-        await fetchNews();
+        const data = await response.json().catch(() => null);
+        if (data && data.status === 'success') {
+          // 업데이트 성공 후 새 뉴스 불러오기
+          await fetchNews();
+        } else {
+          setError(`Failed to update news: ${data?.message || 'Unknown response format'}`);
+        }
       } else {
-        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}` }));
         setError(`Failed to update news: ${errorData.detail || response.status}`);
       }
     } catch (err) {
-      setError(`Error updating news: ${err.message}`);
+      if (err.name === 'AbortError') {
+        setError('News update timed out. Please try again.');
+      } else {
+        setError(`Error updating news: ${err.message}`);
+      }
     } finally {
       setUpdating(false);
     }
