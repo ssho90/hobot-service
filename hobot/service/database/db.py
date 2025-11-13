@@ -66,7 +66,8 @@ def get_db_connection():
             database=DB_NAME,
             charset=DB_CHARSET,
             cursorclass=DictCursor,
-            autocommit=False
+            autocommit=False,
+            connect_timeout=5  # 5초 타임아웃
         )
         yield conn
         conn.commit()
@@ -88,7 +89,8 @@ def init_database():
             port=DB_PORT,
             user=DB_USER,
             password=DB_PASSWORD,
-            charset=DB_CHARSET
+            charset=DB_CHARSET,
+            connect_timeout=5  # 5초 타임아웃
         )
         with conn.cursor() as cursor:
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} CHARACTER SET {DB_CHARSET} COLLATE {DB_CHARSET}_unicode_ci")
