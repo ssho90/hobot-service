@@ -68,10 +68,10 @@ const News = () => {
     }
   };
 
-  // 자동 로드 제거 - 사용자가 명시적으로 요청할 때만 로드
-  // useEffect(() => {
-  //   fetchNews();
-  // }, []);
+  // 컴포넌트 마운트 시 자동으로 뉴스 로드
+  useEffect(() => {
+    fetchNews();
+  }, []);
 
   return (
     <div className="news-container">
@@ -114,7 +114,44 @@ const News = () => {
         </div>
       )}
 
-      {news && (
+      {!loading && !error && !news && (
+        <div className="card news-content-card">
+          <div className="news-content" style={{ textAlign: 'center', padding: '2rem' }}>
+            <p style={{ fontSize: '1.2rem', color: '#666' }}>
+              업데이트가 필요합니다.
+            </p>
+            <p style={{ fontSize: '0.9rem', color: '#999', marginTop: '0.5rem' }}>
+              오늘자 뉴스가 없습니다. 'Update News' 버튼을 클릭하여 뉴스를 업데이트하세요.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && news && !isToday && (
+        <div className="card news-content-card">
+          <div className="news-content" style={{ textAlign: 'center', padding: '1rem', marginBottom: '1rem', backgroundColor: '#fff3cd', borderRadius: '4px' }}>
+            <p style={{ fontSize: '1rem', color: '#856404', margin: 0 }}>
+              ⚠️ 업데이트가 필요합니다. 오늘자 뉴스가 아닙니다.
+            </p>
+          </div>
+          <div className="news-content">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h3: ({node, children, ...props}) => <h3 className="news-header-text" {...props}>{children}</h3>,
+                p: ({node, ...props}) => <p className="news-text" {...props} />,
+                strong: ({node, ...props}) => <strong className="news-bold" {...props} />,
+                ul: ({node, ...props}) => <ul className="news-list" {...props} />,
+                li: ({node, ...props}) => <li className="news-item" {...props} />,
+              }}
+            >
+              {news}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && news && isToday && (
         <div className="card news-content-card">
           <div className="news-content">
             <ReactMarkdown 

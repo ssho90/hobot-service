@@ -111,18 +111,11 @@ async def get_daily_news():
         result = news_manager.get_news_with_date()
         logging.info(f"Step 1 Result: news exists={result['news'] is not None}, date={result.get('date')}, is_today={result.get('is_today')}")
         
-        # 뉴스가 없으면 에러 반환 (자동 업데이트 제거)
-        if not result["news"]:
-            logging.warning("Step 2: No news available in file")
-            raise HTTPException(status_code=404, detail="No news available. Please use /api/news-update to fetch news.")
-        
-        logging.info("Step 3: Successfully returning news from file")
+        # 뉴스가 없어도 결과 반환 (프론트엔드에서 처리)
+        logging.info("Step 2: Returning news result (may be empty)")
         return result
-    except HTTPException:
-        logging.error("Step 4: HTTPException raised, re-raising...")
-        raise
     except Exception as e:
-        logging.error(f"Step 4: Unexpected error getting daily news: {type(e).__name__}: {str(e)}", exc_info=True)
+        logging.error(f"Step 3: Unexpected error getting daily news: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/news-update")
