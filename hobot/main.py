@@ -79,9 +79,8 @@ def require_admin(current_user: dict = Depends(get_current_user)):
     return current_user
 
 def is_system_admin(current_user: dict = Depends(get_current_user)) -> bool:
-    """시스템 어드민 여부 확인 (ssho, admin 사용자)"""
-    username = current_user.get("username", "")
-    return auth.is_system_admin(username)
+    """시스템 어드민 여부 확인 (admin role을 가진 사용자)"""
+    return current_user.get("role") == "admin"
 
 # 기본 페이지 (루트)
 @app.get("/", response_class=HTMLResponse)
@@ -254,8 +253,8 @@ async def login(request: LoginRequest):
             "role": user["role"]
         })
         
-        username = user["username"]
-        is_sys_admin = auth.is_system_admin(username)
+        # admin role을 가진 사용자인지 확인
+        is_sys_admin = user.get("role") == "admin"
         
         return {
             "status": "success",
@@ -277,8 +276,8 @@ async def login(request: LoginRequest):
 @api_router.get("/auth/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     """현재 로그인한 사용자 정보 조회"""
-    username = current_user.get("username", "")
-    is_sys_admin = auth.is_system_admin(username)
+    # admin role을 가진 사용자인지 확인
+    is_sys_admin = current_user.get("role") == "admin"
     
     return {
         "id": current_user["id"],

@@ -118,10 +118,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isSystemAdmin = () => {
-    // 시스템 어드민: ssho, admin 사용자명 또는 is_system_admin 플래그
+    // 시스템 어드민: admin role을 가진 사용자
     if (!user) return false;
-    const username = user.username || '';
-    return user.is_system_admin === true || username === 'ssho' || username === 'admin';
+    return user.role === 'admin';
   };
 
   const getAuthHeaders = () => {

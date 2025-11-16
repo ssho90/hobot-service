@@ -73,11 +73,6 @@
   color: #1e40af;
 }
 
-.role-badge.system_admin {
-  background-color: #fce7f3;
-  color: #9f1239;
-}
-
 .action-buttons {
   display: flex;
   gap: 8px;

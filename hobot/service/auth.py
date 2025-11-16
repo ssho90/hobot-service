@@ -273,9 +273,11 @@ def delete_user(user_id: int) -> bool:
 
 
 def is_system_admin(username: str) -> bool:
-    """시스템 어드민 여부 확인 (ssho, admin 사용자)"""
-    SYSTEM_ADMINS = ['ssho', 'admin']
-    return username in SYSTEM_ADMINS
+    """시스템 어드민 여부 확인 (admin role을 가진 사용자)"""
+    user = get_user_by_username(username)
+    if not user:
+        return False
+    return user.get("role") == "admin"
 
 
 # 데이터베이스 초기화는 지연 초기화로 변경
