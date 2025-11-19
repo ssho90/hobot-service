@@ -29,3 +29,8 @@ langchain-tavily
 
 # MySQL
 pymysql
+
+# Macro Trading
+fredapi
+pandas
+numpy
