@@ -37,6 +37,7 @@ JWT_SECRET_KEY=your_jwt_secret_key_here
 OPENAI_API_KEY=your_openai_api_key
 GEMINI_API_KEY=your_gemini_api_key
 TAVILY_API_KEY=your_tavily_api_key
+FRED_API_KEY=your_fred_api_key
 
 # Trading API Keys
 ENV_UP_ACCESS_KEY=your_upbit_access_key
@@ -89,6 +90,7 @@ EC2 서버에서는 GitHub Actions의 secrets와 variables를 사용합니다.
 | `ENV_OPENAI_API_KEY` | OpenAI API 키 |
 | `ENV_GEMINI_API_KEY` | Gemini API 키 |
 | `ENV_TAVILY_API_KEY` | Tavily API 키 |
+| `FRED_API_KEY` | FRED API 키 (거시경제 데이터 수집용) |
 | `ENV_UP_ACCESS_KEY` | Upbit Access Key |
 | `ENV_UP_SECRET_KEY` | Upbit Secret Key |
 | `ENV_HT_API_KEY` | HT API Key |
@@ -132,6 +134,7 @@ EC2 서버에서는 GitHub Actions의 secrets와 variables를 사용합니다.
 - `OPENAI_API_KEY`: OpenAI API 키
 - `GEMINI_API_KEY`: Google Gemini API 키
 - `TAVILY_API_KEY`: Tavily API 키
+- `FRED_API_KEY`: FRED API 키 (거시경제 데이터 수집용)
 
 #### 거래소 API
 - `ENV_UP_ACCESS_KEY`: Upbit Access Key

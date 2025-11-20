@@ -50,6 +50,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.ENV_TAVILY_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           # MySQL Database Configuration
           DB_HOST: ${{ vars.DB_HOST || secrets.DB_HOST }}
@@ -81,6 +82,7 @@ jobs:
             export OPENAI_API_KEY="${OPENAI_API_KEY}"
             export GEMINI_API_KEY="${GEMINI_API_KEY}"
             export TAVILY_API_KEY="${TAVILY_API_KEY}"
+            export FRED_API_KEY="${FRED_API_KEY}"
             export DOMAIN_NAME="${DOMAIN_NAME}"
             export DB_HOST="${DB_HOST}"
             export DB_PORT="${DB_PORT}"

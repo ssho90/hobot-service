@@ -19,6 +19,7 @@ export HT_ID="${HT_ID}"
 export OPENAI_API_KEY="${OPENAI_API_KEY}"
 export GEMINI_API_KEY="${GEMINI_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
+export FRED_API_KEY="${FRED_API_KEY}"
 export DOMAIN_NAME="${DOMAIN_NAME}"
 # MySQL Database Configuration
 export DB_HOST="${DB_HOST:-localhost}"
@@ -157,6 +158,7 @@ HT_ID=${HT_ID}
 OPENAI_API_KEY=${OPENAI_API_KEY}
 GEMINI_API_KEY=${GEMINI_API_KEY}
 TAVILY_API_KEY=${TAVILY_API_KEY}
+FRED_API_KEY=${FRED_API_KEY}
 
 # MySQL Database Configuration
 DB_HOST=${DB_HOST}
