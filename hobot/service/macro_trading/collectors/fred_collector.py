@@ -292,12 +292,71 @@ class FREDCollector:
             logger.error(f"데이터 존재 확인 실패: {e}")
             return False
     
+    def fill_missing_dates(
+        self,
+        data: pd.Series,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        method: str = 'linear'
+    ) -> pd.Series:
+        """
+        누락된 날짜를 보간으로 채웁니다.
+        
+        Args:
+            data: 시계열 데이터 (pd.Series, 인덱스는 날짜)
+            start_date: 시작 날짜 (None이면 데이터의 첫 날짜)
+            end_date: 종료 날짜 (None이면 데이터의 마지막 날짜)
+            method: 보간 방법 ('linear', 'forward', 'backward')
+            
+        Returns:
+            pd.Series: 보간된 데이터
+        """
+        if len(data) == 0:
+            return data
+        
+        # 날짜 범위 설정
+        if start_date is None:
+            start_date = data.index.min()
+            if isinstance(start_date, pd.Timestamp):
+                start_date = start_date.date()
+            elif not isinstance(start_date, date):
+                start_date = pd.to_datetime(start_date).date()
+        
+        if end_date is None:
+            end_date = data.index.max()
+            if isinstance(end_date, pd.Timestamp):
+                end_date = end_date.date()
+            elif not isinstance(end_date, date):
+                end_date = pd.to_datetime(end_date).date()
+        
+        # 전체 날짜 범위 생성 (일별)
+        date_range = pd.date_range(start=start_date, end=end_date, freq='D')
+        
+        # 기존 데이터를 새로운 인덱스에 재인덱싱
+        data_reindexed = data.reindex(date_range)
+        
+        # 보간 적용
+        if method == 'linear':
+            data_filled = data_reindexed.interpolate(method='linear', limit_direction='both')
+        elif method == 'forward':
+            data_filled = data_reindexed.ffill()
+        elif method == 'backward':
+            data_filled = data_reindexed.bfill()
+        else:
+            data_filled = data_reindexed.interpolate(method='linear', limit_direction='both')
+        
+        # 원본 데이터가 있던 날짜는 원본 값 유지, 보간된 날짜만 추가
+        return data_filled
+    
     def save_to_db(
         self,
         indicator_code: str,
         data: pd.Series,
         indicator_name: Optional[str] = None,
-        unit: Optional[str] = None
+        unit: Optional[str] = None,
+        fill_missing: bool = False,
+        fill_start_date: Optional[date] = None,
+        fill_end_date: Optional[date] = None
     ) -> int:
         """
         FRED 데이터를 DB에 저장합니다. 중복 데이터는 건너뜁니다.
@@ -307,6 +366,9 @@ class FREDCollector:
             data: 시계열 데이터 (pd.Series, 인덱스는 날짜)
             indicator_name: 지표 이름 (None이면 FRED_INDICATORS에서 가져옴)
             unit: 단위 (None이면 FRED_INDICATORS에서 가져옴)
+            fill_missing: 누락된 날짜를 보간으로 채울지 여부
+            fill_start_date: 보간 시작 날짜 (None이면 데이터의 첫 날짜)
+            fill_end_date: 보간 종료 날짜 (None이면 데이터의 마지막 날짜)
             
         Returns:
             int: 저장된 레코드 수
@@ -315,6 +377,11 @@ class FREDCollector:
             indicator_info = FRED_INDICATORS.get(indicator_code, {})
             indicator_name = indicator_name or indicator_info.get("name", indicator_code)
             unit = unit or indicator_info.get("unit", "")
+        
+        # 누락된 날짜 보간
+        if fill_missing:
+            data = self.fill_missing_dates(data, fill_start_date, fill_end_date, method='linear')
+            logger.info(f"{indicator_code}: 누락된 날짜를 보간으로 채웠습니다. (총 {len(data)}개 데이터 포인트)")
         
         saved_count = 0
         skipped_count = 0
@@ -413,12 +480,18 @@ class FREDCollector:
                         time.sleep(request_delay)
                     continue
                 
+                # DGS10, DGS2는 누락된 날짜를 보간으로 채움
+                fill_missing = indicator_code in ["DGS10", "DGS2"]
+                
                 # DB 저장
                 saved_count = self.save_to_db(
                     indicator_code,
                     data,
                     indicator_info["name"],
-                    indicator_info["unit"]
+                    indicator_info["unit"],
+                    fill_missing=fill_missing,
+                    fill_start_date=start_date,
+                    fill_end_date=end_date
                 )
                 
                 results[indicator_code] = saved_count
@@ -434,11 +507,16 @@ class FREDCollector:
                 try:
                     data = self.fetch_indicator(indicator_code, start_date, end_date, use_rate_limit=True)
                     if len(data) > 0:
+                        # DGS10, DGS2는 누락된 날짜를 보간으로 채움
+                        fill_missing = indicator_code in ["DGS10", "DGS2"]
                         saved_count = self.save_to_db(
                             indicator_code,
                             data,
                             indicator_info["name"],
-                            indicator_info["unit"]
+                            indicator_info["unit"],
+                            fill_missing=fill_missing,
+                            fill_start_date=start_date,
+                            fill_end_date=end_date
                         )
                         results[indicator_code] = saved_count
                     else:
@@ -498,12 +576,16 @@ class FREDCollector:
                     results[indicator_code] = 0
                     continue
                 
+                # DGS10, DGS2는 누락된 날짜를 보간으로 채움
                 # DB 저장
                 saved_count = self.save_to_db(
                     indicator_code,
                     data,
                     indicator_info["name"],
-                    indicator_info["unit"]
+                    indicator_info["unit"],
+                    fill_missing=True,  # DGS10, DGS2는 항상 보간 적용
+                    fill_start_date=start_date,
+                    fill_end_date=end_date
                 )
                 
                 results[indicator_code] = saved_count

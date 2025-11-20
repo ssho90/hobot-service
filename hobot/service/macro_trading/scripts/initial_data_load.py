@@ -23,15 +23,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from service.macro_trading.collectors.fred_collector import get_fred_collector
+from service.macro_trading.collectors.fred_collector import get_fred_collector, FRED_INDICATORS
 
 
-def initial_data_load(years: int = 5):
+def initial_data_load(years: int = 5, fill_missing_only: bool = False):
     """
     초기 데이터 적재 함수
     
     Args:
         years: 수집할 과거 데이터 기간 (년, 기본값: 5년)
+        fill_missing_only: True이면 DGS10, DGS2의 누락된 날짜만 보간하여 채움
     
     Returns:
         Dict[str, int]: 지표별 저장된 레코드 수
@@ -53,10 +54,57 @@ def initial_data_load(years: int = 5):
         start_date = end_date - timedelta(days=years * 365)
         
         logger.info(f"수집 기간: {start_date} ~ {end_date} ({years}년)")
+        if fill_missing_only:
+            logger.info("모드: DGS10, DGS2 누락 날짜 보간만 수행")
         logger.info("")
+        
+        # 누락 날짜 보간만 수행하는 경우
+        if fill_missing_only:
+            results = {}
+            for indicator_code in ["DGS10", "DGS2"]:
+                try:
+                    logger.info(f"{indicator_code} 누락 날짜 보간 시작...")
+                    
+                    # 기존 데이터 조회
+                    existing_data = collector.get_latest_data(indicator_code, days=years * 365)
+                    
+                    if len(existing_data) == 0:
+                        logger.warning(f"{indicator_code} 기존 데이터가 없습니다. 전체 수집을 먼저 실행하세요.")
+                        results[indicator_code] = 0
+                        continue
+                    
+                    # 보간 적용
+                    filled_data = collector.fill_missing_dates(
+                        existing_data,
+                        start_date=start_date,
+                        end_date=end_date,
+                        method='linear'
+                    )
+                    
+                    # 보간된 데이터만 저장 (기존 데이터는 skip_existing=True로 건너뜀)
+                    indicator_info = FRED_INDICATORS.get(indicator_code, {})
+                    saved_count = collector.save_to_db(
+                        indicator_code,
+                        filled_data,
+                        indicator_info.get("name", indicator_code),
+                        indicator_info.get("unit", ""),
+                        fill_missing=False,  # 이미 보간된 데이터이므로 다시 보간하지 않음
+                        fill_start_date=None,
+                        fill_end_date=None
+                    )
+                    
+                    results[indicator_code] = saved_count
+                    logger.info(f"{indicator_code} 보간 완료: {saved_count}개 데이터 추가")
+                    
+                except Exception as e:
+                    logger.error(f"{indicator_code} 보간 실패: {e}", exc_info=True)
+                    results[indicator_code] = 0
+            
+            return results
         
         # 모든 지표 수집 (초기 적재 시 rate limit 준수를 위해 딜레이 적용)
         # 초기 적재는 대량 데이터이므로 약간 더 긴 딜레이 사용 (0.6초)
+        # DGS10, DGS2는 자동으로 보간이 적용됨
         results = collector.collect_all_indicators(
             start_date=start_date,
             end_date=end_date,
@@ -129,17 +177,25 @@ if __name__ == "__main__":
         default=5,
         help="수집할 과거 데이터 기간 (년, 기본값: 5년)"
     )
+    parser.add_argument(
+        "--fill-missing-only",
+        action="store_true",
+        help="DGS10, DGS2의 누락된 날짜만 보간하여 채움 (기존 데이터가 있는 경우)"
+    )
     
     args = parser.parse_args()
     
     print("\n" + "=" * 80)
     print("FRED 데이터 초기 적재 스크립트")
     print("=" * 80)
-    print(f"수집 기간: 최근 {args.years}년")
+    if args.fill_missing_only:
+        print("모드: 누락 날짜 보간만 수행 (DGS10, DGS2)")
+    else:
+        print(f"수집 기간: 최근 {args.years}년")
     print("=" * 80 + "\n")
     
     try:
-        results = initial_data_load(years=args.years)
+        results = initial_data_load(years=args.years, fill_missing_only=args.fill_missing_only)
         
         if results:
             print("\n✅ 초기 데이터 적재가 완료되었습니다!")
