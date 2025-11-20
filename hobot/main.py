@@ -192,6 +192,132 @@ async def get_current_strategy_platform(platform: str):
         logging.error(f"Error reading current strategy: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Macro Trading API
+@api_router.get("/macro-trading/fred-data")
+async def get_fred_data(
+    indicator_code: str = Query(..., description="지표 코드 (DGS10, DGS2, FEDFUNDS, CPIAUCSL, PCEPI, GDP, UNRATE, PAYEMS, WALCL, WTREGEN, RRPONTSYD, BAMLH0A0HYM2)"),
+    days: int = Query(default=365, description="조회할 일수 (기본값: 365일)")
+):
+    """FRED 데이터 조회 API"""
+    try:
+        from service.macro_trading.collectors.fred_collector import get_fred_collector
+        from datetime import date, timedelta
+        
+        collector = get_fred_collector()
+        
+        # 최근 N일간 데이터 조회
+        data = collector.get_latest_data(indicator_code, days=days)
+        
+        if len(data) == 0:
+            return {
+                "indicator_code": indicator_code,
+                "data": [],
+                "message": "데이터가 없습니다."
+            }
+        
+        # 날짜와 값을 리스트로 변환
+        result_data = [
+            {
+                "date": date_idx.strftime("%Y-%m-%d") if hasattr(date_idx, 'strftime') else str(date_idx),
+                "value": float(value)
+            }
+            for date_idx, value in data.items()
+        ]
+        
+        return {
+            "indicator_code": indicator_code,
+            "data": result_data,
+            "count": len(result_data)
+        }
+    except Exception as e:
+        logging.error(f"Error fetching FRED data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/macro-trading/yield-curve-spread")
+async def get_yield_curve_spread_data(
+    days: int = Query(default=365, description="조회할 일수 (기본값: 365일)")
+):
+    """장단기 금리차 데이터 조회 API (DGS10 - DGS2)"""
+    try:
+        from service.macro_trading.collectors.fred_collector import get_fred_collector
+        from datetime import date, timedelta
+        import pandas as pd
+        
+        collector = get_fred_collector()
+        
+        # DGS10과 DGS2 데이터 조회
+        dgs10_data = collector.get_latest_data("DGS10", days=days)
+        dgs2_data = collector.get_latest_data("DGS2", days=days)
+        
+        if len(dgs10_data) == 0 or len(dgs2_data) == 0:
+            return {
+                "spread_data": [],
+                "dgs10_data": [],
+                "dgs2_data": [],
+                "message": "데이터가 부족합니다."
+            }
+        
+        # 공통 날짜로 정렬하여 스프레드 계산
+        common_dates = dgs10_data.index.intersection(dgs2_data.index)
+        
+        spread_data = []
+        dgs10_list = []
+        dgs2_list = []
+        
+        for date_idx in common_dates:
+            dgs10_val = dgs10_data[date_idx]
+            dgs2_val = dgs2_data[date_idx]
+            spread = dgs10_val - dgs2_val
+            
+            date_str = date_idx.strftime("%Y-%m-%d") if hasattr(date_idx, 'strftime') else str(date_idx)
+            
+            spread_data.append({
+                "date": date_str,
+                "value": float(spread)
+            })
+            dgs10_list.append({
+                "date": date_str,
+                "value": float(dgs10_val)
+            })
+            dgs2_list.append({
+                "date": date_str,
+                "value": float(dgs2_val)
+            })
+        
+        # 이동평균 계산 (20일, 120일)
+        if len(spread_data) >= 20:
+            spread_values = [item["value"] for item in spread_data]
+            ma20_values = []
+            ma120_values = []
+            
+            for i in range(len(spread_values)):
+                if i >= 19:
+                    ma20 = sum(spread_values[i-19:i+1]) / 20
+                    ma20_values.append({"date": spread_data[i]["date"], "value": float(ma20)})
+                else:
+                    ma20_values.append({"date": spread_data[i]["date"], "value": None})
+                
+                if i >= 119:
+                    ma120 = sum(spread_values[i-119:i+1]) / 120
+                    ma120_values.append({"date": spread_data[i]["date"], "value": float(ma120)})
+                else:
+                    ma120_values.append({"date": spread_data[i]["date"], "value": None})
+        else:
+            ma20_values = []
+            ma120_values = []
+        
+        return {
+            "spread_data": spread_data,
+            "dgs10_data": dgs10_list,
+            "dgs2_data": dgs2_list,
+            "ma20": ma20_values,
+            "ma120": ma120_values,
+            "count": len(spread_data)
+        }
+    except Exception as e:
+        logging.error(f"Error fetching yield curve spread data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/current-strategy")
 async def update_current_strategy(request: StrategyRequest):
     """전략을 업데이트합니다. (기본값은 upbit, 하위 호환성 유지)"""

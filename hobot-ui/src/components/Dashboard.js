@@ -7,6 +7,7 @@ import Tools from './Tools';
 import News from './News';
 import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
+import MacroMonitoring from './MacroMonitoring';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
 import './Dashboard.css';
@@ -39,6 +40,8 @@ const Dashboard = () => {
     const tabParam = urlParams.get('tab');
     if (tabParam === 'trading' && isSystemAdmin()) {
       setActiveTab('trading');
+    } else if (tabParam === 'monitoring') {
+      setActiveTab('monitoring');
     } else if (tabParam === 'admin' && isSystemAdmin()) {
       setActiveTab('admin-users');
     }
@@ -147,6 +150,10 @@ const Dashboard = () => {
 
           {activeTab === 'admin-logs' && (
             <LogManagementPage />
+          )}
+
+          {activeTab === 'monitoring' && (
+            <MacroMonitoring />
           )}
         </div>
       </div>

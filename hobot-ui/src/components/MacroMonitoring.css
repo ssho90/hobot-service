@@ -1,0 +1,87 @@
+.macro-monitoring {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.macro-monitoring h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.macro-monitoring-loading,
+.macro-monitoring-error {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.macro-monitoring-error {
+  color: #d32f2f;
+}
+
+.chart-section {
+  margin-bottom: 40px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-section h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.yield-spread-chart {
+  width: 100%;
+  height: 500px;
+}
+
+.other-indicators {
+  margin-top: 40px;
+}
+
+.other-indicators h2 {
+  font-size: 24px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 30px;
+}
+
+.indicator-chart {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.indicator-chart h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.indicators-loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .indicators-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .macro-monitoring {
+    padding: 10px;
+  }
+}
+

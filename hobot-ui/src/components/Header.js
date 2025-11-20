@@ -40,6 +40,13 @@ const Header = () => {
     if (tab === 'news') {
       navigate('/');
       setShowAdminSubmenu(false);
+    } else if (tab === 'monitoring') {
+      navigate('/dashboard?tab=monitoring');
+      setShowAdminSubmenu(false);
+      setTimeout(() => {
+        const event = new CustomEvent('switchToTab', { detail: { tab: 'monitoring' } });
+        window.dispatchEvent(event);
+      }, 100);
     } else if (tab === 'trading') {
       navigate('/dashboard?tab=trading');
       setShowAdminSubmenu(false);
@@ -67,6 +74,7 @@ const Header = () => {
     if (location.pathname === '/') return 'news';
     if (location.pathname === '/dashboard') {
       if (dashboardActiveTab === 'trading') return 'trading';
+      if (dashboardActiveTab === 'monitoring') return 'monitoring';
       if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs') return 'admin';
       return null;
     }
@@ -129,6 +137,12 @@ const Header = () => {
             onClick={() => handleTabClick('news')}
           >
             News
+          </button>
+          <button
+            className={`header-tab ${activeTab === 'monitoring' ? 'active' : ''}`}
+            onClick={() => handleTabClick('monitoring')}
+          >
+            모니터링
           </button>
           {isSystemAdmin() && (
             <>
