@@ -21,6 +21,56 @@
   color: #d32f2f;
 }
 
+.macro-monitoring-error-banner {
+  background: #ffebee;
+  border-left: 4px solid #d32f2f;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  color: #c62828;
+}
+
+.data-quality-warning {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  color: #e65100;
+  font-size: 14px;
+}
+
+.data-quality-warning ul {
+  margin: 8px 0 0 20px;
+  padding: 0;
+}
+
+.data-quality-warning li {
+  margin: 4px 0;
+}
+
+.indicator-warning {
+  background: #fff3e0;
+  border-left: 3px solid #ff9800;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  color: #e65100;
+  font-size: 13px;
+}
+
+.indicator-error {
+  background: #ffebee;
+  border: 1px solid #d32f2f;
+}
+
+.indicator-error-message {
+  padding: 20px;
+  text-align: center;
+  color: #c62828;
+  font-size: 14px;
+}
+
 .chart-section {
   margin-bottom: 40px;
   background: white;

@@ -12,6 +12,7 @@ const MacroMonitoring = () => {
   const [error, setError] = useState(null);
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
+  const resizeHandlerRef = useRef(null);
 
   // 장단기 금리차 데이터 로드
   useEffect(() => {
@@ -23,10 +24,23 @@ const MacroMonitoring = () => {
           throw new Error('데이터를 불러오는데 실패했습니다.');
         }
         const data = await response.json();
-        setYieldSpreadData(data);
-        setError(null);
+        
+        // 에러가 있으면 표시
+        if (data.error) {
+          const errorMsg = data.error.message || '데이터를 불러오는 중 오류가 발생했습니다.';
+          setError(errorMsg);
+          // 에러가 있어도 데이터가 있으면 표시
+          if (data.spread_data && data.spread_data.length > 0) {
+            setYieldSpreadData(data);
+          } else {
+            setYieldSpreadData(null);
+          }
+        } else {
+          setYieldSpreadData(data);
+          setError(null);
+        }
       } catch (err) {
-        setError(err.message);
+        setError(err.message || '데이터를 불러오는데 실패했습니다.');
         console.error('Error fetching yield spread data:', err);
       } finally {
         setLoading(false);
@@ -38,95 +52,114 @@ const MacroMonitoring = () => {
 
   // Tradingview Lightweight Charts로 장단기 금리차 차트 렌더링
   useEffect(() => {
-    if (!yieldSpreadData || !chartContainerRef.current) return;
+    // 거시경제 지표 탭이 활성화되고 데이터가 있을 때만 차트 렌더링
+    if (activeTab !== 'macro-indicators' || !yieldSpreadData || !chartContainerRef.current) {
+      // 다른 탭으로 전환 시 차트 정리
+      if (activeTab !== 'macro-indicators' && chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+      }
+      return;
+    }
 
     // 기존 차트 제거
     if (chartRef.current) {
       chartRef.current.remove();
     }
 
-    const chart = createChart(chartContainerRef.current, {
-      layout: {
-        background: { type: ColorType.Solid, color: 'white' },
-        textColor: 'black',
-      },
-      width: chartContainerRef.current.clientWidth,
-      height: 500,
-      grid: {
-        vertLines: { color: '#e0e0e0' },
-        horzLines: { color: '#e0e0e0' },
-      },
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
-      },
-    });
+    // DOM이 준비될 때까지 약간의 지연
+    const timer = setTimeout(() => {
+      if (!chartContainerRef.current) return;
 
-    // 스프레드 라인
-    const spreadSeries = chart.addLineSeries({
-      title: '장단기 금리차',
-      color: '#2196F3',
-      lineWidth: 2,
-    });
+      const chart = createChart(chartContainerRef.current, {
+        layout: {
+          background: { type: ColorType.Solid, color: 'white' },
+          textColor: 'black',
+        },
+        width: chartContainerRef.current.clientWidth,
+        height: 500,
+        grid: {
+          vertLines: { color: '#e0e0e0' },
+          horzLines: { color: '#e0e0e0' },
+        },
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: false,
+        },
+      });
 
-    // 20일 이동평균
-    const ma20Series = chart.addLineSeries({
-      title: '20일 이동평균',
-      color: '#FF9800',
-      lineWidth: 1,
-    });
+      // 스프레드 라인
+      const spreadSeries = chart.addLineSeries({
+        title: '장단기 금리차',
+        color: '#2196F3',
+        lineWidth: 2,
+      });
 
-    // 120일 이동평균
-    const ma120Series = chart.addLineSeries({
-      title: '120일 이동평균',
-      color: '#4CAF50',
-      lineWidth: 1,
-    });
+      // 20일 이동평균
+      const ma20Series = chart.addLineSeries({
+        title: '20일 이동평균',
+        color: '#FF9800',
+        lineWidth: 1,
+      });
 
-    // 데이터 포맷팅 및 추가 (lightweight-charts는 YYYY-MM-DD 형식 필요)
-    const spreadData = yieldSpreadData.spread_data.map(item => ({
-      time: item.date, // 이미 YYYY-MM-DD 형식
-      value: item.value,
-    }));
+      // 120일 이동평균
+      const ma120Series = chart.addLineSeries({
+        title: '120일 이동평균',
+        color: '#4CAF50',
+        lineWidth: 1,
+      });
 
-    const ma20Data = yieldSpreadData.ma20
-      .filter(item => item.value !== null)
-      .map(item => ({
+      // 데이터 포맷팅 및 추가 (lightweight-charts는 YYYY-MM-DD 형식 필요)
+      const spreadData = yieldSpreadData.spread_data.map(item => ({
         time: item.date, // 이미 YYYY-MM-DD 형식
         value: item.value,
       }));
 
-    const ma120Data = yieldSpreadData.ma120
-      .filter(item => item.value !== null)
-      .map(item => ({
-        time: item.date, // 이미 YYYY-MM-DD 형식
-        value: item.value,
-      }));
+      const ma20Data = yieldSpreadData.ma20
+        .filter(item => item.value !== null)
+        .map(item => ({
+          time: item.date, // 이미 YYYY-MM-DD 형식
+          value: item.value,
+        }));
 
-    spreadSeries.setData(spreadData);
-    ma20Series.setData(ma20Data);
-    ma120Series.setData(ma120Data);
+      const ma120Data = yieldSpreadData.ma120
+        .filter(item => item.value !== null)
+        .map(item => ({
+          time: item.date, // 이미 YYYY-MM-DD 형식
+          value: item.value,
+        }));
 
-    chartRef.current = chart;
+      spreadSeries.setData(spreadData);
+      ma20Series.setData(ma20Data);
+      ma120Series.setData(ma120Data);
 
-    // 리사이즈 핸들러
-    const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-        });
-      }
-    };
+      chartRef.current = chart;
 
-    window.addEventListener('resize', handleResize);
+      // 리사이즈 핸들러
+      const handleResize = () => {
+        if (chartContainerRef.current && chartRef.current) {
+          chartRef.current.applyOptions({
+            width: chartContainerRef.current.clientWidth,
+          });
+        }
+      };
+
+      resizeHandlerRef.current = handleResize;
+      window.addEventListener('resize', handleResize);
+    }, 100);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+      if (resizeHandlerRef.current) {
+        window.removeEventListener('resize', resizeHandlerRef.current);
+        resizeHandlerRef.current = null;
+      }
       if (chartRef.current) {
         chartRef.current.remove();
+        chartRef.current = null;
       }
     };
-  }, [yieldSpreadData]);
+  }, [yieldSpreadData, activeTab]);
 
   if (loading && activeTab === 'macro-indicators') {
     return <div className="macro-monitoring-loading">데이터를 불러오는 중...</div>;
@@ -161,9 +194,28 @@ const MacroMonitoring = () => {
       {/* 거시경제 지표 탭 */}
       {activeTab === 'macro-indicators' && (
         <div className="tab-content">
+          {/* 에러 메시지 표시 */}
+          {error && (
+            <div className="macro-monitoring-error-banner">
+              <strong>⚠️ 경고:</strong> {error}
+            </div>
+          )}
+          
           {/* 장단기 금리차 차트 */}
           <div className="chart-section">
             <h2>장단기 금리차 (DGS10 - DGS2) - 지난 1년</h2>
+            {yieldSpreadData && yieldSpreadData.error && (
+              <div className="data-quality-warning">
+                <strong>⚠️ 데이터 품질 경고:</strong> {yieldSpreadData.error.message}
+                {yieldSpreadData.error.details && (
+                  <ul>
+                    {yieldSpreadData.error.details.map((detail, idx) => (
+                      <li key={idx}>{detail}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
             <div ref={chartContainerRef} className="yield-spread-chart" />
           </div>
 
@@ -249,56 +301,81 @@ const OtherIndicatorsCharts = () => {
   };
 
   return (
-    <div className="other-indicators">
-      <h2>기타 거시경제 지표</h2>
-      <div className="indicators-grid">
-        {Object.entries(indicators).map(([code, data]) => {
-          if (!data || data.length === 0) return null;
+      <div className="other-indicators">
+        <h2>기타 거시경제 지표</h2>
+        <div className="indicators-grid">
+          {Object.entries(indicators).map(([code, indicatorData]) => {
+            const data = indicatorData?.data || indicatorData; // 하위 호환성
+            if (!data || data.length === 0) {
+              // 에러가 있으면 표시
+              if (indicatorData?.error) {
+                const info = indicatorInfo[code];
+                return (
+                  <div key={code} className="indicator-chart indicator-error">
+                    <h3>{info?.name || code} ({code})</h3>
+                    <div className="indicator-error-message">
+                      <strong>⚠️ 오류:</strong> {indicatorData.error.message}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }
 
-          const info = indicatorInfo[code];
-          if (!info) return null;
+            const info = indicatorInfo[code];
+            if (!info) return null;
 
-          return (
-            <div key={code} className="indicator-chart">
-              <h3>{info.name} ({code})</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id={`color${code}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2196F3" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#2196F3" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12 }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    label={{ value: info.unit, angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`${value} ${info.unit}`, info.name]}
-                    labelFormatter={(label) => `날짜: ${label}`}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#2196F3"
-                    fillOpacity={1}
-                    fill={`url(#color${code})`}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          );
-        })}
+            return (
+              <div key={code} className="indicator-chart">
+                <h3>{info.name} ({code})</h3>
+                {indicatorData?.error && (
+                  <div className="indicator-warning">
+                    <strong>⚠️ 경고:</strong> {indicatorData.error.message}
+                  </div>
+                )}
+                {indicatorData?.warning && (
+                  <div className="indicator-warning">
+                    <strong>⚠️ 데이터 품질 경고:</strong> {indicatorData.warning.message}
+                  </div>
+                )}
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={data}>
+                    <defs>
+                      <linearGradient id={`color${code}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2196F3" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#2196F3" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      label={{ value: info.unit, angle: -90, position: 'insideLeft' }}
+                    />
+                    <Tooltip 
+                      formatter={(value) => [`${value} ${info.unit}`, info.name]}
+                      labelFormatter={(label) => `날짜: ${label}`}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#2196F3"
+                      fillOpacity={1}
+                      fill={`url(#color${code})`}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
   );
 };
 

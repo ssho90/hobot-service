@@ -201,20 +201,58 @@ async def get_fred_data(
 ):
     """FRED 데이터 조회 API"""
     try:
-        from service.macro_trading.collectors.fred_collector import get_fred_collector
+        from service.macro_trading.collectors.fred_collector import (
+            get_fred_collector, RateLimitError, FREDAPIError, DataInsufficientError
+        )
+        from service.macro_trading.validators.data_validator import FREDDataValidator
         from datetime import date, timedelta
         
         collector = get_fred_collector()
+        validator = FREDDataValidator()
         
         # 최근 N일간 데이터 조회
-        data = collector.get_latest_data(indicator_code, days=days)
+        try:
+            data = collector.get_latest_data(indicator_code, days=days)
+        except DataInsufficientError as e:
+            logging.warning(f"Data insufficient: {e}")
+            return {
+                "indicator_code": indicator_code,
+                "data": [],
+                "error": {
+                    "type": "data_insufficient",
+                    "message": str(e),
+                    "severity": "warning"
+                },
+                "message": "데이터가 부족합니다."
+            }
+        except (RateLimitError, FREDAPIError) as e:
+            logging.error(f"FRED API error: {e}", exc_info=True)
+            return {
+                "indicator_code": indicator_code,
+                "data": [],
+                "error": {
+                    "type": "api_error",
+                    "message": str(e),
+                    "severity": "critical"
+                },
+                "message": "FRED API 오류가 발생했습니다."
+            }
         
         if len(data) == 0:
             return {
                 "indicator_code": indicator_code,
                 "data": [],
+                "error": {
+                    "type": "no_data",
+                    "message": "데이터가 없습니다.",
+                    "severity": "warning"
+                },
                 "message": "데이터가 없습니다."
             }
+        
+        # 데이터 품질 검증
+        quality_summary = validator.get_data_quality_summary(indicator_code, data)
+        issues = validator.validate_data_quality(indicator_code, data)
         
         # 날짜와 값을 리스트로 변환
         result_data = [
@@ -225,11 +263,22 @@ async def get_fred_data(
             for date_idx, value in data.items()
         ]
         
-        return {
+        response = {
             "indicator_code": indicator_code,
             "data": result_data,
-            "count": len(result_data)
+            "count": len(result_data),
+            "quality": quality_summary
         }
+        
+        # 심각한 이슈가 있으면 경고 추가
+        critical_issues = [issue for issue in issues if issue.severity == 'critical']
+        if critical_issues:
+            response["warning"] = {
+                "message": f"{len(critical_issues)}개의 심각한 데이터 품질 이슈가 발견되었습니다.",
+                "issues": [issue.to_dict() for issue in critical_issues]
+            }
+        
+        return response
     except Exception as e:
         logging.error(f"Error fetching FRED data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -240,21 +289,41 @@ async def get_yield_curve_spread_data(
 ):
     """장단기 금리차 데이터 조회 API (DGS10 - DGS2)"""
     try:
-        from service.macro_trading.collectors.fred_collector import get_fred_collector
+        from service.macro_trading.collectors.fred_collector import (
+            get_fred_collector, RateLimitError, FREDAPIError, DataInsufficientError
+        )
+        from service.macro_trading.validators.data_validator import FREDDataValidator
         from datetime import date, timedelta
         import pandas as pd
         
         collector = get_fred_collector()
+        validator = FREDDataValidator()
         
         # DGS10과 DGS2 데이터 조회
-        dgs10_data = collector.get_latest_data("DGS10", days=days)
-        dgs2_data = collector.get_latest_data("DGS2", days=days)
+        api_errors = []
+        try:
+            dgs10_data = collector.get_latest_data("DGS10", days=days)
+        except (RateLimitError, FREDAPIError, DataInsufficientError) as e:
+            api_errors.append(f"DGS10: {str(e)}")
+            dgs10_data = pd.Series(dtype=float)
+        
+        try:
+            dgs2_data = collector.get_latest_data("DGS2", days=days)
+        except (RateLimitError, FREDAPIError, DataInsufficientError) as e:
+            api_errors.append(f"DGS2: {str(e)}")
+            dgs2_data = pd.Series(dtype=float)
         
         if len(dgs10_data) == 0 or len(dgs2_data) == 0:
             return {
                 "spread_data": [],
                 "dgs10_data": [],
                 "dgs2_data": [],
+                "error": {
+                    "type": "data_insufficient",
+                    "message": "데이터가 부족합니다.",
+                    "details": api_errors,
+                    "severity": "critical" if api_errors else "warning"
+                },
                 "message": "데이터가 부족합니다."
             }
         
@@ -307,7 +376,7 @@ async def get_yield_curve_spread_data(
             ma20_values = []
             ma120_values = []
         
-        return {
+        response = {
             "spread_data": spread_data,
             "dgs10_data": dgs10_list,
             "dgs2_data": dgs2_list,
@@ -315,6 +384,26 @@ async def get_yield_curve_spread_data(
             "ma120": ma120_values,
             "count": len(spread_data)
         }
+        
+        # API 오류가 있으면 추가
+        if api_errors:
+            response["error"] = {
+                "type": "api_error",
+                "message": "일부 데이터 수집 중 오류가 발생했습니다.",
+                "details": api_errors,
+                "severity": "warning"
+            }
+        
+        # 데이터 품질 검증 (스프레드 데이터)
+        if len(spread_data) > 0:
+            spread_series = pd.Series(
+                [item["value"] for item in spread_data],
+                index=[pd.to_datetime(item["date"]) for item in spread_data]
+            )
+            quality_summary = validator.get_data_quality_summary("YIELD_SPREAD", spread_series)
+            response["quality"] = quality_summary
+        
+        return response
     except Exception as e:
         logging.error(f"Error fetching yield curve spread data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -432,6 +521,71 @@ async def get_rebalancing_history(
             }
     except Exception as e:
         logging.error(f"Error fetching rebalancing history: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/macro-trading/quantitative-signals")
+async def get_quantitative_signals(
+    natural_rate: float = Query(default=2.0, description="자연 이자율 (%)"),
+    target_inflation: float = Query(default=2.0, description="목표 인플레이션율 (%)"),
+    liquidity_ma_weeks: Optional[int] = Query(default=None, description="유동성 이동평균 기간 (주, None이면 설정 파일에서 가져옴)")
+):
+    """AI 판단용 정량 시그널 조회 API
+    
+    모든 정량 시그널을 계산하여 반환합니다:
+    - yield_curve_spread_trend: 장단기 금리차 추세 추종 전략
+    - real_interest_rate: 실질 금리
+    - taylor_rule_signal: 테일러 준칙 신호
+    - net_liquidity: 연준 순유동성
+    - high_yield_spread: 하이일드 스프레드
+    - additional_indicators: 추가 지표 (실업률, 고용 등)
+    """
+    try:
+        from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+        from datetime import datetime
+        
+        calculator = QuantSignalCalculator()
+        
+        # 모든 정량 시그널 계산
+        signals = calculator.calculate_all_signals(
+            natural_rate=natural_rate,
+            target_inflation=target_inflation,
+            liquidity_ma_weeks=liquidity_ma_weeks
+        )
+        
+        # 추가 지표 계산
+        additional_indicators = calculator.get_additional_indicators()
+        
+        # 결과 구성
+        result = {
+            "status": "success",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "signals": {
+                "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
+                "real_interest_rate": signals.get("real_interest_rate"),
+                "taylor_rule_signal": signals.get("taylor_rule_signal"),
+                "net_liquidity": signals.get("net_liquidity"),
+                "high_yield_spread": signals.get("high_yield_spread"),
+                "additional_indicators": additional_indicators
+            },
+            "parameters": {
+                "natural_rate": natural_rate,
+                "target_inflation": target_inflation,
+                "liquidity_ma_weeks": liquidity_ma_weeks
+            }
+        }
+        
+        # None 값이 있는 시그널 확인
+        missing_signals = [key for key, value in signals.items() if value is None]
+        if missing_signals:
+            result["warnings"] = {
+                "message": f"{len(missing_signals)}개의 시그널을 계산할 수 없습니다.",
+                "missing_signals": missing_signals
+            }
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"Error calculating quantitative signals: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/current-strategy")

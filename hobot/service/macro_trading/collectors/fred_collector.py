@@ -28,6 +28,16 @@ class RateLimitError(Exception):
     pass
 
 
+class FREDAPIError(Exception):
+    """FRED API 일반 오류"""
+    pass
+
+
+class DataInsufficientError(Exception):
+    """데이터 부족 오류"""
+    pass
+
+
 # FRED 지표 코드 정의
 FRED_INDICATORS = {
     "DGS10": {
@@ -243,9 +253,15 @@ class FREDCollector:
                     f"잠시 후 재시도하거나 요청 간격을 늘려주세요."
                 )
                 raise RateLimitError(f"FRED API rate limit 초과: {e}") from e
+            elif '401' in error_msg or 'unauthorized' in error_msg or 'invalid' in error_msg:
+                logger.error(f"{indicator_code} 데이터 수집 실패: FRED API 인증 오류. API 키를 확인하세요.")
+                raise FREDAPIError(f"FRED API 인증 실패: {e}") from e
+            elif '404' in error_msg or 'not found' in error_msg:
+                logger.error(f"{indicator_code} 데이터 수집 실패: 지표를 찾을 수 없습니다.")
+                raise FREDAPIError(f"FRED API 지표를 찾을 수 없음: {e}") from e
             else:
                 logger.error(f"{indicator_code} 데이터 수집 실패: {e}")
-                raise
+                raise FREDAPIError(f"FRED API 오류: {e}") from e
     
     def check_data_exists(self, indicator_code: str, target_date: date) -> bool:
         """
@@ -497,16 +513,20 @@ class FREDCollector:
         
         return results
     
-    def get_latest_data(self, indicator_code: str, days: int = 30) -> pd.Series:
+    def get_latest_data(self, indicator_code: str, days: int = 30, min_data_points: Optional[int] = None) -> pd.Series:
         """
         최근 N일간의 데이터를 DB에서 가져옵니다.
         
         Args:
             indicator_code: 지표 코드
             days: 가져올 일수
+            min_data_points: 최소 데이터 포인트 수 (None이면 검사 안 함)
             
         Returns:
             pd.Series: 날짜를 인덱스로 하는 시계열 데이터
+            
+        Raises:
+            DataInsufficientError: 데이터가 부족한 경우
         """
         try:
             with get_db_connection() as conn:
@@ -530,6 +550,10 @@ class FREDCollector:
                 results = cursor.fetchall()
                 
                 if not results:
+                    if min_data_points is not None and min_data_points > 0:
+                        raise DataInsufficientError(
+                            f"{indicator_code}: 요청한 기간({days}일) 동안 데이터가 없습니다."
+                        )
                     return pd.Series(dtype=float)
                 
                 # DataFrame으로 변환
@@ -537,11 +561,22 @@ class FREDCollector:
                 df['date'] = pd.to_datetime(df['date'])
                 df.set_index('date', inplace=True)
                 
-                return df['value']
+                data = df['value']
                 
+                # 최소 데이터 포인트 검사
+                if min_data_points is not None and len(data) < min_data_points:
+                    raise DataInsufficientError(
+                        f"{indicator_code}: 데이터가 부족합니다. "
+                        f"요청: {min_data_points}개, 실제: {len(data)}개"
+                    )
+                
+                return data
+                
+        except DataInsufficientError:
+            raise
         except Exception as e:
             logger.error(f"{indicator_code} 최신 데이터 조회 실패: {e}")
-            return pd.Series(dtype=float)
+            raise FREDAPIError(f"데이터 조회 실패: {e}") from e
 
 
 def get_fred_collector() -> FREDCollector:
