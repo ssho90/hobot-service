@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Tuple
 from datetime import date, timedelta
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -115,8 +116,11 @@ class FREDDataValidator:
         if indicator_code not in self.indicator_ranges:
             return issues
         
+        # decimal.Decimal 타입을 float로 변환하여 연산 오류 방지
+        data_float = data.apply(lambda x: float(x) if isinstance(x, Decimal) else x)
+        
         min_val, max_val = self.indicator_ranges[indicator_code]
-        out_of_range = data[(data < min_val) | (data > max_val)]
+        out_of_range = data_float[(data_float < min_val) | (data_float > max_val)]
         
         if len(out_of_range) > 0:
             affected_dates = [idx.date() if isinstance(idx, pd.Timestamp) else idx for idx in out_of_range.index]
@@ -207,6 +211,9 @@ class FREDDataValidator:
         clean_data = data.dropna()
         if len(clean_data) < 10:
             return issues
+        
+        # decimal.Decimal 타입을 float로 변환하여 연산 오류 방지
+        clean_data = clean_data.apply(lambda x: float(x) if isinstance(x, Decimal) else x)
         
         outliers = []
         

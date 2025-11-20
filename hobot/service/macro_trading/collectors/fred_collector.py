@@ -5,6 +5,7 @@ import os
 import time
 from datetime import datetime, date, timedelta
 from typing import Dict, List, Optional, Tuple
+from decimal import Decimal
 import pandas as pd
 import logging
 from dotenv import load_dotenv
@@ -561,7 +562,8 @@ class FREDCollector:
                 df['date'] = pd.to_datetime(df['date'])
                 df.set_index('date', inplace=True)
                 
-                data = df['value']
+                # decimal.Decimal 타입을 float로 변환
+                data = df['value'].apply(lambda x: float(x) if isinstance(x, Decimal) else float(x))
                 
                 # 최소 데이터 포인트 검사
                 if min_data_points is not None and len(data) < min_data_points:
