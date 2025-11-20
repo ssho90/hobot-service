@@ -183,6 +183,13 @@ deploy_backend() {
   PYTHON_CMD=$(setup_python_env)
   create_env_file
   
+  # Python 캐시 삭제 (이전 코드가 메모리에 남지 않도록)
+  log_info "Clearing Python cache files..."
+  find . -type d -name "__pycache__" -exec rm -r {} + 2>/dev/null || true
+  find . -type f -name "*.pyc" -delete 2>/dev/null || true
+  find . -type f -name "*.pyo" -delete 2>/dev/null || true
+  log_success "Python cache cleared"
+  
   # 전략 초기화
   log_info "Initializing strategies..."
   ${PYTHON_CMD} service/utils/init_strategy_pause.py >/tmp/init_strategy.log 2>&1 || {
@@ -208,13 +215,31 @@ deploy_backend() {
     
     sudo systemctl daemon-reload
     sudo systemctl enable hobot.service
-    sudo systemctl restart hobot.service
-    sleep 3
+    
+    # 서비스 중지 (캐시 정리를 위해)
+    log_info "Stopping backend service for clean restart..."
+    sudo systemctl stop hobot.service 2>/dev/null || true
+    sleep 2
+    
+    # gunicorn 프로세스가 남아있으면 강제 종료
+    GUNICORN_PIDS=$(pgrep -f "gunicorn.*asgi:asgi_app" 2>/dev/null || true)
+    if [ ! -z "${GUNICORN_PIDS}" ]; then
+      log_info "Killing remaining gunicorn processes: ${GUNICORN_PIDS}"
+      sudo pkill -f "gunicorn.*asgi:asgi_app" 2>/dev/null || true
+      sleep 2
+    fi
+    
+    # 서비스 재시작
+    log_info "Starting backend service..."
+    sudo systemctl start hobot.service
+    sleep 5
     
     if sudo systemctl is-active --quiet hobot.service; then
       log_success "Backend service is running"
     else
       log_error "Backend service failed to start"
+      log_info "Service status:"
+      sudo systemctl status hobot.service --no-pager -l | head -30 >&2
     fi
   else
     # 직접 실행
