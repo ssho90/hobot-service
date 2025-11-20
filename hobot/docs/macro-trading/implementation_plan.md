@@ -275,49 +275,90 @@
 ### 2.1 모듈 1: 정량 시그널 수집 (FRED API)
 
 #### 작업 항목
-- [ ] **2.1.1** FRED API 연동
-  - [ ] `fredapi` 패키지 설치 및 테스트
-  - [ ] 환경변수에서 FRED API 키 로드 (`.env` 파일)
-  - [ ] API 연결 테스트
+- [x] **2.1.1** FRED API 연동
+  - [x] `fredapi` 패키지 설치 및 테스트
+  - [x] 환경변수에서 FRED API 키 로드 (`.env` 파일)
+  - [x] API 연결 테스트 (`test_connection()` 메서드 구현 완료)
 
 - [ ] **2.1.2** 금리 데이터 수집 및 저장
-  - [ ] DGS10 (미국 10년 국채 금리) 수집
-  - [ ] DGS2 (미국 2년 국채 금리) 수집
-  - [ ] FEDFUNDS (연준 금리) 수집
-  - [ ] CPI 데이터 수집 (월별 → 일별 보간)
-  - [ ] PCE 데이터 수집 (테일러 준칙용)
-  - [ ] GDP 데이터 수집
-  - [ ] **유동성 지표 데이터 수집**
-    - [ ] WALCL (연준 총자산 - Total Assets) 수집
-    - [ ] WTREGEN (재무부 일반 계정 - TGA) 수집
-    - [ ] RRPONTSYD (역레포 잔고 - RRP) 수집
-    - [ ] BAMLH0A0HYM2 (하이일드 스프레드) 수집
-  - [ ] DB에 저장 (`fred_data` 테이블)
-  - [ ] 당일 데이터 존재 여부 확인 후 중복 조회 방지
+  - [x] DGS10 (미국 10년 국채 금리) 수집 및 저장
+    - [x] `collect_yield_curve_data()` 메서드 구현 완료
+    - [x] DB에 자동 저장 (`fred_data` 테이블)
+    - [x] 중복 데이터 방지 (당일 데이터 존재 여부 확인)
+  - [x] DGS2 (미국 2년 국채 금리) 수집 및 저장
+    - [x] `collect_yield_curve_data()` 메서드 구현 완료
+    - [x] DB에 자동 저장 (`fred_data` 테이블)
+    - [x] 중복 데이터 방지 (당일 데이터 존재 여부 확인)
+  - [x] FEDFUNDS (연준 금리) 수집
+    - [x] `collect_all_indicators()` 메서드로 수집 가능 (구현 완료)
+    - [x] 자동 스케줄링 구현 완료 (매일 09:00 KST 자동 실행)
+  - [x] CPI 데이터 수집 (월별 → 일별 보간)
+    - [x] `collect_all_indicators()` 메서드로 수집 가능 (구현 완료)
+    - [x] 자동 스케줄링 구현 완료 (매일 09:00 KST 자동 실행)
+  - [x] PCE 데이터 수집 (테일러 준칙용)
+    - [x] `collect_all_indicators()` 메서드로 수집 가능 (구현 완료)
+    - [x] 자동 스케줄링 구현 완료 (매일 09:00 KST 자동 실행)
+  - [x] GDP 데이터 수집
+    - [x] `collect_all_indicators()` 메서드로 수집 가능 (구현 완료)
+    - [x] 자동 스케줄링 구현 완료 (매일 09:00 KST 자동 실행)
+  - [x] 유동성 지표 데이터 수집
+    - [x] `collect_all_indicators()` 메서드로 수집 가능 (구현 완료)
+    - [x] WALCL (연준 총자산 - Total Assets) 수집 가능
+    - [x] WTREGEN (재무부 일반 계정 - TGA) 수집 가능
+    - [x] RRPONTSYD (역레포 잔고 - RRP) 수집 가능
+    - [x] BAMLH0A0HYM2 (하이일드 스프레드) 수집 가능
+    - [x] 자동 스케줄링 구현 완료 (매일 09:00 KST 자동 실행)
+  - [x] DB에 저장 (`fred_data` 테이블) - DGS10, DGS2 완료
+  - [x] 당일 데이터 존재 여부 확인 후 중복 조회 방지 - DGS10, DGS2 완료
 
 - [ ] **2.1.3** 정량 시그널 계산
-  - [ ] 공식 1: 장단기 금리차 (DGS10 - DGS2)
-  - [ ] 공식 2: 실질 금리 (DGS10 - CPI 증가율)
-  - [ ] 공식 3: 테일러 준칙 (Target_Rate - FEDFUNDS)
-  - [ ] 공식 4: 연준 순유동성 (Fed Net Liquidity)
-    - [ ] 개념: 연준이 돈을 찍어냈어도(자산), 정부가 통장에 묶어두거나(TGA), 은행이 다시 연준에 맡겨두면(RRP) 시장에는 돈이 없습니다. 이 묶인 돈을 뺀 것이 순유동성입니다.
-    - [ ] 공식: `Net Liquidity = WALCL - WTREGEN - RRPONTSYD`
-    - [ ] AI 판단 로직:
-      - [ ] Net Liquidity의 4주(또는 8주) 이동평균이 상승 중인가?
-      - [ ] 상승 중: 유동성 공급 확대 → 위험자산(주식/코인) 비중 확대 (경기가 나빠도 주가는 오를 수 있음)
-      - [ ] 하락 중: 유동성 흡수 → 현금/채권 비중 확대
-    - [ ] 상관관계: S&P 500 및 비트코인 가격과 매우 높은 양의 상관관계(Coupling)를 보입니다.
-  - [ ] 공식 5: 하이일드 스프레드 (High Yield Spread)
-    - [ ] 개념: 유동성의 **'양(Quantity)'**이 아니라 **'질(Quality)'**을 평가합니다. 시장에 돈이 말라가면(유동성 위기), 위험한 기업부터 돈을 못 빌리게 됩니다.
-    - [ ] 공식: `(투기등급 기업의 회사채 금리) - (안전한 국채 금리)`
-    - [ ] FRED Ticker: BAMLH0A0HYM2 (ICE BofA US High Yield Index Option-Adjusted Spread)
-    - [ ] 평가 기준:
-      - [ ] 3.5% 미만: 유동성 매우 풍부 (Greed) → 주식 적극 매수
-      - [ ] 5.0% 이상: 유동성 경색 시작 (Fear) → 주식 비중 축소
-      - [ ] 10.0% 이상: 금융 위기 (Panic) → 전량 현금/달러/국채
-    - [ ] AI 판단 로직:
-      - [ ] 스프레드가 전주 대비 **급격히 확대(Spike)**되고 있는가? (위기 감지 신호)
-  - [ ] 추가 지표: VIX, DXY, 실업률, GDP 성장률 (선택적)
+  - [x] 공식 1: 장단기 금리차 장기 추세 추종 전략 (DGS10 - DGS2)
+    - [x] 알고리즘 구현 완료: `get_yield_curve_spread_trend_following()`
+    - [x] Spread 계산: DGS10 - DGS2
+    - [x] Spread_Fast: Spread의 20일 이동평균
+    - [x] Spread_Slow: Spread의 120일 이동평균
+    - [x] Yield_Trend: DGS10의 200일 이동평균
+    - [x] 4가지 국면 판단:
+      - Bull Steepening (Spread 확대 + 금리 하락)
+      - Bear Steepening (Spread 확대 + 금리 상승)
+      - Bull Flattening (Spread 축소 + 금리 하락)
+      - Bear Flattening (Spread 축소 + 금리 상승)
+    - [x] MySQL에서 일별 데이터 조회 (최소 250일)
+    - [x] AI가 최종 판단하도록 action 필드 제거
+  - [x] 공식 2: 실질 금리 (DGS10 - CPI 증가율)
+    - [x] `get_real_interest_rate()` 메서드 구현 완료
+    - [x] CPI 데이터 조회 및 증가율 계산
+    - [x] 실질 금리 = 명목 금리 - 인플레이션율
+  - [x] 공식 3: 테일러 준칙 (Target_Rate - FEDFUNDS)
+    - [x] `get_taylor_rule_signal()` 메서드 구현 완료
+    - [x] 테일러 준칙 공식 구현 (r* + π + 0.5(π - π*) + 0.5(y - y*))
+    - [x] PCE 인플레이션율 계산
+    - [x] 목표 금리 - 현재 금리 신호 계산
+  - [x] 공식 4: 연준 순유동성 (Fed Net Liquidity)
+    - [x] `get_net_liquidity()` 메서드 구현 완료
+    - [x] 개념: 연준이 돈을 찍어냈어도(자산), 정부가 통장에 묶어두거나(TGA), 은행이 다시 연준에 맡겨두면(RRP) 시장에는 돈이 없습니다. 이 묶인 돈을 뺀 것이 순유동성입니다.
+    - [x] 공식: `Net Liquidity = WALCL - WTREGEN - RRPONTSYD`
+    - [x] AI 판단 로직:
+      - [x] Net Liquidity의 4주(또는 8주) 이동평균이 상승 중인가?
+      - [x] 상승 중: 유동성 공급 확대 → 위험자산(주식/코인) 비중 확대 (경기가 나빠도 주가는 오를 수 있음)
+      - [x] 하락 중: 유동성 흡수 → 현금/채권 비중 확대
+    - [x] 상관관계: S&P 500 및 비트코인 가격과 매우 높은 양의 상관관계(Coupling)를 보입니다.
+  - [x] 공식 5: 하이일드 스프레드 (High Yield Spread)
+    - [x] `get_high_yield_spread_signal()` 메서드 구현 완료
+    - [x] 개념: 유동성의 **'양(Quantity)'**이 아니라 **'질(Quality)'**을 평가합니다. 시장에 돈이 말라가면(유동성 위기), 위험한 기업부터 돈을 못 빌리게 됩니다.
+    - [x] 공식: `(투기등급 기업의 회사채 금리) - (안전한 국채 금리)`
+    - [x] FRED Ticker: BAMLH0A0HYM2 (ICE BofA US High Yield Index Option-Adjusted Spread)
+    - [x] 평가 기준:
+      - [x] 3.5% 미만: 유동성 매우 풍부 (Greed) → 주식 적극 매수
+      - [x] 5.0% 이상: 유동성 경색 시작 (Fear) → 주식 비중 축소
+      - [x] 10.0% 이상: 금융 위기 (Panic) → 전량 현금/달러/국채
+    - [x] AI 판단 로직:
+      - [x] 스프레드가 전주 대비 **급격히 확대(Spike)**되고 있는가? (위기 감지 신호)
+  - [x] 추가 지표: 실업률, 고용 지표 (선택적)
+    - [x] `get_additional_indicators()` 메서드 구현 완료
+    - [x] 실업률 (UNRATE) 조회
+    - [x] 비농업 고용 지표 (PAYEMS) 증가율 계산
+    - [ ] VIX, DXY 지표 추가 (미구현)
 
 - [ ] **2.1.4** 에러 핸들링
   - [ ] FRED API 장애 시 사이트 팝업/에러 문구 표시
@@ -330,9 +371,11 @@
 - [x] **자연 이자율 ($r^*$) 추정 방법: 초기에는 고정값 2% 사용, 이후 실질 GDP 성장률 기반으로 개선 (결정 완료)
 
 #### 추가 작업 항목
-- [ ] **2.1.5** 데이터 수집 스케줄 정의
-  - [ ] FRED API 호출 빈도 (매일 1회, 09:00 KST)
-  - [ ] 데이터 수집 실패 시 재시도 정책
+- [x] **2.1.5** 데이터 수집 스케줄 정의
+  - [x] FRED API 호출 빈도 (매일 1회, 09:00 KST) - 설정 파일에 추가 완료
+  - [x] 데이터 수집 실패 시 재시도 정책 (3회 재시도, 60초 간격)
+  - [x] 자동 스케줄러 구현 완료 (`scheduler.py`)
+  - [x] 메인 애플리케이션 시작 시 스케줄러 자동 시작
 
 - [ ] **2.1.6** 데이터 검증 로직 구현
   - [ ] 이상치(outlier) 감지
@@ -661,6 +704,18 @@ yfinance>=0.2.0  # 백테스팅용 (선택적)
 ---
 
 ## 📝 의사결정 이력
+
+### 2024-12-19 (장단기 금리차 로직 개선)
+- **공식 1 개선 완료**: 장단기 금리차 장기 추세 추종 전략 구현
+  - ✅ `get_yield_curve_spread_trend_following()` 메서드 구현
+  - ✅ 4가지 국면 판단 로직 구현 (Bull/Bear Steepening, Bull/Bear Flattening)
+  - ✅ 이동평균 기반 추세 분석 (20일, 120일, 200일)
+  - ✅ AI 최종 판단을 위해 action 필드 제거
+  - ✅ 기존 `get_yield_curve_spread()` 메서드 삭제
+- **DGS10, DGS2 자동 수집 및 저장 구현**
+  - ✅ `collect_yield_curve_data()` 메서드 추가
+  - ✅ MySQL DB에 자동 저장 로직 구현
+  - ✅ 중복 데이터 방지 로직 구현
 
 ### 2024-12-19 (구현 진행)
 - **Phase 1.1 완료**: 데이터베이스 스키마 설계 및 생성 완료

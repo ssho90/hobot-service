@@ -30,7 +30,8 @@
   "schedules": {
     "account_check": ["09:10", "14:40"],
     "llm_analysis": ["09:10", "14:40"],
-    "rebalancing": ["15:00"]
+    "rebalancing": ["15:00"],
+    "fred_data_collection": ["09:00"]
   },
   "fred": {
     "cache_duration_hours": 24

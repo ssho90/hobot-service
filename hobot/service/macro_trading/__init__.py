@@ -21,6 +21,13 @@ from service.macro_trading.signals import (
     QuantSignalCalculator
 )
 
+# Scheduler 모듈
+from service.macro_trading.scheduler import (
+    start_fred_scheduler_thread,
+    collect_all_fred_data,
+    setup_fred_scheduler
+)
+
 __all__ = [
     # Config
     'get_config',
@@ -32,6 +39,10 @@ __all__ = [
     'get_fred_collector',
     'FRED_INDICATORS',
     # Quant Signals
-    'QuantSignalCalculator'
+    'QuantSignalCalculator',
+    # Scheduler
+    'start_fred_scheduler_thread',
+    'collect_all_fred_data',
+    'setup_fred_scheduler'
 ]
 

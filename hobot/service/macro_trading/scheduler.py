@@ -1,0 +1,201 @@
+"""
+FRED 데이터 수집 자동 스케줄러 모듈
+"""
+import schedule
+import time
+import threading
+from datetime import date, timedelta
+from typing import Optional
+import logging
+from functools import wraps
+
+from service.macro_trading.collectors.fred_collector import get_fred_collector
+from service.macro_trading.config.config_loader import get_config
+
+logger = logging.getLogger(__name__)
+
+
+def retry_on_failure(max_retries: int = 3, delay: int = 60):
+    """
+    재시도 데코레이터
+    
+    Args:
+        max_retries: 최대 재시도 횟수
+        delay: 재시도 간격 (초)
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    last_exception = e
+                    if attempt < max_retries - 1:
+                        logger.warning(
+                            f"{func.__name__} 실패 (시도 {attempt + 1}/{max_retries}): {e}. "
+                            f"{delay}초 후 재시도합니다."
+                        )
+                        time.sleep(delay)
+                    else:
+                        logger.error(
+                            f"{func.__name__} 최종 실패 (시도 {attempt + 1}/{max_retries}): {e}"
+                        )
+            
+            # 모든 재시도 실패 시 예외 발생
+            raise last_exception
+        
+        return wrapper
+    return decorator
+
+
+@retry_on_failure(max_retries=3, delay=60)
+def collect_all_fred_data(request_delay: Optional[float] = None):
+    """
+    모든 FRED 지표 데이터를 수집하고 DB에 저장합니다.
+    
+    Returns:
+        Dict[str, int]: 지표별 저장된 레코드 수
+    """
+    try:
+        logger.info("=" * 60)
+        logger.info("FRED 데이터 수집 시작")
+        logger.info("=" * 60)
+        
+        collector = get_fred_collector()
+        
+        # 최근 1년 데이터 수집 (또는 마지막 수집일 이후 데이터)
+        end_date = date.today()
+        start_date = end_date - timedelta(days=365)
+        
+        logger.info(f"수집 기간: {start_date} ~ {end_date}")
+        
+        # 모든 지표 수집 (rate limit 준수를 위해 딜레이 적용)
+        # request_delay가 None이면 자동으로 rate limit 기준으로 계산됨
+        results = collector.collect_all_indicators(
+            start_date=start_date,
+            end_date=end_date,
+            skip_existing=True,
+            request_delay=request_delay
+        )
+        
+        # 결과 요약
+        total_saved = sum(results.values())
+        successful = sum(1 for v in results.values() if v > 0)
+        failed = sum(1 for v in results.values() if v == 0)
+        
+        logger.info("=" * 60)
+        logger.info("FRED 데이터 수집 완료")
+        logger.info(f"  - 총 저장된 레코드: {total_saved}개")
+        logger.info(f"  - 성공한 지표: {successful}개")
+        logger.info(f"  - 실패한 지표: {failed}개")
+        logger.info("=" * 60)
+        
+        # 지표별 상세 결과
+        for indicator_code, saved_count in results.items():
+            if saved_count > 0:
+                logger.info(f"  ✓ {indicator_code}: {saved_count}개 저장")
+            else:
+                logger.warning(f"  ✗ {indicator_code}: 수집 실패 또는 데이터 없음")
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"FRED 데이터 수집 중 오류 발생: {e}", exc_info=True)
+        raise
+
+
+def setup_fred_scheduler():
+    """
+    FRED 데이터 수집 스케줄을 설정합니다.
+    
+    설정 파일에서 스케줄 시간을 읽어와서 등록합니다.
+    """
+    try:
+        config = get_config()
+        schedule_times = config.schedules.fred_data_collection
+        
+        if not schedule_times:
+            logger.warning("FRED 데이터 수집 스케줄이 설정되지 않았습니다.")
+            return
+        
+        # 기존 'fred_data_collection' 태그가 있는 스케줄 제거
+        # schedule 라이브러리는 태그로 필터링하여 제거하는 기능이 없으므로,
+        # 모든 스케줄을 클리어하고 다시 등록하는 방식 사용
+        # (다른 스케줄이 있다면 영향을 받을 수 있음)
+        # 대안: 태그를 사용하지 않고 직접 관리하거나, 첫 실행 시에만 등록
+        
+        # 각 시간에 스케줄 등록
+        registered_count = 0
+        for time_str in schedule_times:
+            try:
+                hour, minute = time_str.split(':')
+                schedule.every().day.at(f"{hour}:{minute}").do(collect_all_fred_data).tag('fred_data_collection')
+                logger.info(f"FRED 데이터 수집 스케줄 등록: 매일 {time_str} KST")
+                registered_count += 1
+            except Exception as e:
+                logger.error(f"스케줄 등록 실패 ({time_str}): {e}")
+        
+        logger.info(f"총 {registered_count}개의 FRED 데이터 수집 스케줄이 등록되었습니다.")
+        
+    except Exception as e:
+        logger.error(f"FRED 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
+def run_scheduler():
+    """
+    스케줄러를 실행합니다. (무한 루프)
+    이 함수는 별도 스레드에서 실행되어야 합니다.
+    """
+    logger.info("FRED 데이터 수집 스케줄러 시작")
+    
+    while True:
+        try:
+            schedule.run_pending()
+            time.sleep(60)  # 1분마다 체크
+        except Exception as e:
+            logger.error(f"스케줄러 실행 중 오류: {e}", exc_info=True)
+            time.sleep(60)
+
+
+def start_fred_scheduler_thread():
+    """
+    FRED 데이터 수집 스케줄러를 별도 스레드에서 시작합니다.
+    
+    Returns:
+        threading.Thread: 스케줄러 스레드
+    """
+    # 스케줄 설정
+    setup_fred_scheduler()
+    
+    # 스케줄러 스레드 생성 및 시작
+    scheduler_thread = threading.Thread(
+        target=run_scheduler,
+        name="FREDDataCollectionScheduler",
+        daemon=True
+    )
+    scheduler_thread.start()
+    
+    logger.info("FRED 데이터 수집 스케줄러 스레드가 시작되었습니다.")
+    
+    return scheduler_thread
+
+
+if __name__ == "__main__":
+    # 테스트용: 직접 실행 시 즉시 수집 실행
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    print("FRED 데이터 수집 테스트 실행...")
+    try:
+        results = collect_all_fred_data()
+        print("\n수집 결과:")
+        for indicator, count in results.items():
+            print(f"  {indicator}: {count}개")
+    except Exception as e:
+        print(f"오류 발생: {e}")
+

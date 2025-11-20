@@ -68,8 +68,9 @@ class SchedulesConfig(BaseModel):
     account_check: List[str] = Field(..., description="계좌 조회 시간 리스트 (HH:MM)")
     llm_analysis: List[str] = Field(..., description="LLM 분석 시간 리스트 (HH:MM)")
     rebalancing: List[str] = Field(..., description="리밸런싱 실행 시간 리스트 (HH:MM)")
+    fred_data_collection: List[str] = Field(..., description="FRED 데이터 수집 시간 리스트 (HH:MM)")
 
-    @field_validator('account_check', 'llm_analysis', 'rebalancing')
+    @field_validator('account_check', 'llm_analysis', 'rebalancing', 'fred_data_collection')
     @classmethod
     def validate_time_format(cls, v: List[str]) -> List[str]:
         """시간 형식 검증 (리스트의 각 항목)"""

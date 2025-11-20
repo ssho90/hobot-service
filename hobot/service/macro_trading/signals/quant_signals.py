@@ -24,37 +24,144 @@ class QuantSignalCalculator:
         """
         self.fred_collector = fred_collector or get_fred_collector()
     
-    def get_yield_curve_spread(self, days: int = 30) -> Optional[float]:
+    def get_yield_curve_spread_trend_following(
+        self,
+        ma_fast: int = 20,
+        ma_slow: int = 120,
+        ma_filter: int = 200,
+        min_days: int = 250
+    ) -> Optional[Dict]:
         """
-        공식 1: 장단기 금리차 (DGS10 - DGS2)
+        공식 1 (개선): 장단기 금리차 장기 추세 추종 전략
+        
+        노이즈를 제거하고 거시경제의 큰 사이클을 타기 위해 기간을 길게 잡습니다.
         
         Args:
-            days: 최근 N일간의 평균값 사용
+            ma_fast: 단기 추세선 기간 (일, 기본값: 20일)
+            ma_slow: 장기 기준선 기간 (일, 기본값: 120일)
+            ma_filter: 대세 판단용 이동평균 기간 (일, 기본값: 200일)
+            min_days: 최소 필요한 데이터 일수 (기본값: 250일)
             
         Returns:
-            float: 장단기 금리차 (%) 또는 None (데이터 부족 시)
+            Dict: {
+                "spread": 현재 스프레드 값 (%),
+                "spread_fast": Spread의 단기 이동평균 (%),
+                "spread_slow": Spread의 장기 이동평균 (%),
+                "yield_trend": DGS10의 200일 이동평균 (%),
+                "current_dgs10": 현재 DGS10 값 (%),
+                "current_dgs2": 현재 DGS2 값 (%),
+                "spread_trend": "Steepening" 또는 "Flattening",
+                "spread_trend_kr": 스프레드 추세 한글명,
+                "yield_regime": "Rising" 또는 "Falling",
+                "yield_regime_kr": 금리 대세 한글명,
+                "regime": "Bull Steepening" | "Bear Steepening" | "Bull Flattening" | "Bear Flattening",
+                "regime_kr": 국면 한글명
+            } 또는 None (데이터 부족 시)
         """
         try:
-            dgs10 = self.fred_collector.get_latest_data("DGS10", days)
-            dgs2 = self.fred_collector.get_latest_data("DGS2", days)
+            # 충분한 일별 데이터 조회 (최소 250일, 여유를 두고)
+            dgs10 = self.fred_collector.get_latest_data("DGS10", min_days)
+            dgs2 = self.fred_collector.get_latest_data("DGS2", min_days)
             
             if len(dgs10) == 0 or len(dgs2) == 0:
                 logger.warning("장단기 금리 데이터가 부족합니다")
                 return None
             
-            # 최신 값 사용 (또는 평균값)
-            latest_dgs10 = dgs10.iloc[-1] if len(dgs10) > 0 else None
-            latest_dgs2 = dgs2.iloc[-1] if len(dgs2) > 0 else None
-            
-            if latest_dgs10 is None or latest_dgs2 is None:
+            # 최소 데이터 요구사항 확인 (ma_filter보다 충분히 많아야 함)
+            if len(dgs10) < ma_filter or len(dgs2) < ma_filter:
+                logger.warning(
+                    f"데이터가 부족합니다. 필요: {ma_filter}일, 현재: DGS10={len(dgs10)}일, DGS2={len(dgs2)}일"
+                )
                 return None
             
-            spread = latest_dgs10 - latest_dgs2
-            logger.info(f"장단기 금리차: {spread:.2f}% (DGS10: {latest_dgs10:.2f}%, DGS2: {latest_dgs2:.2f}%)")
-            return float(spread)
+            # 날짜 기준으로 정렬 및 병합
+            df = pd.DataFrame({
+                "DGS10": dgs10,
+                "DGS2": dgs2
+            })
+            df = df.sort_index()
+            
+            # 결측치 처리 (forward fill)
+            df = df.ffill().dropna()
+            
+            if len(df) < ma_filter:
+                logger.warning(f"결측치 제거 후 데이터가 부족합니다: {len(df)}일")
+                return None
+            
+            # 1. Spread 계산: DGS10 - DGS2
+            df["Spread"] = df["DGS10"] - df["DGS2"]
+            
+            # 2. Spread_Fast: Spread의 단기 이동평균
+            df["Spread_Fast"] = df["Spread"].rolling(window=ma_fast).mean()
+            
+            # 3. Spread_Slow: Spread의 장기 이동평균
+            df["Spread_Slow"] = df["Spread"].rolling(window=ma_slow).mean()
+            
+            # 4. Yield_Trend: DGS10의 200일 이동평균
+            df["Yield_Trend"] = df["DGS10"].rolling(window=ma_filter).mean()
+            
+            # 최신 값 추출
+            latest = df.iloc[-1]
+            current_spread = latest["Spread"]
+            spread_fast = latest["Spread_Fast"]
+            spread_slow = latest["Spread_Slow"]
+            yield_trend = latest["Yield_Trend"]
+            current_dgs10 = latest["DGS10"]
+            current_dgs2 = latest["DGS2"]
+            
+            # Condition A: 스프레드 추세 판단
+            if spread_fast > spread_slow:
+                spread_trend = "Steepening"
+                spread_trend_kr = "확대"
+            else:
+                spread_trend = "Flattening"
+                spread_trend_kr = "축소"
+            
+            # Condition B: 금리 대세 판단
+            if current_dgs10 > yield_trend:
+                yield_regime = "Rising"
+                yield_regime_kr = "금리 상승 추세"
+            else:
+                yield_regime = "Falling"
+                yield_regime_kr = "금리 하락 추세"
+            
+            # 4가지 국면 판단
+            if spread_trend == "Steepening" and yield_regime == "Falling":
+                regime = "Bull Steepening"
+                regime_kr = "Bull Steepening (경기 부양 기대)"
+            elif spread_trend == "Steepening" and yield_regime == "Rising":
+                regime = "Bear Steepening"
+                regime_kr = "Bear Steepening (인플레/재정 공포)"
+            elif spread_trend == "Flattening" and yield_regime == "Falling":
+                regime = "Bull Flattening"
+                regime_kr = "Bull Flattening (경기 둔화 초기)"
+            else:  # Flattening + Rising
+                regime = "Bear Flattening"
+                regime_kr = "Bear Flattening (강력한 긴축)"
+            
+            logger.info(
+                f"장단기 금리차 추세 추종 전략: {regime_kr}\n"
+                f"  - 스프레드: {current_spread:.2f}% (단기 MA: {spread_fast:.2f}%, 장기 MA: {spread_slow:.2f}%)\n"
+                f"  - 금리 대세: {yield_regime_kr} (DGS10: {current_dgs10:.2f}%, 200일 MA: {yield_trend:.2f}%)"
+            )
+            
+            return {
+                "spread": float(current_spread),
+                "spread_fast": float(spread_fast),
+                "spread_slow": float(spread_slow),
+                "yield_trend": float(yield_trend),
+                "current_dgs10": float(current_dgs10),
+                "current_dgs2": float(current_dgs2),
+                "spread_trend": spread_trend,
+                "spread_trend_kr": spread_trend_kr,
+                "yield_regime": yield_regime,
+                "yield_regime_kr": yield_regime_kr,
+                "regime": regime,
+                "regime_kr": regime_kr
+            }
             
         except Exception as e:
-            logger.error(f"장단기 금리차 계산 실패: {e}")
+            logger.error(f"장단기 금리차 추세 추종 전략 계산 실패: {e}", exc_info=True)
             return None
     
     def get_real_interest_rate(self, days: int = 30) -> Optional[float]:
@@ -374,7 +481,7 @@ class QuantSignalCalculator:
                 liquidity_ma_weeks = 4  # 기본값
         
         signals = {
-            "yield_curve_spread": self.get_yield_curve_spread(),
+            "yield_curve_spread_trend": self.get_yield_curve_spread_trend_following(),
             "real_interest_rate": self.get_real_interest_rate(),
             "taylor_rule_signal": self.get_taylor_rule_signal(
                 natural_rate=natural_rate,
