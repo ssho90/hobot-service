@@ -210,43 +210,99 @@ const LogManagementPage = () => {
               />
             </div>
             
-            <button
-              onClick={() => {
+            {/* UTC+9 시간대를 datetime-local 형식으로 변환하는 헬퍼 함수 */}
+            {(() => {
+              const formatDateTimeLocal = (date) => {
+                const year = date.getUTCFullYear();
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const hours = String(date.getUTCHours()).padStart(2, '0');
+                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+              };
+              
+              const setTimeRange = (minutesAgo) => {
                 const now = new Date();
-                const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-                setEndTime(now.toISOString().slice(0, 16));
-                setStartTime(oneHourAgo.toISOString().slice(0, 16));
-              }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid #d1d5db',
-                backgroundColor: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              최근 1시간
-            </button>
-            
-            <button
-              onClick={() => {
-                const now = new Date();
-                const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                setEndTime(now.toISOString().slice(0, 16));
-                setStartTime(oneDayAgo.toISOString().slice(0, 16));
-              }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid #d1d5db',
-                backgroundColor: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              최근 24시간
-            </button>
+                const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
+                const pastTime = new Date(kstTime.getTime() - minutesAgo * 60 * 1000);
+                setEndTime(formatDateTimeLocal(kstTime));
+                setStartTime(formatDateTimeLocal(pastTime));
+              };
+              
+              return (
+                <>
+                  <button
+                    onClick={() => setTimeRange(5)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    최근 5분
+                  </button>
+                  
+                  <button
+                    onClick={() => setTimeRange(15)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    최근 15분
+                  </button>
+                  
+                  <button
+                    onClick={() => setTimeRange(30)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    최근 30분
+                  </button>
+                  
+                  <button
+                    onClick={() => setTimeRange(60)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    최근 1시간
+                  </button>
+                  
+                  <button
+                    onClick={() => setTimeRange(24 * 60)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    최근 24시간
+                  </button>
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

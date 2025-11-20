@@ -963,13 +963,17 @@ async def get_logs(
                 all_log_entries.sort(key=lambda x: x[0])
                 
                 # 시간 필터 적용
+                # 프론트엔드에서 UTC+9 시간을 보내므로, 로그 타임스탬프와 직접 비교
+                # 로그 타임스탬프는 서버의 로컬 시간대(UTC+9)로 저장되어 있다고 가정
                 filtered_entries = all_log_entries
                 if start_time or end_time:
                     try:
                         if start_time:
+                            # UTC+9 시간대를 naive datetime으로 파싱 (로그와 동일한 시간대)
                             start_dt = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
                             filtered_entries = [entry for entry in filtered_entries if entry[0] >= start_dt]
                         if end_time:
+                            # UTC+9 시간대를 naive datetime으로 파싱 (로그와 동일한 시간대)
                             end_dt = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
                             # 종료 시간에 59초 59밀리초 추가하여 해당 시간대까지 포함
                             end_dt = end_dt.replace(second=59, microsecond=999999)
