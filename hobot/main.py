@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv(override=True)
 
@@ -316,6 +317,121 @@ async def get_yield_curve_spread_data(
         }
     except Exception as e:
         logging.error(f"Error fetching yield curve spread data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/macro-trading/account-snapshots")
+async def get_account_snapshots(
+    days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
+    admin_user: dict = Depends(require_admin)
+):
+    """계좌 스냅샷 조회 API (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime, timedelta
+        
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=days)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    id,
+                    snapshot_date,
+                    total_value,
+                    cash_balance,
+                    allocation_actual,
+                    pnl_by_asset,
+                    pnl_total,
+                    created_at,
+                    updated_at
+                FROM account_snapshots
+                WHERE snapshot_date >= %s AND snapshot_date <= %s
+                ORDER BY snapshot_date DESC
+            """, (start_date, end_date))
+            
+            rows = cursor.fetchall()
+            
+            result = []
+            for row in rows:
+                result.append({
+                    "id": row["id"],
+                    "snapshot_date": row["snapshot_date"].strftime("%Y-%m-%d") if row["snapshot_date"] else None,
+                    "total_value": float(row["total_value"]) if row["total_value"] else 0,
+                    "cash_balance": float(row["cash_balance"]) if row["cash_balance"] else 0,
+                    "allocation_actual": row["allocation_actual"] if isinstance(row["allocation_actual"], dict) else (json.loads(row["allocation_actual"]) if row["allocation_actual"] else {}),
+                    "pnl_by_asset": row["pnl_by_asset"] if isinstance(row["pnl_by_asset"], dict) else (json.loads(row["pnl_by_asset"]) if row["pnl_by_asset"] else {}),
+                    "pnl_total": float(row["pnl_total"]) if row["pnl_total"] else 0,
+                    "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None,
+                    "updated_at": row["updated_at"].strftime("%Y-%m-%d %H:%M:%S") if row["updated_at"] else None
+                })
+            
+            return {
+                "status": "success",
+                "data": result,
+                "count": len(result)
+            }
+    except Exception as e:
+        logging.error(f"Error fetching account snapshots: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/macro-trading/rebalancing-history")
+async def get_rebalancing_history(
+    days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
+    admin_user: dict = Depends(require_admin)
+):
+    """리밸런싱 실행 이력 조회 API (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime, timedelta
+        import json
+        
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    id,
+                    execution_date,
+                    threshold_used,
+                    drift_before,
+                    drift_after,
+                    trades_executed,
+                    total_cost,
+                    status,
+                    error_message,
+                    created_at
+                FROM rebalancing_history
+                WHERE execution_date >= %s AND execution_date <= %s
+                ORDER BY execution_date DESC
+            """, (start_date, end_date))
+            
+            rows = cursor.fetchall()
+            
+            result = []
+            for row in rows:
+                result.append({
+                    "id": row["id"],
+                    "execution_date": row["execution_date"].strftime("%Y-%m-%d %H:%M:%S") if row["execution_date"] else None,
+                    "threshold_used": float(row["threshold_used"]) if row["threshold_used"] else 0,
+                    "drift_before": row["drift_before"] if isinstance(row["drift_before"], dict) else (json.loads(row["drift_before"]) if row["drift_before"] else {}),
+                    "drift_after": row["drift_after"] if isinstance(row["drift_after"], dict) else (json.loads(row["drift_after"]) if row["drift_after"] else {}),
+                    "trades_executed": row["trades_executed"] if isinstance(row["trades_executed"], dict) else (json.loads(row["trades_executed"]) if row["trades_executed"] else {}),
+                    "total_cost": float(row["total_cost"]) if row["total_cost"] else 0,
+                    "status": row["status"],
+                    "error_message": row["error_message"],
+                    "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None
+                })
+            
+            return {
+                "status": "success",
+                "data": result,
+                "count": len(result)
+            }
+    except Exception as e:
+        logging.error(f"Error fetching rebalancing history: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/current-strategy")
