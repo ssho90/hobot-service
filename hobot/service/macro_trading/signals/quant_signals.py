@@ -244,7 +244,7 @@ class QuantSignalCalculator:
             # 월별 데이터이므로 최신 값만 필요, 안전하게 최근 90일(약 3개월) 조회
             fedfunds = self.fred_collector.get_latest_data("FEDFUNDS", days=90)
             if len(fedfunds) == 0:
-                logger.warning("FEDFUNDS 데이터가 부족합니다")
+                logger.warning("FEDFUNDS 데이터가 부족합니다.")
                 return None
             
             current_fedfunds = fedfunds.iloc[-1]
