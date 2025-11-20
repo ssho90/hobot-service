@@ -726,15 +726,15 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def startup_event():
     """애플리케이션 시작 시 실행되는 이벤트"""
-    logger.info("Hobot 애플리케이션 시작 중...")
+    logging.info("Hobot 애플리케이션 시작 중...")
     
     # FRED 데이터 수집 스케줄러 시작
     try:
         from service.macro_trading.scheduler import start_fred_scheduler_thread
         start_fred_scheduler_thread()
-        logger.info("FRED 데이터 수집 스케줄러가 시작되었습니다.")
+        logging.info("FRED 데이터 수집 스케줄러가 시작되었습니다.")
     except Exception as e:
-        logger.error(f"FRED 스케줄러 시작 실패: {e}", exc_info=True)
+        logging.error(f"FRED 스케줄러 시작 실패: {e}", exc_info=True)
         # 스케줄러 실패해도 애플리케이션은 계속 실행
 
 
