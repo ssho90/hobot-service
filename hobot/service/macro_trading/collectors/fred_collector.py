@@ -57,7 +57,7 @@ FRED_INDICATORS = {
         "code": "FEDFUNDS",
         "name": "Effective Federal Funds Rate",
         "unit": "%",
-        "frequency": "daily"
+        "frequency": "monthly"
     },
     "CPIAUCSL": {
         "code": "CPIAUCSL",

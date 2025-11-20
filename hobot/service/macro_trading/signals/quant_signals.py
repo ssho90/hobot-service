@@ -240,8 +240,9 @@ class QuantSignalCalculator:
             float: 테일러 준칙 신호 (Target_Rate - FEDFUNDS) 또는 None
         """
         try:
-            # FEDFUNDS (현재 연준 금리)
-            fedfunds = self.fred_collector.get_latest_data("FEDFUNDS", days, None)
+            # FEDFUNDS (현재 연준 금리 - 월별 데이터)
+            # 월별 데이터이므로 최신 값만 필요, 안전하게 최근 90일(약 3개월) 조회
+            fedfunds = self.fred_collector.get_latest_data("FEDFUNDS", days=90)
             if len(fedfunds) == 0:
                 logger.warning("FEDFUNDS 데이터가 부족합니다")
                 return None
@@ -249,12 +250,15 @@ class QuantSignalCalculator:
             current_fedfunds = fedfunds.iloc[-1]
             
             # PCE 인플레이션율 (월별 데이터)
-            pce_data = self.fred_collector.get_latest_data("PCEPI", 365, None)
+            # 월별 데이터이므로 최근 2개월치만 필요 (전월 대비 계산)
+            # 안전하게 최근 90일(약 3개월) 조회하여 최소 2개월치 데이터 확보
+            pce_data = self.fred_collector.get_latest_data("PCEPI", days=90)
             if len(pce_data) < 2:
-                logger.warning("PCE 데이터가 부족합니다")
+                logger.warning("PCE 데이터가 부족합니다 (최소 2개월치 필요)")
                 return None
             
             # PCE 증가율 계산 (전월 대비 연율화)
+            # 월별 데이터이므로 날짜 기준으로 정렬하여 최신 2개월치 사용
             pce_values = pce_data.sort_index()
             latest_pce = pce_values.iloc[-1]
             prev_pce = pce_values.iloc[-2] if len(pce_values) >= 2 else pce_values.iloc[0]
