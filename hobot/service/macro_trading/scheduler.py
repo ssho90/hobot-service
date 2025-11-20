@@ -99,6 +99,51 @@ def collect_all_fred_data(request_delay: Optional[float] = None):
             else:
                 logger.warning(f"  ✗ {indicator_code}: 수집 실패 또는 데이터 없음")
         
+        # DGS10, DGS2의 누락된 날짜 보간 처리
+        logger.info("")
+        logger.info("DGS10, DGS2 누락 날짜 보간 처리 시작...")
+        for indicator_code in ["DGS10", "DGS2"]:
+            try:
+                # 기존 데이터 조회 (최근 1년)
+                existing_data = collector.get_latest_data(indicator_code, days=365)
+                
+                if len(existing_data) == 0:
+                    logger.warning(f"{indicator_code}: 기존 데이터가 없어 보간을 건너뜁니다.")
+                    continue
+                
+                # 보간 적용
+                filled_data = collector.fill_missing_dates(
+                    existing_data,
+                    start_date=start_date,
+                    end_date=end_date,
+                    method='linear'
+                )
+                
+                # 보간된 데이터만 저장 (기존 데이터는 skip_existing=True로 건너뜀)
+                from service.macro_trading.collectors.fred_collector import FRED_INDICATORS
+                indicator_info = FRED_INDICATORS.get(indicator_code, {})
+                
+                interpolated_count = collector.save_to_db(
+                    indicator_code,
+                    filled_data,
+                    indicator_info.get("name", indicator_code),
+                    indicator_info.get("unit", ""),
+                    fill_missing=False,  # 이미 보간된 데이터이므로 다시 보간하지 않음
+                    fill_start_date=None,
+                    fill_end_date=None
+                )
+                
+                if interpolated_count > 0:
+                    logger.info(f"  ✓ {indicator_code}: {interpolated_count}개 보간 데이터 추가")
+                else:
+                    logger.info(f"  - {indicator_code}: 누락된 날짜 없음 (이미 완전함)")
+                    
+            except Exception as e:
+                logger.warning(f"{indicator_code} 보간 처리 중 오류: {e}")
+                continue
+        
+        logger.info("=" * 60)
+        
         return results
         
     except Exception as e:

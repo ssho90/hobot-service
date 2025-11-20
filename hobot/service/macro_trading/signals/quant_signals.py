@@ -241,7 +241,7 @@ class QuantSignalCalculator:
         """
         try:
             # FEDFUNDS (현재 연준 금리)
-            fedfunds = self.fred_collector.get_latest_data("FEDFUNDS", days)
+            fedfunds = self.fred_collector.get_latest_data("FEDFUNDS", days, None)
             if len(fedfunds) == 0:
                 logger.warning("FEDFUNDS 데이터가 부족합니다")
                 return None
@@ -249,7 +249,7 @@ class QuantSignalCalculator:
             current_fedfunds = fedfunds.iloc[-1]
             
             # PCE 인플레이션율 (월별 데이터)
-            pce_data = self.fred_collector.get_latest_data("PCEPI", days=365)
+            pce_data = self.fred_collector.get_latest_data("PCEPI", days=365, None)
             if len(pce_data) < 2:
                 logger.warning("PCE 데이터가 부족합니다")
                 return None
