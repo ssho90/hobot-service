@@ -523,6 +523,30 @@ async def get_rebalancing_history(
         logging.error(f"Error fetching rebalancing history: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+def convert_numpy_types(obj):
+    """
+    numpy 타입을 Python 기본 타입으로 변환하는 재귀 함수
+    """
+    import numpy as np
+    
+    if isinstance(obj, (np.integer, np.int_, np.intc, np.intp, np.int8,
+                        np.int16, np.int32, np.int64, np.uint8, np.uint16,
+                        np.uint32, np.uint64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float_, np.float16, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return [convert_numpy_types(item) for item in obj.tolist()]
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_numpy_types(item) for item in obj]
+    else:
+        return obj
+
+
 @api_router.get("/macro-trading/quantitative-signals")
 async def get_quantitative_signals(
     natural_rate: float = Query(default=2.0, description="자연 이자율 (%)"),
@@ -581,6 +605,9 @@ async def get_quantitative_signals(
                 "message": f"{len(missing_signals)}개의 시그널을 계산할 수 없습니다.",
                 "missing_signals": missing_signals
             }
+        
+        # numpy 타입을 Python 기본 타입으로 변환
+        result = convert_numpy_types(result)
         
         return result
         
