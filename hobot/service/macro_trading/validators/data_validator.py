@@ -321,13 +321,20 @@ class FREDDataValidator:
         else:
             status = 'ok'
         
+        # numpy 타입을 Python 기본 타입으로 변환
+        missing_count = data.isna().sum()
+        if hasattr(missing_count, 'item'):
+            missing_count = int(missing_count.item())
+        else:
+            missing_count = int(missing_count)
+        
         return {
             'indicator_code': indicator_code,
             'status': status,
-            'data_points': len(data),
-            'missing_count': data.isna().sum(),
-            'critical_issues': critical_count,
-            'warning_issues': warning_count,
+            'data_points': int(len(data)),
+            'missing_count': missing_count,
+            'critical_issues': int(critical_count),
+            'warning_issues': int(warning_count),
             'issues': [issue.to_dict() for issue in issues]
         }
 

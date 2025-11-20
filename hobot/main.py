@@ -337,9 +337,27 @@ async def get_yield_curve_spread_data(
         for date_idx in common_dates:
             dgs10_val = dgs10_data[date_idx]
             dgs2_val = dgs2_data[date_idx]
+            
+            # numpy 타입을 Python 기본 타입으로 변환
+            if hasattr(dgs10_val, 'item'):
+                dgs10_val = float(dgs10_val.item())
+            else:
+                dgs10_val = float(dgs10_val)
+            
+            if hasattr(dgs2_val, 'item'):
+                dgs2_val = float(dgs2_val.item())
+            else:
+                dgs2_val = float(dgs2_val)
+            
             spread = dgs10_val - dgs2_val
             
-            date_str = date_idx.strftime("%Y-%m-%d") if hasattr(date_idx, 'strftime') else str(date_idx)
+            # 날짜 변환
+            if isinstance(date_idx, pd.Timestamp):
+                date_str = date_idx.strftime("%Y-%m-%d")
+            elif hasattr(date_idx, 'strftime'):
+                date_str = date_idx.strftime("%Y-%m-%d")
+            else:
+                date_str = str(date_idx)
             
             spread_data.append({
                 "date": date_str,
@@ -402,6 +420,9 @@ async def get_yield_curve_spread_data(
             )
             quality_summary = validator.get_data_quality_summary("YIELD_SPREAD", spread_series)
             response["quality"] = quality_summary
+        
+        # numpy 타입 변환 (모든 응답 데이터에 적용)
+        response = convert_numpy_types(response)
         
         return response
     except Exception as e:
