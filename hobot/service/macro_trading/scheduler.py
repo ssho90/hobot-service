@@ -108,7 +108,7 @@ def collect_all_fred_data(request_delay: Optional[float] = None):
                 existing_data = collector.get_latest_data(indicator_code, days=365)
                 
                 if len(existing_data) == 0:
-                    logger.warning(f"{indicator_code}: 기존 데이터가 없어 보간을 건너뜁니다.")
+                    logger.debug(f"{indicator_code}: 기존 데이터가 없어 보간을 건너뜁니다.")
                     continue
                 
                 # 보간 적용
@@ -136,10 +136,12 @@ def collect_all_fred_data(request_delay: Optional[float] = None):
                 if interpolated_count > 0:
                     logger.info(f"  ✓ {indicator_code}: {interpolated_count}개 보간 데이터 추가")
                 else:
-                    logger.info(f"  - {indicator_code}: 누락된 날짜 없음 (이미 완전함)")
+                    logger.debug(f"  - {indicator_code}: 누락된 날짜 없음 (이미 완전함)")
                     
             except Exception as e:
-                logger.warning(f"{indicator_code} 보간 처리 중 오류: {e}")
+                # 예외 발생 시 상세 정보는 debug 레벨로, 요약만 warning으로
+                logger.warning(f"{indicator_code} 보간 처리 중 오류: {type(e).__name__}: {str(e)}")
+                logger.debug(f"{indicator_code} 보간 처리 상세 오류:", exc_info=True)
                 continue
         
         logger.info("=" * 60)
