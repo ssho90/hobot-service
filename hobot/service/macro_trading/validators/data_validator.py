@@ -117,7 +117,8 @@ class FREDDataValidator:
             return issues
         
         # decimal.Decimal 타입을 float로 변환하여 연산 오류 방지
-        data_float = data.apply(lambda x: float(x) if isinstance(x, Decimal) else x)
+        # pd.to_numeric을 사용하여 더 확실하게 변환
+        data_float = pd.to_numeric(data, errors='coerce')
         
         min_val, max_val = self.indicator_ranges[indicator_code]
         out_of_range = data_float[(data_float < min_val) | (data_float > max_val)]
@@ -213,7 +214,10 @@ class FREDDataValidator:
             return issues
         
         # decimal.Decimal 타입을 float로 변환하여 연산 오류 방지
-        clean_data = clean_data.apply(lambda x: float(x) if isinstance(x, Decimal) else x)
+        # pd.to_numeric을 사용하여 더 확실하게 변환
+        clean_data = pd.to_numeric(clean_data, errors='coerce').dropna()
+        if len(clean_data) < 10:
+            return issues
         
         outliers = []
         
