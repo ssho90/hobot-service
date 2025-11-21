@@ -944,16 +944,60 @@ async def get_logs(
                     return datetime.now()
             
             # 로그 파일 읽기
+            # 시간 필터가 없으면 파일 끝에서 최근 N줄만 읽기 (tail과 동일하게)
+            # 시간 필터가 있으면 전체 파일을 읽어서 필터링
             all_log_entries = []  # (timestamp, log_line) 튜플 리스트
             try:
                 with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    file_lines = f.readlines()
+                    if start_time or end_time:
+                        # 시간 필터가 있으면 전체 파일 읽기
+                        file_lines = f.readlines()
+                    else:
+                        # 시간 필터가 없으면 파일 끝에서 최근 N줄만 읽기 (효율적이고 정확함)
+                        # 파일 크기가 크면 seek로 끝부분만 읽기
+                        try:
+                            # 파일 크기 확인
+                            f.seek(0, 2)  # 파일 끝으로 이동
+                            file_size = f.tell()
+                            
+                            # 최근 대략 N줄을 읽기 위해 (평균 라인 길이 * N * 2)만큼만 읽기
+                            # 안전하게 더 많이 읽기 위해 * 3
+                            read_size = min(lines * 200 * 3, file_size)  # 평균 라인 길이 200자 가정
+                            f.seek(max(0, file_size - read_size))
+                            file_lines = f.readlines()
+                            # 실제로는 마지막 N줄만 사용 (Traceback 등 여러 줄 에러 포함)
+                            file_lines = file_lines[-lines * 2:]  # 여유있게 2배로
+                        except:
+                            # seek 실패 시 전체 파일 읽기
+                            f.seek(0)
+                            file_lines = f.readlines()
+                            file_lines = file_lines[-lines * 2:]
+                    
                     if file_lines:
+                        # 타임스탬프가 없는 줄(예: Traceback의 일부)을 처리하기 위해
+                        # 이전 줄의 타임스탬프를 상속받도록 처리
+                        last_timestamp = None
                         for line in file_lines:
                             line = line.rstrip('\n\r')
-                            if line.strip():  # 빈 줄 제외
+                            if not line.strip():  # 빈 줄은 건너뛰기
+                                continue
+                            
+                            # 타임스탬프 패턴이 있는지 먼저 확인
+                            has_timestamp = bool(timestamp_pattern.match(line) or gunicorn_timestamp_pattern.search(line))
+                            
+                            if has_timestamp:
+                                # 타임스탬프가 있으면 파싱
                                 timestamp = parse_timestamp(line)
-                                all_log_entries.append((timestamp, line))
+                                last_timestamp = timestamp
+                            else:
+                                # 타임스탬프가 없으면 이전 줄의 타임스탬프 상속
+                                if last_timestamp is not None:
+                                    timestamp = last_timestamp
+                                else:
+                                    # 첫 줄이 타임스탬프가 없으면 건너뛰기
+                                    continue
+                            
+                            all_log_entries.append((timestamp, line))
             except Exception as e:
                 logging.warning(f"Could not read {log_path}: {e}")
                 return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_name}
