@@ -250,9 +250,9 @@ class QuantSignalCalculator:
             current_fedfunds = fedfunds.iloc[-1]
             
             # PCE 인플레이션율 (월별 데이터)
-            # 월별 데이터이므로 최근 2개월치만 필요 (전월 대비 계산)
-            # 안전하게 최근 90일(약 3개월) 조회하여 최소 2개월치 데이터 확보
-            pce_data = self.fred_collector.get_latest_data("PCEPI", days=90)
+            # PCEPI는 최신 데이터가 3개월 전 것일 수 있으므로 충분한 기간 조회 필요
+            # 최소 6개월(180일) 데이터 조회하여 최소 2개월치 데이터 확보
+            pce_data = self.fred_collector.get_latest_data("PCEPI", days=180)
             if len(pce_data) < 2:
                 logger.warning("PCE 데이터가 부족합니다 (최소 2개월치 필요)")
                 return None
@@ -261,7 +261,23 @@ class QuantSignalCalculator:
             # 월별 데이터이므로 날짜 기준으로 정렬하여 최신 2개월치 사용
             pce_values = pce_data.sort_index()
             latest_pce = pce_values.iloc[-1]
+            latest_pce_date = pce_values.index[-1]
             prev_pce = pce_values.iloc[-2] if len(pce_values) >= 2 else pce_values.iloc[0]
+            
+            # 최신 데이터의 날짜 확인 (3개월 이상 오래된 경우 경고)
+            today = date.today()
+            if isinstance(latest_pce_date, pd.Timestamp):
+                latest_pce_date_only = latest_pce_date.date()
+            else:
+                latest_pce_date_only = latest_pce_date
+            
+            days_old = (today - latest_pce_date_only).days
+            if days_old > 90:
+                logger.warning(
+                    f"PCEPI 최신 데이터가 {days_old}일 전 것입니다 "
+                    f"(날짜: {latest_pce_date_only}). "
+                    f"3개월 이상 지연된 데이터를 사용합니다."
+                )
             
             current_inflation = ((latest_pce / prev_pce) - 1) * 12 * 100
             
