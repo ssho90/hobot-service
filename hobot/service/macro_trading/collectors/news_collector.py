@@ -21,13 +21,23 @@ load_dotenv()
 try:
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
-    from selenium.common.exceptions import TimeoutException
+    from selenium.common.exceptions import TimeoutException, WebDriverException
+    
+    # webdriver-manager를 사용하여 ChromeDriver 자동 관리
+    try:
+        from webdriver_manager.chrome import ChromeDriverManager
+        WEBDRIVER_MANAGER_AVAILABLE = True
+    except ImportError:
+        WEBDRIVER_MANAGER_AVAILABLE = False
+    
     SELENIUM_AVAILABLE = True
 except ImportError:
     SELENIUM_AVAILABLE = False
+    WEBDRIVER_MANAGER_AVAILABLE = False
 
 from service.database.db import get_db_connection
 
@@ -69,7 +79,12 @@ class NewsCollector:
             HTML 문자열 또는 None (실패 시)
         """
         if use_selenium and SELENIUM_AVAILABLE:
-            return self._fetch_with_selenium()
+            html = self._fetch_with_selenium()
+            # Selenium 실패 시 requests로 폴백
+            if html is None:
+                logger.warning("Selenium 실패. requests로 대체 시도합니다.")
+                return self._fetch_with_requests()
+            return html
         elif use_selenium and not SELENIUM_AVAILABLE:
             logger.warning("Selenium이 설치되지 않았습니다. requests로 대체합니다.")
             return self._fetch_with_requests()
@@ -104,10 +119,33 @@ class NewsCollector:
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--disable-gpu')
+            chrome_options.add_argument('--disable-software-rasterizer')
             chrome_options.add_argument('--window-size=1920,1080')
-            chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+            chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+            chrome_options.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             
-            driver = webdriver.Chrome(options=chrome_options)
+            # ChromeDriver 서비스 설정
+            service = None
+            if WEBDRIVER_MANAGER_AVAILABLE:
+                try:
+                    # webdriver-manager를 사용하여 ChromeDriver 자동 다운로드 및 관리
+                    service = Service(ChromeDriverManager().install())
+                    logger.info("webdriver-manager를 사용하여 ChromeDriver 설정")
+                except Exception as e:
+                    logger.warning(f"webdriver-manager 사용 실패: {e}. 기본 ChromeDriver 사용 시도")
+            
+            # ChromeDriver 초기화
+            try:
+                if service:
+                    driver = webdriver.Chrome(service=service, options=chrome_options)
+                else:
+                    driver = webdriver.Chrome(options=chrome_options)
+            except WebDriverException as e:
+                logger.error(f"ChromeDriver 초기화 실패: {e}")
+                logger.error("Chrome 브라우저가 설치되어 있는지 확인하세요.")
+                logger.error("Linux의 경우: sudo yum install -y google-chrome-stable 또는 sudo apt-get install -y google-chrome-stable")
+                return None
+            
             logger.info(f"페이지 접속: {self.STREAM_URL}")
             driver.get(self.STREAM_URL)
             
@@ -144,8 +182,11 @@ class NewsCollector:
             return None
         finally:
             if driver:
-                driver.quit()
-                logger.info("브라우저 종료 완료")
+                try:
+                    driver.quit()
+                    logger.info("브라우저 종료 완료")
+                except:
+                    pass
     
     def parse_news_items(self, html: str) -> List[Dict]:
         """
@@ -469,7 +510,12 @@ class NewsCollector:
             # 1. 페이지 가져오기
             html = self.fetch_stream_page(use_selenium=use_selenium)
             if not html:
-                raise NewsCollectorError("페이지를 가져올 수 없습니다")
+                error_msg = "페이지를 가져올 수 없습니다"
+                if use_selenium:
+                    error_msg += "\nSelenium 실패 시 requests로 폴백을 시도했지만 실패했습니다."
+                    error_msg += "\nEC2 서버에서 Chrome이 설치되어 있는지 확인하세요."
+                    error_msg += "\n설치 방법: sudo yum install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
+                raise NewsCollectorError(error_msg)
             
             # 2. 뉴스 파싱
             news_items = self.parse_news_items(html)
