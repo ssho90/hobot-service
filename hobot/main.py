@@ -636,6 +636,98 @@ async def get_quantitative_signals(
         logging.error(f"Error calculating quantitative signals: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@api_router.get("/macro-trading/economic-news")
+async def get_economic_news(
+    hours: int = Query(default=24, ge=1, le=168, description="조회할 시간 범위 (시간, 기본값: 24시간, 최대: 168시간)")
+):
+    """최근 경제 뉴스 조회 API
+    
+    economic_news 테이블에서 최근 N시간 내의 뉴스를 조회하여 반환합니다.
+    
+    Returns:
+        {
+            "status": "success",
+            "timestamp": "2024-12-19 10:30:00",
+            "hours": 24,
+            "total_count": 10,
+            "news": [
+                {
+                    "id": 1,
+                    "title": "US Stocks Rebound, Still Post Weekly Losses",
+                    "link": "https://tradingeconomics.com/united-states/stock-market",
+                    "country": "United States",
+                    "category": "Stock Market",
+                    "description": "US stocks sharply rebounded...",
+                    "published_at": "2024-12-19 08:00:00",
+                    "collected_at": "2024-12-19 10:00:00"
+                },
+                ...
+            ]
+        }
+    """
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime, timedelta
+        
+        # 시간 범위 계산
+        cutoff_time = datetime.now() - timedelta(hours=hours)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 최근 N시간 내의 뉴스 조회
+            cursor.execute("""
+                SELECT 
+                    id,
+                    title,
+                    link,
+                    country,
+                    category,
+                    description,
+                    published_at,
+                    collected_at,
+                    source,
+                    created_at
+                FROM economic_news
+                WHERE published_at >= %s
+                ORDER BY published_at DESC
+            """, (cutoff_time,))
+            
+            rows = cursor.fetchall()
+            
+            # 결과 구성
+            news_list = []
+            for row in rows:
+                news_item = {
+                    "id": row.get("id"),
+                    "title": row.get("title"),
+                    "link": row.get("link"),
+                    "country": row.get("country"),
+                    "category": row.get("category"),
+                    "description": row.get("description"),
+                    "published_at": row.get("published_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("published_at") else None,
+                    "collected_at": row.get("collected_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("collected_at") else None,
+                    "source": row.get("source"),
+                    "created_at": row.get("created_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("created_at") else None
+                }
+                news_list.append(news_item)
+            
+            result = {
+                "status": "success",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "hours": hours,
+                "total_count": len(news_list),
+                "news": news_list
+            }
+            
+            return result
+            
+    except Exception as e:
+        logging.error(f"Error fetching economic news: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/current-strategy")
 async def update_current_strategy(request: StrategyRequest):
     """전략을 업데이트합니다. (기본값은 upbit, 하위 호환성 유지)"""
