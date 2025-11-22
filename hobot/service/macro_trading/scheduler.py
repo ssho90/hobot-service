@@ -1,5 +1,5 @@
 """
-FRED 데이터 수집 자동 스케줄러 모듈
+FRED 데이터 수집 및 뉴스 수집 자동 스케줄러 모듈
 """
 import schedule
 import time
@@ -10,6 +10,7 @@ import logging
 from functools import wraps
 
 from service.macro_trading.collectors.fred_collector import get_fred_collector
+from service.macro_trading.collectors.news_collector import get_news_collector
 from service.macro_trading.config.config_loader import get_config
 
 logger = logging.getLogger(__name__)
@@ -153,6 +154,37 @@ def collect_all_fred_data(request_delay: Optional[float] = None):
         raise
 
 
+@retry_on_failure(max_retries=3, delay=60)
+def collect_recent_news():
+    """
+    TradingEconomics 스트림에서 최근 2시간 이내의 뉴스를 수집하고 DB에 저장합니다.
+    
+    Returns:
+        Tuple[int, int]: (저장된 개수, 건너뛴 개수)
+    """
+    try:
+        logger.info("=" * 60)
+        logger.info("경제 뉴스 수집 시작")
+        logger.info("=" * 60)
+        
+        collector = get_news_collector()
+        
+        # 2시간 이내의 뉴스 수집
+        saved, skipped = collector.collect_recent_news(hours=2)
+        
+        logger.info("=" * 60)
+        logger.info("경제 뉴스 수집 완료")
+        logger.info(f"  - 저장된 뉴스: {saved}개")
+        logger.info(f"  - 건너뛴 뉴스: {skipped}개")
+        logger.info("=" * 60)
+        
+        return saved, skipped
+        
+    except Exception as e:
+        logger.error(f"뉴스 수집 중 오류 발생: {e}", exc_info=True)
+        raise
+
+
 def setup_fred_scheduler():
     """
     FRED 데이터 수집 스케줄을 설정합니다.
@@ -207,6 +239,21 @@ def run_scheduler():
             time.sleep(60)
 
 
+def setup_news_scheduler():
+    """
+    뉴스 수집 스케줄을 설정합니다.
+    1시간마다 실행되도록 등록합니다.
+    """
+    try:
+        # 1시간마다 실행
+        schedule.every().hour.do(collect_recent_news).tag('news_collection')
+        logger.info("뉴스 수집 스케줄 등록: 매 1시간마다 실행")
+        
+    except Exception as e:
+        logger.error(f"뉴스 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
 def start_fred_scheduler_thread():
     """
     FRED 데이터 수집 스케줄러를 별도 스레드에서 시작합니다.
@@ -228,6 +275,55 @@ def start_fred_scheduler_thread():
     logger.info("FRED 데이터 수집 스케줄러 스레드가 시작되었습니다.")
     
     return scheduler_thread
+
+
+def start_news_scheduler_thread():
+    """
+    뉴스 수집 스케줄러를 별도 스레드에서 시작합니다.
+    
+    Returns:
+        threading.Thread: 스케줄러 스레드
+    """
+    # 스케줄 설정
+    setup_news_scheduler()
+    
+    # 스케줄러 스레드 생성 및 시작
+    scheduler_thread = threading.Thread(
+        target=run_scheduler,
+        name="NewsCollectionScheduler",
+        daemon=True
+    )
+    scheduler_thread.start()
+    
+    logger.info("뉴스 수집 스케줄러 스레드가 시작되었습니다.")
+    
+    return scheduler_thread
+
+
+def start_all_schedulers():
+    """
+    모든 스케줄러를 시작합니다.
+    
+    Returns:
+        List[threading.Thread]: 스케줄러 스레드 리스트
+    """
+    threads = []
+    
+    # FRED 데이터 수집 스케줄러
+    try:
+        fred_thread = start_fred_scheduler_thread()
+        threads.append(fred_thread)
+    except Exception as e:
+        logger.error(f"FRED 스케줄러 시작 실패: {e}")
+    
+    # 뉴스 수집 스케줄러
+    try:
+        news_thread = start_news_scheduler_thread()
+        threads.append(news_thread)
+    except Exception as e:
+        logger.error(f"뉴스 스케줄러 시작 실패: {e}")
+    
+    return threads
 
 
 if __name__ == "__main__":

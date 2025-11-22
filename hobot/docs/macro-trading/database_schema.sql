@@ -127,6 +127,27 @@ CREATE TABLE system_logs (
     INDEX idx_log_level (log_level) COMMENT '로그 레벨 인덱스'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='시스템 로그';
 
+-- 8. 경제 뉴스 테이블
+-- 역할: TradingEconomics 스트림에서 수집한 경제 뉴스 저장
+CREATE TABLE economic_news (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '고유 ID',
+    title VARCHAR(500) NOT NULL COMMENT '뉴스 제목',
+    link VARCHAR(500) COMMENT '뉴스 링크',
+    country VARCHAR(100) COMMENT '국가 (예: United States, Peru)',
+    category VARCHAR(100) COMMENT '카테고리 (예: Stock Market, GDP Annual Growth Rate)',
+    description TEXT COMMENT '뉴스 본문/요약',
+    published_at DATETIME COMMENT '뉴스 발행 시간',
+    collected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '수집 일시',
+    source VARCHAR(100) DEFAULT 'TradingEconomics Stream' COMMENT '데이터 출처',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UNIQUE KEY unique_title_link (title(255), link(255)) COMMENT '제목과 링크로 중복 방지',
+    INDEX idx_published_at (published_at) COMMENT '발행 시간 인덱스',
+    INDEX idx_country (country) COMMENT '국가 인덱스',
+    INDEX idx_category (category) COMMENT '카테고리 인덱스',
+    INDEX idx_collected_at (collected_at) COMMENT '수집 일시 인덱스'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='경제 뉴스';
+
 -- ============================================
 -- 추가 인덱스 (성능 최적화)
 -- ============================================

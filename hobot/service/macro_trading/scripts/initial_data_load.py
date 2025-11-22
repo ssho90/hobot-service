@@ -24,6 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from service.macro_trading.collectors.fred_collector import get_fred_collector, FRED_INDICATORS
+from service.macro_trading.collectors.news_collector import get_news_collector
 
 
 def initial_data_load(years: int = 5, fill_missing_only: bool = False):
@@ -167,10 +168,50 @@ def initial_data_load(years: int = 5, fill_missing_only: bool = False):
         raise
 
 
+def initial_news_load(hours: int = 24, use_selenium: bool = False):
+    """
+    초기 뉴스 적재 함수
+    
+    Args:
+        hours: 수집할 시간 범위 (기본값: 24시간)
+        use_selenium: Selenium 사용 여부 (JavaScript 렌더링 필요 시)
+    
+    Returns:
+        Tuple[int, int]: (저장된 개수, 건너뛴 개수)
+    """
+    logger.info("=" * 80)
+    logger.info("경제 뉴스 초기 적재 시작")
+    logger.info("=" * 80)
+    logger.info(f"수집 기간: 최근 {hours}시간")
+    if use_selenium:
+        logger.info("모드: Selenium 사용 (JavaScript 렌더링)")
+    logger.info("")
+    
+    try:
+        collector = get_news_collector()
+        
+        # 24시간 이내의 뉴스 수집 및 저장
+        saved, skipped = collector.collect_recent_news(hours=hours, use_selenium=use_selenium)
+        
+        logger.info("")
+        logger.info("=" * 80)
+        logger.info("경제 뉴스 초기 적재 완료")
+        logger.info("=" * 80)
+        logger.info(f"  - 저장된 뉴스: {saved:,}개")
+        logger.info(f"  - 건너뛴 뉴스: {skipped:,}개")
+        logger.info("=" * 80)
+        
+        return saved, skipped
+        
+    except Exception as e:
+        logger.error(f"초기 뉴스 적재 중 오류 발생: {e}", exc_info=True)
+        raise
+
+
 if __name__ == "__main__":
     import argparse
     
-    parser = argparse.ArgumentParser(description="FRED 데이터 초기 적재 스크립트")
+    parser = argparse.ArgumentParser(description="FRED 데이터 및 뉴스 초기 적재 스크립트")
     parser.add_argument(
         "--years",
         type=int,
@@ -182,29 +223,101 @@ if __name__ == "__main__":
         action="store_true",
         help="DGS10, DGS2의 누락된 날짜만 보간하여 채움 (기존 데이터가 있는 경우)"
     )
+    parser.add_argument(
+        "--skip-fred",
+        action="store_true",
+        help="FRED 데이터 수집 건너뛰기 (뉴스만 수집)"
+    )
+    parser.add_argument(
+        "--skip-news",
+        action="store_true",
+        help="뉴스 수집 건너뛰기 (FRED 데이터만 수집)"
+    )
+    parser.add_argument(
+        "--news-hours",
+        type=int,
+        default=24,
+        help="뉴스 수집 시간 범위 (시간, 기본값: 24시간)"
+    )
+    parser.add_argument(
+        "--use-selenium",
+        action="store_true",
+        help="뉴스 수집 시 Selenium 사용 (JavaScript 렌더링 필요 시)"
+    )
     
     args = parser.parse_args()
     
     print("\n" + "=" * 80)
-    print("FRED 데이터 초기 적재 스크립트")
+    print("FRED 데이터 및 뉴스 초기 적재 스크립트")
     print("=" * 80)
-    if args.fill_missing_only:
-        print("모드: 누락 날짜 보간만 수행 (DGS10, DGS2)")
+    
+    if not args.skip_fred:
+        if args.fill_missing_only:
+            print("FRED 모드: 누락 날짜 보간만 수행 (DGS10, DGS2)")
+        else:
+            print(f"FRED 수집 기간: 최근 {args.years}년")
     else:
-        print(f"수집 기간: 최근 {args.years}년")
+        print("FRED 데이터 수집: 건너뜀")
+    
+    if not args.skip_news:
+        print(f"뉴스 수집 기간: 최근 {args.news_hours}시간")
+        if args.use_selenium:
+            print("뉴스 수집 모드: Selenium 사용")
+    else:
+        print("뉴스 수집: 건너뜀")
+    
     print("=" * 80 + "\n")
     
     try:
-        results = initial_data_load(years=args.years, fill_missing_only=args.fill_missing_only)
+        # FRED 데이터 수집
+        fred_results = {}
+        if not args.skip_fred:
+            try:
+                fred_results = initial_data_load(years=args.years, fill_missing_only=args.fill_missing_only)
+            except Exception as e:
+                logger.error(f"FRED 데이터 수집 실패: {e}", exc_info=True)
+                print(f"\n⚠️  FRED 데이터 수집 실패: {e}")
+                print("  뉴스 수집은 계속 진행합니다...\n")
         
-        if results:
+        # 뉴스 수집
+        news_saved = 0
+        news_skipped = 0
+        if not args.skip_news:
+            try:
+                news_saved, news_skipped = initial_news_load(hours=args.news_hours, use_selenium=args.use_selenium)
+            except Exception as e:
+                logger.error(f"뉴스 수집 실패: {e}", exc_info=True)
+                print(f"\n⚠️  뉴스 수집 실패: {e}")
+        
+        # 결과 요약
+        print("\n" + "=" * 80)
+        print("초기 적재 완료 요약")
+        print("=" * 80)
+        
+        if not args.skip_fred:
+            if fred_results:
+                total_saved = sum(fred_results.values())
+                print(f"FRED 데이터: {total_saved:,}개 레코드 저장")
+            else:
+                print("FRED 데이터: 수집 실패 또는 건너뜀")
+        
+        if not args.skip_news:
+            print(f"경제 뉴스: {news_saved:,}개 저장, {news_skipped:,}개 건너뜀")
+        
+        print("=" * 80)
+        
+        if (not args.skip_fred and fred_results) or (not args.skip_news and news_saved > 0):
             print("\n✅ 초기 데이터 적재가 완료되었습니다!")
             print("\n다음 단계:")
-            print("  1. 서버를 시작하면 매일 09:00에 자동으로 최신 데이터가 수집됩니다.")
-            print("  2. 정량 시그널 계산이 정상적으로 작동하는지 확인하세요.")
+            if not args.skip_fred:
+                print("  1. 서버를 시작하면 매일 09:00에 자동으로 최신 FRED 데이터가 수집됩니다.")
+            if not args.skip_news:
+                print("  2. 서버를 시작하면 매 1시간마다 자동으로 최신 뉴스가 수집됩니다.")
+            print("  3. 정량 시그널 계산이 정상적으로 작동하는지 확인하세요.")
         else:
             print("\n❌ 초기 데이터 적재에 실패했습니다.")
-            print("  - FRED_API_KEY 환경변수를 확인하세요.")
+            if not args.skip_fred:
+                print("  - FRED_API_KEY 환경변수를 확인하세요.")
             print("  - 데이터베이스 연결을 확인하세요.")
             
     except KeyboardInterrupt:
@@ -212,5 +325,7 @@ if __name__ == "__main__":
         sys.exit(1)
     except Exception as e:
         print(f"\n\n❌ 오류 발생: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 

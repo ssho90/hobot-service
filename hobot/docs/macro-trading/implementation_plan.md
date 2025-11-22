@@ -385,13 +385,15 @@
 ### 2.2 모듈 2: 정성 분석 (LLM)
 
 #### 작업 항목
-- [ ] **2.2.1** 데이터 소스 크롤링
-  - [ ] TradingEconomics 경제 캘린더 크롤링
-    - [ ] 주요 이벤트 (CPI, FOMC, 실업률) 수집
-    - [ ] 이벤트 날짜, 예상값, 실제값 추출
+- [x] **2.2.1** 데이터 소스 크롤링
+  - [x] TradingEconomics 스트림 뉴스 크롤링
+    - [x] 24시간 이내의 경제 뉴스 수집
+    - [x] 뉴스 제목, 날짜, 내용, 링크 추출
+    - [x] 국가 코드, 중요도, 이벤트 유형 자동 분류
+    - [x] `NewsCollector` 클래스 구현 완료 (`service/macro_trading/collectors/news_collector.py`)
+    - [x] 데이터를 `economic_news` 테이블에 저장
   - [ ] 연준 공식 발표문 (FOMC Statement) 수집
     - [ ] 연준 웹사이트 크롤링 또는 RSS 피드 활용
-  - [ ] 데이터를 `economic_events` 테이블에 저장
 
 - [ ] **2.2.2** LLM 요약 분석
   - [ ] Gemini LLM 통합 (기존 `llm.py` 활용)

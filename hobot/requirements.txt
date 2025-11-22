@@ -34,3 +34,6 @@ pymysql
 fredapi
 pandas
 numpy
+requests
+beautifulsoup4
+selenium  # JavaScript 렌더링이 필요한 웹페이지 크롤링용 (선택적)

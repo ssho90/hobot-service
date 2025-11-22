@@ -162,6 +162,28 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """)
         
+        # 경제 뉴스 테이블 (TradingEconomics 스트림 뉴스)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS economic_news (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(500) NOT NULL,
+                link VARCHAR(500),
+                country VARCHAR(100),
+                category VARCHAR(100),
+                description TEXT,
+                published_at DATETIME,
+                collected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                source VARCHAR(100) DEFAULT 'TradingEconomics Stream',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_title_link (title(255), link(255)),
+                INDEX idx_published_at (published_at),
+                INDEX idx_country (country),
+                INDEX idx_category (category),
+                INDEX idx_collected_at (collected_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """)
+        
         conn.commit()
 
 
