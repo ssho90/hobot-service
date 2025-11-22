@@ -52,8 +52,10 @@ def ensure_backup_dir():
 @contextmanager
 def get_db_connection():
     """데이터베이스 연결 컨텍스트 매니저"""
-    # 데이터베이스 초기화 확인
-    ensure_database_initialized()
+    # 데이터베이스 초기화 확인 (재귀 호출 방지를 위해 init_database 내부에서는 호출하지 않음)
+    # init_database 내부에서 get_db_connection을 호출하므로, 여기서는 초기화만 확인
+    if not _initializing:  # 초기화 중이 아닐 때만 호출
+        ensure_database_initialized()
     
     conn = None
     try:
@@ -440,15 +442,28 @@ def list_backups():
 # 데이터베이스 초기화는 지연 초기화로 변경
 # 모듈 import 시점에는 실행하지 않고, 실제 사용 시점에 초기화
 _db_initialized = False
+_initializing = False  # 재귀 호출 방지 플래그
 
 def ensure_database_initialized():
     """데이터베이스가 초기화되었는지 확인하고, 필요시 초기화"""
-    global _db_initialized
-    if not _db_initialized:
-        try:
-            init_database()
-            _db_initialized = True
-        except Exception as e:
-            print(f"⚠️  데이터베이스 초기화 실패: {e}")
-            print("MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")
-            # 초기화 실패해도 예외를 발생시키지 않음 (서비스 시작은 계속)
+    global _db_initialized, _initializing
+    
+    # 이미 초기화되었으면 바로 리턴
+    if _db_initialized:
+        return
+    
+    # 현재 초기화 중이면 리턴 (재귀 호출 방지)
+    if _initializing:
+        return
+    
+    # 초기화 시작
+    _initializing = True
+    try:
+        init_database()
+        _db_initialized = True
+    except Exception as e:
+        print(f"⚠️  데이터베이스 초기화 실패: {e}")
+        print("MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")
+        # 초기화 실패해도 예외를 발생시키지 않음 (서비스 시작은 계속)
+    finally:
+        _initializing = False

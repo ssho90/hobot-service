@@ -419,20 +419,25 @@ class NewsCollector:
                 if link:
                     # 제목과 링크로 중복 확인
                     cursor.execute("""
-                        SELECT COUNT(*) FROM economic_news
+                        SELECT COUNT(*) as cnt FROM economic_news
                         WHERE title = %s AND link = %s
                     """, (title, link))
                 else:
                     # 제목만으로 중복 확인
                     cursor.execute("""
-                        SELECT COUNT(*) FROM economic_news
+                        SELECT COUNT(*) as cnt FROM economic_news
                         WHERE title = %s
                     """, (title,))
                 
                 result = cursor.fetchone()
-                return result[0] > 0 if result else False
+                # DictCursor를 사용하므로 딕셔너리 형태로 반환됨
+                if result:
+                    # 'cnt' 키 또는 첫 번째 값 사용
+                    count = result.get('cnt') if isinstance(result, dict) else (result[0] if isinstance(result, (list, tuple)) else list(result.values())[0])
+                    return int(count) > 0
+                return False
         except Exception as e:
-            logger.error(f"중복 확인 실패: {e}")
+            logger.error(f"중복 확인 실패: {e}", exc_info=True)
             return False
     
     def save_to_db(self, news_items: List[Dict]) -> Tuple[int, int]:
