@@ -94,7 +94,7 @@ class NewsCollectorTester:
         
         driver = None
         try:
-            print("🌐 Selenium을 사용하여 페이지 로드 중...")
+            print("\n🌐 Selenium을 사용하여 페이지 로드 중...")
             
             # Chrome 옵션 설정
             chrome_options = Options()
@@ -106,33 +106,41 @@ class NewsCollectorTester:
             chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             
             driver = webdriver.Chrome(options=chrome_options)
+            print(f"   페이지 접속: {self.STREAM_URL}")
             driver.get(self.STREAM_URL)
             
             # stream div가 로드될 때까지 대기 (최대 30초)
             try:
+                print("   stream div 로드 대기 중...")
                 WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.ID, "stream"))
                 )
-                print("✅ stream div 로드 완료")
+                print("   ✅ stream div 로드 완료")
                 
                 # 추가로 뉴스 항목이 로드될 때까지 대기
+                print("   뉴스 항목 로드 대기 중...")
                 WebDriverWait(driver, 10).until(
                     lambda d: len(d.find_elements(By.CSS_SELECTOR, "li.te-stream-item")) > 0
                 )
-                print(f"✅ 뉴스 항목 로드 완료 ({len(driver.find_elements(By.CSS_SELECTOR, 'li.te-stream-item'))}개)")
+                news_count = len(driver.find_elements(By.CSS_SELECTOR, "li.te-stream-item"))
+                print(f"   ✅ 뉴스 항목 로드 완료 ({news_count}개)")
             except TimeoutException:
-                print("⚠️  뉴스 항목 로드 타임아웃 (일부만 로드되었을 수 있음)")
+                print("   ⚠️  뉴스 항목 로드 타임아웃 (일부만 로드되었을 수 있음)")
+                # 타임아웃이어도 현재 로드된 항목 수 확인
+                try:
+                    news_count = len(driver.find_elements(By.CSS_SELECTOR, "li.te-stream-item"))
+                    print(f"   현재 로드된 뉴스 항목: {news_count}개")
+                except:
+                    pass
             
             html = driver.page_source
+            print(f"   HTML 가져오기 완료 (길이: {len(html):,} bytes)")
             
-            # 디버깅: HTML을 파일로 저장
-            save_html = input("\nHTML을 파일로 저장하시겠습니까? (y/n): ").lower() == 'y'
-            if save_html:
-                html_file = "tradingeconomics_stream_selenium.html"
-                with open(html_file, 'w', encoding='utf-8') as f:
-                    f.write(html)
-                print(f"✅ HTML이 {html_file}에 저장되었습니다.")
-                print(f"   파일 크기: {len(html)} bytes")
+            # HTML을 자동으로 파일로 저장 (디버깅용)
+            html_file = "tradingeconomics_stream_selenium.html"
+            with open(html_file, 'w', encoding='utf-8') as f:
+                f.write(html)
+            print(f"   ✅ HTML이 {html_file}에 저장되었습니다.")
             
             return html
             
@@ -144,6 +152,7 @@ class NewsCollectorTester:
         finally:
             if driver:
                 driver.quit()
+                print("   브라우저 종료 완료")
     
     def parse_news_items(self, html: str) -> List[Dict]:
         """HTML에서 뉴스 항목 파싱"""
@@ -337,10 +346,13 @@ class NewsCollectorTester:
                 desc = desc[:200] + "..."
             print(f"본문: {desc}")
     
-    def test_collect_news(self, hours: int = 2, use_selenium: bool = False):
+    def test_collect_news(self, hours: int = 20, use_selenium: bool = True):
         """뉴스 수집 테스트 실행"""
         print("\n" + "=" * 80)
         print("TradingEconomics 뉴스 수집 테스트 시작")
+        print("=" * 80)
+        print(f"수집 기간: 최근 {hours}시간")
+        print(f"Selenium 사용: {'예' if use_selenium else '아니오'}")
         print("=" * 80)
         
         # 1. 페이지 가져오기
@@ -416,18 +428,21 @@ def main():
     """메인 함수"""
     tester = NewsCollectorTester()
     
-    # Selenium 사용 여부 확인
+    # 무조건 Selenium 사용, 20시간 내 뉴스 수집
     print("\n" + "=" * 80)
-    use_selenium = input("Selenium을 사용하시겠습니까? (JavaScript 렌더링 필요, y/n): ").lower() == 'y'
+    print("설정:")
+    print("  - Selenium 사용: 예 (무조건)")
+    print("  - 수집 기간: 최근 20시간")
+    print("=" * 80)
     
-    # 2시간 이내 뉴스 수집 테스트
-    tester.test_collect_news(hours=2, use_selenium=use_selenium)
+    # 20시간 이내 뉴스 수집 테스트
+    tester.test_collect_news(hours=20, use_selenium=True)
     
     # 추가 옵션: 전체 뉴스 확인 (필터링 없이)
     print("\n" + "=" * 80)
     response = input("전체 뉴스 목록도 확인하시겠습니까? (y/n): ")
     if response.lower() == 'y':
-        html = tester.fetch_stream_page()
+        html = tester.fetch_stream_page(use_selenium=True)
         if html:
             news_items = tester.parse_news_items(html)
             print(f"\n전체 뉴스: {len(news_items)}개")

@@ -168,13 +168,13 @@ def initial_data_load(years: int = 5, fill_missing_only: bool = False):
         raise
 
 
-def initial_news_load(hours: int = 24, use_selenium: bool = False):
+def initial_news_load(hours: int = 48, use_selenium: bool = True):
     """
     초기 뉴스 적재 함수
     
     Args:
-        hours: 수집할 시간 범위 (기본값: 24시간)
-        use_selenium: Selenium 사용 여부 (JavaScript 렌더링 필요 시)
+        hours: 수집할 시간 범위 (기본값: 48시간)
+        use_selenium: Selenium 사용 여부 (기본값: True, JavaScript 렌더링 필요)
     
     Returns:
         Tuple[int, int]: (저장된 개수, 건너뛴 개수)
@@ -183,14 +183,13 @@ def initial_news_load(hours: int = 24, use_selenium: bool = False):
     logger.info("경제 뉴스 초기 적재 시작")
     logger.info("=" * 80)
     logger.info(f"수집 기간: 최근 {hours}시간")
-    if use_selenium:
-        logger.info("모드: Selenium 사용 (JavaScript 렌더링)")
+    logger.info("모드: Selenium 사용 (JavaScript 렌더링)")
     logger.info("")
     
     try:
         collector = get_news_collector()
         
-        # 24시간 이내의 뉴스 수집 및 저장
+        # 48시간 이내의 뉴스 수집 및 저장
         saved, skipped = collector.collect_recent_news(hours=hours, use_selenium=use_selenium)
         
         logger.info("")
@@ -236,13 +235,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--news-hours",
         type=int,
-        default=24,
-        help="뉴스 수집 시간 범위 (시간, 기본값: 24시간)"
+        default=48,
+        help="뉴스 수집 시간 범위 (시간, 기본값: 48시간)"
     )
     parser.add_argument(
-        "--use-selenium",
+        "--no-selenium",
         action="store_true",
-        help="뉴스 수집 시 Selenium 사용 (JavaScript 렌더링 필요 시)"
+        help="뉴스 수집 시 Selenium 사용 안 함 (기본값: Selenium 사용)"
     )
     
     args = parser.parse_args()
@@ -261,8 +260,10 @@ if __name__ == "__main__":
     
     if not args.skip_news:
         print(f"뉴스 수집 기간: 최근 {args.news_hours}시간")
-        if args.use_selenium:
-            print("뉴스 수집 모드: Selenium 사용")
+        if args.no_selenium:
+            print("뉴스 수집 모드: requests 사용 (Selenium 사용 안 함)")
+        else:
+            print("뉴스 수집 모드: Selenium 사용 (기본값)")
     else:
         print("뉴스 수집: 건너뜀")
     
@@ -284,7 +285,8 @@ if __name__ == "__main__":
         news_skipped = 0
         if not args.skip_news:
             try:
-                news_saved, news_skipped = initial_news_load(hours=args.news_hours, use_selenium=args.use_selenium)
+                use_selenium = not args.no_selenium  # --no-selenium이면 False, 아니면 True
+                news_saved, news_skipped = initial_news_load(hours=args.news_hours, use_selenium=use_selenium)
             except Exception as e:
                 logger.error(f"뉴스 수집 실패: {e}", exc_info=True)
                 print(f"\n⚠️  뉴스 수집 실패: {e}")

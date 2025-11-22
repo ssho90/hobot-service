@@ -58,18 +58,21 @@ class NewsCollector:
         })
         self.timeout = 30
     
-    def fetch_stream_page(self, use_selenium: bool = False) -> Optional[str]:
+    def fetch_stream_page(self, use_selenium: bool = True) -> Optional[str]:
         """
         TradingEconomics 스트림 페이지 HTML 가져오기
         
         Args:
-            use_selenium: Selenium을 사용하여 JavaScript 렌더링된 HTML 가져오기
+            use_selenium: Selenium을 사용하여 JavaScript 렌더링된 HTML 가져오기 (기본값: True)
         
         Returns:
             HTML 문자열 또는 None (실패 시)
         """
         if use_selenium and SELENIUM_AVAILABLE:
             return self._fetch_with_selenium()
+        elif use_selenium and not SELENIUM_AVAILABLE:
+            logger.warning("Selenium이 설치되지 않았습니다. requests로 대체합니다.")
+            return self._fetch_with_requests()
         else:
             return self._fetch_with_requests()
     
@@ -105,31 +108,44 @@ class NewsCollector:
             chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             
             driver = webdriver.Chrome(options=chrome_options)
+            logger.info(f"페이지 접속: {self.STREAM_URL}")
             driver.get(self.STREAM_URL)
             
             # stream div가 로드될 때까지 대기 (최대 30초)
             try:
+                logger.info("stream div 로드 대기 중...")
                 WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.ID, "stream"))
                 )
+                logger.info("✅ stream div 로드 완료")
+                
                 # 추가로 뉴스 항목이 로드될 때까지 대기
+                logger.info("뉴스 항목 로드 대기 중...")
                 WebDriverWait(driver, 10).until(
                     lambda d: len(d.find_elements(By.CSS_SELECTOR, "li.te-stream-item")) > 0
                 )
-                logger.info("뉴스 항목 로드 완료")
+                news_count = len(driver.find_elements(By.CSS_SELECTOR, "li.te-stream-item"))
+                logger.info(f"✅ 뉴스 항목 로드 완료 ({news_count}개)")
             except TimeoutException:
-                logger.warning("뉴스 항목 로드 타임아웃 (일부만 로드되었을 수 있음)")
+                logger.warning("⚠️  뉴스 항목 로드 타임아웃 (일부만 로드되었을 수 있음)")
+                # 타임아웃이어도 현재 로드된 항목 수 확인
+                try:
+                    news_count = len(driver.find_elements(By.CSS_SELECTOR, "li.te-stream-item"))
+                    logger.info(f"현재 로드된 뉴스 항목: {news_count}개")
+                except:
+                    pass
             
             html = driver.page_source
-            logger.info(f"Selenium으로 HTML 가져오기 성공 (길이: {len(html)} bytes)")
+            logger.info(f"HTML 가져오기 완료 (길이: {len(html):,} bytes)")
             return html
             
         except Exception as e:
-            logger.error(f"Selenium으로 페이지 가져오기 실패: {e}")
+            logger.error(f"Selenium으로 페이지 가져오기 실패: {e}", exc_info=True)
             return None
         finally:
             if driver:
                 driver.quit()
+                logger.info("브라우저 종료 완료")
     
     def parse_news_items(self, html: str) -> List[Dict]:
         """
@@ -438,13 +454,13 @@ class NewsCollector:
             logger.error(f"DB 저장 중 오류: {e}")
             raise NewsCollectorError(f"DB 저장 실패: {e}")
     
-    def collect_recent_news(self, hours: int = 2, use_selenium: bool = False) -> Tuple[int, int]:
+    def collect_recent_news(self, hours: int = 2, use_selenium: bool = True) -> Tuple[int, int]:
         """
         최근 뉴스 수집 및 저장 (메인 메서드)
         
         Args:
             hours: 수집할 시간 범위 (기본값: 2시간)
-            use_selenium: Selenium 사용 여부 (JavaScript 렌더링 필요 시)
+            use_selenium: Selenium 사용 여부 (기본값: True, JavaScript 렌더링 필요)
             
         Returns:
             (저장된 개수, 건너뛴 개수) 튜플
