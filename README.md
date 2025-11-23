@@ -1,254 +1,379 @@
-# Hobot Trading System
+# 🚀 Hobot Macro Auto Trading Service
 
-Hobot 자동 트레이딩 시스템의 풀스택 애플리케이션입니다.
+> **AI 기반 거시경제 자동매매 시스템**  
+> 연준 금리, 인플레이션, 유동성 지표를 실시간 분석하여 포트폴리오를 자동으로 리밸런싱하는 지능형 투자 시스템
 
-## 🏗️ 프로젝트 구조
+---
+
+## 💡 서비스 소개
+
+**Hobot Macro Auto Trading Service**는 거시경제 지표와 AI를 활용한 자동 포트폴리오 관리 시스템입니다. 연준의 금리 정책, 인플레이션 추이, 시장 유동성 등 핵심 거시경제 데이터를 실시간으로 분석하고, Gemini AI가 이를 종합 판단하여 최적의 자산 배분을 결정합니다.
+
+### 🎯 핵심 가치
+
+- **데이터 기반 의사결정**: FRED API를 통한 실시간 거시경제 지표 수집 및 분석
+- **AI 전략가**: Gemini 2.5 Pro가 정량 시그널과 정성 뉴스를 종합하여 포트폴리오 전략 수립
+- **자동 실행**: 임계값 기반 자동 리밸런싱으로 감정 없는 투자 실행
+- **리스크 관리**: 일일/월간 손실 한도, 드라이런 모드 등 안전장치 내장
+
+---
+
+## 🌟 주요 기능
+
+### 📊 정량 시그널 분석
+- **장단기 금리차 추세 추종**: 금리 곡선의 변화를 통해 경기 사이클 판단
+- **실질 금리 계산**: 명목 금리에서 인플레이션을 차감한 실제 수익률 분석
+- **테일러 준칙 신호**: 연준의 목표 금리와 현재 금리 차이 분석
+- **연준 순유동성**: 시장에 실제 공급된 유동성 추적 (WALCL - TGA - RRP)
+- **하이일드 스프레드**: 유동성 위기 조기 감지 (Greed/Fear/Panic 구간 판단)
+
+### 📰 정성 분석
+- **경제 뉴스 수집**: TradingEconomics에서 24시간 내 경제 뉴스 자동 수집
+- **LLM 요약**: Gemini AI가 뉴스를 분석하여 핵심 정책 변화점 추출
+- **이벤트 추적**: CPI, FOMC, 실업률 등 주요 경제 이벤트 모니터링
+
+### 🤖 AI 전략가
+- **종합 판단**: 정량 시그널 + 정성 분석 + 계좌 손익을 종합하여 포트폴리오 목표 비중 결정
+- **자산군별 배분**: 주식(Stocks), 채권(Bonds), 대체투자(Alternatives), 현금(Cash) 최적 비중 산출
+- **JSON 구조화 출력**: Pydantic을 통한 엄격한 스키마 검증
+
+### ⚙️ 자동 실행
+- **임계값 기반 리밸런싱**: 목표 비중과 실제 비중의 편차가 5% 이상일 때 자동 실행
+- **스마트 매매**: 매도 우선 → 매수 실행 순서로 거래 비용 최소화
+- **안전장치**: 일일/월간 손실 한도, 수동 승인 모드, 드라이런 모드
+
+---
+
+## 🏗️ 시스템 아키텍처
 
 ```
-hobot-service/
-├── hobot/                 # Backend (FastAPI)
-│   ├── main.py           # FastAPI 애플리케이션
-│   ├── app.py            # 뉴스 요약 기능
-│   ├── service/          # 비즈니스 로직
-│   │   ├── upbit/        # Upbit API 연동
-│   │   ├── kis/          # KIS API 연동
-│   │   ├── slack_bot.py  # Slack 알림
-│   │   └── CurrentStrategy.txt  # 현재 전략 상태
-│   ├── requirements.txt  # Python 의존성
-│   ├── start_dev.sh      # 개발 서버 실행
-│   └── start_server.sh   # 프로덕션 서버 실행
-├── hobot-ui/             # Frontend (React)
-│   ├── src/
-│   │   ├── components/   # React 컴포넌트
-│   │   ├── App.js        # 메인 앱
-│   │   └── index.js      # 진입점
-│   ├── package.json      # Node.js 의존성
-│   └── README.md         # 프론트엔드 문서
-└── README.md            # 이 파일
+┌─────────────────────────────────────────────────────────────┐
+│                    Hobot Macro Trading System                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  모듈 1:     │  │  모듈 2:     │  │  모듈 3:     │     │
+│  │  정량 시그널 │  │  정성 분석   │  │  계좌 손익   │     │
+│  │  (FRED API)  │  │  (뉴스 수집) │  │  (KIS API)   │     │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
+│         │                  │                  │            │
+│         └──────────────────┼──────────────────┘            │
+│                            │                                │
+│                   ┌────────▼────────┐                       │
+│                   │  모듈 4:       │                       │
+│                   │  AI 전략가     │                       │
+│                   │  (Gemini LLM)  │                       │
+│                   └────────┬───────┘                       │
+│                            │                                │
+│                   ┌────────▼────────┐                       │
+│                   │  모듈 5:       │                       │
+│                   │  리밸런싱 봇   │                       │
+│                   │  (KIS API)     │                       │
+│                   └─────────────────┘                       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 빠른 시작
+### 데이터 흐름
 
-### 1. 전체 스택 한번에 실행
+1. **데이터 수집** (매일 09:00)
+   - FRED API: 금리, 인플레이션, 유동성 지표
+   - TradingEconomics: 경제 뉴스 (1시간마다)
+   - KIS API: 계좌 상태 및 손익
 
-```bash
-# 프로젝트 루트로 이동
-cd hobot-service
+2. **AI 분석** (09:10, 14:40)
+   - 정량 시그널 계산
+   - 뉴스 요약 및 정성 분석
+   - 포트폴리오 목표 비중 결정
 
-# 백엔드와 프론트엔드 동시 실행
-./start_all.sh
-```
+3. **자동 실행** (15:00)
+   - 편차 계산 (목표 vs 실제)
+   - 임계값(5%) 초과 시 리밸런싱 실행
+   - 거래 이력 저장
 
-### 2. 개별 실행
-
-#### 백엔드만 실행
-```bash
-cd hobot-service/hobot
-./start_dev.sh    # 개발 모드
-# 또는
-./start_server.sh # 프로덕션 모드
-```
-
-#### 프론트엔드만 실행
-```bash
-cd hobot-service/hobot-ui
-npm install
-npm start
-```
-
-## 🌐 접속 주소
-
-- **프론트엔드**: http://localhost:3000
-- **백엔드 API**: http://localhost:8991
-- **API 문서**: http://localhost:8991/docs
-
-## 🚢 배포
-
-AWS EC2에 자동 배포하는 방법은 [DEPLOYMENT.md](./DEPLOYMENT.md)를 참고하세요.
-
-GitHub Actions를 통해 `main` 브랜치에 푸시하면 자동으로 EC2에 배포됩니다.
-
-## 🔐 로그인 정보
-
-- **사용자명**: `admin`
-- **비밀번호**: `admin`
-
-## 📋 주요 기능
-
-### Frontend (React)
-- 🔐 로그인 페이지
-- 📊 Hobot 상태 모니터링 (30초마다 헬스체크)
-- 📈 현재 포지션 표시 (1분마다 업데이트)
-- ⏸️ Pause/Start 기능
-- 🎨 모던한 UI/UX
-
-### Backend (FastAPI)
-- 🔍 Hobot 헬스체크 API
-- 📰 뉴스 요약 기능
-- 💰 Upbit/KIS 트레이딩 API
-- 📝 전략 상태 관리
-- 🔔 Slack 알림
+---
 
 ## 🛠️ 기술 스택
 
 ### Backend
-- **FastAPI**: 현대적이고 빠른 웹 프레임워크
-- **Uvicorn**: ASGI 서버 (개발용)
-- **Gunicorn**: WSGI/ASGI 서버 (프로덕션용)
-- **Python 3.9+**: 프로그래밍 언어
+- **FastAPI**: 고성능 비동기 웹 프레임워크
+- **Python 3.12+**: 메인 프로그래밍 언어
+- **MySQL**: 데이터 영구 저장 (거시경제 지표, 뉴스, 거래 이력)
+- **Pydantic V2**: 설정 및 데이터 검증
+- **Selenium**: JavaScript 렌더링이 필요한 웹 크롤링
 
-### Frontend
-- **React 18**: 사용자 인터페이스 라이브러리
-- **React Router**: 클라이언트 사이드 라우팅
-- **Axios**: HTTP 클라이언트
-- **CSS3**: 스타일링
+### AI/ML
+- **Google Gemini 2.5 Pro**: 포트폴리오 전략 결정
+- **LangChain**: LLM 통합 및 프롬프트 관리
 
-### External APIs
-- **Upbit API**: 암호화폐 거래
-- **KIS API**: 한국투자증권 API
-- **Slack API**: 알림 시스템
+### 데이터 소스
+- **FRED API**: 연준 거시경제 지표 (금리, 인플레이션, 유동성)
+- **TradingEconomics**: 경제 뉴스 및 이벤트
+- **KIS API**: 한국투자증권 계좌 조회 및 매매
 
-## 📦 설치 요구사항
+### 인프라
+- **AWS EC2**: 서버 호스팅
+- **Gunicorn + Uvicorn**: 프로덕션 ASGI 서버
+- **Schedule**: 작업 스케줄링
 
-### 시스템 요구사항
-- **Python 3.9+**
-- **Node.js 16+**
-- **npm 8+**
+### 주요 라이브러리
+```python
+# 데이터 처리
+pandas, numpy          # 데이터 분석 및 계산
+fredapi               # FRED API 클라이언트
+beautifulsoup4        # 웹 크롤링
+selenium              # JavaScript 렌더링
+webdriver-manager     # ChromeDriver 자동 관리
 
-### Python 패키지
+# 데이터베이스
+pymysql               # MySQL 연결
+
+# AI/LLM
+langchain-google-genai # Gemini 통합
+```
+
+---
+
+## 📁 프로젝트 구조
+
+```
+hobot-service/
+├── hobot/
+│   ├── main.py                          # FastAPI 애플리케이션
+│   ├── service/
+│   │   ├── macro_trading/              # 거시경제 자동매매 모듈
+│   │   │   ├── collectors/            # 데이터 수집
+│   │   │   │   ├── fred_collector.py  # FRED API 수집기
+│   │   │   │   └── news_collector.py  # 경제 뉴스 수집기
+│   │   │   ├── signals/               # 정량 시그널 계산
+│   │   │   │   └── quant_signals.py   # 금리차, 실질금리, 테일러준칙 등
+│   │   │   ├── config/                # 설정 관리
+│   │   │   │   └── config_loader.py   # Pydantic 기반 설정 검증
+│   │   │   ├── scheduler.py           # 자동 스케줄러
+│   │   │   └── scripts/               # 초기 데이터 적재
+│   │   ├── database/                  # 데이터베이스 관리
+│   │   │   └── db.py                  # MySQL 연결 및 초기화
+│   │   └── kis/                       # 한국투자증권 API
+│   ├── requirements.txt               # Python 의존성
+│   └── docs/
+│       └── macro-trading/             # 상세 문서
+│           ├── implementation_plan.md # 구현 계획서
+│           └── database_schema.sql    # DB 스키마
+```
+
+---
+
+## 🚀 빠른 시작
+
+### 1. 환경 설정
+
 ```bash
+# 저장소 클론
+git clone <repository-url>
 cd hobot-service/hobot
+
+# 가상환경 생성 및 활성화
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# 또는
+venv\Scripts\activate    # Windows
+
+# 의존성 설치
 pip install -r requirements.txt
 ```
 
-### Node.js 패키지
-```bash
-cd hobot-service/hobot-ui
-npm install
+### 2. 환경 변수 설정
+
+`.env` 파일 생성:
+
+```env
+# FRED API
+FRED_API_KEY=your_fred_api_key
+
+# 데이터베이스
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=hobot
+
+# Gemini API
+GOOGLE_API_KEY=your_google_api_key
+
+# KIS API
+KIS_APP_KEY=your_kis_app_key
+KIS_APP_SECRET=your_kis_app_secret
 ```
 
-## 🔧 개발 환경 설정
+### 3. 데이터베이스 초기화
 
-### 1. 환경 변수 설정
 ```bash
-cd hobot-service/hobot
-cp .env.example .env
-# .env 파일을 편집하여 필요한 API 키 설정
+# 데이터베이스 스키마 생성
+mysql -u root -p < docs/macro-trading/database_schema.sql
+
+# 초기 데이터 적재 (FRED 5년치 + 뉴스 48시간)
+python -m service.macro_trading.scripts.initial_data_load
 ```
 
-### 2. 가상환경 설정 (선택사항)
+### 4. 서버 실행
+
 ```bash
-cd hobot-service/hobot
-python3 -m venv venv
-source venv/bin/activate  # macOS/Linux
-# 또는
-venv\Scripts\activate     # Windows
+# 개발 모드
+./start_dev.sh
+
+# 프로덕션 모드
+./start_server.sh
 ```
 
-## 📝 API 엔드포인트
+---
 
-모든 API 엔드포인트는 `/api` 경로를 기본으로 사용합니다.
+## 📡 API 엔드포인트
 
-### 기본 엔드포인트
-- `GET /` - 기본 페이지
+### 거시경제 데이터
 
-### API 엔드포인트
-- `GET /api/health` - Hobot 헬스체크
-- `GET /api/news` - 뉴스 요약
-- `GET /api/upbit/trading` - Upbit 트레이딩
-- `GET /api/kis/healthcheck` - KIS 헬스체크
-- `GET /api/upbit/test2` - Upbit 테스트
-- `GET /api/current-strategy` - 현재 전략 상태 조회
-- `POST /api/current-strategy` - 현재 전략 상태 변경
+- `GET /api/macro-trading/quantitative-signals`  
+  정량 시그널 조회 (장단기 금리차, 실질금리, 테일러준칙, 유동성 등)
+
+- `GET /api/macro-trading/economic-news?hours=24`  
+  최근 N시간 내 경제 뉴스 조회
+
+- `GET /api/macro-trading/fred-data`  
+  FRED 지표 데이터 조회
+
+### 계좌 및 거래
+
+- `GET /api/macro-trading/account-snapshots`  
+  계좌 상태 스냅샷 조회
+
+- `GET /api/macro-trading/rebalancing-history`  
+  리밸런싱 실행 이력 조회
 
 ### API 문서
 - `GET /docs` - Swagger UI
 - `GET /redoc` - ReDoc
 
-## 🐛 문제 해결
+---
 
-### 포트 충돌 에러
-```bash
-# 포트 사용 중인 프로세스 확인
-lsof -i :8991  # 백엔드 포트
-lsof -i :3000  # 프론트엔드 포트
+## 🔧 주요 모듈 설명
 
-# 프로세스 종료
-kill -9 <PID>
-```
+### 1. 정량 시그널 계산 (`signals/quant_signals.py`)
 
-### 의존성 설치 에러
-```bash
-# Python 의존성 재설치
-cd hobot-service/hobot
-pip install --upgrade pip
-pip install -r requirements.txt
+거시경제 지표를 기반으로 투자 시그널을 계산합니다.
 
-# Node.js 의존성 재설치
-cd hobot-service/hobot-ui
-rm -rf node_modules package-lock.json
-npm install
-```
+**지원 시그널:**
+- 장단기 금리차 추세 추종 (Bull/Bear Steepening/Flattening)
+- 실질 금리 (명목 금리 - 인플레이션)
+- 테일러 준칙 신호
+- 연준 순유동성 (WALCL - TGA - RRP)
+- 하이일드 스프레드 (Greed/Fear/Panic 구간)
 
-### 서버 시작 실패
-1. 포트가 사용 중인지 확인
-2. 의존성이 모두 설치되었는지 확인
-3. 환경 변수가 올바르게 설정되었는지 확인
+### 2. 데이터 수집 (`collectors/`)
 
-## 📊 모니터링
+**FRED Collector:**
+- 연준 거시경제 지표 자동 수집
+- 중복 방지 및 데이터 보간
+- 매일 09:00 자동 실행
 
-### 로그 확인
+**News Collector:**
+- TradingEconomics 뉴스 수집
+- Selenium을 통한 JavaScript 렌더링
+- 1시간마다 자동 실행
 
-#### 백엔드 로그 (Gunicorn)
-```bash
-cd hobot-service/hobot
+### 3. AI 전략가 (예정)
 
-# 로그 모니터링 스크립트 (대화형)
-./log_monitor.sh
+Gemini LLM이 정량 시그널과 정성 뉴스를 종합하여 포트폴리오 목표 비중을 결정합니다.
 
-# 최근 로그 보기
-./view_logs.sh
+**입력:**
+- 정량 시그널 (금리차, 실질금리, 유동성 등)
+- 정성 분석 (경제 뉴스 요약)
+- 계좌 손익 (자산군별 수익률)
 
-# 실시간 로그 모니터링
-tail -f logs/access.log    # 접근 로그
-tail -f logs/error.log     # 에러 로그
-tail -f log.txt           # 애플리케이션 로그
+**출력:**
+- 자산군별 목표 비중 (Stocks, Bonds, Alternatives, Cash)
+- 분석 요약
 
-# 모든 로그 동시 모니터링
-tail -f logs/access.log logs/error.log log.txt
-```
+### 4. 리밸런싱 봇 (예정)
 
-#### 프론트엔드 로그
-```bash
-# 프론트엔드 로그
-tail -f hobot-service/hobot-ui/frontend.log
-```
-
-### 서버 상태 확인
-```bash
-# 백엔드 상태
-curl http://localhost:8991/api/health
-
-# 프론트엔드 상태
-curl http://localhost:3000
-```
-
-## 🤝 기여하기
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
-
-## 📞 지원
-
-문제가 발생하거나 질문이 있으시면 이슈를 생성해주세요.
+목표 비중과 실제 비중의 편차가 임계값(5%)을 초과하면 자동으로 리밸런싱을 실행합니다.
 
 ---
 
-**Happy Trading! 🚀**
+## 📊 데이터베이스 스키마
+
+### 핵심 테이블
+
+- `fred_data`: FRED 거시경제 지표 (금리, 인플레이션, 유동성)
+- `economic_news`: TradingEconomics 뉴스
+- `ai_strategy_decisions`: AI가 결정한 포트폴리오 목표 비중
+- `rebalancing_history`: 리밸런싱 실행 이력
+- `account_snapshots`: 일별 계좌 상태 스냅샷
+
+상세 스키마는 [`docs/macro-trading/database_schema.sql`](hobot/docs/macro-trading/database_schema.sql) 참고
+
+---
+
+## 🔐 보안 및 안전장치
+
+- **손실 한도**: 일일 5%, 월간 15% 손실 시 자동 중지
+- **수동 승인 모드**: 중요한 거래는 수동 승인 필요
+- **드라이런 모드**: 실제 매매 없이 시뮬레이션만 실행
+- **로그 기록**: 모든 거래 및 의사결정 이력 저장
+
+---
+
+## 📈 성과 추적
+
+- **계좌 스냅샷**: 매일 자동으로 계좌 상태 저장
+- **리밸런싱 이력**: 모든 거래 내역 및 편차 추적
+- **AI 의사결정 이력**: 전략 변경 이유 및 분석 요약 저장
+
+---
+
+## 🧪 테스트
+
+```bash
+# 정량 시그널 계산 테스트 (DB 없이)
+python -m service.macro_trading.tests.test_quant_signals_no_db
+
+# 뉴스 수집 테스트 (DB 없이)
+python -m service.macro_trading.tests.test_news_collector_no_db
+
+# 설정 파일 검증
+python -m service.macro_trading.tests.test_config
+```
+
+---
+
+## 📚 문서
+
+- [구현 계획서](hobot/docs/macro-trading/implementation_plan.md) - 전체 개발 계획 및 진행 상황
+- [데이터베이스 스키마](hobot/docs/macro-trading/database_schema.sql) - 테이블 구조
+- [정량 시그널 설명](hobot/docs/macro-trading/quantitative_signals_description.md) - 각 시그널의 의미 및 해석
+- [EC2 Selenium 설정](hobot/docs/macro-trading/EC2_SELENIUM_SETUP.md) - 서버 환경 설정 가이드
+
+---
+
+## 🎯 개발 로드맵
+
+- [x] Phase 1: 기초 인프라 (DB, 설정, 로깅)
+- [x] Phase 2: 데이터 수집 모듈 (FRED, 뉴스, 계좌)
+- [ ] Phase 3: AI 전략가 (Gemini LLM 통합)
+- [ ] Phase 4: 실행 봇 (자동 리밸런싱)
+- [ ] Phase 5: 백테스팅 프레임워크
+- [ ] Phase 6: 통합 및 테스트
+
+---
+
+## 🤝 기여하기
+
+이슈를 생성하거나 Pull Request를 보내주세요!
+
+---
+
+## 📄 라이선스
+
+MIT License
+
+---
+
+**Built with ❤️ for intelligent macro trading**
