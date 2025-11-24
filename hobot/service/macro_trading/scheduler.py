@@ -227,8 +227,16 @@ def run_scheduler():
     """
     스케줄러를 실행합니다. (무한 루프)
     이 함수는 별도 스레드에서 실행되어야 합니다.
+    모든 등록된 스케줄(FRED, 뉴스 등)을 실행합니다.
     """
-    logger.info("FRED 데이터 수집 스케줄러 시작")
+    thread_name = threading.current_thread().name
+    logger.info(f"스케줄러 시작: {thread_name}")
+    
+    # 등록된 스케줄 확인
+    jobs = schedule.get_jobs()
+    logger.info(f"등록된 스케줄: {len(jobs)}개")
+    for job in jobs:
+        logger.info(f"  - {job}")
     
     while True:
         try:
@@ -304,24 +312,39 @@ def start_all_schedulers():
     """
     모든 스케줄러를 시작합니다.
     
+    주의: schedule 라이브러리는 전역 상태를 사용하므로,
+    모든 스케줄을 하나의 스레드에서 실행하는 것이 더 효율적입니다.
+    
     Returns:
         List[threading.Thread]: 스케줄러 스레드 리스트
     """
     threads = []
     
-    # FRED 데이터 수집 스케줄러
+    # 먼저 모든 스케줄을 설정
     try:
-        fred_thread = start_fred_scheduler_thread()
-        threads.append(fred_thread)
+        setup_fred_scheduler()
+        logger.info("FRED 스케줄 설정 완료")
     except Exception as e:
-        logger.error(f"FRED 스케줄러 시작 실패: {e}")
+        logger.error(f"FRED 스케줄 설정 실패: {e}")
     
-    # 뉴스 수집 스케줄러
     try:
-        news_thread = start_news_scheduler_thread()
-        threads.append(news_thread)
+        setup_news_scheduler()
+        logger.info("뉴스 스케줄 설정 완료")
     except Exception as e:
-        logger.error(f"뉴스 스케줄러 시작 실패: {e}")
+        logger.error(f"뉴스 스케줄 설정 실패: {e}")
+    
+    # 하나의 통합 스케줄러 스레드에서 모든 스케줄 실행
+    try:
+        scheduler_thread = threading.Thread(
+            target=run_scheduler,
+            name="UnifiedScheduler",
+            daemon=True
+        )
+        scheduler_thread.start()
+        threads.append(scheduler_thread)
+        logger.info("통합 스케줄러 스레드가 시작되었습니다.")
+    except Exception as e:
+        logger.error(f"스케줄러 스레드 시작 실패: {e}")
     
     return threads
 

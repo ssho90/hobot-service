@@ -1186,13 +1186,13 @@ async def startup_event():
     """애플리케이션 시작 시 실행되는 이벤트"""
     logging.info("Hobot 애플리케이션 시작 중...")
     
-    # FRED 데이터 수집 스케줄러 시작
+    # 모든 스케줄러 시작 (FRED 데이터 수집 + 뉴스 수집)
     try:
-        from service.macro_trading.scheduler import start_fred_scheduler_thread
-        start_fred_scheduler_thread()
-        logging.info("FRED 데이터 수집 스케줄러가 시작되었습니다.")
+        from service.macro_trading.scheduler import start_all_schedulers
+        threads = start_all_schedulers()
+        logging.info(f"모든 스케줄러가 시작되었습니다. (총 {len(threads)}개 스레드)")
     except Exception as e:
-        logging.error(f"FRED 스케줄러 시작 실패: {e}", exc_info=True)
+        logging.error(f"스케줄러 시작 실패: {e}", exc_info=True)
         # 스케줄러 실패해도 애플리케이션은 계속 실행
 
 
