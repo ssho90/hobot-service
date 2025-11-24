@@ -728,6 +728,170 @@ async def get_economic_news(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/macro-trading/economic-news-data")
+async def get_economic_news_data(
+    hours: int = Query(default=24, ge=1, le=168, description="조회할 시간 범위 (시간, 기본값: 24시간, 최대: 168시간)"),
+    group_by: str = Query(default="hour", description="그룹화 단위: 'hour' (1시간), '6hour' (6시간), 'day' (1일)", regex="^(hour|6hour|day)$")
+):
+    """경제 뉴스 데이터 조회 API (시간 단위 그룹화)
+    
+    FRED 데이터 API와 유사한 형식으로 시간 단위로 그룹화된 뉴스 데이터를 반환합니다.
+    
+    Args:
+        hours: 조회할 시간 범위 (기본값: 24시간)
+        group_by: 그룹화 단위 ('hour', '6hour', 'day')
+    
+    Returns:
+        {
+            "data": [
+                {
+                    "time": "2024-12-19 10:00:00",
+                    "count": 5,
+                    "news": [
+                        {
+                            "id": 1,
+                            "title": "...",
+                            "country": "United States",
+                            "category": "Stock Market",
+                            "published_at": "2024-12-19 10:15:00"
+                        },
+                        ...
+                    ]
+                },
+                ...
+            ],
+            "count": 10,
+            "hours": 24,
+            "group_by": "hour",
+            "summary": {
+                "total_news": 10,
+                "unique_countries": 5,
+                "unique_categories": 8
+            }
+        }
+    """
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime, timedelta
+        from collections import defaultdict
+        
+        # 시간 범위 계산
+        cutoff_time = datetime.now() - timedelta(hours=hours)
+        
+        # 그룹화 단위에 따른 시간 포맷 결정
+        if group_by == "hour":
+            time_format = "%Y-%m-%d %H:00:00"
+            time_truncate = "DATE_FORMAT(published_at, '%Y-%m-%d %H:00:00')"
+        elif group_by == "6hour":
+            # 6시간 단위: 0-5시, 6-11시, 12-17시, 18-23시
+            time_format = "%Y-%m-%d %H:00:00"
+            time_truncate = "DATE_FORMAT(DATE_SUB(published_at, INTERVAL HOUR(published_at) MOD 6 HOUR), '%Y-%m-%d %H:00:00')"
+        else:  # day
+            time_format = "%Y-%m-%d 00:00:00"
+            time_truncate = "DATE_FORMAT(published_at, '%Y-%m-%d 00:00:00')"
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 시간 단위로 그룹화하여 뉴스 개수 조회
+            cursor.execute(f"""
+                SELECT 
+                    {time_truncate} as time_group,
+                    COUNT(*) as count
+                FROM economic_news
+                WHERE published_at >= %s
+                GROUP BY time_group
+                ORDER BY time_group DESC
+            """, (cutoff_time,))
+            
+            grouped_counts = cursor.fetchall()
+            
+            # 각 시간 그룹별 상세 뉴스 조회
+            data = []
+            all_news = []
+            countries = set()
+            categories = set()
+            
+            for row in grouped_counts:
+                time_group_str = row.get("time_group")
+                count = row.get("count")
+                
+                # 해당 시간 그룹의 뉴스 상세 조회
+                if group_by == "hour":
+                    time_start = datetime.strptime(time_group_str, "%Y-%m-%d %H:00:00")
+                    time_end = time_start + timedelta(hours=1)
+                elif group_by == "6hour":
+                    time_start = datetime.strptime(time_group_str, "%Y-%m-%d %H:00:00")
+                    time_end = time_start + timedelta(hours=6)
+                else:  # day
+                    time_start = datetime.strptime(time_group_str, "%Y-%m-%d 00:00:00")
+                    time_end = time_start + timedelta(days=1)
+                
+                cursor.execute("""
+                    SELECT 
+                        id,
+                        title,
+                        link,
+                        country,
+                        category,
+                        description,
+                        published_at
+                    FROM economic_news
+                    WHERE published_at >= %s AND published_at < %s
+                    ORDER BY published_at DESC
+                """, (time_start, time_end))
+                
+                news_items = cursor.fetchall()
+                
+                # 뉴스 리스트 구성
+                news_list = []
+                for news_row in news_items:
+                    news_item = {
+                        "id": news_row.get("id"),
+                        "title": news_row.get("title"),
+                        "link": news_row.get("link"),
+                        "country": news_row.get("country"),
+                        "category": news_row.get("category"),
+                        "description": news_row.get("description"),
+                        "published_at": news_row.get("published_at").strftime("%Y-%m-%d %H:%M:%S") if news_row.get("published_at") else None
+                    }
+                    news_list.append(news_item)
+                    all_news.append(news_item)
+                    
+                    # 통계 수집
+                    if news_row.get("country"):
+                        countries.add(news_row.get("country"))
+                    if news_row.get("category"):
+                        categories.add(news_row.get("category"))
+                
+                data.append({
+                    "time": time_group_str,
+                    "count": count,
+                    "news": news_list
+                })
+            
+            # 요약 통계
+            summary = {
+                "total_news": len(all_news),
+                "unique_countries": len(countries),
+                "unique_categories": len(categories)
+            }
+            
+            result = {
+                "data": data,
+                "count": len(data),
+                "hours": hours,
+                "group_by": group_by,
+                "summary": summary
+            }
+            
+            return result
+            
+    except Exception as e:
+        logging.error(f"Error fetching economic news data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/current-strategy")
 async def update_current_strategy(request: StrategyRequest):
     """전략을 업데이트합니다. (기본값은 upbit, 하위 호환성 유지)"""
