@@ -645,6 +645,9 @@ async def get_economic_news(
     
     economic_news 테이블에서 최근 N시간 내의 뉴스를 조회하여 반환합니다.
     
+    Args:
+        hours: 조회할 시간 범위 (기본값: 24시간)
+    
     Returns:
         {
             "status": "success",
@@ -660,7 +663,8 @@ async def get_economic_news(
                     "category": "Stock Market",
                     "description": "US stocks sharply rebounded...",
                     "published_at": "2024-12-19 08:00:00",
-                    "collected_at": "2024-12-19 10:00:00"
+                    "collected_at": "2024-12-19 10:00:00",
+                    "source": "TradingEconomics Stream"
                 },
                 ...
             ]
@@ -670,13 +674,11 @@ async def get_economic_news(
         from service.database.db import get_db_connection
         from datetime import datetime, timedelta
         
-        # 시간 범위 계산
         cutoff_time = datetime.now() - timedelta(hours=hours)
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
             
-            # 최근 N시간 내의 뉴스 조회
             cursor.execute("""
                 SELECT 
                     id,
@@ -696,7 +698,6 @@ async def get_economic_news(
             
             rows = cursor.fetchall()
             
-            # 결과 구성
             news_list = []
             for row in rows:
                 news_item = {
@@ -713,15 +714,13 @@ async def get_economic_news(
                 }
                 news_list.append(news_item)
             
-            result = {
+            return {
                 "status": "success",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "hours": hours,
                 "total_count": len(news_list),
                 "news": news_list
             }
-            
-            return result
             
     except Exception as e:
         logging.error(f"Error fetching economic news: {e}", exc_info=True)
