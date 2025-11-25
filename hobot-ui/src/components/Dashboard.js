@@ -6,7 +6,6 @@ import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
 import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
-import MacroMonitoring from './MacroMonitoring';
 import MacroDashboard from './MacroDashboard';
 import TradingDashboard from './TradingDashboard';
 import Header from './Header';
@@ -159,9 +158,6 @@ const Dashboard = () => {
             <LogManagementPage />
           )}
 
-          {activeTab === 'monitoring' && (
-            <MacroMonitoring />
-          )}
         </div>
       </div>
     </div>

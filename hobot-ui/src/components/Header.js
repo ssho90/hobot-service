@@ -37,14 +37,7 @@ const Header = () => {
   };
   
   const handleTabClick = (tab) => {
-    if (tab === 'monitoring') {
-      navigate('/dashboard?tab=monitoring');
-      setShowAdminSubmenu(false);
-      setTimeout(() => {
-        const event = new CustomEvent('switchToTab', { detail: { tab: 'monitoring' } });
-        window.dispatchEvent(event);
-      }, 100);
-    } else if (tab === 'trading') {
+    if (tab === 'trading') {
       navigate('/dashboard?tab=trading');
       setShowAdminSubmenu(false);
       setTimeout(() => {
@@ -70,7 +63,6 @@ const Header = () => {
   const getActiveTab = () => {
     if (location.pathname === '/dashboard') {
       if (dashboardActiveTab === 'trading') return 'trading';
-      if (dashboardActiveTab === 'monitoring') return 'monitoring';
       if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs') return 'admin';
       if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
       return 'macro-dashboard'; // 기본값
@@ -140,12 +132,6 @@ const Header = () => {
             }}
           >
             Macro Dashboard
-          </button>
-          <button
-            className={`header-tab ${activeTab === 'monitoring' ? 'active' : ''}`}
-            onClick={() => handleTabClick('monitoring')}
-          >
-            모니터링
           </button>
           {isSystemAdmin() && (
             <>
