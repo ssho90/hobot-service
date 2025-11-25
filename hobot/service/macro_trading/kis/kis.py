@@ -1,4 +1,4 @@
-# service/kis.py
+# service/macro_trading/kis/kis.py
 from dotenv import load_dotenv
 import os
 import pandas as pd
@@ -8,13 +8,13 @@ import traceback
 load_dotenv(override=True)
 
 # 내부 모듈 임포트
-from service.kis.kis_api import KISAPI
-from service.kis.kis_utils import (
+from .kis_api import KISAPI
+from .kis_utils import (
     calculate_rsi, write_current_strategy, get_balance_info, 
     current_time, read_current_strategy, get_buy_info, get_sell_info, calculate_atr
 )
 from service.slack_bot import post_message
-from service.kis.config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME, INTERVAL
+from .config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME, INTERVAL
 
 # ===============================================
 # Helper Functions
@@ -224,6 +224,7 @@ def control_tower():
 
 
 def health_check():
+    """KIS API 헬스체크 - 잔액조회 및 현재가 조회"""
     try:
         api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
         current_price = api.get_current_price(TARGET_TICKER)
@@ -235,3 +236,56 @@ def health_check():
         trace = traceback.format_exc()
         post_message(f"Health Check Error: {e}\n{trace}", channel="#auto-trading-error")
         return {"status": "error", "message": str(e), "trace": trace}
+
+def get_balance_info_api():
+    """잔액조회 API용 함수 - 상세 정보 반환"""
+    try:
+        api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
+        current_price = api.get_current_price(TARGET_TICKER)
+        balance_data = api.get_balance()
+        
+        if not balance_data or balance_data.get('rt_cd') != '0':
+            return {
+                "status": "error",
+                "message": balance_data.get('msg1', '잔고 조회 실패') if balance_data else '잔고 조회 실패'
+            }
+        
+        output1 = balance_data.get('output1', [])  # 주식 잔고
+        output2 = balance_data.get('output2', [])  # 계좌 총 평가
+        
+        total_eval_amt = int(output2[0]['tot_evlu_amt']) if output2 else 0
+        cash_balance = int(output2[0]['dnca_tot_amt']) if output2 else 0
+        
+        # 보유 주식 정보
+        holdings = []
+        if output1:
+            for item in output1:
+                holdings.append({
+                    "stock_code": item.get('pdno', ''),
+                    "stock_name": item.get('prdt_name', ''),
+                    "quantity": int(item.get('hldg_qty', 0)),
+                    "avg_buy_price": int(item.get('pchs_avg_prc', 0)),
+                    "current_price": int(item.get('prpr', 0)),
+                    "eval_amount": int(item.get('evlu_amt', 0)),
+                    "profit_loss": int(item.get('evlu_pfls_amt', 0)),
+                    "profit_loss_rate": float(item.get('evlu_pfls_rt', 0))
+                })
+        
+        return {
+            "status": "success",
+            "account_no": ACCOUNT_NO,
+            "total_eval_amount": total_eval_amt,
+            "cash_balance": cash_balance,
+            "holdings": holdings,
+            "target_ticker": TARGET_TICKER,
+            "target_ticker_name": TARGET_TICKER_NAME,
+            "target_ticker_current_price": current_price
+        }
+    except Exception as e:
+        trace = traceback.format_exc()
+        return {
+            "status": "error",
+            "message": str(e),
+            "trace": trace
+        }
+

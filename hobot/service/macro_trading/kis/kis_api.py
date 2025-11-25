@@ -1,4 +1,4 @@
-# service/kis_api.py
+# service/macro_trading/kis/kis_api.py
 import requests
 import json
 import pandas as pd
@@ -234,3 +234,4 @@ class KISAPI:
         else:
             print(f"Error getting current price: {res.text}")
             return None
+

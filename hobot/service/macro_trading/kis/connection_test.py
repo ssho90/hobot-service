@@ -7,10 +7,9 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 # 설정 및 API 모듈 임포트
-# 이 파일이 main.py와 같은 위치에 있다고 가정합니다.
-from service.kis.config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME
-from service.kis.kis_api import KISAPI
-from service.kis.kis_utils import get_balance_info
+from .config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME
+from .kis_api import KISAPI
+from .kis_utils import get_balance_info
 
 def run_connection_test():
     """
@@ -98,3 +97,4 @@ def run_connection_test():
 
 if __name__ == "__main__":
     run_connection_test()
+

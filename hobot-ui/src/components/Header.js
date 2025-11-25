@@ -37,10 +37,7 @@ const Header = () => {
   };
   
   const handleTabClick = (tab) => {
-    if (tab === 'news') {
-      navigate('/');
-      setShowAdminSubmenu(false);
-    } else if (tab === 'monitoring') {
+    if (tab === 'monitoring') {
       navigate('/dashboard?tab=monitoring');
       setShowAdminSubmenu(false);
       setTimeout(() => {
@@ -71,14 +68,14 @@ const Header = () => {
   
   // 현재 활성 탭 확인
   const getActiveTab = () => {
-    if (location.pathname === '/') return 'news';
     if (location.pathname === '/dashboard') {
       if (dashboardActiveTab === 'trading') return 'trading';
       if (dashboardActiveTab === 'monitoring') return 'monitoring';
       if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs') return 'admin';
-      return null;
+      if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
+      return 'macro-dashboard'; // 기본값
     }
-    return null;
+    return 'macro-dashboard';
   };
 
   // 외부 클릭 시 메뉴 닫기
@@ -133,10 +130,16 @@ const Header = () => {
         </div>
         <nav className="header-tabs">
           <button
-            className={`header-tab ${activeTab === 'news' ? 'active' : ''}`}
-            onClick={() => handleTabClick('news')}
+            className={`header-tab ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
+            onClick={() => {
+              navigate('/dashboard?tab=macro-dashboard');
+              setTimeout(() => {
+                const event = new CustomEvent('switchToTab', { detail: { tab: 'macro-dashboard' } });
+                window.dispatchEvent(event);
+              }, 100);
+            }}
           >
-            News
+            Macro Dashboard
           </button>
           <button
             className={`header-tab ${activeTab === 'monitoring' ? 'active' : ''}`}

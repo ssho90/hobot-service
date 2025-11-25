@@ -1,0 +1,163 @@
+.trading-dashboard {
+  padding: 20px;
+}
+
+.dashboard-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.dashboard-tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.dashboard-tab:hover {
+  color: #2196F3;
+}
+
+.dashboard-tab.active {
+  color: #2196F3;
+  border-bottom-color: #2196F3;
+  font-weight: bold;
+}
+
+.tab-content {
+  margin-top: 20px;
+}
+
+.status-section {
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.account-info,
+.strategy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 150px;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.strategy-value {
+  padding: 5px 15px;
+  background: #e3f2fd;
+  border-radius: 4px;
+  color: #1976d2;
+  font-family: monospace;
+}
+
+.holdings-table {
+  overflow-x: auto;
+}
+
+.holdings-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.holdings-table th,
+.holdings-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.holdings-table th {
+  background: #f5f5f5;
+  font-weight: 500;
+  color: #333;
+}
+
+.holdings-table tr:hover {
+  background: #f9f9f9;
+}
+
+.holdings-table .positive {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.holdings-table .negative {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.rebalancing-status {
+  padding: 20px;
+}
+
+.info-note {
+  padding: 15px;
+  background: #e3f2fd;
+  border-radius: 4px;
+  color: #1976d2;
+}
+
+.info-note p {
+  margin: 0;
+}
+
+.no-data {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+
+.loading,
+.error {
+  padding: 20px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.loading {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+}
+

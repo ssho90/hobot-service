@@ -1,21 +1,28 @@
-# service/kis_utils.py
+# service/macro_trading/kis/kis_utils.py
 import pandas as pd
 import numpy as np
+import os
 
 # ================
 # current state Read/Write
 # 현재 매수한 거래가 어떤 전략인지
 # ================
 def write_current_strategy(text):
-    with open('service/CurrentStrategy_kis.txt', 'w') as file:
+    # 프로젝트 루트 기준으로 경로 설정
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    strategy_file = os.path.join(base_path, 'service', 'CurrentStrategy_kis.txt')
+    with open(strategy_file, 'w') as file:
         file.write(text)
 
     current_strategy = read_current_strategy()
     return "[System] Current Strategy : " + current_strategy
 
 def read_current_strategy():
+    # 프로젝트 루트 기준으로 경로 설정
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    strategy_file = os.path.join(base_path, 'service', 'CurrentStrategy_kis.txt')
     try:
-        with open('service/CurrentStrategy_kis.txt', 'r') as file:
+        with open(strategy_file, 'r') as file:
             condition = file.read()
         if not condition:
             return "STRATEGY_NULL"
@@ -73,7 +80,7 @@ def current_time(type="time"):
 # ===============================================
 def get_balance_info(balance_data, ticker_name, current_price):
     if not balance_data:
-        return "잔고 조회에 실패했습니다."
+        return "잔고 조회에 실패했습니다.", 0, 0
 
     output1 = balance_data.get('output1', []) # 주식 잔고
     output2 = balance_data.get('output2', []) # 계좌 총 평가
@@ -143,3 +150,4 @@ def get_sell_info(strategy, quantity, price, ticker_name):
 - 체결수량: {format(quantity, ",")} 주
 - 체결단가: {format(price, ",")} 원
     """
+

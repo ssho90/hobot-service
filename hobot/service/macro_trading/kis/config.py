@@ -16,3 +16,4 @@ ACCOUNT_NO = os.getenv("HT_ACCOUNT")
 TARGET_TICKER = "005930"  # 매매할 종목 코드 (예: 삼성전자)
 TARGET_TICKER_NAME = "삼성전자" # 매매할 종목 이름
 INTERVAL = "D" # 캔들 데이터 주기 (D: 일봉, W: 주봉, M: 월봉)
+

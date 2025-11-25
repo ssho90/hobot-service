@@ -145,7 +145,7 @@ async def upbit_trading():
 async def kis_health_check():
     """한국투자증권 API 헬스체크"""
     try:
-        from service.kis.kis import health_check as kis_health_check_func
+        from service.macro_trading.kis.kis import health_check as kis_health_check_func
         result = kis_health_check_func()
         logging.info(f"KIS health check result: {result}")
         return result
@@ -153,10 +153,22 @@ async def kis_health_check():
         logging.error(f"Error in KIS health check: {e}")
         return {"status": "error", "message": str(e)}
 
+@api_router.get("/kis/balance")
+async def kis_get_balance():
+    """한국투자증권 계좌 잔액조회"""
+    try:
+        from service.macro_trading.kis.kis import get_balance_info_api
+        result = get_balance_info_api()
+        logging.info(f"KIS balance check result: {result.get('status')}")
+        return result
+    except Exception as e:
+        logging.error(f"Error in KIS balance check: {e}")
+        return {"status": "error", "message": str(e)}
+
 @api_router.get("/kis/healthcheck")
 async def kis_health_check_old():
     """기존 엔드포인트 (하위 호환성 유지)"""
-    from service.kis import connection_test
+    from service.macro_trading.kis import connection_test
     res = connection_test.run_connection_test()
     logging.info(f"kis health check result: {res}")
     return res

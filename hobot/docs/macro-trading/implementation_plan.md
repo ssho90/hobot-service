@@ -9,6 +9,48 @@
 
 ---
 
+## 🌐 Hobot Web Site 컨텐츠 구조
+
+### 1. Macro Dashboard
+- **Overview**
+  - FRED 지표와 Economic News를 조합하여 LLM으로 현재 거시경제 상황 분석
+  - LLM 분석 결과를 Overview에 출력
+  - 관련 API 엔드포인트: `/api/macro-trading/economic-news`, `/api/macro-trading/quantitative-signals`
+- **FRED 지표**
+  - Tradingview Lightweight Charts를 사용한 시각화 (이미 구현 완료)
+  - 장단기 금리차, 실질 금리, 테일러 준칙, 순유동성, 하이일드 스프레드 등 지표 표시
+  - 관련 API 엔드포인트: `/api/macro-trading/fred-data`, `/api/macro-trading/yield-curve-spread`
+- **Economic News**
+  - TradingEconomics 스트림 뉴스 표시
+  - 최근 24시간 내 경제 뉴스 조회 및 표시
+  - 국가별, 카테고리별 필터링 기능
+  - 관련 API 엔드포인트: `/api/macro-trading/economic-news`, `/api/macro-trading/economic-news-data`
+
+### 2. Trading Dashboard
+- **Macro Quant Trading**
+  - 한국투자증권 API 연동 상태 표시
+  - 현재 계좌 잔액 및 보유 자산 표시 (`/api/kis/balance`)
+  - Macro 지표에 따른 자동 리밸런싱 상태 모니터링
+  - 리밸런싱 이력 표시 (`/api/macro-trading/rebalancing-history`)
+  - 계좌 스냅샷 조회 (`/api/macro-trading/account-snapshots`)
+- **Crypto Auto Trading**
+  - Upbit API 연동 상태 표시 (`/api/health`)
+  - 현재 포지션 및 전략 상태 표시 (`/api/current-strategy`)
+  - 자동매매 실행 이력 표시
+
+### 3. Admin 메뉴
+- **사용자 관리**
+  - 사용자 목록 조회 (`/api/admin/users`)
+  - 사용자 추가/수정/삭제 (`/api/admin/users/{user_id}`)
+  - 권한 관리 (admin/user)
+- **로그 관리**
+  - 백엔드 로그 조회 (`/api/admin/logs?log_type=backend`)
+  - 프론트엔드 로그 조회 (`/api/admin/logs?log_type=frontend`)
+  - nginx 로그 조회 (`/api/admin/logs?log_type=nginx`)
+  - 로그 필터링 (시간, 레벨, 모듈별)
+
+---
+
 ## 📊 전체 진행 상황
 
 - [ ] Phase 1: 기초 인프라
@@ -199,21 +241,49 @@
 ### 1.3 로깅 및 모니터링 시스템 구축
 
 #### 작업 항목
-- [ ] **1.3.1** 로깅 시스템 구현
-  - [ ] Python `logging` 모듈 설정
-  - [ ] 로그 레벨별 분리 (DEBUG, INFO, WARNING, ERROR)
-  - [ ] DB 로깅 함수 구현 (`system_logs` 테이블에 저장)
-  - [ ] 파일 로깅 (선택적)
+- [x] **1.3.1** 로깅 시스템 구현
+  - [x] Python `logging` 모듈 설정 (main.py에 구현 완료)
+  - [x] 로그 레벨별 분리 (DEBUG, INFO, WARNING, ERROR)
+  - [x] DB 로깅 함수 구현 (`system_logs` 테이블에 저장) - service/utils/logger.py 구현 완료
+  - [x] 파일 로깅 (log.txt, logs/access.log, logs/error.log)
 
-- [ ] **1.3.2** 모니터링 시스템 구현
-  - [ ] 각 모듈별 헬스체크 함수 구현
-  - [ ] API 연결 상태 확인 (FRED, KIS, Gemini)
+- [x] **1.3.2** 모니터링 시스템 구현
+  - [x] 각 모듈별 헬스체크 함수 구현 (/api/health, /api/kis/health)
+  - [x] API 연결 상태 확인 (FRED, KIS, Gemini)
 
-- [ ] **1.3.3** Macro 분석 Dashboard 개발 (프론트엔드)
-  - [ ] 매크로 지표 시각화 (차트)
-  - [ ] LLM 분석 결과 표시
-  - [ ] 실시간 데이터 업데이트
-  - [ ] API 엔드포인트 구현 (백엔드)
+- [x] **1.3.3** Hobot Web Site 컨텐츠 구현
+  - [x] **1.3.3.1** Macro Dashboard
+    - [x] Overview 페이지 (화면 구성 완료, API는 추후 구현)
+      - [x] FRED 지표와 Economic News를 조합하여 LLM으로 현재 거시경제 상황 분석 (화면 구성)
+      - [x] LLM 분석 결과를 Overview에 출력 (화면 구성)
+      - [ ] 관련 API 엔드포인트 구현 (추후 구현)
+    - [x] FRED 지표 페이지
+      - [x] Tradingview Lightweight Charts를 사용한 시각화 (이미 구현 완료)
+      - [x] 장단기 금리차, 실질 금리, 테일러 준칙, 순유동성, 하이일드 스프레드 등 지표 표시
+    - [x] Economic News 페이지 (화면 구성 완료)
+      - [x] TradingEconomics 스트림 뉴스 표시
+      - [x] 최근 24시간 내 경제 뉴스 조회 및 표시
+      - [x] 국가별, 카테고리별 필터링 기능
+  - [x] **1.3.3.2** Trading Dashboard (화면 구성 완료)
+    - [x] Macro Quant Trading 페이지
+      - [x] 한국투자증권 API 연동 상태 표시
+      - [x] 현재 계좌 잔액 및 보유 자산 표시
+      - [x] Macro 지표에 따른 자동 리밸런싱 상태 모니터링 (모니터링 탭으로 안내)
+      - [x] 리밸런싱 이력 표시 (모니터링 탭으로 안내)
+    - [x] Crypto Auto Trading 페이지
+      - [x] Upbit API 연동 상태 표시
+      - [x] 현재 포지션 및 전략 상태 표시
+      - [ ] 자동매매 실행 이력 표시 (추후 구현)
+  - [ ] **1.3.3.3** Admin 메뉴
+    - [ ] 사용자 관리 페이지
+      - [ ] 사용자 목록 조회
+      - [ ] 사용자 추가/수정/삭제
+      - [ ] 권한 관리 (admin/user)
+    - [ ] 로그 관리 페이지
+      - [ ] 백엔드 로그 조회
+      - [ ] 프론트엔드 로그 조회
+      - [ ] nginx 로그 조회
+      - [ ] 로그 필터링 (시간, 레벨, 모듈별)
 
 #### 의사결정 필요 사항
 - [x] 로그 보관 기간: 7일, 파일 (결정 완료)
@@ -226,10 +296,12 @@
   - [ ] 압축 보관 정책
 
 - [ ] **1.3.5** Macro Dashboard 상세 요구사항 정의
-  - [ ] 표시할 매크로 지표 목록 결정
-  - [ ] 차트 라이브러리 선택: 1)Tradingview Lightweight Charts (FRED 지표 추이, 주가 차트, 장단기 금리차 그래프, 환율 등 시계열 메인 차트), 2)Rechart(포트폴리오 자산 배분(파이 차트), 월별 수익률(막대 차트) 등 스냅샷 데이터)
-  - [ ] 업데이트 주기 : 주기적 (1시간)
-  - [ ] 사용자 권한 : 시계열 메인 차트는 모든 사람, 스냅샷 데이터는 관리자만
+  - [x] 표시할 매크로 지표 목록 결정
+    - [x] FRED 지표: 장단기 금리차, 실질 금리, 테일러 준칙, 순유동성, 하이일드 스프레드
+    - [x] Economic News: TradingEconomics 스트림 뉴스
+  - [x] 차트 라이브러리 선택: Tradingview Lightweight Charts (FRED 지표 추이, 주가 차트, 장단기 금리차 그래프, 환율 등 시계열 메인 차트) - 이미 구현 완료
+  - [x] 업데이트 주기: 주기적 (1시간)
+  - [x] 사용자 권한: 시계열 메인 차트는 모든 사람, 스냅샷 데이터는 관리자만
 
 ---
 

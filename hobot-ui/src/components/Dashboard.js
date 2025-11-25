@@ -4,10 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
 import Tools from './Tools';
-import News from './News';
 import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
 import MacroMonitoring from './MacroMonitoring';
+import MacroDashboard from './MacroDashboard';
+import TradingDashboard from './TradingDashboard';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
 import './Dashboard.css';
@@ -16,13 +17,13 @@ const Dashboard = () => {
   const { isSystemAdmin } = useAuth();
   const navigate = useNavigate();
   const [currentStrategy, setCurrentStrategy] = useState('');
-  const [activeTab, setActiveTab] = useState('news');
+  const [activeTab, setActiveTab] = useState('macro-dashboard');
   const [activePlatform, setActivePlatform] = useState('upbit');
   
   // 시스템 어드민이 아니면 trading 탭 접근 불가
   useEffect(() => {
     if (activeTab === 'trading' && !isSystemAdmin()) {
-      setActiveTab('news');
+      setActiveTab('macro-dashboard');
     }
   }, [activeTab, isSystemAdmin]);
   
@@ -44,6 +45,8 @@ const Dashboard = () => {
       setActiveTab('monitoring');
     } else if (tabParam === 'admin' && isSystemAdmin()) {
       setActiveTab('admin-users');
+    } else if (tabParam === 'macro-dashboard') {
+      setActiveTab('macro-dashboard');
     }
   }, [isSystemAdmin]);
 
@@ -82,7 +85,7 @@ const Dashboard = () => {
     };
     
     const handleSwitchToTab = (event) => {
-      const tab = event.detail?.tab || 'news';
+      const tab = event.detail?.tab || 'macro-dashboard';
       setActiveTab(tab);
     };
 
@@ -140,8 +143,12 @@ const Dashboard = () => {
             </>
           )}
 
-          {activeTab === 'news' && (
-            <News />
+          {activeTab === 'macro-dashboard' && (
+            <MacroDashboard />
+          )}
+
+          {activeTab === 'trading' && (
+            <TradingDashboard />
           )}
 
           {activeTab === 'admin-users' && (
