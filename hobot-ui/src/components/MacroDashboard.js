@@ -511,12 +511,10 @@ const EconomicNewsTab = () => {
   // 한글 모드일 때 뉴스가 로드되면 번역 요청 (DB에서 먼저 확인)
   useEffect(() => {
     if (translationLang === 'ko' && filteredNews.length > 0) {
-      // DB에서 이미 번역된 내용이 있으면 먼저 사용
+      // DB에서 이미 번역된 내용이 있으면 먼저 사용 (title, description만)
       filteredNews.forEach((item) => {
         const titleKey = `title_${item.id}`;
         const descKey = `desc_${item.id}`;
-        const countryKey = `country_${item.id}`;
-        const categoryKey = `category_${item.id}`;
         
         // DB에서 가져온 번역 데이터가 있으면 사용
         if (item.title_ko && !translatedData[titleKey]) {
@@ -525,25 +523,13 @@ const EconomicNewsTab = () => {
         if (item.description_ko && !translatedData[descKey]) {
           setTranslatedData(prev => ({ ...prev, [descKey]: item.description_ko }));
         }
-        if (item.country_ko && !translatedData[countryKey]) {
-          setTranslatedData(prev => ({ ...prev, [countryKey]: item.country_ko }));
-        }
-        if (item.category_ko && !translatedData[categoryKey]) {
-          setTranslatedData(prev => ({ ...prev, [categoryKey]: item.category_ko }));
-        }
         
-        // DB에 번역이 없으면 번역 요청
+        // DB에 번역이 없으면 번역 요청 (title, description만)
         if (item.title && !item.title_ko && !translatedData[titleKey] && !translating[titleKey]) {
           translateText(item.title, titleKey, item.id, 'title');
         }
         if (item.description && !item.description_ko && !translatedData[descKey] && !translating[descKey]) {
           translateText(item.description, descKey, item.id, 'description');
-        }
-        if (item.country && !item.country_ko && !translatedData[countryKey] && !translating[countryKey]) {
-          translateText(item.country, countryKey, item.id, 'country');
-        }
-        if (item.category && !item.category_ko && !translatedData[categoryKey] && !translating[categoryKey]) {
-          translateText(item.category, categoryKey, item.id, 'category');
         }
       });
     }
@@ -561,20 +547,6 @@ const EconomicNewsTab = () => {
             <option value={72}>72시간</option>
             <option value={168}>1주일</option>
           </select>
-          <div className="lang-toggle">
-            <button
-              className={translationLang === 'en' ? 'active' : ''}
-              onClick={() => setTranslationLang('en')}
-            >
-              EN
-            </button>
-            <button
-              className={translationLang === 'ko' ? 'active' : ''}
-              onClick={() => setTranslationLang('ko')}
-            >
-              KO
-            </button>
-          </div>
         </div>
         <div className="control-group">
           <label>국가:</label>
@@ -584,20 +556,6 @@ const EconomicNewsTab = () => {
               <option key={country} value={country}>{country}</option>
             ))}
           </select>
-          <div className="lang-toggle">
-            <button
-              className={translationLang === 'en' ? 'active' : ''}
-              onClick={() => setTranslationLang('en')}
-            >
-              EN
-            </button>
-            <button
-              className={translationLang === 'ko' ? 'active' : ''}
-              onClick={() => setTranslationLang('ko')}
-            >
-              KO
-            </button>
-          </div>
         </div>
         <div className="control-group">
           <label>카테고리:</label>
@@ -607,6 +565,9 @@ const EconomicNewsTab = () => {
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
+        </div>
+        <div className="control-group">
+          <label>번역:</label>
           <div className="lang-toggle">
             <button
               className={translationLang === 'en' ? 'active' : ''}
@@ -637,8 +598,6 @@ const EconomicNewsTab = () => {
             filteredNews.map(item => {
               const titleKey = `title_${item.id}`;
               const descKey = `desc_${item.id}`;
-              const countryKey = `country_${item.id}`;
-              const categoryKey = `category_${item.id}`;
               
               const displayTitle = translationLang === 'ko' && translatedData[titleKey] 
                 ? translatedData[titleKey] 
@@ -646,12 +605,6 @@ const EconomicNewsTab = () => {
               const displayDesc = translationLang === 'ko' && translatedData[descKey] 
                 ? translatedData[descKey] 
                 : item.description;
-              const displayCountry = translationLang === 'ko' && translatedData[countryKey] 
-                ? translatedData[countryKey] 
-                : item.country;
-              const displayCategory = translationLang === 'ko' && translatedData[categoryKey] 
-                ? translatedData[categoryKey] 
-                : item.category;
 
               return (
                 <div key={item.id} className="news-item">
@@ -666,14 +619,14 @@ const EconomicNewsTab = () => {
                       )}
                     </h3>
                     <div className="news-meta">
-                      {displayCountry && (
+                      {item.country && (
                         <span className="news-country">
-                          {translating[countryKey] ? '번역 중...' : displayCountry}
+                          {item.country}
                         </span>
                       )}
-                      {displayCategory && (
+                      {item.category && (
                         <span className="news-category">
-                          {translating[categoryKey] ? '번역 중...' : displayCategory}
+                          {item.category}
                         </span>
                       )}
                       {item.published_at && (
