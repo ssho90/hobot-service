@@ -48,7 +48,7 @@ jobs:
           HT_ACCOUNT: ${{ secrets.ENV_HT_ACCOUNT }}
           HT_ID: ${{ secrets.ENV_HT_ID }}
           OPENAI_API_KEY: ${{ secrets.ENV_OPENAI_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.ENV_GEMINI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.ENV_GOOGLE_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.ENV_TAVILY_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
@@ -80,7 +80,7 @@ jobs:
             export HT_ACCOUNT="${HT_ACCOUNT}"
             export HT_ID="${HT_ID}"
             export OPENAI_API_KEY="${OPENAI_API_KEY}"
-            export GEMINI_API_KEY="${GEMINI_API_KEY}"
+            export GOOGLE_API_KEY="${GOOGLE_API_KEY}"
             export TAVILY_API_KEY="${TAVILY_API_KEY}"
             export FRED_API_KEY="${FRED_API_KEY}"
             export DOMAIN_NAME="${DOMAIN_NAME}"
