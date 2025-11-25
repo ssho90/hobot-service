@@ -16,7 +16,7 @@ from PIL import Image # Pillow 라이브러리 (Gemini 이미지 처리용)
 # -----------------------------
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 MEMORY_FILE = "memory_store.json"
 
 # -----------------------------
