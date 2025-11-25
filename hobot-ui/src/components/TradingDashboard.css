@@ -123,6 +123,74 @@
   font-weight: 500;
 }
 
+.account-rebalancing-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.account-info-card,
+.rebalancing-chart-card {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .account-rebalancing-container {
+    flex-direction: column;
+  }
+}
+
+.rebalancing-chart-container {
+  padding: 10px;
+}
+
+.chart-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.tooltip-label {
+  font-weight: bold;
+  margin: 0 0 5px 0;
+}
+
+.tooltip-value {
+  margin: 5px 0;
+}
+
+.tooltip-percent {
+  margin: 5px 0 0 0;
+  color: #ccc;
+}
+
+.chart-summary {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.summary-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.summary-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
 .rebalancing-status {
   padding: 20px;
 }
