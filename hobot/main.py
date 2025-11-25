@@ -830,7 +830,7 @@ async def translate_text(request: TranslateRequest):
         
         # DB에 없으면 LLM으로 번역
         logging.info(f"Translating with LLM: news_id={news_id}, field_type={field_type}")
-        from service.llm import llm_gemini_20_flash
+        from service.llm import llm_gemini_flash
         from langchain_core.prompts import ChatPromptTemplate
         from langchain_core.output_parsers import StrOutputParser
         
@@ -841,7 +841,7 @@ async def translate_text(request: TranslateRequest):
             ("user", "{text}")
         ])
         
-        llm = llm_gemini_20_flash()
+        llm = llm_gemini_flash()
         chain = prompt | llm | StrOutputParser()
         
         translated_text = chain.invoke({"text": prompt_text}).strip()

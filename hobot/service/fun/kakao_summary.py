@@ -24,7 +24,7 @@ docs = text_loader("data/KakaoTalk_20250310_1510_17_085_group.txt")
 chain = (
     {"daily_news": lambda x: docs, "question": RunnablePassthrough()}
     | prompt
-    | llm.llm_gemini_20_flash()
+    | llm.llm_gemini_flash()
     | StrOutputParser()
 )
 

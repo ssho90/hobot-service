@@ -24,30 +24,30 @@ def llm_gpt4o():
 
     return gpt4o
 
-def llm_gemini_pro(model="gemini-1.5-pro"):
+def llm_gemini_pro(model="gemini-2.5-pro"):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
 
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=0.5,
-        max_tokens=4000,
         timeout=None,
         max_retries=2,
     )
 
     return llm
 
-def llm_gemini_20_flash():
+def llm_gemini_flash(model="gemini-2.5-flash"):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
+        model=model,
         temperature=0.5,
-        max_tokens=4000,
         timeout=None,
         max_retries=2,
     )
 
     return llm
+
+
