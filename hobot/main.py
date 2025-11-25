@@ -769,6 +769,8 @@ async def translate_text(request: TranslateRequest):
             "from_cache": true/false
         }
     """
+    logging.info(f"Translation request received: news_id={request.news_id}, field_type={request.field_type}, text_length={len(request.text) if request.text else 0}")
+    
     try:
         from service.database.db import get_db_connection
         
@@ -776,6 +778,17 @@ async def translate_text(request: TranslateRequest):
         target_lang = request.target_lang
         news_id = request.news_id
         field_type = request.field_type
+        
+        # country, category는 번역하지 않음
+        if field_type in ["country", "category"]:
+            logging.info(f"Skipping translation for field_type: {field_type}")
+            return {
+                "status": "success",
+                "original_text": text,
+                "translated_text": text,
+                "target_lang": target_lang,
+                "from_cache": False
+            }
         
         # 한글 번역만 지원 (영어는 원문 반환)
         if target_lang != "ko":
@@ -787,38 +800,36 @@ async def translate_text(request: TranslateRequest):
                 "from_cache": False
             }
         
+        # 필드 타입에 따라 적절한 컬럼명 결정 (title, description만)
+        field_map = {
+            "title": "title_ko",
+            "description": "description_ko"
+        }
+        
         # DB에서 번역 확인 (news_id와 field_type이 제공된 경우)
-        if news_id and field_type:
+        if news_id and field_type and field_type in field_map:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
+                column_name = field_map[field_type]
+                cursor.execute(f"""
+                    SELECT {column_name}
+                    FROM economic_news
+                    WHERE id = %s AND {column_name} IS NOT NULL AND {column_name} != ''
+                """, (news_id,))
                 
-                # 필드 타입에 따라 적절한 컬럼명 결정
-                field_map = {
-                    "title": "title_ko",
-                    "description": "description_ko",
-                    "country": "country_ko",
-                    "category": "category_ko"
-                }
-                
-                if field_type in field_map:
-                    column_name = field_map[field_type]
-                    cursor.execute(f"""
-                        SELECT {column_name}
-                        FROM economic_news
-                        WHERE id = %s AND {column_name} IS NOT NULL AND {column_name} != ''
-                    """, (news_id,))
-                    
-                    row = cursor.fetchone()
-                    if row and row.get(column_name):
-                        return {
-                            "status": "success",
-                            "original_text": text,
-                            "translated_text": row.get(column_name),
-                            "target_lang": target_lang,
-                            "from_cache": True
-                        }
+                row = cursor.fetchone()
+                if row and row.get(column_name):
+                    logging.info(f"Translation found in cache: news_id={news_id}, field_type={field_type}")
+                    return {
+                        "status": "success",
+                        "original_text": text,
+                        "translated_text": row.get(column_name),
+                        "target_lang": target_lang,
+                        "from_cache": True
+                    }
         
         # DB에 없으면 LLM으로 번역
+        logging.info(f"Translating with LLM: news_id={news_id}, field_type={field_type}")
         from service.llm import llm_gemini_20_flash
         from langchain_core.prompts import ChatPromptTemplate
         from langchain_core.output_parsers import StrOutputParser
@@ -834,6 +845,7 @@ async def translate_text(request: TranslateRequest):
         chain = prompt | llm | StrOutputParser()
         
         translated_text = chain.invoke({"text": prompt_text}).strip()
+        logging.info(f"Translation completed: news_id={news_id}, field_type={field_type}, translated_length={len(translated_text)}")
         
         # 번역 결과를 DB에 저장 (news_id와 field_type이 제공된 경우)
         if news_id and field_type and field_type in field_map:
@@ -847,8 +859,9 @@ async def translate_text(request: TranslateRequest):
                         WHERE id = %s
                     """, (translated_text, news_id))
                     conn.commit()
+                    logging.info(f"Translation saved to DB: news_id={news_id}, field_type={field_type}")
             except Exception as e:
-                logging.warning(f"Failed to save translation to DB: {e}")
+                logging.error(f"Failed to save translation to DB: {e}", exc_info=True)
         
         return {
             "status": "success",
