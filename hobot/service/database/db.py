@@ -186,6 +186,27 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """)
         
+        # 한글 번역 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN title_ko VARCHAR(500) COMMENT '제목 한글 번역'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
+        
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN description_ko TEXT COMMENT '설명 한글 번역'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN country_ko VARCHAR(100) COMMENT '국가 한글 번역'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN category_ko VARCHAR(100) COMMENT '카테고리 한글 번역'")
+        except Exception:
+            pass
+        
         conn.commit()
 
 

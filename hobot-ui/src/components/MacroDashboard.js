@@ -32,8 +32,6 @@ const MacroDashboard = () => {
 
   return (
     <div className="macro-dashboard">
-      <h1>Macro Dashboard</h1>
-      
       {/* Overview 섹션 (항상 표시) */}
       <div className="overview-section">
         <h2>overview</h2>
@@ -419,6 +417,9 @@ const EconomicNewsTab = () => {
   const [hours, setHours] = useState(24);
   const [filterCountry, setFilterCountry] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [translationLang, setTranslationLang] = useState('en'); // 'en' or 'ko'
+  const [translatedData, setTranslatedData] = useState({}); // {field_id: translated_text}
+  const [translating, setTranslating] = useState({}); // {field_id: true/false}
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -452,6 +453,103 @@ const EconomicNewsTab = () => {
   const countries = [...new Set(news.map(item => item.country).filter(Boolean))].sort();
   const categories = [...new Set(news.map(item => item.category).filter(Boolean))].sort();
 
+  // 번역 함수
+  const translateText = async (text, fieldId, newsId, fieldType) => {
+    if (!text || translationLang === 'en') {
+      // 영어 모드이거나 텍스트가 없으면 번역하지 않음
+      const newTranslatedData = { ...translatedData };
+      delete newTranslatedData[fieldId];
+      setTranslatedData(newTranslatedData);
+      return;
+    }
+
+    // 이미 번역된 데이터가 있으면 사용
+    if (translatedData[fieldId]) {
+      return;
+    }
+
+    setTranslating({ ...translating, [fieldId]: true });
+
+    try {
+      const response = await fetch('/api/macro-trading/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          target_lang: 'ko',
+          news_id: newsId,
+          field_type: fieldType
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success') {
+          setTranslatedData({
+            ...translatedData,
+            [fieldId]: data.translated_text
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Translation error:', err);
+    } finally {
+      setTranslating({ ...translating, [fieldId]: false });
+    }
+  };
+
+  // 번역 언어 변경 시 번역 데이터 초기화
+  useEffect(() => {
+    if (translationLang === 'en') {
+      setTranslatedData({});
+      setTranslating({});
+    }
+  }, [translationLang]);
+
+  // 한글 모드일 때 뉴스가 로드되면 번역 요청 (DB에서 먼저 확인)
+  useEffect(() => {
+    if (translationLang === 'ko' && filteredNews.length > 0) {
+      // DB에서 이미 번역된 내용이 있으면 먼저 사용
+      filteredNews.forEach((item) => {
+        const titleKey = `title_${item.id}`;
+        const descKey = `desc_${item.id}`;
+        const countryKey = `country_${item.id}`;
+        const categoryKey = `category_${item.id}`;
+        
+        // DB에서 가져온 번역 데이터가 있으면 사용
+        if (item.title_ko && !translatedData[titleKey]) {
+          setTranslatedData(prev => ({ ...prev, [titleKey]: item.title_ko }));
+        }
+        if (item.description_ko && !translatedData[descKey]) {
+          setTranslatedData(prev => ({ ...prev, [descKey]: item.description_ko }));
+        }
+        if (item.country_ko && !translatedData[countryKey]) {
+          setTranslatedData(prev => ({ ...prev, [countryKey]: item.country_ko }));
+        }
+        if (item.category_ko && !translatedData[categoryKey]) {
+          setTranslatedData(prev => ({ ...prev, [categoryKey]: item.category_ko }));
+        }
+        
+        // DB에 번역이 없으면 번역 요청
+        if (item.title && !item.title_ko && !translatedData[titleKey] && !translating[titleKey]) {
+          translateText(item.title, titleKey, item.id, 'title');
+        }
+        if (item.description && !item.description_ko && !translatedData[descKey] && !translating[descKey]) {
+          translateText(item.description, descKey, item.id, 'description');
+        }
+        if (item.country && !item.country_ko && !translatedData[countryKey] && !translating[countryKey]) {
+          translateText(item.country, countryKey, item.id, 'country');
+        }
+        if (item.category && !item.category_ko && !translatedData[categoryKey] && !translating[categoryKey]) {
+          translateText(item.category, categoryKey, item.id, 'category');
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [translationLang, news]);
+
   return (
     <div className="tab-content">
       <div className="news-controls">
@@ -463,6 +561,20 @@ const EconomicNewsTab = () => {
             <option value={72}>72시간</option>
             <option value={168}>1주일</option>
           </select>
+          <div className="lang-toggle">
+            <button
+              className={translationLang === 'en' ? 'active' : ''}
+              onClick={() => setTranslationLang('en')}
+            >
+              EN
+            </button>
+            <button
+              className={translationLang === 'ko' ? 'active' : ''}
+              onClick={() => setTranslationLang('ko')}
+            >
+              KO
+            </button>
+          </div>
         </div>
         <div className="control-group">
           <label>국가:</label>
@@ -472,6 +584,20 @@ const EconomicNewsTab = () => {
               <option key={country} value={country}>{country}</option>
             ))}
           </select>
+          <div className="lang-toggle">
+            <button
+              className={translationLang === 'en' ? 'active' : ''}
+              onClick={() => setTranslationLang('en')}
+            >
+              EN
+            </button>
+            <button
+              className={translationLang === 'ko' ? 'active' : ''}
+              onClick={() => setTranslationLang('ko')}
+            >
+              KO
+            </button>
+          </div>
         </div>
         <div className="control-group">
           <label>카테고리:</label>
@@ -481,6 +607,20 @@ const EconomicNewsTab = () => {
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
+          <div className="lang-toggle">
+            <button
+              className={translationLang === 'en' ? 'active' : ''}
+              onClick={() => setTranslationLang('en')}
+            >
+              EN
+            </button>
+            <button
+              className={translationLang === 'ko' ? 'active' : ''}
+              onClick={() => setTranslationLang('ko')}
+            >
+              KO
+            </button>
+          </div>
         </div>
       </div>
 
@@ -494,33 +634,63 @@ const EconomicNewsTab = () => {
           {filteredNews.length === 0 ? (
             <div className="no-news">뉴스가 없습니다.</div>
           ) : (
-            filteredNews.map(item => (
-              <div key={item.id} className="news-item">
-                <div className="news-header">
-                  <h3 className="news-title">
-                    {item.link ? (
-                      <a href={item.link} target="_blank" rel="noopener noreferrer">
-                        {item.title}
-                      </a>
-                    ) : (
-                      item.title
-                    )}
-                  </h3>
-                  <div className="news-meta">
-                    {item.country && <span className="news-country">{item.country}</span>}
-                    {item.category && <span className="news-category">{item.category}</span>}
-                    {item.published_at && (
-                      <span className="news-date">
-                        {new Date(item.published_at).toLocaleString('ko-KR')}
-                      </span>
-                    )}
+            filteredNews.map(item => {
+              const titleKey = `title_${item.id}`;
+              const descKey = `desc_${item.id}`;
+              const countryKey = `country_${item.id}`;
+              const categoryKey = `category_${item.id}`;
+              
+              const displayTitle = translationLang === 'ko' && translatedData[titleKey] 
+                ? translatedData[titleKey] 
+                : item.title;
+              const displayDesc = translationLang === 'ko' && translatedData[descKey] 
+                ? translatedData[descKey] 
+                : item.description;
+              const displayCountry = translationLang === 'ko' && translatedData[countryKey] 
+                ? translatedData[countryKey] 
+                : item.country;
+              const displayCategory = translationLang === 'ko' && translatedData[categoryKey] 
+                ? translatedData[categoryKey] 
+                : item.category;
+
+              return (
+                <div key={item.id} className="news-item">
+                  <div className="news-header">
+                    <h3 className="news-title">
+                      {item.link ? (
+                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                          {translating[titleKey] ? '번역 중...' : displayTitle}
+                        </a>
+                      ) : (
+                        translating[titleKey] ? '번역 중...' : displayTitle
+                      )}
+                    </h3>
+                    <div className="news-meta">
+                      {displayCountry && (
+                        <span className="news-country">
+                          {translating[countryKey] ? '번역 중...' : displayCountry}
+                        </span>
+                      )}
+                      {displayCategory && (
+                        <span className="news-category">
+                          {translating[categoryKey] ? '번역 중...' : displayCategory}
+                        </span>
+                      )}
+                      {item.published_at && (
+                        <span className="news-date">
+                          {new Date(item.published_at).toLocaleString('ko-KR')}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {displayDesc && (
+                    <div className="news-description">
+                      {translating[descKey] ? '번역 중...' : displayDesc}
+                    </div>
+                  )}
                 </div>
-                {item.description && (
-                  <div className="news-description">{item.description}</div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

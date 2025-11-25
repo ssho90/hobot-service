@@ -695,10 +695,14 @@ async def get_economic_news(
                 SELECT 
                     id,
                     title,
+                    title_ko,
                     link,
                     country,
+                    country_ko,
                     category,
+                    category_ko,
                     description,
+                    description_ko,
                     published_at,
                     collected_at,
                     source,
@@ -715,10 +719,14 @@ async def get_economic_news(
                 news_item = {
                     "id": row.get("id"),
                     "title": row.get("title"),
+                    "title_ko": row.get("title_ko"),
                     "link": row.get("link"),
                     "country": row.get("country"),
+                    "country_ko": row.get("country_ko"),
                     "category": row.get("category"),
+                    "category_ko": row.get("category_ko"),
                     "description": row.get("description"),
+                    "description_ko": row.get("description_ko"),
                     "published_at": row.get("published_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("published_at") else None,
                     "collected_at": row.get("collected_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("collected_at") else None,
                     "source": row.get("source"),
@@ -738,6 +746,126 @@ async def get_economic_news(
         logging.error(f"Error fetching economic news: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+
+class TranslateRequest(BaseModel):
+    text: str
+    target_lang: str = "ko"  # "ko" or "en"
+    news_id: Optional[int] = None  # 뉴스 ID (DB 저장용)
+    field_type: Optional[str] = None  # 필드 타입: "title", "description", "country", "category"
+
+@api_router.post("/macro-trading/translate")
+async def translate_text(request: TranslateRequest):
+    """텍스트 번역 API (DB 캐싱 지원)
+    
+    Args:
+        request: TranslateRequest 객체 (text, target_lang, news_id, field_type)
+    
+    Returns:
+        {
+            "status": "success",
+            "original_text": "...",
+            "translated_text": "...",
+            "target_lang": "ko",
+            "from_cache": true/false
+        }
+    """
+    try:
+        from service.database.db import get_db_connection
+        
+        text = request.text
+        target_lang = request.target_lang
+        news_id = request.news_id
+        field_type = request.field_type
+        
+        # 한글 번역만 지원 (영어는 원문 반환)
+        if target_lang != "ko":
+            return {
+                "status": "success",
+                "original_text": text,
+                "translated_text": text,
+                "target_lang": target_lang,
+                "from_cache": False
+            }
+        
+        # DB에서 번역 확인 (news_id와 field_type이 제공된 경우)
+        if news_id and field_type:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                
+                # 필드 타입에 따라 적절한 컬럼명 결정
+                field_map = {
+                    "title": "title_ko",
+                    "description": "description_ko",
+                    "country": "country_ko",
+                    "category": "category_ko"
+                }
+                
+                if field_type in field_map:
+                    column_name = field_map[field_type]
+                    cursor.execute(f"""
+                        SELECT {column_name}
+                        FROM economic_news
+                        WHERE id = %s AND {column_name} IS NOT NULL AND {column_name} != ''
+                    """, (news_id,))
+                    
+                    row = cursor.fetchone()
+                    if row and row.get(column_name):
+                        return {
+                            "status": "success",
+                            "original_text": text,
+                            "translated_text": row.get(column_name),
+                            "target_lang": target_lang,
+                            "from_cache": True
+                        }
+        
+        # DB에 없으면 LLM으로 번역
+        from service.llm import llm_gemini_20_flash
+        from langchain_core.prompts import ChatPromptTemplate
+        from langchain_core.output_parsers import StrOutputParser
+        
+        prompt_text = f"다음 영어 텍스트를 자연스러운 한국어로 번역해주세요. 전문 용어는 그대로 유지하되, 문맥에 맞게 번역해주세요:\n\n{text}"
+        
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "You are a professional translator. Translate the given text accurately and naturally."),
+            ("user", "{text}")
+        ])
+        
+        llm = llm_gemini_20_flash()
+        chain = prompt | llm | StrOutputParser()
+        
+        translated_text = chain.invoke({"text": prompt_text}).strip()
+        
+        # 번역 결과를 DB에 저장 (news_id와 field_type이 제공된 경우)
+        if news_id and field_type and field_type in field_map:
+            try:
+                with get_db_connection() as conn:
+                    cursor = conn.cursor()
+                    column_name = field_map[field_type]
+                    cursor.execute(f"""
+                        UPDATE economic_news
+                        SET {column_name} = %s
+                        WHERE id = %s
+                    """, (translated_text, news_id))
+                    conn.commit()
+            except Exception as e:
+                logging.warning(f"Failed to save translation to DB: {e}")
+        
+        return {
+            "status": "success",
+            "original_text": text,
+            "translated_text": translated_text,
+            "target_lang": target_lang,
+            "from_cache": False
+        }
+    except Exception as e:
+        logging.error(f"Translation error: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "message": str(e),
+            "original_text": request.text,
+            "translated_text": request.text,  # 에러 시 원문 반환
+            "from_cache": False
+        }
 
 @api_router.get("/macro-trading/economic-news-data")
 async def get_economic_news_data(
@@ -842,10 +970,14 @@ async def get_economic_news_data(
                     SELECT 
                         id,
                         title,
+                        title_ko,
                         link,
                         country,
+                        country_ko,
                         category,
+                        category_ko,
                         description,
+                        description_ko,
                         published_at
                     FROM economic_news
                     WHERE published_at >= %s AND published_at < %s
@@ -860,10 +992,14 @@ async def get_economic_news_data(
                     news_item = {
                         "id": news_row.get("id"),
                         "title": news_row.get("title"),
+                        "title_ko": news_row.get("title_ko"),
                         "link": news_row.get("link"),
                         "country": news_row.get("country"),
+                        "country_ko": news_row.get("country_ko"),
                         "category": news_row.get("category"),
+                        "category_ko": news_row.get("category_ko"),
                         "description": news_row.get("description"),
+                        "description_ko": news_row.get("description_ko"),
                         "published_at": news_row.get("published_at").strftime("%Y-%m-%d %H:%M:%S") if news_row.get("published_at") else None
                     }
                     news_list.append(news_item)
