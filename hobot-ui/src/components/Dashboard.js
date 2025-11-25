@@ -21,7 +21,7 @@ const Dashboard = () => {
   
   // 시스템 어드민이 아니면 trading 탭 접근 불가
   useEffect(() => {
-    if (activeTab === 'trading' && !isSystemAdmin()) {
+    if ((activeTab === 'trading-macro' || activeTab === 'trading-crypto') && !isSystemAdmin()) {
       setActiveTab('macro-dashboard');
     }
   }, [activeTab, isSystemAdmin]);
@@ -35,13 +35,13 @@ const Dashboard = () => {
   
   // Header 탭 클릭에 따라 초기 탭 설정
   useEffect(() => {
-    // URL에서 탭 정보 확인 (예: /dashboard?tab=trading)
+    // URL에서 탭 정보 확인 (예: /dashboard?tab=trading-macro)
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
-    if (tabParam === 'trading' && isSystemAdmin()) {
-      setActiveTab('trading');
-    } else if (tabParam === 'monitoring') {
-      setActiveTab('monitoring');
+    if (tabParam === 'trading-macro' && isSystemAdmin()) {
+      setActiveTab('trading-macro');
+    } else if (tabParam === 'trading-crypto' && isSystemAdmin()) {
+      setActiveTab('trading-crypto');
     } else if (tabParam === 'admin' && isSystemAdmin()) {
       setActiveTab('admin-users');
     } else if (tabParam === 'macro-dashboard') {
@@ -113,41 +113,56 @@ const Dashboard = () => {
       <Header />
       <div className="main-content">
         <div className="content-area">
-          {activeTab === 'trading' && (
+          {/* Macro Quant Trading */}
+          {activeTab === 'trading-macro' && (
+            <TradingDashboard />
+          )}
+
+          {/* Crypto Auto Trading */}
+          {activeTab === 'trading-crypto' && (
             <>
               <PlatformSelector 
                 activePlatform={activePlatform} 
                 setActivePlatform={setActivePlatform}
               />
               
-              <div className="status-section">
-                <div className="status-item">
-                  <HobotStatus platform={activePlatform} />
-                </div>
-                <div className="status-item">
-                  <CurrentPosition 
-                    platform={activePlatform}
-                    currentStrategy={currentStrategy} 
-                  />
-                </div>
-              </div>
+              {/* Upbit 선택 시에만 Status, Position, Tools 표시 */}
+              {activePlatform === 'upbit' && (
+                <>
+                  <div className="status-section">
+                    <div className="status-item">
+                      <HobotStatus platform={activePlatform} />
+                    </div>
+                    <div className="status-item">
+                      <CurrentPosition 
+                        platform={activePlatform}
+                        currentStrategy={currentStrategy} 
+                      />
+                    </div>
+                  </div>
 
-              <div className="tools-section">
-                <Tools 
-                  platform={activePlatform}
-                  currentStrategy={currentStrategy} 
-                  onStrategyChange={handleStrategyChange}
-                />
-              </div>
+                  <div className="tools-section">
+                    <Tools 
+                      platform={activePlatform}
+                      currentStrategy={currentStrategy} 
+                      onStrategyChange={handleStrategyChange}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Binance 선택 시 (추후 구현) */}
+              {activePlatform === 'binance' && (
+                <div className="card">
+                  <h2>Binance Auto Trading</h2>
+                  <p className="info-note">Binance 자동매매 기능은 추후 구현 예정입니다.</p>
+                </div>
+              )}
             </>
           )}
 
           {activeTab === 'macro-dashboard' && (
             <MacroDashboard />
-          )}
-
-          {activeTab === 'trading' && (
-            <TradingDashboard />
           )}
 
           {activeTab === 'admin-users' && (

@@ -10,10 +10,12 @@ const Header = () => {
   const location = useLocation();
   const [showMenu, setShowMenu] = useState(false);
   const [showAdminSubmenu, setShowAdminSubmenu] = useState(false);
+  const [showTradingSubmenu, setShowTradingSubmenu] = useState(false);
   const [dashboardActiveTab, setDashboardActiveTab] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const menuRef = useRef(null);
   const adminMenuRef = useRef(null);
+  const tradingMenuRef = useRef(null);
   
   // Dashboard의 activeTab 변경 추적
   useEffect(() => {
@@ -23,6 +25,10 @@ const Header = () => {
       // Admin 하위 탭이 활성화되면 하위 메뉴 열기
       if (tab === 'admin-users' || tab === 'admin-logs') {
         setShowAdminSubmenu(true);
+      }
+      // Trading 하위 탭이 활성화되면 하위 메뉴 열기
+      if (tab === 'trading-macro' || tab === 'trading-crypto') {
+        setShowTradingSubmenu(true);
       }
     };
     
@@ -35,15 +41,11 @@ const Header = () => {
   const handleLogin = () => {
     setShowLoginModal(true);
   };
-  
+
   const handleTabClick = (tab) => {
     if (tab === 'trading') {
-      navigate('/dashboard?tab=trading');
-      setShowAdminSubmenu(false);
-      setTimeout(() => {
-        const event = new CustomEvent('switchToTab', { detail: { tab: 'trading' } });
-        window.dispatchEvent(event);
-      }, 100);
+      // Trading 탭 클릭 시 하위 메뉴 토글
+      setShowTradingSubmenu(!showTradingSubmenu);
     } else if (tab === 'admin') {
       // Admin 탭 클릭 시 하위 메뉴 토글
       setShowAdminSubmenu(!showAdminSubmenu);
@@ -62,10 +64,14 @@ const Header = () => {
   // 현재 활성 탭 확인
   const getActiveTab = () => {
     if (location.pathname === '/dashboard') {
-      if (dashboardActiveTab === 'trading') return 'trading';
+      if (dashboardActiveTab === 'trading-macro' || dashboardActiveTab === 'trading-crypto') return 'trading';
       if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs') return 'admin';
       if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
       return 'macro-dashboard'; // 기본값
+    }
+    // 기본 화면(/)에서는 Macro Dashboard가 활성화
+    if (location.pathname === '/') {
+      return 'macro-dashboard';
     }
     return 'macro-dashboard';
   };
@@ -79,16 +85,19 @@ const Header = () => {
       if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
         setShowAdminSubmenu(false);
       }
+      if (tradingMenuRef.current && !tradingMenuRef.current.contains(event.target)) {
+        setShowTradingSubmenu(false);
+      }
     };
 
-    if (showMenu || showAdminSubmenu) {
+    if (showMenu || showAdminSubmenu || showTradingSubmenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMenu, showAdminSubmenu]);
+  }, [showMenu, showAdminSubmenu, showTradingSubmenu]);
 
   const handleLogout = () => {
     logout();
@@ -135,12 +144,45 @@ const Header = () => {
           </button>
           {isSystemAdmin() && (
             <>
-              <button
-                className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
-                onClick={() => handleTabClick('trading')}
-              >
-                Trading
-              </button>
+              <div className="header-tab-container" ref={tradingMenuRef}>
+                <button
+                  className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('trading')}
+                >
+                  Trading
+                  <span className="tab-arrow">▼</span>
+                </button>
+                {showTradingSubmenu && (
+                  <div className="admin-submenu">
+                    <button
+                      className={`admin-submenu-item ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
+                      onClick={() => {
+                        navigate('/dashboard?tab=trading-macro');
+                        setShowTradingSubmenu(false);
+                        setTimeout(() => {
+                          const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-macro' } });
+                          window.dispatchEvent(event);
+                        }, 100);
+                      }}
+                    >
+                      Macro Quant
+                    </button>
+                    <button
+                      className={`admin-submenu-item ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
+                      onClick={() => {
+                        navigate('/dashboard?tab=trading-crypto');
+                        setShowTradingSubmenu(false);
+                        setTimeout(() => {
+                          const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-crypto' } });
+                          window.dispatchEvent(event);
+                        }, 100);
+                      }}
+                    >
+                      Crypto
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="header-tab-container" ref={adminMenuRef}>
                 <button
                   className={`header-tab ${activeTab === 'admin' ? 'active' : ''}`}

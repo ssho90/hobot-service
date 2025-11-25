@@ -5,7 +5,6 @@ const PlatformSelector = ({ activePlatform, setActivePlatform }) => {
   const platforms = [
     { id: 'upbit', label: 'Upbit', icon: '💰', color: '#3b82f6' },
     { id: 'binance', label: 'Binance', icon: '🌐', color: '#f59e0b', disabled: true },
-    { id: 'kis', label: '한국투자증권', icon: '📈', color: '#8b5cf6' },
   ];
 
   return (

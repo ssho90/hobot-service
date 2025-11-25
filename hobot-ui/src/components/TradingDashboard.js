@@ -3,68 +3,39 @@ import HobotStatus from './HobotStatus';
 import './TradingDashboard.css';
 
 const TradingDashboard = () => {
-  const [activeTab, setActiveTab] = useState('macro');
   const [kisBalance, setKisBalance] = useState(null);
   const [kisLoading, setKisLoading] = useState(false);
   const [kisError, setKisError] = useState(null);
 
   // KIS 계좌 잔액 조회
   useEffect(() => {
-    if (activeTab === 'macro') {
-      const fetchKisBalance = async () => {
-        setKisLoading(true);
-        setKisError(null);
-        try {
-          const response = await fetch('/api/kis/balance');
-          if (response.ok) {
-            const data = await response.json();
-            setKisBalance(data);
-          } else {
-            throw new Error('계좌 정보를 불러오는데 실패했습니다.');
-          }
-        } catch (err) {
-          setKisError(err.message);
-        } finally {
-          setKisLoading(false);
+    const fetchKisBalance = async () => {
+      setKisLoading(true);
+      setKisError(null);
+      try {
+        const response = await fetch('/api/kis/balance');
+        if (response.ok) {
+          const data = await response.json();
+          setKisBalance(data);
+        } else {
+          throw new Error('계좌 정보를 불러오는데 실패했습니다.');
         }
-      };
-      fetchKisBalance();
-    }
-  }, [activeTab]);
+      } catch (err) {
+        setKisError(err.message);
+      } finally {
+        setKisLoading(false);
+      }
+    };
+    fetchKisBalance();
+  }, []);
 
   return (
     <div className="trading-dashboard">
-      <h1>Trading Dashboard</h1>
-      
-      {/* 탭 메뉴 */}
-      <div className="dashboard-tabs">
-        <button
-          className={`dashboard-tab ${activeTab === 'macro' ? 'active' : ''}`}
-          onClick={() => setActiveTab('macro')}
-        >
-          Macro Quant Trading
-        </button>
-        <button
-          className={`dashboard-tab ${activeTab === 'crypto' ? 'active' : ''}`}
-          onClick={() => setActiveTab('crypto')}
-        >
-          Crypto Auto Trading
-        </button>
-      </div>
-
-      {/* Macro Quant Trading 탭 */}
-      {activeTab === 'macro' && (
-        <MacroQuantTradingTab 
-          balance={kisBalance}
-          loading={kisLoading}
-          error={kisError}
-        />
-      )}
-
-      {/* Crypto Auto Trading 탭 */}
-      {activeTab === 'crypto' && (
-        <CryptoAutoTradingTab />
-      )}
+      <MacroQuantTradingTab 
+        balance={kisBalance}
+        loading={kisLoading}
+        error={kisError}
+      />
     </div>
   );
 };
@@ -164,63 +135,6 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
           <p className="info-note">
             리밸런싱 상태는 "모니터링" 탭의 "리밸런싱 현황"에서 확인할 수 있습니다.
           </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Crypto Auto Trading 탭 컴포넌트
-const CryptoAutoTradingTab = () => {
-  const [currentStrategy, setCurrentStrategy] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStrategy = async () => {
-      try {
-        const response = await fetch('/api/current-strategy/upbit');
-        if (response.ok) {
-          const data = await response.text();
-          setCurrentStrategy(data.trim());
-        }
-      } catch (err) {
-        console.error('Failed to fetch strategy:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStrategy();
-    const interval = setInterval(fetchStrategy, 60000); // 1분마다 업데이트
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="tab-content">
-      {/* API 연동 상태 */}
-      <div className="status-section">
-        <HobotStatus platform="upbit" />
-      </div>
-
-      {/* 현재 포지션 */}
-      <div className="card">
-        <h2>현재 포지션</h2>
-        {loading ? (
-          <div className="loading">전략 상태를 불러오는 중...</div>
-        ) : (
-          <div className="strategy-info">
-            <div className="info-row">
-              <span className="info-label">현재 전략:</span>
-              <span className="info-value strategy-value">{currentStrategy || 'STRATEGY_NULL'}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 자동매매 실행 이력 */}
-      <div className="card">
-        <h2>자동매매 실행 이력</h2>
-        <div className="info-note">
-          <p>자동매매 실행 이력은 추후 구현 예정입니다.</p>
         </div>
       </div>
     </div>
