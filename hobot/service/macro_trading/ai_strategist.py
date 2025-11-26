@@ -1,95 +1,19 @@
 """
 AI 전략가 모듈
-<<<<<<< HEAD
-정량 시그널과 정성 뉴스를 종합하여 포트폴리오 목표 비중을 결정
-"""
-import logging
-from typing import Dict, List, Optional
-from datetime import datetime, timedelta
-=======
 Gemini 2.5 Pro를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
 """
 import json
 import logging
-from datetime import datetime
-from typing import Dict, Optional, Any
+from datetime import datetime, timedelta
+from typing import Dict, Optional, Any, List
 from pydantic import BaseModel, Field, field_validator
 
 from service.llm import llm_gemini_pro
->>>>>>> ab835cb7edb0307065ff5bc80d40f90e0d0afb36
 from service.database.db import get_db_connection
 
 logger = logging.getLogger(__name__)
 
 
-<<<<<<< HEAD
-def collect_economic_news(hours: int = 24) -> List[Dict]:
-    """
-    최근 N시간 내의 경제 뉴스를 수집하여 반환
-    
-    Args:
-        hours: 조회할 시간 범위 (기본값: 24시간)
-    
-    Returns:
-        뉴스 리스트 (딕셔너리 형태)
-    """
-    try:
-        cutoff_time = datetime.now() - timedelta(hours=hours)
-        
-        with get_db_connection() as conn:
-            # get_db_connection()이 이미 DictCursor를 사용하므로
-            # cursor()만 호출하면 됨 (dictionary=True 불필요)
-            cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT 
-                    id,
-                    title,
-                    title_ko,
-                    link,
-                    country,
-                    country_ko,
-                    category,
-                    category_ko,
-                    description,
-                    description_ko,
-                    published_at,
-                    collected_at,
-                    source
-                FROM economic_news
-                WHERE published_at >= %s
-                ORDER BY published_at DESC
-            """, (cutoff_time,))
-            
-            rows = cursor.fetchall()
-            
-            # DictCursor를 사용하므로 이미 딕셔너리 형태로 반환됨
-            news_list = []
-            for row in rows:
-                news_item = {
-                    "id": row.get("id"),
-                    "title": row.get("title"),
-                    "title_ko": row.get("title_ko"),
-                    "link": row.get("link"),
-                    "country": row.get("country"),
-                    "country_ko": row.get("country_ko"),
-                    "category": row.get("category"),
-                    "category_ko": row.get("category_ko"),
-                    "description": row.get("description"),
-                    "description_ko": row.get("description_ko"),
-                    "published_at": row.get("published_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("published_at") else None,
-                    "collected_at": row.get("collected_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("collected_at") else None,
-                    "source": row.get("source")
-                }
-                news_list.append(news_item)
-            
-            logger.info(f"경제 뉴스 {len(news_list)}개 수집 완료")
-            return news_list
-            
-    except Exception as e:
-        logger.error(f"경제 뉴스 수집 실패: {e}", exc_info=True)
-        raise
-=======
 class TargetAllocation(BaseModel):
     """목표 자산 배분 모델"""
     Stocks: float = Field(..., ge=0, le=100, description="주식 비중 (%)")
@@ -140,20 +64,25 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
 def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
     """경제 뉴스 수집"""
     try:
-        from service.database.db import get_db_connection
-        from datetime import datetime, timedelta
-        
         cutoff_time = datetime.now() - timedelta(hours=hours)
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT 
+                    id,
                     title,
+                    title_ko,
+                    link,
                     country,
+                    country_ko,
                     category,
+                    category_ko,
                     description,
-                    published_at
+                    description_ko,
+                    published_at,
+                    collected_at,
+                    source
                 FROM economic_news
                 WHERE published_at >= %s
                 ORDER BY published_at DESC
@@ -166,6 +95,8 @@ def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
             for item in news:
                 if item.get('published_at'):
                     item['published_at'] = item['published_at'].strftime('%Y-%m-%d %H:%M:%S')
+                if item.get('collected_at'):
+                    item['collected_at'] = item['collected_at'].strftime('%Y-%m-%d %H:%M:%S')
             
             return {
                 "total_count": len(news),
@@ -434,5 +365,3 @@ def run_ai_analysis():
     except Exception as e:
         logger.error(f"AI 분석 실행 실패: {e}", exc_info=True)
         return False
->>>>>>> ab835cb7edb0307065ff5bc80d40f90e0d0afb36
-
