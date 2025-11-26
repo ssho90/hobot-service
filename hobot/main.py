@@ -497,6 +497,149 @@ async def get_account_snapshots(
         logging.error(f"Error fetching account snapshots: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+# 자산군 상세 설정 관련 Pydantic 모델
+class AssetClassDetailItem(BaseModel):
+    ticker: str
+    name: str
+    weight: float  # 0-1 사이 값
+
+class AssetClassDetailsRequest(BaseModel):
+    asset_class: str  # stocks, bonds, alternatives, cash
+    items: list[AssetClassDetailItem]
+
+@api_router.get("/macro-trading/asset-class-details")
+async def get_asset_class_details():
+    """자산군별 상세 종목 및 비율 조회"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    asset_class,
+                    ticker,
+                    name,
+                    weight,
+                    is_active,
+                    created_at,
+                    updated_at
+                FROM asset_class_details
+                WHERE is_active = TRUE
+                ORDER BY asset_class, weight DESC
+            """)
+            
+            rows = cursor.fetchall()
+            
+            # 자산군별로 그룹화
+            result = {
+                "stocks": [],
+                "bonds": [],
+                "alternatives": [],
+                "cash": []
+            }
+            
+            for row in rows:
+                asset_class = row["asset_class"]
+                if asset_class in result:
+                    result[asset_class].append({
+                        "ticker": row["ticker"],
+                        "name": row["name"],
+                        "weight": float(row["weight"]),
+                        "is_active": bool(row["is_active"]),
+                        "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None,
+                        "updated_at": row["updated_at"].strftime("%Y-%m-%d %H:%M:%S") if row["updated_at"] else None
+                    })
+            
+            return {
+                "status": "success",
+                "data": result
+            }
+    except Exception as e:
+        logging.error(f"Error fetching asset class details: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/macro-trading/asset-class-details")
+async def save_asset_class_details(
+    request: AssetClassDetailsRequest,
+    admin_user: dict = Depends(require_admin)
+):
+    """자산군별 상세 종목 및 비율 저장 (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime
+        
+        # 자산군 유효성 검사
+        valid_asset_classes = ["stocks", "bonds", "alternatives", "cash"]
+        if request.asset_class not in valid_asset_classes:
+            raise HTTPException(status_code=400, detail=f"Invalid asset_class. Must be one of: {', '.join(valid_asset_classes)}")
+        
+        # 비중 합계 검증 (0.99 ~ 1.01 사이 허용, 부동소수점 오차 고려)
+        total_weight = sum(item.weight for item in request.items)
+        if not (0.99 <= total_weight <= 1.01):
+            raise HTTPException(status_code=400, detail=f"Total weight must be 1.0 (current: {total_weight:.4f})")
+        
+        # 각 항목의 비중 검증
+        for item in request.items:
+            if not (0 <= item.weight <= 1):
+                raise HTTPException(status_code=400, detail=f"Item weight must be between 0 and 1 (ticker: {item.ticker}, weight: {item.weight})")
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 기존 항목들을 비활성화
+            cursor.execute("""
+                UPDATE asset_class_details
+                SET is_active = FALSE
+                WHERE asset_class = %s
+            """, (request.asset_class,))
+            
+            # 새 항목들 저장
+            now = datetime.now()
+            for item in request.items:
+                cursor.execute("""
+                    INSERT INTO asset_class_details 
+                    (asset_class, ticker, name, weight, is_active, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, TRUE, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        name = VALUES(name),
+                        weight = VALUES(weight),
+                        is_active = TRUE,
+                        updated_at = VALUES(updated_at)
+                """, (request.asset_class, item.ticker, item.name, item.weight, now, now))
+            
+            conn.commit()
+            
+            return {
+                "status": "success",
+                "message": f"Asset class details saved for {request.asset_class}",
+                "asset_class": request.asset_class,
+                "items_count": len(request.items)
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error saving asset class details: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/macro-trading/rebalance")
+async def manual_rebalance(
+    admin_user: dict = Depends(require_admin)
+):
+    """수동 리밸런싱 실행 (admin 전용)"""
+    try:
+        from datetime import datetime
+        # TODO: 실제 리밸런싱 로직 구현 (Phase 4에서 구현 예정)
+        # 현재는 플레이스홀더 응답
+        return {
+            "status": "success",
+            "message": "리밸런싱이 요청되었습니다. (실제 구현은 Phase 4에서 완료 예정)",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logging.error(f"Error executing manual rebalance: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/rebalancing-history")
 async def get_rebalancing_history(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),

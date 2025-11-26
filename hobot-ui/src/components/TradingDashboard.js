@@ -43,6 +43,10 @@ const TradingDashboard = () => {
 
 // Macro Quant Trading 탭 컴포넌트
 const MacroQuantTradingTab = ({ balance, loading, error }) => {
+  const [showAssetClassModal, setShowAssetClassModal] = useState(false);
+  const [showRebalanceConfirm, setShowRebalanceConfirm] = useState(false);
+  const [isRebalancing, setIsRebalancing] = useState(false);
+
   return (
     <div className="tab-content">
       {/* API 연동 상태 */}
@@ -54,7 +58,24 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
       <div className="account-rebalancing-container">
         {/* 계좌 정보 (왼쪽 반) */}
         <div className="card account-info-card">
-          <h2>계좌 정보</h2>
+          <div className="card-header-with-actions">
+            <h2>계좌 정보</h2>
+            <div className="card-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setShowAssetClassModal(true)}
+              >
+                자산군 상세 설정
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowRebalanceConfirm(true)}
+                disabled={isRebalancing}
+              >
+                {isRebalancing ? '리밸런싱 중...' : '수동 리밸런싱'}
+              </button>
+            </div>
+          </div>
           {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
           {error && <div className="error">오류: {error}</div>}
           {!loading && !error && balance && balance.status === 'success' && (
@@ -104,6 +125,14 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         </div>
       </div>
 
+      {/* 자산군별 수익률 */}
+      {balance && balance.status === 'success' && balance.asset_class_info && (
+        <div className="card">
+          <h2>자산군별 수익률</h2>
+          <AssetClassPerformance assetClassInfo={balance.asset_class_info} />
+        </div>
+      )}
+
       {/* 보유 자산 */}
       {balance && balance.status === 'success' && balance.holdings && balance.holdings.length > 0 && (
         <div className="card">
@@ -145,25 +174,144 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         </div>
       )}
 
+      {/* 자산군 상세 설정 모달 */}
+      {showAssetClassModal && (
+        <AssetClassDetailsModal
+          onClose={() => setShowAssetClassModal(false)}
+        />
+      )}
+
+      {/* 수동 리밸런싱 확인 모달 */}
+      {showRebalanceConfirm && (
+        <RebalanceConfirmModal
+          onConfirm={async () => {
+            setIsRebalancing(true);
+            try {
+              const token = localStorage.getItem('token');
+              const response = await fetch('/api/macro-trading/rebalance', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                alert('리밸런싱이 요청되었습니다.');
+                setShowRebalanceConfirm(false);
+              } else {
+                const error = await response.json();
+                alert(`리밸런싱 실패: ${error.detail || '알 수 없는 오류'}`);
+              }
+            } catch (err) {
+              alert(`리밸런싱 실패: ${err.message}`);
+            } finally {
+              setIsRebalancing(false);
+            }
+          }}
+          onCancel={() => setShowRebalanceConfirm(false)}
+        />
+      )}
+
+    </div>
+  );
+};
+
+// 자산군별 수익률 컴포넌트
+const AssetClassPerformance = ({ assetClassInfo }) => {
+  const assetClassLabels = {
+    stocks: '주식',
+    bonds: '채권',
+    alternatives: '대체투자',
+    cash: '현금'
+  };
+
+  const assetClassOrder = ['stocks', 'bonds', 'alternatives', 'cash'];
+
+  return (
+    <div className="asset-class-performance">
+      {assetClassOrder.map((assetClass) => {
+        const info = assetClassInfo[assetClass];
+        if (!info || info.count === 0 && assetClass !== 'cash') {
+          return null;
+        }
+
+        return (
+          <div key={assetClass} className="asset-class-group">
+            <div className="asset-class-header">
+              <h3>{assetClassLabels[assetClass] || assetClass}</h3>
+              <div className="asset-class-summary">
+                <span className="summary-label">평가금액:</span>
+                <span className="summary-value">
+                  {info.total_eval_amount?.toLocaleString('ko-KR')} 원
+                </span>
+                <span className="summary-label">손익:</span>
+                <span className={`summary-value ${info.total_profit_loss >= 0 ? 'positive' : 'negative'}`}>
+                  {info.total_profit_loss?.toLocaleString('ko-KR')} 원
+                </span>
+                <span className="summary-label">수익률:</span>
+                <span className={`summary-value ${info.profit_loss_rate >= 0 ? 'positive' : 'negative'}`}>
+                  {info.profit_loss_rate?.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+            
+            {/* 그룹 내 종목별 수익률 */}
+            {info.holdings && info.holdings.length > 0 && (
+              <div className="asset-class-holdings">
+                <table className="holdings-table">
+                  <thead>
+                    <tr>
+                      <th>종목명</th>
+                      <th>종목코드</th>
+                      <th>평가금액</th>
+                      <th>손익</th>
+                      <th>손익률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {info.holdings.map((holding, idx) => (
+                      <tr key={idx}>
+                        <td>{holding.stock_name}</td>
+                        <td>{holding.stock_code}</td>
+                        <td>{holding.eval_amount?.toLocaleString('ko-KR')} 원</td>
+                        <td className={holding.profit_loss >= 0 ? 'positive' : 'negative'}>
+                          {holding.profit_loss?.toLocaleString('ko-KR')} 원
+                        </td>
+                        <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
+                          {holding.profit_loss_rate?.toFixed(2)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
 
 // 리밸런싱 차트 컴포넌트
 const RebalancingChart = ({ balance }) => {
-  // 자산 비율 계산
-  const cashAmount = balance.cash_balance || 0;
-  const stockAmount = balance.holdings?.reduce((sum, holding) => sum + (holding.eval_amount || 0), 0) || 0;
-  const bondAmount = 0; // 채권 데이터는 현재 없음
-  const goldAmount = 0; // 금 데이터는 현재 없음
+  // 자산군별 정보에서 데이터 추출
+  const assetClassInfo = balance.asset_class_info || {};
+  
+  const stockAmount = assetClassInfo.stocks?.total_eval_amount || 0;
+  const bondAmount = assetClassInfo.bonds?.total_eval_amount || 0;
+  const alternativesAmount = assetClassInfo.alternatives?.total_eval_amount || 0;
+  const cashAmount = assetClassInfo.cash?.total_eval_amount || balance.cash_balance || 0;
 
-  const totalAmount = cashAmount + stockAmount + bondAmount + goldAmount;
+  const totalAmount = cashAmount + stockAmount + bondAmount + alternativesAmount;
 
   const chartData = [
     { name: '현금', value: cashAmount, color: '#4CAF50' },
     { name: '주식', value: stockAmount, color: '#2196F3' },
     { name: '채권', value: bondAmount, color: '#FF9800' },
-    { name: '금', value: goldAmount, color: '#FFC107' }
+    { name: '대체투자', value: alternativesAmount, color: '#FFC107' }
   ].filter(item => item.value > 0); // 0인 항목은 제외
 
   const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
@@ -251,6 +399,256 @@ const RebalancingChart = ({ balance }) => {
           <span className="summary-value">
             {totalAmount.toLocaleString('ko-KR')} 원
           </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 자산군 상세 설정 모달 컴포넌트
+const AssetClassDetailsModal = ({ onClose }) => {
+  const [assetClassDetails, setAssetClassDetails] = useState({
+    stocks: [],
+    bonds: [],
+    alternatives: [],
+    cash: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('stocks');
+  const [editingItems, setEditingItems] = useState({});
+
+  const assetClassLabels = {
+    stocks: '주식',
+    bonds: '채권',
+    alternatives: '대체투자',
+    cash: '현금'
+  };
+
+  useEffect(() => {
+    fetchAssetClassDetails();
+  }, []);
+
+  const fetchAssetClassDetails = async () => {
+    try {
+      const response = await fetch('/api/macro-trading/asset-class-details');
+      if (response.ok) {
+        const data = await response.json();
+        setAssetClassDetails(data.data || {
+          stocks: [],
+          bonds: [],
+          alternatives: [],
+          cash: []
+        });
+        // 각 자산군별로 편집 가능한 상태 초기화
+        const editing = {};
+        Object.keys(data.data || {}).forEach(assetClass => {
+          editing[assetClass] = [...(data.data[assetClass] || [])];
+        });
+        setEditingItems(editing);
+      }
+    } catch (err) {
+      console.error('Error fetching asset class details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddItem = (assetClass) => {
+    const newItem = { ticker: '', name: '', weight: 0 };
+    setEditingItems(prev => ({
+      ...prev,
+      [assetClass]: [...(prev[assetClass] || []), newItem]
+    }));
+  };
+
+  const handleRemoveItem = (assetClass, index) => {
+    setEditingItems(prev => ({
+      ...prev,
+      [assetClass]: prev[assetClass].filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleItemChange = (assetClass, index, field, value) => {
+    setEditingItems(prev => {
+      const newItems = [...prev[assetClass]];
+      newItems[index] = { ...newItems[index], [field]: value };
+      return { ...prev, [assetClass]: newItems };
+    });
+  };
+
+  const handleSave = async (assetClass) => {
+    const items = editingItems[assetClass] || [];
+    
+    // 유효성 검사
+    if (items.length === 0) {
+      alert('최소 1개 이상의 종목이 필요합니다.');
+      return;
+    }
+
+    const totalWeight = items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0);
+    if (Math.abs(totalWeight - 1.0) > 0.01) {
+      alert(`비중 합계가 1.0이어야 합니다. (현재: ${totalWeight.toFixed(4)})`);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/macro-trading/asset-class-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          asset_class: assetClass,
+          items: items.map(item => ({
+            ticker: item.ticker,
+            name: item.name,
+            weight: parseFloat(item.weight)
+          }))
+        })
+      });
+
+      if (response.ok) {
+        alert('저장되었습니다. 다음 리밸런싱 시 반영됩니다.');
+        await fetchAssetClassDetails();
+      } else {
+        const error = await response.json();
+        alert(`저장 실패: ${error.detail || '알 수 없는 오류'}`);
+      }
+    } catch (err) {
+      alert(`저장 실패: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="loading">로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content asset-class-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>자산군 상세 설정</h2>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="modal-tabs">
+          {Object.keys(assetClassLabels).map(assetClass => (
+            <button
+              key={assetClass}
+              className={`modal-tab ${activeTab === assetClass ? 'active' : ''}`}
+              onClick={() => setActiveTab(assetClass)}
+            >
+              {assetClassLabels[assetClass]}
+            </button>
+          ))}
+        </div>
+
+        <div className="modal-body">
+          {Object.keys(assetClassLabels).map(assetClass => (
+            activeTab === assetClass && (
+              <div key={assetClass} className="asset-class-editor">
+                <div className="editor-header">
+                  <h3>{assetClassLabels[assetClass]} 자산군 설정</h3>
+                  <button
+                    className="btn btn-small"
+                    onClick={() => handleAddItem(assetClass)}
+                  >
+                    + 종목 추가
+                  </button>
+                </div>
+                
+                <div className="items-list">
+                  {(editingItems[assetClass] || []).map((item, index) => (
+                    <div key={index} className="item-row">
+                      <input
+                        type="text"
+                        placeholder="티커 (예: 360750)"
+                        value={item.ticker || ''}
+                        onChange={(e) => handleItemChange(assetClass, index, 'ticker', e.target.value)}
+                        className="input-ticker"
+                      />
+                      <input
+                        type="text"
+                        placeholder="종목명 (예: TIGER 미국 S&P500)"
+                        value={item.name || ''}
+                        onChange={(e) => handleItemChange(assetClass, index, 'name', e.target.value)}
+                        className="input-name"
+                      />
+                      <input
+                        type="number"
+                        placeholder="비중 (0-1)"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={item.weight || ''}
+                        onChange={(e) => handleItemChange(assetClass, index, 'weight', e.target.value)}
+                        className="input-weight"
+                      />
+                      <button
+                        className="btn btn-danger btn-small"
+                        onClick={() => handleRemoveItem(assetClass, index)}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="editor-footer">
+                  <div className="weight-summary">
+                    총 비중: {((editingItems[assetClass] || []).reduce((sum, item) => sum + parseFloat(item.weight || 0), 0)).toFixed(4)}
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleSave(assetClass)}
+                    disabled={saving}
+                  >
+                    {saving ? '저장 중...' : '저장'}
+                  </button>
+                </div>
+              </div>
+            )
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 수동 리밸런싱 확인 모달 컴포넌트
+const RebalanceConfirmModal = ({ onConfirm, onCancel }) => {
+  return (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-content confirm-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>리밸런싱 확인</h2>
+        </div>
+        <div className="modal-body">
+          <p>정말 리밸런싱을 실행하시겠습니까?</p>
+          <p className="warning-text">
+            리밸런싱은 현재 포트폴리오를 AI가 결정한 목표 비중에 맞춰 자동으로 조정합니다.
+            실제 매매가 발생할 수 있습니다.
+          </p>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onCancel}>
+            취소
+          </button>
+          <button className="btn btn-primary" onClick={onConfirm}>
+            확인
+          </button>
         </div>
       </div>
     </div>
