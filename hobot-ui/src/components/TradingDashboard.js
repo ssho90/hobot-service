@@ -668,6 +668,48 @@ const AssetClassPerformance = ({ assetClassInfo }) => {
   );
 };
 
+// AI 분석 Rebalancing 비중 컴포넌트
+const AIRebalancingAllocation = ({ targetAllocation }) => {
+  const allocationItems = [
+    { label: '주식', value: targetAllocation.Stocks || 0, color: '#2196F3' },
+    { label: '채권', value: targetAllocation.Bonds || 0, color: '#FF9800' },
+    { label: '대체투자', value: targetAllocation.Alternatives || 0, color: '#FFC107' },
+    { label: '현금', value: targetAllocation.Cash || 0, color: '#4CAF50' }
+  ];
+
+  return (
+    <div className="ai-rebalancing-allocation">
+      <div className="allocation-bars">
+        {allocationItems.map((item, index) => (
+          <div key={index} className="allocation-bar-item">
+            <div className="allocation-bar-header">
+              <span className="allocation-bar-label">{item.label}</span>
+              <span className="allocation-bar-value">{item.value.toFixed(1)}%</span>
+            </div>
+            <div className="allocation-bar-container">
+              <div 
+                className="allocation-bar-fill"
+                style={{ 
+                  width: `${item.value}%`,
+                  backgroundColor: item.color
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="allocation-summary">
+        <div className="summary-item">
+          <span className="summary-label">총 비중:</span>
+          <span className="summary-value">
+            {allocationItems.reduce((sum, item) => sum + item.value, 0).toFixed(1)}%
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // 리밸런싱 차트 컴포넌트
 const RebalancingChart = ({ balance }) => {
   // 자산군별 정보에서 데이터 추출
