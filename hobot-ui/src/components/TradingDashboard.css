@@ -438,10 +438,17 @@
 
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 10px;
   padding: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 2px solid #e0e0e0;
+  background: #f9f9f9;
+}
+
+.btn-large {
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 /* 자산군 편집기 스타일 */

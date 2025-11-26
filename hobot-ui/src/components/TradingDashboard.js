@@ -908,51 +908,76 @@ const AssetClassDetailsModal = ({ onClose }) => {
     setSearchResults(prev => ({ ...prev, [key]: [] }));
   };
 
-  const handleSave = async (assetClass) => {
-    const items = editingItems[assetClass] || [];
+  // 모든 자산군을 한번에 저장
+  const handleSaveAll = async () => {
+    const assetClasses = ['stocks', 'bonds', 'alternatives', 'cash'];
+    const errors = [];
     
-    // 유효성 검사
-    if (items.length === 0) {
-      alert('최소 1개 이상의 종목이 필요합니다.');
-      return;
-    }
+    // 모든 자산군 유효성 검사
+    for (const assetClass of assetClasses) {
+      const items = editingItems[assetClass] || [];
+      
+      if (items.length === 0) {
+        const label = assetClassLabels[assetClass];
+        errors.push(`${label} 자산군에 최소 1개 이상의 종목이 필요합니다.`);
+        continue;
+      }
 
-    const totalWeight = items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0);
-    if (Math.abs(totalWeight - 1.0) > 0.01) {
-      alert(`비중 합계가 1.0이어야 합니다. (현재: ${totalWeight.toFixed(4)})`);
+      const totalWeight = items.reduce((sum, item) => sum + parseFloat(item.weight || 0), 0);
+      if (Math.abs(totalWeight - 1.0) > 0.01) {
+        const label = assetClassLabels[assetClass];
+        errors.push(`${label} 자산군의 비중 합계가 1.0이어야 합니다. (현재: ${totalWeight.toFixed(4)})`);
+      }
+    }
+    
+    if (errors.length > 0) {
+      alert(errors.join('\n'));
       return;
     }
 
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/macro-trading/asset-class-details', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          asset_class: assetClass,
-          items: items.map(item => ({
-            ticker: item.ticker || '',
-            name: item.name || (assetClass === 'cash' ? `${item.currency || 'KRW'} 현금` : ''),
-            weight: parseFloat(item.weight),
-            currency: assetClass === 'cash' ? (item.currency || 'KRW') : undefined
-          }))
-        })
+      const savePromises = assetClasses.map(assetClass => {
+        const items = editingItems[assetClass] || [];
+        return fetch('/api/macro-trading/asset-class-details', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            asset_class: assetClass,
+            items: items.map(item => ({
+              ticker: item.ticker || '',
+              name: item.name || (assetClass === 'cash' ? `${item.currency || 'KRW'} 현금` : ''),
+              weight: parseFloat(item.weight),
+              currency: assetClass === 'cash' ? (item.currency || 'KRW') : undefined
+            }))
+          })
+        });
       });
 
-      if (response.ok) {
-        alert('저장되었습니다. 다음 리밸런싱 시 반영됩니다.');
-        await fetchAssetClassDetails();
-      } else {
-        const error = await response.json();
-        alert(`저장 실패: ${error.detail || '알 수 없는 오류'}`);
+      const responses = await Promise.all(savePromises);
+      const failed = responses.filter(r => !r.ok);
+      
+      if (failed.length > 0) {
+        const errorMessages = await Promise.all(failed.map(r => r.json()));
+        alert(`일부 저장 실패:\n${errorMessages.map(e => e.detail || '알 수 없는 오류').join('\n')}`);
+        setSaving(false);
+        return;
+      }
+
+      // 저장 성공 시 확인 대화상자
+      const confirmed = window.confirm('저장되었습니다. 다음 리밸런싱 시 반영됩니다.\n확인을 누르면 화면이 새로고침됩니다.');
+      
+      if (confirmed) {
+        onClose();
+        // /dashboard?tab=trading-macro로 이동
+        window.location.href = '/dashboard?tab=trading-macro';
       }
     } catch (err) {
       alert(`저장 실패: ${err.message}`);
-    } finally {
       setSaving(false);
     }
   };
@@ -1131,17 +1156,21 @@ const AssetClassDetailsModal = ({ onClose }) => {
                   <div className="weight-summary">
                     총 비중: {((editingItems[assetClass] || []).reduce((sum, item) => sum + parseFloat(item.weight || 0), 0)).toFixed(4)}
                   </div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleSave(assetClass)}
-                    disabled={saving}
-                  >
-                    {saving ? '저장 중...' : '저장'}
-                  </button>
                 </div>
               </div>
             )
           ))}
+        </div>
+        
+        {/* 모달 하단 전체 저장 버튼 */}
+        <div className="modal-footer">
+          <button
+            className="btn btn-primary btn-large"
+            onClick={handleSaveAll}
+            disabled={saving}
+          >
+            {saving ? '저장 중...' : '모두 저장'}
+          </button>
         </div>
       </div>
     </div>
