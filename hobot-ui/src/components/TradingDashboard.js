@@ -48,35 +48,50 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
   const [isRebalancing, setIsRebalancing] = useState(false);
   const [targetAllocation, setTargetAllocation] = useState(null);
   const [rebalancingChanges, setRebalancingChanges] = useState(null);
+  const [assetClassDetails, setAssetClassDetails] = useState(null);
 
-  // AI 목표 비중 조회
+  // AI 목표 비중 및 자산군 상세 설정 조회
   useEffect(() => {
-    const fetchTargetAllocation = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/macro-trading/latest-strategy-decision');
-        if (response.ok) {
-          const result = await response.json();
+        // AI 목표 비중 조회
+        let targetAllocData = null;
+        const targetResponse = await fetch('/api/macro-trading/latest-strategy-decision');
+        if (targetResponse.ok) {
+          const result = await targetResponse.json();
           if (result.data) {
             setTargetAllocation(result.data);
-            
-            // 다음 리밸런싱 변경 사항 계산
-            if (balance && balance.status === 'success' && result.data.target_allocation) {
-              calculateRebalancingChanges(balance, result.data.target_allocation);
-            }
+            targetAllocData = result.data.target_allocation;
           }
         }
+
+        // 자산군 상세 설정 조회
+        let assetClassDetailsData = null;
+        const detailsResponse = await fetch('/api/macro-trading/asset-class-details');
+        if (detailsResponse.ok) {
+          const detailsResult = await detailsResponse.json();
+          if (detailsResult.data) {
+            setAssetClassDetails(detailsResult.data);
+            assetClassDetailsData = detailsResult.data;
+          }
+        }
+
+        // 다음 리밸런싱 변경 사항 계산
+        if (balance && balance.status === 'success' && targetAllocData) {
+          calculateRebalancingChanges(balance, targetAllocData, assetClassDetailsData);
+        }
       } catch (err) {
-        console.error('Error fetching target allocation:', err);
+        console.error('Error fetching data:', err);
       }
     };
     
     if (balance && balance.status === 'success') {
-      fetchTargetAllocation();
+      fetchData();
     }
   }, [balance]);
 
   // 리밸런싱 변경 사항 계산
-  const calculateRebalancingChanges = (currentBalance, targetAlloc) => {
+  const calculateRebalancingChanges = (currentBalance, targetAlloc, assetClassDetailsData) => {
     if (!currentBalance.asset_class_info) return;
     
     const totalAmount = currentBalance.total_eval_amount || 0;
@@ -114,16 +129,18 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
       const diff = targetAmount - currentAmount;
       const diffWeight = targetWeight - currentWeight;
       
-      if (Math.abs(diffWeight) > 0.1) { // 0.1% 이상 차이
-        changes.push({
-          assetClass: assetClassLabels[assetClass],
-          currentWeight: currentWeight.toFixed(2),
-          targetWeight: targetWeight.toFixed(2),
-          diffWeight: diffWeight > 0 ? `+${diffWeight.toFixed(2)}` : diffWeight.toFixed(2),
-          diffAmount: diff,
-          action: diff > 0 ? '매수' : '매도'
-        });
-      }
+      // 자산군 상세 설정에서 해당 자산군의 종목 목록 가져오기
+      const assetClassItems = assetClassDetailsData && assetClassDetailsData[assetClass] ? assetClassDetailsData[assetClass] : [];
+      
+      changes.push({
+        assetClass: assetClassLabels[assetClass],
+        currentWeight: currentWeight.toFixed(2),
+        targetWeight: targetWeight.toFixed(2),
+        diffWeight: diffWeight > 0 ? `+${diffWeight.toFixed(2)}` : diffWeight.toFixed(2),
+        diffAmount: diff,
+        action: diff > 0 ? '매수' : '매도',
+        items: assetClassItems // 자산군 상세 설정 종목 목록
+      });
     });
     
     setRebalancingChanges(changes);
@@ -136,86 +153,92 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         <HobotStatus platform="kis" />
       </div>
 
-      {/* 계좌 정보 카드 */}
-      <div className="card account-info-card-full">
-        <div className="card-header-with-actions">
-          <h2>계좌 정보</h2>
-          <div className="card-actions">
-            <button 
-              className="btn btn-secondary"
-              onClick={() => setShowAssetClassModal(true)}
-            >
-              자산군 상세 설정
-            </button>
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowRebalanceConfirm(true)}
-              disabled={isRebalancing}
-            >
-              {isRebalancing ? '리밸런싱 중...' : '수동 리밸런싱'}
-            </button>
+      {/* 계좌 정보 및 리밸런싱 차트 (나란히 배치) */}
+      <div className="account-rebalancing-container">
+        {/* 계좌 정보 (왼쪽 반) */}
+        <div className="card account-info-card">
+          <div className="card-header-with-actions">
+            <h2>계좌 정보</h2>
+            <div className="card-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setShowAssetClassModal(true)}
+              >
+                자산군 상세 설정
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowRebalanceConfirm(true)}
+                disabled={isRebalancing}
+              >
+                {isRebalancing ? '리밸런싱 중...' : '수동 리밸런싱'}
+              </button>
+            </div>
           </div>
+          
+          {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
+          {error && <div className="error">오류: {error}</div>}
+          
+          {!loading && !error && balance && balance.status === 'success' && (
+            <>
+              {/* 기본 계좌 정보 */}
+              <div className="account-info-summary">
+                <div className="info-row">
+                  <span className="info-label">계좌번호:</span>
+                  <span className="info-value">{balance.account_no}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">총 평가금액:</span>
+                  <span className="info-value">
+                    {balance.total_eval_amount?.toLocaleString('ko-KR')} 원
+                  </span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">현금 잔액:</span>
+                  <span className="info-value">
+                    {balance.cash_balance?.toLocaleString('ko-KR')} 원
+                  </span>
+                </div>
+              </div>
+
+              {/* 현재 리밸런싱 대상 자산 테이블 */}
+              <div className="rebalancing-target-assets">
+                <h3>현재 리밸런싱 대상 자산</h3>
+                <RebalancingTargetAssetsTable balance={balance} />
+              </div>
+            </>
+          )}
+          
+          {!loading && !error && (!balance || balance.status !== 'success') && (
+            <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
+          )}
         </div>
-        
-        {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
-        {error && <div className="error">오류: {error}</div>}
-        
-        {!loading && !error && balance && balance.status === 'success' && (
-          <>
-            {/* 기본 계좌 정보 */}
-            <div className="account-info-summary">
-              <div className="info-row">
-                <span className="info-label">계좌번호:</span>
-                <span className="info-value">{balance.account_no}</span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">총 평가금액:</span>
-                <span className="info-value">
-                  {balance.total_eval_amount?.toLocaleString('ko-KR')} 원
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">현금 잔액:</span>
-                <span className="info-value">
-                  {balance.cash_balance?.toLocaleString('ko-KR')} 원
-                </span>
-              </div>
-            </div>
 
-            {/* 현재 리밸런싱 대상 자산 테이블 */}
-            <div className="rebalancing-target-assets">
-              <h3>현재 리밸런싱 대상 자산</h3>
-              <RebalancingTargetAssetsTable balance={balance} />
-            </div>
-
-            {/* 다음 리밸런싱 시 변경될 자산 목록 */}
-            <div className="next-rebalancing-changes">
-              <h3>다음 리밸런싱 시 변경될 자산 목록</h3>
-              <RebalancingChangesList 
-                changes={rebalancingChanges}
-                targetAllocation={targetAllocation}
-              />
-            </div>
-          </>
-        )}
-        
-        {!loading && !error && (!balance || balance.status !== 'success') && (
-          <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
-        )}
+        {/* 리밸런싱 차트 (오른쪽 반) */}
+        <div className="card rebalancing-chart-card">
+          <h2>리밸런싱 상태</h2>
+          {loading && <div className="loading">데이터를 불러오는 중...</div>}
+          {error && <div className="error">오류: {error}</div>}
+          {!loading && !error && balance && balance.status === 'success' && (
+            <RebalancingChart balance={balance} />
+          )}
+          {!loading && !error && (!balance || balance.status !== 'success') && (
+            <div className="no-data">데이터를 불러올 수 없습니다.</div>
+          )}
+        </div>
       </div>
 
-      {/* 리밸런싱 차트 */}
-      <div className="card rebalancing-chart-card">
-        <h2>리밸런싱 상태</h2>
-        {loading && <div className="loading">데이터를 불러오는 중...</div>}
-        {error && <div className="error">오류: {error}</div>}
-        {!loading && !error && balance && balance.status === 'success' && (
-          <RebalancingChart balance={balance} />
-        )}
-        {!loading && !error && (!balance || balance.status !== 'success') && (
-          <div className="no-data">데이터를 불러올 수 없습니다.</div>
-        )}
-      </div>
+      {/* 다음 리밸런싱 시 변경될 자산 목록 (전체 너비) */}
+      {!loading && !error && balance && balance.status === 'success' && (
+        <div className="card next-rebalancing-changes-card">
+          <h2>다음 리밸런싱 시 변경될 자산 목록</h2>
+          <RebalancingChangesList 
+            changes={rebalancingChanges}
+            targetAllocation={targetAllocation}
+            assetClassDetails={assetClassDetails}
+          />
+        </div>
+      )}
 
       {/* 자산군별 수익률 */}
       {balance && balance.status === 'success' && balance.asset_class_info && (
@@ -411,21 +434,55 @@ const RebalancingTargetAssetsTable = ({ balance }) => {
 };
 
 // 다음 리밸런싱 변경 사항 목록 컴포넌트
-const RebalancingChangesList = ({ changes, targetAllocation }) => {
+const RebalancingChangesList = ({ changes, targetAllocation, assetClassDetails }) => {
   if (!changes || changes.length === 0) {
     return (
       <div className="rebalancing-changes-empty">
         <p>현재 목표 비중과 일치합니다. 변경 사항이 없습니다.</p>
-        {targetAllocation && (
+        {(targetAllocation || assetClassDetails) && (
           <div className="target-allocation-info">
-            <p><strong>현재 목표 비중:</strong></p>
-            <ul>
-              {Object.entries(targetAllocation.target_allocation || {}).map(([key, value]) => (
-                <li key={key}>
-                  {key}: {typeof value === 'number' ? `${value.toFixed(2)}%` : value}
-                </li>
-              ))}
-            </ul>
+            {targetAllocation && targetAllocation.target_allocation && (
+              <div className="ai-allocation-section">
+                <p><strong>AI 분석 목표 비중:</strong></p>
+                <ul>
+                  {Object.entries(targetAllocation.target_allocation).map(([key, value]) => (
+                    <li key={key}>
+                      {key}: {typeof value === 'number' ? `${value.toFixed(2)}%` : value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {assetClassDetails && (
+              <div className="user-settings-section">
+                <p><strong>사용자 설정 (자산군 상세 설정):</strong></p>
+                {Object.keys(assetClassDetails).map(assetClass => {
+                  const items = assetClassDetails[assetClass] || [];
+                  if (items.length === 0) return null;
+                  
+                  const assetClassLabels = {
+                    stocks: '주식',
+                    bonds: '채권',
+                    alternatives: '대체투자',
+                    cash: '현금'
+                  };
+                  
+                  return (
+                    <div key={assetClass} className="asset-class-detail">
+                      <p><strong>{assetClassLabels[assetClass]}:</strong></p>
+                      <ul>
+                        {items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.name} ({item.ticker}) - 비중: {(item.weight * 100).toFixed(2)}%
+                            {item.currency && ` [${item.currency}]`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -434,6 +491,54 @@ const RebalancingChangesList = ({ changes, targetAllocation }) => {
 
   return (
     <div className="rebalancing-changes-list">
+      {/* AI 목표 비중 및 사용자 설정 정보 */}
+      <div className="rebalancing-info-sections">
+        {targetAllocation && targetAllocation.target_allocation && (
+          <div className="info-section">
+            <h4>AI 분석 목표 비중</h4>
+            <div className="allocation-grid">
+              {Object.entries(targetAllocation.target_allocation).map(([key, value]) => (
+                <div key={key} className="allocation-item">
+                  <span className="allocation-label">{key}:</span>
+                  <span className="allocation-value">{typeof value === 'number' ? `${value.toFixed(2)}%` : value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {assetClassDetails && (
+          <div className="info-section">
+            <h4>사용자 설정 (자산군 상세 설정)</h4>
+            {Object.keys(assetClassDetails).map(assetClass => {
+              const items = assetClassDetails[assetClass] || [];
+              if (items.length === 0) return null;
+              
+              const assetClassLabels = {
+                stocks: '주식',
+                bonds: '채권',
+                alternatives: '대체투자',
+                cash: '현금'
+              };
+              
+              return (
+                <div key={assetClass} className="asset-class-detail">
+                  <strong>{assetClassLabels[assetClass]}:</strong>
+                  <ul>
+                    {items.map((item, idx) => (
+                      <li key={idx}>
+                        {item.name} ({item.ticker}) - {(item.weight * 100).toFixed(2)}%
+                        {item.currency && ` [${item.currency}]`}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 변경 사항 테이블 */}
       <table>
         <thead>
           <tr>
@@ -443,6 +548,7 @@ const RebalancingChangesList = ({ changes, targetAllocation }) => {
             <th>변경 비중</th>
             <th>변경 금액</th>
             <th>조치</th>
+            <th>설정된 종목</th>
           </tr>
         </thead>
         <tbody>
@@ -461,6 +567,19 @@ const RebalancingChangesList = ({ changes, targetAllocation }) => {
                 <span className={`action-badge ${change.action === '매수' ? 'buy' : 'sell'}`}>
                   {change.action}
                 </span>
+              </td>
+              <td>
+                {change.items && change.items.length > 0 ? (
+                  <div className="configured-items">
+                    {change.items.map((item, itemIdx) => (
+                      <span key={itemIdx} className="item-badge">
+                        {item.name} ({(item.weight * 100).toFixed(0)}%)
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="no-items">설정 없음</span>
+                )}
               </td>
             </tr>
           ))}
