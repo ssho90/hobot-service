@@ -679,14 +679,13 @@ async def get_ai_overview():
         import json
         
         with get_db_connection() as conn:
-            cursor = conn.cursor(dictionary=True)
+            cursor = conn.cursor()
             cursor.execute("""
                 SELECT 
                     id,
                     decision_date,
                     analysis_summary,
                     target_allocation,
-                    reasoning,
                     created_at
                 FROM ai_strategy_decisions
                 ORDER BY decision_date DESC
@@ -765,7 +764,7 @@ async def get_latest_strategy_decision():
         import json
         
         with get_db_connection() as conn:
-            cursor = conn.cursor(dictionary=True)
+            cursor = conn.cursor()
             cursor.execute("""
                 SELECT 
                     id,
