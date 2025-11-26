@@ -547,6 +547,16 @@ PYEOF
   
   # 우리 설정을 sites-available에 복사 (가이드 2단계 A)
   log_info "Creating nginx configuration in sites-available..."
+  
+  # 기존 설정이 있고 Certbot이 설정한 SSL 부분이 있으면 백업
+  CERTBOT_CONFIGURED=false
+  if [ -f "/etc/nginx/sites-available/hobot" ] && sudo grep -q "managed by Certbot" /etc/nginx/sites-available/hobot; then
+    log_info "Certbot SSL configuration detected, will preserve it..."
+    sudo cp /etc/nginx/sites-available/hobot /etc/nginx/sites-available/hobot.certbot-backup
+    CERTBOT_CONFIGURED=true
+  fi
+  
+  # 새 설정 파일 복사
   sudo cp "${DEPLOY_PATH}/.github/deploy/nginx.conf" /etc/nginx/sites-available/hobot
   sudo sed -i "s|/home/ec2-user/hobot-service|${DEPLOY_PATH}|g" /etc/nginx/sites-available/hobot
   
@@ -557,6 +567,18 @@ PYEOF
     sudo sed -i "s|server_name _;|server_name ${DOMAIN_NAME} www.${DOMAIN_NAME};|g" /etc/nginx/sites-available/hobot
   else
     log_info "No domain name provided, using default server_name (_)"
+  fi
+  
+  # Certbot이 이미 설정한 경우 SSL 설정 자동 복원
+  if [ "$CERTBOT_CONFIGURED" = true ] && command -v certbot &>/dev/null; then
+    log_info "Restoring Certbot SSL configuration using certbot..."
+    # Certbot의 --nginx 옵션을 사용하여 SSL 설정을 다시 적용 (기존 인증서 사용, non-interactive)
+    # --reinstall 옵션은 설정만 다시 적용하고 인증서는 갱신하지 않음
+    sudo certbot --nginx --reinstall --cert-name stockoverflow.org -d stockoverflow.org -d www.stockoverflow.org --non-interactive --keep-until-expiring 2>/dev/null && {
+      log_success "Certbot SSL configuration restored"
+    } || {
+      log_warn "Certbot reinstall failed, SSL may need manual configuration"
+    }
   fi
   
   sudo chmod 644 /etc/nginx/sites-available/hobot
