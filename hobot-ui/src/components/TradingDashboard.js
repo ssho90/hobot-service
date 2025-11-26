@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import HobotStatus from './HobotStatus';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import './TradingDashboard.css';
 
@@ -148,11 +147,6 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
 
   return (
     <div className="tab-content">
-      {/* API 연동 상태 */}
-      <div className="status-section">
-        <HobotStatus platform="kis" />
-      </div>
-
       {/* 계좌 정보 및 리밸런싱 차트 (나란히 배치) */}
       <div className="account-rebalancing-container">
         {/* 계좌 정보 (왼쪽 반) */}
