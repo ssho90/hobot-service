@@ -94,24 +94,54 @@ const FredIndicatorsTab = () => {
   // 장단기 금리차 데이터 로드
   useEffect(() => {
     const fetchYieldSpreadData = async () => {
+      const url = '/api/macro-trading/yield-curve-spread?days=365';
+      console.log('[MacroDashboard] Fetching yield spread data from:', url);
+      
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/macro-trading/yield-curve-spread?days=365');
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).catch((fetchError) => {
+          console.error('[MacroDashboard] Fetch error details:', {
+            name: fetchError.name,
+            message: fetchError.message,
+            stack: fetchError.stack,
+            cause: fetchError.cause,
+            type: fetchError.constructor.name,
+          });
+          throw fetchError;
+        });
+        
+        console.log('[MacroDashboard] Response received:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
+        
         if (!response.ok) {
           const errorText = await response.text();
+          console.error('[MacroDashboard] Error response body:', errorText);
           let errorData;
           try {
             errorData = JSON.parse(errorText);
           } catch {
-            errorData = { detail: `서버 오류 (${response.status})` };
+            errorData = { detail: `서버 오류 (${response.status} ${response.statusText})` };
           }
           throw new Error(errorData.detail || '데이터를 불러오는데 실패했습니다.');
         }
+        
         const data = await response.json();
+        console.log('[MacroDashboard] Data received:', { hasError: !!data.error, dataKeys: Object.keys(data) });
         
         if (data.error) {
           const errorMsg = data.error.message || '데이터를 불러오는 중 오류가 발생했습니다.';
+          console.error('[MacroDashboard] Data contains error:', data.error);
           setError(errorMsg);
           if (data.spread_data && data.spread_data.length > 0) {
             setYieldSpreadData(data);
@@ -123,13 +153,23 @@ const FredIndicatorsTab = () => {
           setError(null);
         }
       } catch (err) {
+        console.error('[MacroDashboard] Full error object:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause,
+          type: err.constructor.name,
+          toString: err.toString(),
+        });
+        
         // 네트워크 에러인 경우
-        if (err.name === 'TypeError' && err.message.includes('fetch')) {
-          setError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.');
+        if (err.name === 'TypeError' && (err.message.includes('fetch') || err.message.includes('Failed to fetch'))) {
+          const errorMsg = '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요. (프록시 설정: http://localhost:8991)';
+          console.error('[MacroDashboard] Network error - 프록시 또는 백엔드 서버 연결 실패');
+          setError(errorMsg);
         } else {
           setError(err.message || '데이터를 불러오는데 실패했습니다.');
         }
-        console.error('Error fetching yield spread data:', err);
       } finally {
         setLoading(false);
       }
@@ -441,30 +481,65 @@ const EconomicNewsTab = () => {
 
   useEffect(() => {
     const fetchNews = async () => {
+      const url = `/api/macro-trading/economic-news?hours=${hours}`;
+      console.log('[EconomicNewsTab] Fetching news from:', url);
+      
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/macro-trading/economic-news?hours=${hours}`);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).catch((fetchError) => {
+          console.error('[EconomicNewsTab] Fetch error details:', {
+            name: fetchError.name,
+            message: fetchError.message,
+            stack: fetchError.stack,
+            cause: fetchError.cause,
+            type: fetchError.constructor.name,
+          });
+          throw fetchError;
+        });
+        
+        console.log('[EconomicNewsTab] Response received:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+        });
+        
         if (!response.ok) {
           const errorText = await response.text();
+          console.error('[EconomicNewsTab] Error response body:', errorText);
           let errorData;
           try {
             errorData = JSON.parse(errorText);
           } catch {
-            errorData = { detail: `서버 오류 (${response.status})` };
+            errorData = { detail: `서버 오류 (${response.status} ${response.statusText})` };
           }
           throw new Error(errorData.detail || '뉴스를 불러오는데 실패했습니다.');
         }
         const data = await response.json();
+        console.log('[EconomicNewsTab] Data received:', { newsCount: data.news?.length || 0 });
         setNews(data.news || []);
       } catch (err) {
+        console.error('[EconomicNewsTab] Full error object:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause,
+          type: err.constructor.name,
+          toString: err.toString(),
+        });
+        
         // 네트워크 에러인 경우
-        if (err.name === 'TypeError' && err.message.includes('fetch')) {
-          setError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.');
+        if (err.name === 'TypeError' && (err.message.includes('fetch') || err.message.includes('Failed to fetch'))) {
+          console.error('[EconomicNewsTab] Network error - 프록시 또는 백엔드 서버 연결 실패');
+          setError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요. (프록시 설정: http://localhost:8991)');
         } else {
           setError(err.message || '뉴스를 불러오는데 실패했습니다.');
         }
-        console.error('Error fetching news:', err);
       } finally {
         setLoading(false);
       }
