@@ -442,12 +442,20 @@ const EconomicNewsTab = () => {
     fetchNews();
   }, [hours]);
 
-  // 필터링된 뉴스
-  const filteredNews = news.filter(item => {
-    if (filterCountry && item.country !== filterCountry) return false;
-    if (filterCategory && item.category !== filterCategory) return false;
-    return true;
-  });
+  // 필터링된 뉴스 (published_at 기준 최신순 정렬)
+  const filteredNews = news
+    .filter(item => {
+      if (filterCountry && item.country !== filterCountry) return false;
+      if (filterCategory && item.category !== filterCategory) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      // published_at 기준 최신순 정렬 (내림차순)
+      if (!a.published_at && !b.published_at) return 0;
+      if (!a.published_at) return 1;
+      if (!b.published_at) return -1;
+      return new Date(b.published_at) - new Date(a.published_at);
+    });
 
   // 국가 및 카테고리 목록
   const countries = [...new Set(news.map(item => item.country).filter(Boolean))].sort();
