@@ -147,6 +147,14 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
 
   return (
     <div className="tab-content">
+      {/* AI 분석 Rebalancing 비중 */}
+      {targetAllocation && targetAllocation.target_allocation && (
+        <div className="card ai-rebalancing-allocation-card">
+          <h2>AI 분석 Rebalancing 비중</h2>
+          <AIRebalancingAllocation targetAllocation={targetAllocation.target_allocation} />
+        </div>
+      )}
+
       {/* 계좌 정보 및 리밸런싱 차트 (나란히 배치) */}
       <div className="account-rebalancing-container">
         {/* 계좌 정보 (왼쪽 반) */}

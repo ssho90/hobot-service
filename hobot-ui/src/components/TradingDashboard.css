@@ -837,6 +837,84 @@
   font-weight: 600;
 }
 
+/* AI 분석 Rebalancing 비중 */
+.ai-rebalancing-allocation-card {
+  margin-bottom: 20px;
+}
+
+.ai-rebalancing-allocation {
+  padding: 20px;
+}
+
+.allocation-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.allocation-bar-item {
+  width: 100%;
+}
+
+.allocation-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.allocation-bar-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.allocation-bar-value {
+  font-weight: 600;
+  color: #2196F3;
+  font-size: 16px;
+}
+
+.allocation-bar-container {
+  width: 100%;
+  height: 24px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.allocation-bar-fill {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.allocation-summary {
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 10px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.summary-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
 .action-badge.buy {
   background: #e3f2fd;
   color: #1976d2;

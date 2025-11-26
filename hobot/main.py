@@ -671,6 +671,92 @@ async def search_stocks(
         logging.error(f"Error searching stocks: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/macro-trading/overview")
+async def get_ai_overview():
+    """AI 분석 Overview 조회"""
+    try:
+        from service.database.db import get_db_connection
+        import json
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT 
+                    id,
+                    decision_date,
+                    analysis_summary,
+                    target_allocation,
+                    reasoning,
+                    created_at
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT 1
+            """)
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                return {
+                    "status": "success",
+                    "data": None,
+                    "message": "AI 분석 결과가 아직 없습니다."
+                }
+            
+            # JSON 필드 파싱
+            target_allocation = row['target_allocation']
+            if isinstance(target_allocation, str):
+                target_allocation = json.loads(target_allocation)
+            
+            # analysis_summary에서 reasoning 추출 (판단 근거: 이후 텍스트)
+            analysis_summary = row['analysis_summary'] or ''
+            reasoning = ''
+            if '판단 근거:' in analysis_summary:
+                parts = analysis_summary.split('판단 근거:')
+                if len(parts) > 1:
+                    reasoning = parts[1].strip()
+                    analysis_summary = parts[0].strip()
+            
+            return {
+                "status": "success",
+                "data": {
+                    "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
+                    "analysis_summary": analysis_summary,
+                    "reasoning": reasoning,
+                    "target_allocation": target_allocation,
+                    "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
+                }
+            }
+            
+    except Exception as e:
+        logging.error(f"Error getting AI overview: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/macro-trading/run-ai-analysis")
+async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
+    """수동 AI 분석 실행 (Admin 전용)"""
+    try:
+        from service.macro_trading.ai_strategist import run_ai_analysis
+        
+        logging.info(f"수동 AI 분석 실행 요청: {admin_user.get('username')}")
+        
+        success = run_ai_analysis()
+        
+        if success:
+            return {
+                "status": "success",
+                "message": "AI 분석이 완료되었습니다."
+            }
+        else:
+            raise HTTPException(status_code=500, detail="AI 분석 실행에 실패했습니다.")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error running AI analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/macro-trading/latest-strategy-decision")
 async def get_latest_strategy_decision():
     """최신 AI 전략 결정 조회"""
@@ -679,7 +765,7 @@ async def get_latest_strategy_decision():
         import json
         
         with get_db_connection() as conn:
-            cursor = conn.cursor()
+            cursor = conn.cursor(dictionary=True)
             cursor.execute("""
                 SELECT 
                     id,

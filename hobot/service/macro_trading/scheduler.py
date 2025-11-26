@@ -13,6 +13,7 @@ from service.macro_trading.collectors.fred_collector import get_fred_collector
 from service.macro_trading.collectors.news_collector import get_news_collector
 from service.macro_trading.config.config_loader import get_config
 from service.macro_trading.kis.stock_collector import collect_all_stock_tickers
+from service.macro_trading.ai_strategist import run_ai_analysis
 
 logger = logging.getLogger(__name__)
 
@@ -304,6 +305,40 @@ def setup_stock_ticker_scheduler():
         raise
 
 
+@retry_on_failure(max_retries=3, delay=60)
+def run_ai_strategy_analysis():
+    """
+    AI 전략 분석을 실행합니다.
+    매일 08:30에 실행되도록 스케줄에 등록됩니다.
+    """
+    try:
+        logger.info("AI 전략 분석 실행 시작")
+        success = run_ai_analysis()
+        if success:
+            logger.info("AI 전략 분석 완료")
+        else:
+            logger.error("AI 전략 분석 실패")
+        return success
+    except Exception as e:
+        logger.error(f"AI 전략 분석 중 오류 발생: {e}", exc_info=True)
+        raise
+
+
+def setup_ai_analysis_scheduler():
+    """
+    AI 전략 분석 스케줄을 설정합니다.
+    매일 08:30에 실행되도록 등록합니다.
+    """
+    try:
+        # 매일 08:30에 실행
+        schedule.every().day.at("08:30").do(run_ai_strategy_analysis).tag('ai_analysis')
+        logger.info("AI 전략 분석 스케줄 등록: 매일 08:30 KST")
+        
+    except Exception as e:
+        logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
 def start_fred_scheduler_thread():
     """
     FRED 데이터 수집 스케줄러를 별도 스레드에서 시작합니다.
@@ -380,6 +415,12 @@ def start_all_schedulers():
         logger.info("종목 정보 수집 스케줄 설정 완료")
     except Exception as e:
         logger.error(f"종목 정보 수집 스케줄 설정 실패: {e}")
+    
+    try:
+        setup_ai_analysis_scheduler()
+        logger.info("AI 전략 분석 스케줄 설정 완료")
+    except Exception as e:
+        logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}")
     
     # 하나의 통합 스케줄러 스레드에서 모든 스케줄 실행
     try:

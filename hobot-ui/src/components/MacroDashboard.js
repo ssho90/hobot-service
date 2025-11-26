@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAuth } from '../context/AuthContext';
 import './MacroDashboard.css';
 import './MacroMonitoring.css';
 
@@ -9,32 +10,94 @@ const MacroDashboard = () => {
   const [overviewData, setOverviewData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const { isAdmin, getAuthHeaders } = useAuth();
 
-  // Overview 데이터 로드 (API는 추후 구현)
+  // Overview 데이터 로드
+  const fetchOverview = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/macro-trading/overview');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === 'success' && result.data) {
+          setOverviewData(result.data);
+        } else {
+          setOverviewData(null);
+        }
+      } else {
+        throw new Error('AI 분석 데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching overview:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // TODO: LLM 분석 결과 API 호출
-    // const fetchOverview = async () => {
-    //   setLoading(true);
-    //   try {
-    //     const response = await fetch('/api/macro-trading/overview');
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       setOverviewData(data);
-    //     }
-    //   } catch (err) {
-    //     setError(err.message);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchOverview();
+    fetchOverview();
   }, []);
+
+  // 수동 AI 분석 실행
+  const handleManualUpdate = async () => {
+    if (!isAdmin()) {
+      alert('관리자만 사용할 수 있는 기능입니다.');
+      return;
+    }
+
+    setUpdating(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/macro-trading/run-ai-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === 'success') {
+          alert('AI 분석이 완료되었습니다. 결과를 불러오는 중...');
+          // 분석 완료 후 데이터 다시 로드
+          await fetchOverview();
+        } else {
+          throw new Error(result.message || 'AI 분석 실행에 실패했습니다.');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: '알 수 없는 오류' }));
+        throw new Error(errorData.detail || 'AI 분석 실행에 실패했습니다.');
+      }
+    } catch (err) {
+      setError(err.message);
+      alert(`오류: ${err.message}`);
+      console.error('Error running AI analysis:', err);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <div className="macro-dashboard">
       {/* Overview 섹션 (항상 표시) */}
       <div className="overview-section">
-        <h2>overview</h2>
+        <div className="overview-header-section">
+          <h2>overview</h2>
+          {isAdmin() && (
+            <button
+              className="btn btn-primary btn-update"
+              onClick={handleManualUpdate}
+              disabled={updating || loading}
+            >
+              {updating ? '분석 중...' : '수동 업데이트'}
+            </button>
+          )}
+        </div>
         <div className="card overview-card">
           {loading && <div className="loading">분석 중...</div>}
           {error && <div className="error">오류: {error}</div>}
@@ -45,10 +108,47 @@ const MacroDashboard = () => {
           )}
           {overviewData && (
             <div className="overview-content">
-              <div className="analysis-result">
-                {/* LLM 분석 결과 표시 */}
-                <pre>{JSON.stringify(overviewData, null, 2)}</pre>
+              <div className="overview-header">
+                <div className="overview-date">
+                  분석 일시: {overviewData.decision_date || overviewData.created_at}
+                </div>
               </div>
+              
+              <div className="analysis-summary">
+                <h3>분석 요약</h3>
+                <p>{overviewData.analysis_summary}</p>
+              </div>
+              
+              {overviewData.reasoning && (
+                <div className="analysis-reasoning">
+                  <h3>판단 근거</h3>
+                  <p>{overviewData.reasoning}</p>
+                </div>
+              )}
+              
+              {overviewData.target_allocation && (
+                <div className="target-allocation">
+                  <h3>목표 자산 배분</h3>
+                  <div className="allocation-grid">
+                    <div className="allocation-item">
+                      <span className="allocation-label">주식</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Stocks?.toFixed(1) || 0}%</span>
+                    </div>
+                    <div className="allocation-item">
+                      <span className="allocation-label">채권</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Bonds?.toFixed(1) || 0}%</span>
+                    </div>
+                    <div className="allocation-item">
+                      <span className="allocation-label">대체투자</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Alternatives?.toFixed(1) || 0}%</span>
+                    </div>
+                    <div className="allocation-item">
+                      <span className="allocation-label">현금</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Cash?.toFixed(1) || 0}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
