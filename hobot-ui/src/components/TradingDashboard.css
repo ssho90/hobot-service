@@ -351,13 +351,19 @@
   border-radius: 8px;
   padding: 0;
   max-width: 90%;
-  max-height: 90vh;
-  overflow: auto;
+  width: auto;
+  height: auto;
+  max-height: 95vh;
+  overflow: visible;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
 }
 
 .asset-class-modal {
   width: 800px;
+  min-width: 600px;
+  max-width: 90vw;
 }
 
 .confirm-modal {
@@ -424,6 +430,10 @@
 
 .modal-body {
   padding: 20px;
+  overflow: visible;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-footer {
@@ -439,6 +449,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-height: 0;
+  overflow: visible;
 }
 
 .editor-header {
@@ -456,6 +468,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: visible;
+  max-height: none;
 }
 
 .item-row {
@@ -467,10 +481,35 @@
   border-radius: 4px;
 }
 
+.input-currency {
+  width: 120px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.input-ticker:disabled,
+.input-name:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
 .input-ticker {
   width: 120px;
   padding: 8px;
   border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.cash-item-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: #f5f5f5;
   border-radius: 4px;
 }
 
@@ -544,6 +583,18 @@
   align-items: center;
   padding-top: 15px;
   border-top: 1px solid #e0e0e0;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.editor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .weight-summary {
@@ -614,5 +665,161 @@
   color: #f44336;
   font-size: 14px;
   margin-top: 10px;
+}
+
+/* 계좌 정보 전체 카드 */
+.account-info-card-full {
+  width: 100%;
+}
+
+.account-info-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+/* 현재 리밸런싱 대상 자산 테이블 */
+.rebalancing-target-assets {
+  margin-bottom: 30px;
+}
+
+.rebalancing-target-assets h3 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+}
+
+.rebalancing-target-table {
+  overflow-x: auto;
+}
+
+.rebalancing-target-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.rebalancing-target-table th,
+.rebalancing-target-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+
+.rebalancing-target-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.rebalancing-target-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.rebalancing-target-table .positive {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.rebalancing-target-table .negative {
+  color: #f44336;
+  font-weight: 500;
+}
+
+/* 다음 리밸런싱 변경 사항 */
+.next-rebalancing-changes {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.next-rebalancing-changes h3 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+}
+
+.rebalancing-changes-empty {
+  padding: 30px;
+  text-align: center;
+  background: #f5f5f5;
+  border-radius: 4px;
+  color: #666;
+}
+
+.rebalancing-changes-empty p {
+  margin: 10px 0;
+}
+
+.target-allocation-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.target-allocation-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+}
+
+.target-allocation-info li {
+  padding: 5px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.rebalancing-changes-list {
+  overflow-x: auto;
+}
+
+.rebalancing-changes-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.rebalancing-changes-list th,
+.rebalancing-changes-list td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+
+.rebalancing-changes-list th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.rebalancing-changes-list tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.action-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.action-badge.buy {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.action-badge.sell {
+  background: #ffebee;
+  color: #c62828;
 }
 

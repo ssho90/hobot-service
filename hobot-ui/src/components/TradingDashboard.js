@@ -46,6 +46,88 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
   const [showAssetClassModal, setShowAssetClassModal] = useState(false);
   const [showRebalanceConfirm, setShowRebalanceConfirm] = useState(false);
   const [isRebalancing, setIsRebalancing] = useState(false);
+  const [targetAllocation, setTargetAllocation] = useState(null);
+  const [rebalancingChanges, setRebalancingChanges] = useState(null);
+
+  // AI 목표 비중 조회
+  useEffect(() => {
+    const fetchTargetAllocation = async () => {
+      try {
+        const response = await fetch('/api/macro-trading/latest-strategy-decision');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            setTargetAllocation(result.data);
+            
+            // 다음 리밸런싱 변경 사항 계산
+            if (balance && balance.status === 'success' && result.data.target_allocation) {
+              calculateRebalancingChanges(balance, result.data.target_allocation);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching target allocation:', err);
+      }
+    };
+    
+    if (balance && balance.status === 'success') {
+      fetchTargetAllocation();
+    }
+  }, [balance]);
+
+  // 리밸런싱 변경 사항 계산
+  const calculateRebalancingChanges = (currentBalance, targetAlloc) => {
+    if (!currentBalance.asset_class_info) return;
+    
+    const totalAmount = currentBalance.total_eval_amount || 0;
+    const changes = [];
+    
+    // 자산군별 목표 비중과 현재 비중 비교
+    const assetClassLabels = {
+      stocks: '주식',
+      bonds: '채권',
+      alternatives: '대체투자',
+      cash: '현금'
+    };
+    
+    Object.keys(assetClassLabels).forEach(assetClass => {
+      const currentInfo = currentBalance.asset_class_info[assetClass];
+      const currentAmount = currentInfo?.total_eval_amount || 0;
+      const currentWeight = totalAmount > 0 ? (currentAmount / totalAmount) * 100 : 0;
+      
+      // 목표 비중 (AI 결정 또는 기본값)
+      // AI 결정은 Stocks, Bonds_US_Long, Bonds_KR_Short, Alternatives, Cash 형식일 수 있음
+      let targetWeight = 0;
+      if (targetAlloc[assetClass]) {
+        targetWeight = targetAlloc[assetClass];
+      } else if (assetClass === 'stocks' && targetAlloc['Stocks']) {
+        targetWeight = targetAlloc['Stocks'];
+      } else if (assetClass === 'bonds') {
+        // 채권은 US_Long과 KR_Short의 합
+        targetWeight = (targetAlloc['Bonds_US_Long'] || 0) + (targetAlloc['Bonds_KR_Short'] || 0);
+      } else if (assetClass === 'alternatives' && targetAlloc['Alternatives']) {
+        targetWeight = targetAlloc['Alternatives'];
+      } else if (assetClass === 'cash' && targetAlloc['Cash']) {
+        targetWeight = targetAlloc['Cash'];
+      }
+      const targetAmount = (totalAmount * targetWeight) / 100;
+      const diff = targetAmount - currentAmount;
+      const diffWeight = targetWeight - currentWeight;
+      
+      if (Math.abs(diffWeight) > 0.1) { // 0.1% 이상 차이
+        changes.push({
+          assetClass: assetClassLabels[assetClass],
+          currentWeight: currentWeight.toFixed(2),
+          targetWeight: targetWeight.toFixed(2),
+          diffWeight: diffWeight > 0 ? `+${diffWeight.toFixed(2)}` : diffWeight.toFixed(2),
+          diffAmount: diff,
+          action: diff > 0 ? '매수' : '매도'
+        });
+      }
+    });
+    
+    setRebalancingChanges(changes);
+  };
 
   return (
     <div className="tab-content">
@@ -54,32 +136,34 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         <HobotStatus platform="kis" />
       </div>
 
-      {/* 계좌 정보 및 리밸런싱 차트 */}
-      <div className="account-rebalancing-container">
-        {/* 계좌 정보 (왼쪽 반) */}
-        <div className="card account-info-card">
-          <div className="card-header-with-actions">
-            <h2>계좌 정보</h2>
-            <div className="card-actions">
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setShowAssetClassModal(true)}
-              >
-                자산군 상세 설정
-              </button>
-              <button 
-                className="btn btn-primary"
-                onClick={() => setShowRebalanceConfirm(true)}
-                disabled={isRebalancing}
-              >
-                {isRebalancing ? '리밸런싱 중...' : '수동 리밸런싱'}
-              </button>
-            </div>
+      {/* 계좌 정보 카드 */}
+      <div className="card account-info-card-full">
+        <div className="card-header-with-actions">
+          <h2>계좌 정보</h2>
+          <div className="card-actions">
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setShowAssetClassModal(true)}
+            >
+              자산군 상세 설정
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={() => setShowRebalanceConfirm(true)}
+              disabled={isRebalancing}
+            >
+              {isRebalancing ? '리밸런싱 중...' : '수동 리밸런싱'}
+            </button>
           </div>
-          {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
-          {error && <div className="error">오류: {error}</div>}
-          {!loading && !error && balance && balance.status === 'success' && (
-            <div className="account-info">
+        </div>
+        
+        {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
+        {error && <div className="error">오류: {error}</div>}
+        
+        {!loading && !error && balance && balance.status === 'success' && (
+          <>
+            {/* 기본 계좌 정보 */}
+            <div className="account-info-summary">
               <div className="info-row">
                 <span className="info-label">계좌번호:</span>
                 <span className="info-value">{balance.account_no}</span>
@@ -96,33 +180,41 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
                   {balance.cash_balance?.toLocaleString('ko-KR')} 원
                 </span>
               </div>
-              {balance.target_ticker_current_price && (
-                <div className="info-row">
-                  <span className="info-label">대상 종목 현재가 ({balance.target_ticker_name}):</span>
-                  <span className="info-value">
-                    {balance.target_ticker_current_price?.toLocaleString('ko-KR')} 원
-                  </span>
-                </div>
-              )}
             </div>
-          )}
-          {!loading && !error && (!balance || balance.status !== 'success') && (
-            <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
-          )}
-        </div>
 
-        {/* 리밸런싱 차트 (오른쪽 반) */}
-        <div className="card rebalancing-chart-card">
-          <h2>리밸런싱 상태</h2>
-          {loading && <div className="loading">데이터를 불러오는 중...</div>}
-          {error && <div className="error">오류: {error}</div>}
-          {!loading && !error && balance && balance.status === 'success' && (
-            <RebalancingChart balance={balance} />
-          )}
-          {!loading && !error && (!balance || balance.status !== 'success') && (
-            <div className="no-data">데이터를 불러올 수 없습니다.</div>
-          )}
-        </div>
+            {/* 현재 리밸런싱 대상 자산 테이블 */}
+            <div className="rebalancing-target-assets">
+              <h3>현재 리밸런싱 대상 자산</h3>
+              <RebalancingTargetAssetsTable balance={balance} />
+            </div>
+
+            {/* 다음 리밸런싱 시 변경될 자산 목록 */}
+            <div className="next-rebalancing-changes">
+              <h3>다음 리밸런싱 시 변경될 자산 목록</h3>
+              <RebalancingChangesList 
+                changes={rebalancingChanges}
+                targetAllocation={targetAllocation}
+              />
+            </div>
+          </>
+        )}
+        
+        {!loading && !error && (!balance || balance.status !== 'success') && (
+          <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
+        )}
+      </div>
+
+      {/* 리밸런싱 차트 */}
+      <div className="card rebalancing-chart-card">
+        <h2>리밸런싱 상태</h2>
+        {loading && <div className="loading">데이터를 불러오는 중...</div>}
+        {error && <div className="error">오류: {error}</div>}
+        {!loading && !error && balance && balance.status === 'success' && (
+          <RebalancingChart balance={balance} />
+        )}
+        {!loading && !error && (!balance || balance.status !== 'success') && (
+          <div className="no-data">데이터를 불러올 수 없습니다.</div>
+        )}
       </div>
 
       {/* 자산군별 수익률 */}
@@ -214,6 +306,166 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         />
       )}
 
+    </div>
+  );
+};
+
+// 현재 리밸런싱 대상 자산 테이블 컴포넌트
+const RebalancingTargetAssetsTable = ({ balance }) => {
+  const assetClassLabels = {
+    stocks: '주식',
+    bonds: '채권',
+    alternatives: '대체투자',
+    cash: '현금'
+  };
+
+  // 자산군별로 보유 종목 그룹화
+  const groupedHoldings = {};
+  
+  if (balance.asset_class_info) {
+    Object.keys(assetClassLabels).forEach(assetClass => {
+      const info = balance.asset_class_info[assetClass];
+      if (info && info.holdings && info.holdings.length > 0) {
+        groupedHoldings[assetClass] = info.holdings.map(holding => ({
+          ...holding,
+          group: assetClassLabels[assetClass]
+        }));
+      }
+    });
+  }
+
+  // 현금 자산군 처리
+  if (balance.asset_class_info && balance.asset_class_info.cash) {
+    const cashInfo = balance.asset_class_info.cash;
+    if (cashInfo.total_eval_amount > 0) {
+      if (!groupedHoldings.cash) {
+        groupedHoldings.cash = [];
+      }
+      // 현금은 별도 항목으로 추가
+      if (balance.cash_balance > 0) {
+        groupedHoldings.cash.push({
+          stock_name: '원화 현금',
+          stock_code: 'CASH',
+          current_price: 1,
+          avg_buy_price: 1,
+          profit_loss_rate: 0,
+          eval_amount: balance.cash_balance,
+          quantity: balance.cash_balance,
+          group: '현금'
+        });
+      }
+    }
+  }
+
+  // 모든 종목을 평탄화하여 테이블에 표시
+  const allHoldings = [];
+  Object.keys(groupedHoldings).forEach(assetClass => {
+    allHoldings.push(...groupedHoldings[assetClass]);
+  });
+
+  if (allHoldings.length === 0) {
+    return <div className="no-data">보유 자산이 없습니다.</div>;
+  }
+
+  return (
+    <div className="rebalancing-target-table">
+      <table>
+        <thead>
+          <tr>
+            <th>그룹</th>
+            <th>종목명</th>
+            <th>현재가</th>
+            <th>매수가</th>
+            <th>수익률</th>
+            <th>수익금 (매수한 총 금액)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {allHoldings.map((holding, idx) => {
+            // 매수한 총 금액 = 평균매수가 * 수량
+            const totalBuyAmount = (holding.avg_buy_price || 0) * (holding.quantity || 0);
+            
+            return (
+              <tr key={idx}>
+                <td>{holding.group}</td>
+                <td>{holding.stock_name}</td>
+                <td>
+                  {holding.current_price ? `${holding.current_price.toLocaleString('ko-KR')} 원` : '-'}
+                </td>
+                <td>
+                  {holding.avg_buy_price ? `${holding.avg_buy_price.toLocaleString('ko-KR')} 원` : '-'}
+                </td>
+                <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
+                  {holding.profit_loss_rate !== undefined ? `${holding.profit_loss_rate.toFixed(2)}%` : '-'}
+                </td>
+                <td>
+                  {totalBuyAmount > 0 ? `${totalBuyAmount.toLocaleString('ko-KR')} 원` : '-'}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// 다음 리밸런싱 변경 사항 목록 컴포넌트
+const RebalancingChangesList = ({ changes, targetAllocation }) => {
+  if (!changes || changes.length === 0) {
+    return (
+      <div className="rebalancing-changes-empty">
+        <p>현재 목표 비중과 일치합니다. 변경 사항이 없습니다.</p>
+        {targetAllocation && (
+          <div className="target-allocation-info">
+            <p><strong>현재 목표 비중:</strong></p>
+            <ul>
+              {Object.entries(targetAllocation.target_allocation || {}).map(([key, value]) => (
+                <li key={key}>
+                  {key}: {typeof value === 'number' ? `${value.toFixed(2)}%` : value}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rebalancing-changes-list">
+      <table>
+        <thead>
+          <tr>
+            <th>자산군</th>
+            <th>현재 비중</th>
+            <th>목표 비중</th>
+            <th>변경 비중</th>
+            <th>변경 금액</th>
+            <th>조치</th>
+          </tr>
+        </thead>
+        <tbody>
+          {changes.map((change, idx) => (
+            <tr key={idx}>
+              <td>{change.assetClass}</td>
+              <td>{change.currentWeight}%</td>
+              <td>{change.targetWeight}%</td>
+              <td className={parseFloat(change.diffWeight) >= 0 ? 'positive' : 'negative'}>
+                {change.diffWeight}%
+              </td>
+              <td className={change.diffAmount >= 0 ? 'positive' : 'negative'}>
+                {change.diffAmount >= 0 ? '+' : ''}{change.diffAmount.toLocaleString('ko-KR')} 원
+              </td>
+              <td>
+                <span className={`action-badge ${change.action === '매수' ? 'buy' : 'sell'}`}>
+                  {change.action}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -443,7 +695,10 @@ const AssetClassDetailsModal = ({ onClose }) => {
         // 각 자산군별로 편집 가능한 상태 초기화
         const editing = {};
         Object.keys(data.data || {}).forEach(assetClass => {
-          editing[assetClass] = [...(data.data[assetClass] || [])];
+          editing[assetClass] = (data.data[assetClass] || []).map(item => ({
+            ...item,
+            currency: item.currency || (assetClass === 'cash' ? 'KRW' : undefined)
+          }));
         });
         setEditingItems(editing);
       }
@@ -455,11 +710,25 @@ const AssetClassDetailsModal = ({ onClose }) => {
   };
 
   const handleAddItem = (assetClass) => {
-    const newItem = { ticker: '', name: '', weight: 0 };
-    setEditingItems(prev => ({
-      ...prev,
-      [assetClass]: [...(prev[assetClass] || []), newItem]
-    }));
+    // 현금 자산군은 통화 선택이 필요
+    if (assetClass === 'cash') {
+      const newItem = { 
+        currency: 'KRW', 
+        ticker: '', 
+        name: '원화 현금', 
+        weight: 0 
+      };
+      setEditingItems(prev => ({
+        ...prev,
+        [assetClass]: [...(prev[assetClass] || []), newItem]
+      }));
+    } else {
+      const newItem = { ticker: '', name: '', weight: 0 };
+      setEditingItems(prev => ({
+        ...prev,
+        [assetClass]: [...(prev[assetClass] || []), newItem]
+      }));
+    }
   };
 
   const handleRemoveItem = (assetClass, index) => {
@@ -547,9 +816,10 @@ const AssetClassDetailsModal = ({ onClose }) => {
         body: JSON.stringify({
           asset_class: assetClass,
           items: items.map(item => ({
-            ticker: item.ticker,
-            name: item.name,
-            weight: parseFloat(item.weight)
+            ticker: item.ticker || '',
+            name: item.name || (assetClass === 'cash' ? `${item.currency || 'KRW'} 현금` : ''),
+            weight: parseFloat(item.weight),
+            currency: assetClass === 'cash' ? (item.currency || 'KRW') : undefined
           }))
         })
       });
@@ -608,7 +878,7 @@ const AssetClassDetailsModal = ({ onClose }) => {
                     className="btn btn-small"
                     onClick={() => handleAddItem(assetClass)}
                   >
-                    + 종목 추가
+                    + {assetClass === 'cash' ? '통화 추가' : '종목 추가'}
                   </button>
                 </div>
                 
@@ -616,6 +886,74 @@ const AssetClassDetailsModal = ({ onClose }) => {
                   {(editingItems[assetClass] || []).map((item, index) => {
                     const searchKey = `${assetClass}-${index}`;
                     const results = searchResults[searchKey] || [];
+                    
+                    // 현금 자산군은 통화 선택 UI
+                    if (assetClass === 'cash') {
+                      const handleCurrencyChange = (newCurrency) => {
+                        handleItemChange(assetClass, index, 'currency', newCurrency);
+                        // 통화 변경 시 자동으로 티커와 이름 설정
+                        if (newCurrency === 'USD') {
+                          // 달러 선택 시: KODEX 미국달러선물 ETF (138230) 자동 설정
+                          handleItemChange(assetClass, index, 'ticker', '138230');
+                          handleItemChange(assetClass, index, 'name', 'KODEX 미국달러선물');
+                        } else if (newCurrency === 'KRW') {
+                          // 원화 선택 시: 티커는 선택사항, 이름만 설정
+                          if (!item.ticker) {
+                            handleItemChange(assetClass, index, 'ticker', '');
+                          }
+                          if (!item.name) {
+                            handleItemChange(assetClass, index, 'name', '원화 현금');
+                          }
+                        }
+                      };
+                      
+                      return (
+                        <div key={index} className="item-row cash-item-row">
+                          <select
+                            className="input-currency"
+                            value={item.currency || 'KRW'}
+                            onChange={(e) => handleCurrencyChange(e.target.value)}
+                          >
+                            <option value="KRW">KRW (원화)</option>
+                            <option value="USD">USD (달러)</option>
+                          </select>
+                          <input
+                            type="text"
+                            placeholder={item.currency === 'USD' ? '티커 (자동: 138230)' : '티커 (선택사항)'}
+                            value={item.ticker || ''}
+                            onChange={(e) => handleItemChange(assetClass, index, 'ticker', e.target.value)}
+                            className="input-ticker"
+                            disabled={item.currency === 'USD'} // 달러 선택 시 티커 자동 설정으로 비활성화
+                          />
+                          <input
+                            type="text"
+                            placeholder={item.currency === 'USD' ? '이름 (자동: KODEX 미국달러선물)' : '이름 (예: 원화 현금)'}
+                            value={item.name || ''}
+                            onChange={(e) => handleItemChange(assetClass, index, 'name', e.target.value)}
+                            className="input-name"
+                            disabled={item.currency === 'USD'} // 달러 선택 시 이름 자동 설정으로 비활성화
+                          />
+                          <input
+                            type="number"
+                            placeholder="비중 (0-1)"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={item.weight || ''}
+                            onChange={(e) => handleItemChange(assetClass, index, 'weight', e.target.value)}
+                            className="input-weight"
+                          />
+                          <button
+                            className="btn btn-danger btn-small"
+                            onClick={() => handleRemoveItem(assetClass, index)}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      );
+                    }
+                    
+                    // 다른 자산군은 기존 UI
                     return (
                       <div key={index} className="item-row">
                         <input

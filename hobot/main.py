@@ -502,6 +502,7 @@ class AssetClassDetailItem(BaseModel):
     ticker: str
     name: str
     weight: float  # 0-1 사이 값
+    currency: Optional[str] = None  # 현금 자산군의 경우 통화 (KRW, USD)
 
 class AssetClassDetailsRequest(BaseModel):
     asset_class: str  # stocks, bonds, alternatives, cash
@@ -521,6 +522,7 @@ async def get_asset_class_details():
                     ticker,
                     name,
                     weight,
+                    currency,
                     is_active,
                     created_at,
                     updated_at
@@ -546,6 +548,7 @@ async def get_asset_class_details():
                         "ticker": row["ticker"],
                         "name": row["name"],
                         "weight": float(row["weight"]),
+                        "currency": row.get("currency"),
                         "is_active": bool(row["is_active"]),
                         "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None,
                         "updated_at": row["updated_at"].strftime("%Y-%m-%d %H:%M:%S") if row["updated_at"] else None
@@ -599,14 +602,15 @@ async def save_asset_class_details(
             for item in request.items:
                 cursor.execute("""
                     INSERT INTO asset_class_details 
-                    (asset_class, ticker, name, weight, is_active, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, TRUE, %s, %s)
+                    (asset_class, ticker, name, weight, currency, is_active, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, TRUE, %s, %s)
                     ON DUPLICATE KEY UPDATE
                         name = VALUES(name),
                         weight = VALUES(weight),
+                        currency = VALUES(currency),
                         is_active = TRUE,
                         updated_at = VALUES(updated_at)
-                """, (request.asset_class, item.ticker, item.name, item.weight, now, now))
+                """, (request.asset_class, item.ticker, item.name, item.weight, item.currency, now, now))
             
             conn.commit()
             
@@ -666,6 +670,78 @@ async def search_stocks(
     except Exception as e:
         logging.error(f"Error searching stocks: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/macro-trading/latest-strategy-decision")
+async def get_latest_strategy_decision():
+    """최신 AI 전략 결정 조회"""
+    try:
+        from service.database.db import get_db_connection
+        import json
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    id,
+                    decision_date,
+                    analysis_summary,
+                    target_allocation,
+                    quant_signals,
+                    qual_sentiment,
+                    account_pnl,
+                    created_at
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT 1
+            """)
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                return {
+                    "status": "success",
+                    "data": None,
+                    "message": "AI 전략 결정이 아직 없습니다."
+                }
+            
+            # JSON 필드 파싱
+            target_allocation = row['target_allocation']
+            if isinstance(target_allocation, str):
+                target_allocation = json.loads(target_allocation)
+            
+            quant_signals = row.get('quant_signals')
+            if quant_signals and isinstance(quant_signals, str):
+                quant_signals = json.loads(quant_signals)
+            
+            qual_sentiment = row.get('qual_sentiment')
+            if qual_sentiment and isinstance(qual_sentiment, str):
+                qual_sentiment = json.loads(qual_sentiment)
+            
+            account_pnl = row.get('account_pnl')
+            if account_pnl and isinstance(account_pnl, str):
+                account_pnl = json.loads(account_pnl)
+            
+            return {
+                "status": "success",
+                "data": {
+                    "id": row['id'],
+                    "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
+                    "analysis_summary": row.get('analysis_summary'),
+                    "target_allocation": target_allocation,
+                    "quant_signals": quant_signals,
+                    "qual_sentiment": qual_sentiment,
+                    "account_pnl": account_pnl,
+                    "created_at": row['created_at'].strftime("%Y-%m-%d %H:%M:%S") if row['created_at'] else None
+                }
+            }
+    except Exception as e:
+        logging.error(f"Error fetching latest strategy decision: {e}", exc_info=True)
+        # AI 전략 결정이 없어도 에러가 아닌 빈 응답 반환
+        return {
+            "status": "success",
+            "data": None,
+            "message": "AI 전략 결정을 조회할 수 없습니다."
+        }
 
 @api_router.get("/macro-trading/rebalancing-history")
 async def get_rebalancing_history(
