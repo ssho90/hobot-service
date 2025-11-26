@@ -235,3 +235,71 @@ class KISAPI:
             print(f"Error getting current price: {res.text}")
             return None
 
+    def search_stocks(self, keyword, market_type="J", limit=100):
+        """
+        종목명으로 종목 검색
+        
+        Args:
+            keyword: 검색 키워드 (종목명 일부)
+            market_type: 시장 구분 (J: 주식, ETF 등)
+            limit: 최대 검색 결과 수
+            
+        Returns:
+            List[Dict]: 검색 결과 리스트 [{"ticker": "005930", "stock_name": "삼성전자"}, ...]
+        """
+        time.sleep(0.1)
+        path = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+        url = f"{self.base_url}{path}"
+        headers = self._get_common_headers("CTCA0903R")
+        
+        # 종목 검색은 다른 API를 사용해야 할 수 있음
+        # KIS API 문서에 따라 수정 필요
+        # 일단 잔고 조회 API의 output1에서 종목명을 가져오는 방식으로 대체
+        # 또는 종목 마스터 데이터를 직접 조회
+        
+        # 임시: 잔고 조회를 통해 보유 종목 정보를 가져오는 방식
+        # 실제로는 종목 검색 전용 API를 사용해야 함
+        try:
+            # 종목 검색 API (CTCA0903R) 사용
+            params = {
+                "FID_COND_MRKT_DIV_CODE": market_type,
+                "FID_INPUT_ISCD": keyword,  # 키워드로 검색
+                "FID_INPUT_PRICE_1": "",
+                "FID_INPUT_PRICE_2": "",
+                "FID_VOL_CNT": "",
+                "FID_TRGT_CLS_CODE": "",
+                "FID_TRGT_EXLS_CLS_CODE": "",
+                "FID_INPUT_ISCD": keyword
+            }
+            
+            res = requests.get(url, headers=headers, params=params)
+            if res.status_code == 200:
+                data = res.json()
+                # API 응답 구조에 따라 파싱 필요
+                # 일단 빈 리스트 반환 (실제 API 구조 확인 후 수정)
+                return []
+            else:
+                print(f"Error searching stocks: {res.text}")
+                return []
+        except Exception as e:
+            print(f"Error in search_stocks: {e}")
+            return []
+
+    def get_all_stocks(self, market_type="J"):
+        """
+        모든 종목 목록 조회 (ETF 포함)
+        
+        Args:
+            market_type: 시장 구분 (J: 주식, ETF 등)
+            
+        Returns:
+            List[Dict]: 종목 리스트 [{"ticker": "005930", "stock_name": "삼성전자"}, ...]
+        """
+        # KIS API에는 전체 종목 목록을 한 번에 조회하는 API가 없을 수 있음
+        # 대신 잔고 조회나 다른 API를 통해 종목 정보를 수집해야 할 수 있음
+        # 또는 종목 마스터 파일을 다운로드하는 방식 사용
+        
+        # 임시 구현: 빈 리스트 반환
+        # 실제로는 KIS API 문서를 참고하여 구현 필요
+        return []
+

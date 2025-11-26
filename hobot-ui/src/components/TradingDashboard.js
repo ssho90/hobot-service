@@ -477,6 +477,49 @@ const AssetClassDetailsModal = ({ onClose }) => {
     });
   };
 
+  const [searchResults, setSearchResults] = useState({});
+  const [searchTimeouts, setSearchTimeouts] = useState({});
+
+  const handleNameSearch = async (assetClass, index, searchValue) => {
+    // 기존 타이머 취소
+    const key = `${assetClass}-${index}`;
+    if (searchTimeouts[key]) {
+      clearTimeout(searchTimeouts[key]);
+    }
+
+    // 입력값 업데이트
+    handleItemChange(assetClass, index, 'name', searchValue);
+
+    // 검색어가 2글자 이상일 때만 검색
+    if (searchValue.length < 2) {
+      setSearchResults(prev => ({ ...prev, [key]: [] }));
+      return;
+    }
+
+    // 디바운싱: 300ms 후 검색
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/macro-trading/search-stocks?keyword=${encodeURIComponent(searchValue)}&limit=10`);
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(prev => ({ ...prev, [key]: data.data || [] }));
+        }
+      } catch (err) {
+        console.error('Error searching stocks:', err);
+        setSearchResults(prev => ({ ...prev, [key]: [] }));
+      }
+    }, 300);
+
+    setSearchTimeouts(prev => ({ ...prev, [key]: timeout }));
+  };
+
+  const handleSelectStock = (assetClass, index, stock) => {
+    const key = `${assetClass}-${index}`;
+    handleItemChange(assetClass, index, 'ticker', stock.ticker);
+    handleItemChange(assetClass, index, 'name', stock.stock_name);
+    setSearchResults(prev => ({ ...prev, [key]: [] }));
+  };
+
   const handleSave = async (assetClass) => {
     const items = editingItems[assetClass] || [];
     
@@ -570,40 +613,61 @@ const AssetClassDetailsModal = ({ onClose }) => {
                 </div>
                 
                 <div className="items-list">
-                  {(editingItems[assetClass] || []).map((item, index) => (
-                    <div key={index} className="item-row">
-                      <input
-                        type="text"
-                        placeholder="티커 (예: 360750)"
-                        value={item.ticker || ''}
-                        onChange={(e) => handleItemChange(assetClass, index, 'ticker', e.target.value)}
-                        className="input-ticker"
-                      />
-                      <input
-                        type="text"
-                        placeholder="종목명 (예: TIGER 미국 S&P500)"
-                        value={item.name || ''}
-                        onChange={(e) => handleItemChange(assetClass, index, 'name', e.target.value)}
-                        className="input-name"
-                      />
-                      <input
-                        type="number"
-                        placeholder="비중 (0-1)"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={item.weight || ''}
-                        onChange={(e) => handleItemChange(assetClass, index, 'weight', e.target.value)}
-                        className="input-weight"
-                      />
-                      <button
-                        className="btn btn-danger btn-small"
-                        onClick={() => handleRemoveItem(assetClass, index)}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  ))}
+                  {(editingItems[assetClass] || []).map((item, index) => {
+                    const searchKey = `${assetClass}-${index}`;
+                    const results = searchResults[searchKey] || [];
+                    return (
+                      <div key={index} className="item-row">
+                        <input
+                          type="text"
+                          placeholder="티커 (예: 360750)"
+                          value={item.ticker || ''}
+                          onChange={(e) => handleItemChange(assetClass, index, 'ticker', e.target.value)}
+                          className="input-ticker"
+                        />
+                        <div className="input-name-wrapper">
+                          <input
+                            type="text"
+                            placeholder="종목명 검색 (예: TIGER)"
+                            value={item.name || ''}
+                            onChange={(e) => handleNameSearch(assetClass, index, e.target.value)}
+                            className="input-name"
+                            autoComplete="off"
+                          />
+                          {results.length > 0 && (
+                            <div className="search-results-dropdown">
+                              {results.map((stock, idx) => (
+                                <div
+                                  key={idx}
+                                  className="search-result-item"
+                                  onClick={() => handleSelectStock(assetClass, index, stock)}
+                                >
+                                  <span className="result-ticker">{stock.ticker}</span>
+                                  <span className="result-name">{stock.stock_name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <input
+                          type="number"
+                          placeholder="비중 (0-1)"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={item.weight || ''}
+                          onChange={(e) => handleItemChange(assetClass, index, 'weight', e.target.value)}
+                          className="input-weight"
+                        />
+                        <button
+                          className="btn btn-danger btn-small"
+                          onClick={() => handleRemoveItem(assetClass, index)}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="editor-footer">

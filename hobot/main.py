@@ -640,6 +640,33 @@ async def manual_rebalance(
         logging.error(f"Error executing manual rebalance: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/macro-trading/search-stocks")
+async def search_stocks(
+    keyword: str = Query(..., description="검색 키워드 (종목명 일부)"),
+    limit: int = Query(default=20, ge=1, le=100, description="최대 검색 결과 수")
+):
+    """종목명으로 티커 검색"""
+    try:
+        from service.macro_trading.kis.stock_collector import search_stock_tickers
+        
+        if not keyword or len(keyword.strip()) < 1:
+            return {
+                "status": "success",
+                "data": [],
+                "count": 0
+            }
+        
+        results = search_stock_tickers(keyword.strip(), limit=limit)
+        
+        return {
+            "status": "success",
+            "data": results,
+            "count": len(results)
+        }
+    except Exception as e:
+        logging.error(f"Error searching stocks: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/rebalancing-history")
 async def get_rebalancing_history(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
