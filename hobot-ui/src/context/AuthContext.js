@@ -71,6 +71,17 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ username, password })
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { detail: `서버 오류 (${response.status})` };
+        }
+        return { success: false, error: errorData.detail || '로그인에 실패했습니다.' };
+      }
+
       const data = await response.json();
 
       if (response.ok) {
@@ -83,6 +94,11 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.detail || '로그인에 실패했습니다.' };
       }
     } catch (error) {
+      // 네트워크 에러인 경우
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        return { success: false, error: '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.' };
+      }
+      console.error('Login error:', error);
       return { success: false, error: '서버 연결에 실패했습니다.' };
     }
   };
@@ -101,6 +117,17 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(requestBody)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { detail: `서버 오류 (${response.status})` };
+        }
+        return { success: false, error: errorData.detail || '회원가입에 실패했습니다.' };
+      }
+
       const data = await response.json();
 
       if (response.ok) {
@@ -109,6 +136,11 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.detail || '회원가입에 실패했습니다.' };
       }
     } catch (error) {
+      // 네트워크 에러인 경우
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        return { success: false, error: '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.' };
+      }
+      console.error('Register error:', error);
       return { success: false, error: '서버 연결에 실패했습니다.' };
     }
   };

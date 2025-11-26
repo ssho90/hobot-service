@@ -96,9 +96,17 @@ const FredIndicatorsTab = () => {
     const fetchYieldSpreadData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch('/api/macro-trading/yield-curve-spread?days=365');
         if (!response.ok) {
-          throw new Error('데이터를 불러오는데 실패했습니다.');
+          const errorText = await response.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { detail: `서버 오류 (${response.status})` };
+          }
+          throw new Error(errorData.detail || '데이터를 불러오는데 실패했습니다.');
         }
         const data = await response.json();
         
@@ -115,7 +123,12 @@ const FredIndicatorsTab = () => {
           setError(null);
         }
       } catch (err) {
-        setError(err.message || '데이터를 불러오는데 실패했습니다.');
+        // 네트워크 에러인 경우
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+          setError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.');
+        } else {
+          setError(err.message || '데이터를 불러오는데 실패했습니다.');
+        }
         console.error('Error fetching yield spread data:', err);
       } finally {
         setLoading(false);
@@ -293,7 +306,12 @@ const OtherIndicatorsCharts = () => {
             }
             return { code, data: null };
           } catch (err) {
-            console.error(`Error fetching ${code}:`, err);
+            // 네트워크 에러는 조용히 처리 (개별 지표 실패는 전체를 막지 않음)
+            if (err.name === 'TypeError' && err.message.includes('fetch')) {
+              console.error(`Network error fetching ${code}: 서버에 연결할 수 없습니다.`);
+            } else {
+              console.error(`Error fetching ${code}:`, err);
+            }
             return { code, data: null };
           }
         });
@@ -428,12 +446,25 @@ const EconomicNewsTab = () => {
       try {
         const response = await fetch(`/api/macro-trading/economic-news?hours=${hours}`);
         if (!response.ok) {
-          throw new Error('뉴스를 불러오는데 실패했습니다.');
+          const errorText = await response.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { detail: `서버 오류 (${response.status})` };
+          }
+          throw new Error(errorData.detail || '뉴스를 불러오는데 실패했습니다.');
         }
         const data = await response.json();
         setNews(data.news || []);
       } catch (err) {
-        setError(err.message);
+        // 네트워크 에러인 경우
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+          setError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.');
+        } else {
+          setError(err.message || '뉴스를 불러오는데 실패했습니다.');
+        }
+        console.error('Error fetching news:', err);
       } finally {
         setLoading(false);
       }
