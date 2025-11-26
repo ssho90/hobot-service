@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAuth } from '../context/AuthContext';
 import './MacroDashboard.css';
 import './MacroMonitoring.css';
 
@@ -9,32 +10,94 @@ const MacroDashboard = () => {
   const [overviewData, setOverviewData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const { isAdmin, getAuthHeaders } = useAuth();
 
-  // Overview 데이터 로드 (API는 추후 구현)
+  // Overview 데이터 로드
+  const fetchOverview = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/macro-trading/overview');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === 'success' && result.data) {
+          setOverviewData(result.data);
+        } else {
+          setOverviewData(null);
+        }
+      } else {
+        throw new Error('AI 분석 데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching overview:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // TODO: LLM 분석 결과 API 호출
-    // const fetchOverview = async () => {
-    //   setLoading(true);
-    //   try {
-    //     const response = await fetch('/api/macro-trading/overview');
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       setOverviewData(data);
-    //     }
-    //   } catch (err) {
-    //     setError(err.message);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchOverview();
+    fetchOverview();
   }, []);
+
+  // 수동 AI 분석 실행
+  const handleManualUpdate = async () => {
+    if (!isAdmin()) {
+      alert('관리자만 사용할 수 있는 기능입니다.');
+      return;
+    }
+
+    setUpdating(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/macro-trading/run-ai-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === 'success') {
+          alert('AI 분석이 완료되었습니다. 결과를 불러오는 중...');
+          // 분석 완료 후 데이터 다시 로드
+          await fetchOverview();
+        } else {
+          throw new Error(result.message || 'AI 분석 실행에 실패했습니다.');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: '알 수 없는 오류' }));
+        throw new Error(errorData.detail || 'AI 분석 실행에 실패했습니다.');
+      }
+    } catch (err) {
+      setError(err.message);
+      alert(`오류: ${err.message}`);
+      console.error('Error running AI analysis:', err);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <div className="macro-dashboard">
       {/* Overview 섹션 (항상 표시) */}
       <div className="overview-section">
-        <h2>overview</h2>
+        <div className="overview-header-section">
+          <h2>overview</h2>
+          {isAdmin() && (
+            <button
+              className="btn btn-primary btn-update"
+              onClick={handleManualUpdate}
+              disabled={updating || loading}
+            >
+              {updating ? '분석 중...' : '수동 업데이트'}
+            </button>
+          )}
+        </div>
         <div className="card overview-card">
           {loading && <div className="loading">분석 중...</div>}
           {error && <div className="error">오류: {error}</div>}
@@ -45,10 +108,47 @@ const MacroDashboard = () => {
           )}
           {overviewData && (
             <div className="overview-content">
-              <div className="analysis-result">
-                {/* LLM 분석 결과 표시 */}
-                <pre>{JSON.stringify(overviewData, null, 2)}</pre>
+              <div className="overview-header">
+                <div className="overview-date">
+                  분석 일시: {overviewData.decision_date || overviewData.created_at}
+                </div>
               </div>
+              
+              <div className="analysis-summary">
+                <h3>분석 요약</h3>
+                <p>{overviewData.analysis_summary}</p>
+              </div>
+              
+              {overviewData.reasoning && (
+                <div className="analysis-reasoning">
+                  <h3>판단 근거</h3>
+                  <p>{overviewData.reasoning}</p>
+                </div>
+              )}
+              
+              {overviewData.target_allocation && (
+                <div className="target-allocation">
+                  <h3>목표 자산 배분</h3>
+                  <div className="allocation-grid">
+                    <div className="allocation-item">
+                      <span className="allocation-label">주식</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Stocks?.toFixed(1) || 0}%</span>
+                    </div>
+                    <div className="allocation-item">
+                      <span className="allocation-label">채권</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Bonds?.toFixed(1) || 0}%</span>
+                    </div>
+                    <div className="allocation-item">
+                      <span className="allocation-label">대체투자</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Alternatives?.toFixed(1) || 0}%</span>
+                    </div>
+                    <div className="allocation-item">
+                      <span className="allocation-label">현금</span>
+                      <span className="allocation-value">{overviewData.target_allocation.Cash?.toFixed(1) || 0}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -94,16 +194,54 @@ const FredIndicatorsTab = () => {
   // 장단기 금리차 데이터 로드
   useEffect(() => {
     const fetchYieldSpreadData = async () => {
+      const url = '/api/macro-trading/yield-curve-spread?days=365';
+      console.log('[MacroDashboard] Fetching yield spread data from:', url);
+      
       try {
         setLoading(true);
-        const response = await fetch('/api/macro-trading/yield-curve-spread?days=365');
+        setError(null);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).catch((fetchError) => {
+          console.error('[MacroDashboard] Fetch error details:', {
+            name: fetchError.name,
+            message: fetchError.message,
+            stack: fetchError.stack,
+            cause: fetchError.cause,
+            type: fetchError.constructor.name,
+          });
+          throw fetchError;
+        });
+        
+        console.log('[MacroDashboard] Response received:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
+        
         if (!response.ok) {
-          throw new Error('데이터를 불러오는데 실패했습니다.');
+          const errorText = await response.text();
+          console.error('[MacroDashboard] Error response body:', errorText);
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { detail: `서버 오류 (${response.status} ${response.statusText})` };
+          }
+          throw new Error(errorData.detail || '데이터를 불러오는데 실패했습니다.');
         }
+        
         const data = await response.json();
+        console.log('[MacroDashboard] Data received:', { hasError: !!data.error, dataKeys: Object.keys(data) });
         
         if (data.error) {
           const errorMsg = data.error.message || '데이터를 불러오는 중 오류가 발생했습니다.';
+          console.error('[MacroDashboard] Data contains error:', data.error);
           setError(errorMsg);
           if (data.spread_data && data.spread_data.length > 0) {
             setYieldSpreadData(data);
@@ -115,8 +253,23 @@ const FredIndicatorsTab = () => {
           setError(null);
         }
       } catch (err) {
-        setError(err.message || '데이터를 불러오는데 실패했습니다.');
-        console.error('Error fetching yield spread data:', err);
+        console.error('[MacroDashboard] Full error object:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause,
+          type: err.constructor.name,
+          toString: err.toString(),
+        });
+        
+        // 네트워크 에러인 경우
+        if (err.name === 'TypeError' && (err.message.includes('fetch') || err.message.includes('Failed to fetch'))) {
+          const errorMsg = '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요. (프록시 설정: http://localhost:8991)';
+          console.error('[MacroDashboard] Network error - 프록시 또는 백엔드 서버 연결 실패');
+          setError(errorMsg);
+        } else {
+          setError(err.message || '데이터를 불러오는데 실패했습니다.');
+        }
       } finally {
         setLoading(false);
       }
@@ -293,7 +446,12 @@ const OtherIndicatorsCharts = () => {
             }
             return { code, data: null };
           } catch (err) {
-            console.error(`Error fetching ${code}:`, err);
+            // 네트워크 에러는 조용히 처리 (개별 지표 실패는 전체를 막지 않음)
+            if (err.name === 'TypeError' && err.message.includes('fetch')) {
+              console.error(`Network error fetching ${code}: 서버에 연결할 수 없습니다.`);
+            } else {
+              console.error(`Error fetching ${code}:`, err);
+            }
             return { code, data: null };
           }
         });
@@ -423,17 +581,65 @@ const EconomicNewsTab = () => {
 
   useEffect(() => {
     const fetchNews = async () => {
+      const url = `/api/macro-trading/economic-news?hours=${hours}`;
+      console.log('[EconomicNewsTab] Fetching news from:', url);
+      
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/macro-trading/economic-news?hours=${hours}`);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).catch((fetchError) => {
+          console.error('[EconomicNewsTab] Fetch error details:', {
+            name: fetchError.name,
+            message: fetchError.message,
+            stack: fetchError.stack,
+            cause: fetchError.cause,
+            type: fetchError.constructor.name,
+          });
+          throw fetchError;
+        });
+        
+        console.log('[EconomicNewsTab] Response received:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+        });
+        
         if (!response.ok) {
-          throw new Error('뉴스를 불러오는데 실패했습니다.');
+          const errorText = await response.text();
+          console.error('[EconomicNewsTab] Error response body:', errorText);
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { detail: `서버 오류 (${response.status} ${response.statusText})` };
+          }
+          throw new Error(errorData.detail || '뉴스를 불러오는데 실패했습니다.');
         }
         const data = await response.json();
+        console.log('[EconomicNewsTab] Data received:', { newsCount: data.news?.length || 0 });
         setNews(data.news || []);
       } catch (err) {
-        setError(err.message);
+        console.error('[EconomicNewsTab] Full error object:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause,
+          type: err.constructor.name,
+          toString: err.toString(),
+        });
+        
+        // 네트워크 에러인 경우
+        if (err.name === 'TypeError' && (err.message.includes('fetch') || err.message.includes('Failed to fetch'))) {
+          console.error('[EconomicNewsTab] Network error - 프록시 또는 백엔드 서버 연결 실패');
+          setError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요. (프록시 설정: http://localhost:8991)');
+        } else {
+          setError(err.message || '뉴스를 불러오는데 실패했습니다.');
+        }
       } finally {
         setLoading(false);
       }
@@ -442,12 +648,20 @@ const EconomicNewsTab = () => {
     fetchNews();
   }, [hours]);
 
-  // 필터링된 뉴스
-  const filteredNews = news.filter(item => {
-    if (filterCountry && item.country !== filterCountry) return false;
-    if (filterCategory && item.category !== filterCategory) return false;
-    return true;
-  });
+  // 필터링된 뉴스 (published_at 기준 최신순 정렬)
+  const filteredNews = news
+    .filter(item => {
+      if (filterCountry && item.country !== filterCountry) return false;
+      if (filterCategory && item.category !== filterCategory) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      // published_at 기준 최신순 정렬 (내림차순)
+      if (!a.published_at && !b.published_at) return 0;
+      if (!a.published_at) return 1;
+      if (!b.published_at) return -1;
+      return new Date(b.published_at) - new Date(a.published_at);
+    });
 
   // 국가 및 카테고리 목록
   const countries = [...new Set(news.map(item => item.country).filter(Boolean))].sort();

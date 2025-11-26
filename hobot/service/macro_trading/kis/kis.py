@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import pandas as pd
 import traceback
+from typing import Dict, List, Optional
 
 # 프로젝트 루트의 .env 파일 로드
 load_dotenv(override=True)
@@ -15,6 +16,7 @@ from .kis_utils import (
 )
 from service.slack_bot import post_message
 from .config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME, INTERVAL
+from service.macro_trading.config.config_loader import ConfigLoader
 
 # ===============================================
 # Helper Functions
@@ -237,8 +239,147 @@ def health_check():
         post_message(f"Health Check Error: {e}\n{trace}", channel="#auto-trading-error")
         return {"status": "error", "message": str(e), "trace": trace}
 
+def parse_holdings_by_asset_class(holdings: List[Dict]) -> Dict[str, List[Dict]]:
+    """
+    보유 종목을 자산군별로 분류
+    DB의 사용자 설정을 우선 사용하고, 없으면 설정 파일 사용
+    
+    Args:
+        holdings: 보유 종목 리스트
+        
+    Returns:
+        자산군별로 분류된 holdings 딕셔너리
+    """
+    try:
+        # 티커 → 자산군 매핑 딕셔너리 생성
+        ticker_to_asset_class = {}
+        
+        # 먼저 DB에서 사용자 설정 조회
+        try:
+            from service.database.db import get_db_connection
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT asset_class, ticker
+                    FROM asset_class_details
+                    WHERE is_active = TRUE
+                """)
+                rows = cursor.fetchall()
+                for row in rows:
+                    ticker_to_asset_class[row['ticker']] = row['asset_class']
+        except Exception as db_error:
+            print(f"Warning: Could not load asset class details from DB: {db_error}")
+            # DB 조회 실패 시 설정 파일 사용
+        
+        # DB에 설정이 없으면 설정 파일에서 로드
+        if not ticker_to_asset_class:
+            config_loader = ConfigLoader()
+            config = config_loader.load()
+            etf_mapping = config.etf_mapping
+            
+            for asset_class, mapping in etf_mapping.items():
+                for ticker in mapping.tickers:
+                    ticker_to_asset_class[ticker] = asset_class
+        
+        # 자산군별 holdings 분류
+        classified_holdings = {
+            "stocks": [],
+            "bonds": [],
+            "alternatives": [],
+            "cash": [],
+            "other": []  # 매핑되지 않은 종목
+        }
+        
+        for holding in holdings:
+            stock_code = holding.get('stock_code', '')
+            asset_class = ticker_to_asset_class.get(stock_code, 'other')
+            
+            if asset_class in classified_holdings:
+                classified_holdings[asset_class].append(holding)
+            else:
+                classified_holdings['other'].append(holding)
+        
+        return classified_holdings
+    except Exception as e:
+        print(f"Error parsing holdings by asset class: {e}")
+        traceback.print_exc()
+        # 에러 발생 시 빈 딕셔너리 반환
+        return {
+            "stocks": [],
+            "bonds": [],
+            "alternatives": [],
+            "cash": [],
+            "other": []
+        }
+
+
+def calculate_asset_class_pnl(holdings: List[Dict], cash_balance: int = 0) -> Dict[str, Dict]:
+    """
+    자산군별 수익률 계산
+    
+    Args:
+        holdings: 보유 종목 리스트
+        cash_balance: 현금 잔액
+        
+    Returns:
+        자산군별 수익률 정보 딕셔너리
+    """
+    classified_holdings = parse_holdings_by_asset_class(holdings)
+    
+    asset_class_info = {}
+    
+    # 자산군별 정보 계산
+    for asset_class, class_holdings in classified_holdings.items():
+        if asset_class == 'other':
+            continue
+            
+        total_eval_amount = sum(h.get('eval_amount', 0) for h in class_holdings)
+        total_profit_loss = sum(h.get('profit_loss', 0) for h in class_holdings)
+        total_avg_buy_amount = sum(
+            h.get('avg_buy_price', 0) * h.get('quantity', 0) 
+            for h in class_holdings
+        )
+        
+        # 수익률 계산 (매입가 대비)
+        profit_loss_rate = 0.0
+        if total_avg_buy_amount > 0:
+            profit_loss_rate = (total_profit_loss / total_avg_buy_amount) * 100
+        
+        asset_class_info[asset_class] = {
+            "holdings": class_holdings,
+            "total_eval_amount": total_eval_amount,
+            "total_profit_loss": total_profit_loss,
+            "total_avg_buy_amount": total_avg_buy_amount,
+            "profit_loss_rate": round(profit_loss_rate, 2),
+            "count": len(class_holdings)
+        }
+    
+    # Cash 자산군에 현금 잔액 추가
+    if 'cash' in asset_class_info:
+        asset_class_info['cash']['total_eval_amount'] += cash_balance
+        # 현금은 수익률 0%
+        if asset_class_info['cash']['total_avg_buy_amount'] > 0:
+            asset_class_info['cash']['profit_loss_rate'] = (
+                asset_class_info['cash']['total_profit_loss'] / 
+                asset_class_info['cash']['total_avg_buy_amount']
+            ) * 100
+        else:
+            asset_class_info['cash']['profit_loss_rate'] = 0.0
+    else:
+        asset_class_info['cash'] = {
+            "holdings": [],
+            "total_eval_amount": cash_balance,
+            "total_profit_loss": 0,
+            "total_avg_buy_amount": cash_balance,
+            "profit_loss_rate": 0.0,
+            "count": 0
+        }
+    
+    return asset_class_info
+
+
 def get_balance_info_api():
-    """잔액조회 API용 함수 - 상세 정보 반환"""
+    """잔액조회 API용 함수 - 상세 정보 반환 (자산군별 정보 포함)"""
     try:
         api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
         current_price = api.get_current_price(TARGET_TICKER)
@@ -271,12 +412,16 @@ def get_balance_info_api():
                     "profit_loss_rate": float(item.get('evlu_pfls_rt', 0))
                 })
         
+        # 자산군별 정보 계산
+        asset_class_info = calculate_asset_class_pnl(holdings, cash_balance)
+        
         return {
             "status": "success",
             "account_no": ACCOUNT_NO,
             "total_eval_amount": total_eval_amt,
             "cash_balance": cash_balance,
             "holdings": holdings,
+            "asset_class_info": asset_class_info,  # 자산군별 정보 추가
             "target_ticker": TARGET_TICKER,
             "target_ticker_name": TARGET_TICKER_NAME,
             "target_ticker_current_price": current_price

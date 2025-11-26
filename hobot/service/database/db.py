@@ -207,6 +207,48 @@ def init_database():
         except Exception:
             pass
         
+        # 자산군 상세 설정 테이블 (사용자가 관리하는 자산군별 종목 및 비율)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS asset_class_details (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                asset_class VARCHAR(50) NOT NULL COMMENT '자산군 (stocks, bonds, alternatives, cash)',
+                ticker VARCHAR(20) NOT NULL COMMENT 'ETF 티커',
+                name VARCHAR(255) NOT NULL COMMENT 'ETF 이름',
+                weight DECIMAL(5,4) NOT NULL COMMENT '자산군 내 비중 (0-1)',
+                currency VARCHAR(10) COMMENT '통화 (현금 자산군의 경우: KRW, USD)',
+                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY unique_asset_class_ticker (asset_class, ticker) COMMENT '자산군별 티커 중복 방지',
+                INDEX idx_asset_class (asset_class) COMMENT '자산군 인덱스',
+                INDEX idx_is_active (is_active) COMMENT '활성화 여부 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='자산군별 상세 종목 및 비율 설정'
+        """)
+        
+        # currency 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE asset_class_details ADD COLUMN currency VARCHAR(10) COMMENT '통화 (현금 자산군의 경우: KRW, USD)'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
+        
+        # 종목명-티커 매핑 테이블 (KIS API에서 수집)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS stock_tickers (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                ticker VARCHAR(20) NOT NULL COMMENT '종목 코드',
+                stock_name VARCHAR(255) NOT NULL COMMENT '종목명',
+                market_type VARCHAR(10) DEFAULT 'J' COMMENT '시장 구분 (J: 주식, ETF 등)',
+                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+                last_updated DATE NOT NULL COMMENT '마지막 업데이트 날짜',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY unique_ticker (ticker) COMMENT '티커 중복 방지',
+                INDEX idx_stock_name (stock_name) COMMENT '종목명 인덱스 (검색용)',
+                INDEX idx_is_active (is_active) COMMENT '활성화 여부 인덱스',
+                INDEX idx_last_updated (last_updated) COMMENT '업데이트 날짜 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='종목명-티커 매핑 (KIS API 수집)'
+        """)
+        
         conn.commit()
 
 

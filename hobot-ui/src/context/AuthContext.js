@@ -62,16 +62,48 @@ export const AuthProvider = ({ children }) => {
   }, [verifyToken]);
 
   const login = async (username, password) => {
+    const url = '/api/auth/login';
+    console.log('[AuthContext] Attempting login to:', url);
+    
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ username, password })
+      }).catch((fetchError) => {
+        console.error('[AuthContext] Fetch error details:', {
+          name: fetchError.name,
+          message: fetchError.message,
+          stack: fetchError.stack,
+          cause: fetchError.cause,
+          type: fetchError.constructor.name,
+        });
+        throw fetchError;
       });
 
+      console.log('[AuthContext] Login response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[AuthContext] Error response body:', errorText);
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { detail: `서버 오류 (${response.status} ${response.statusText})` };
+        }
+        return { success: false, error: errorData.detail || '로그인에 실패했습니다.' };
+      }
+
       const data = await response.json();
+      console.log('[AuthContext] Login data received:', { hasToken: !!data.token, hasUser: !!data.user });
 
       if (response.ok) {
         setToken(data.token);
@@ -83,6 +115,20 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.detail || '로그인에 실패했습니다.' };
       }
     } catch (error) {
+      console.error('[AuthContext] Full error object:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause,
+        type: error.constructor.name,
+        toString: error.toString(),
+      });
+      
+      // 네트워크 에러인 경우
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
+        console.error('[AuthContext] Network error - 프록시 또는 백엔드 서버 연결 실패');
+        return { success: false, error: '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요. (프록시 설정: http://localhost:8991)' };
+      }
       return { success: false, error: '서버 연결에 실패했습니다.' };
     }
   };
@@ -101,6 +147,17 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(requestBody)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { detail: `서버 오류 (${response.status})` };
+        }
+        return { success: false, error: errorData.detail || '회원가입에 실패했습니다.' };
+      }
+
       const data = await response.json();
 
       if (response.ok) {
@@ -109,6 +166,11 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: data.detail || '회원가입에 실패했습니다.' };
       }
     } catch (error) {
+      // 네트워크 에러인 경우
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        return { success: false, error: '서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.' };
+      }
+      console.error('Register error:', error);
       return { success: false, error: '서버 연결에 실패했습니다.' };
     }
   };
