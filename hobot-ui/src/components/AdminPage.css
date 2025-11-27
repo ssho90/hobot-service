@@ -241,7 +241,8 @@
   max-width: 800px;
   width: 90%;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
@@ -251,6 +252,7 @@
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -281,6 +283,9 @@
 
 .modal-body {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .detail-section {
@@ -314,10 +319,12 @@
   font-size: 12px;
   white-space: pre-wrap;
   word-wrap: break-word;
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
+  overflow-x: auto;
   color: #1f2937;
   line-height: 1.5;
+  margin: 0;
 }
 
 .loading {
