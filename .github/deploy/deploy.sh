@@ -373,56 +373,88 @@ setup_nginx() {
   LANGFUSE_CERT="/etc/letsencrypt/live/langfuse.stockoverflow.com/fullchain.pem"
   LANGFUSE_US_CERT="/etc/letsencrypt/live/langfuse-us.stockoverflow.com/fullchain.pem"
   
-  # 인증서가 없으면 SSL 블록을 제거하는 Python 스크립트 실행
+  # 인증서가 없으면 Langfuse 프록시 서버 블록 전체를 제거
   if [ ! -f "$LANGFUSE_CERT" ] || [ ! -f "$LANGFUSE_US_CERT" ]; then
-    log_info "SSL certificates not found, removing HTTPS blocks temporarily..."
-    cat > /tmp/remove_ssl_blocks.py << 'PYEOF'
+    log_info "SSL certificates not found, removing Langfuse proxy blocks temporarily..."
+    cat > /tmp/remove_langfuse_blocks.py << 'PYEOF'
 import re
 import sys
 
 try:
     with open('/etc/nginx/conf.d/00-hobot.conf', 'r') as f:
-        lines = f.readlines()
+        content = f.read()
     
+    # Langfuse 관련 server 블록 제거 (HTTP와 HTTPS 모두)
+    # server { ... } 블록을 찾아서 server_name이 langfuse인 것만 제거
+    lines = content.split('\n')
     result = []
-    in_ssl_server = False
-    ssl_server_depth = 0
-    skip_ssl_block = False
+    in_server = False
+    server_depth = 0
+    is_langfuse_server = False
+    server_start_idx = -1
     
-    for line in lines:
-        # SSL server 블록 시작 감지 (listen 443)
-        if re.search(r'listen\s+443\s+ssl', line):
-            in_ssl_server = True
-            ssl_server_depth = 1
-            skip_ssl_block = True
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        
+        # server 블록 시작
+        if re.search(r'server\s*{', line):
+            in_server = True
+            server_depth = 1
+            is_langfuse_server = False
+            server_start_idx = i
+            i += 1
             continue
         
-        if in_ssl_server:
-            ssl_server_depth += line.count('{') - line.count('}')
-            if ssl_server_depth == 0:
-                in_ssl_server = False
-                skip_ssl_block = False
+        if in_server:
+            server_depth += line.count('{') - line.count('}')
+            
+            # server_name 확인
+            if re.search(r'server_name\s+(langfuse|langfuse-us)\.stockoverflow\.com', line):
+                is_langfuse_server = True
+            
+            # server 블록 종료
+            if server_depth == 0:
+                if not is_langfuse_server:
+                    # Langfuse 서버가 아니면 결과에 추가
+                    result.extend(lines[server_start_idx:i+1])
+                in_server = False
+                is_langfuse_server = False
+                server_start_idx = -1
+            
+            i += 1
             continue
         
         result.append(line)
+        i += 1
     
     with open('/etc/nginx/conf.d/00-hobot.conf', 'w') as f:
-        f.writelines(result)
-    print("[OK] Removed SSL blocks")
+        f.write('\n'.join(result))
+    print("[OK] Removed Langfuse proxy blocks")
     sys.exit(0)
         
 except Exception as e:
     print(f"[ERROR] Error: {e}")
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 PYEOF
-    sudo python3 /tmp/remove_ssl_blocks.py
-    rm -f /tmp/remove_ssl_blocks.py
+    sudo python3 /tmp/remove_langfuse_blocks.py
+    rm -f /tmp/remove_langfuse_blocks.py
   fi
   
   # nginx 설정 테스트
-  if ! sudo nginx -t 2>&1 | grep -q "test is successful"; then
+  log_info "Testing nginx configuration..."
+  NGINX_TEST_OUTPUT=$(sudo nginx -t 2>&1)
+  if echo "$NGINX_TEST_OUTPUT" | grep -q "test is successful"; then
+    log_success "Nginx configuration is valid"
+  else
     log_error "Nginx configuration test failed"
-    sudo nginx -t
+    echo "$NGINX_TEST_OUTPUT" >&2
+    # 설정 파일 내용 확인
+    log_info "Checking nginx configuration file..."
+    sudo head -50 /etc/nginx/conf.d/00-hobot.conf >&2 || true
+    exit 1
   fi
   
   # nginx 시작
