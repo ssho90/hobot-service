@@ -23,7 +23,7 @@ const Header = () => {
       const tab = event.detail?.tab || null;
       setDashboardActiveTab(tab);
       // Admin 하위 탭이 활성화되면 하위 메뉴 열기
-      if (tab === 'admin-users' || tab === 'admin-logs') {
+      if (tab === 'admin-users' || tab === 'admin-logs' || tab === 'admin-llm-monitoring') {
         setShowAdminSubmenu(true);
       }
       // Trading 하위 탭이 활성화되면 하위 메뉴 열기
@@ -65,7 +65,7 @@ const Header = () => {
   const getActiveTab = () => {
     if (location.pathname === '/dashboard') {
       if (dashboardActiveTab === 'trading-macro' || dashboardActiveTab === 'trading-crypto') return 'trading';
-      if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs') return 'admin';
+      if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring') return 'admin';
       if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
       return 'macro-dashboard'; // 기본값
     }
@@ -204,6 +204,12 @@ const Header = () => {
                       onClick={() => handleAdminSubmenuClick('admin-logs')}
                     >
                       로그 관리
+                    </button>
+                    <button
+                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-llm-monitoring' ? 'active' : ''}`}
+                      onClick={() => handleAdminSubmenuClick('admin-llm-monitoring')}
+                    >
+                      LLM 모니터링
                     </button>
                   </div>
                 )}

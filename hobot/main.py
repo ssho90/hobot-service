@@ -1829,6 +1829,177 @@ async def get_logs(
         logging.error(f"Error getting logs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/llm-monitoring/logs")
+async def get_llm_monitoring_logs(
+    limit: int = Query(default=100, ge=1, le=1000, description="조회할 로그 수"),
+    offset: int = Query(default=0, ge=0, description="오프셋"),
+    model_name: Optional[str] = Query(default=None, description="모델명 필터"),
+    service_name: Optional[str] = Query(default=None, description="서비스명 필터"),
+    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)")
+):
+    """LLM 사용 로그 조회"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # WHERE 조건 구성
+            conditions = []
+            params = []
+            
+            if model_name:
+                conditions.append("model_name = %s")
+                params.append(model_name)
+            
+            if service_name:
+                conditions.append("service_name = %s")
+                params.append(service_name)
+            
+            if start_date:
+                conditions.append("DATE(created_at) >= %s")
+                params.append(start_date)
+            
+            if end_date:
+                conditions.append("DATE(created_at) <= %s")
+                params.append(end_date)
+            
+            where_clause = " AND ".join(conditions) if conditions else "1=1"
+            
+            # 전체 개수 조회
+            count_query = f"SELECT COUNT(*) as total FROM llm_usage_logs WHERE {where_clause}"
+            cursor.execute(count_query, params)
+            total = cursor.fetchone()['total']
+            
+            # 로그 조회
+            query = f"""
+                SELECT 
+                    id, model_name, provider, request_prompt, response_prompt,
+                    prompt_tokens, completion_tokens, total_tokens,
+                    service_name, duration_ms, created_at
+                FROM llm_usage_logs
+                WHERE {where_clause}
+                ORDER BY created_at DESC
+                LIMIT %s OFFSET %s
+            """
+            params.extend([limit, offset])
+            cursor.execute(query, params)
+            
+            logs = cursor.fetchall()
+            
+            # datetime 객체를 문자열로 변환
+            for log in logs:
+                if log.get('created_at'):
+                    log['created_at'] = log['created_at'].isoformat() if hasattr(log['created_at'], 'isoformat') else str(log['created_at'])
+            
+            return {
+                "status": "success",
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "logs": logs
+            }
+    except Exception as e:
+        logging.error(f"LLM 모니터링 로그 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/llm-monitoring/token-usage")
+async def get_llm_token_usage(
+    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)"),
+    group_by: str = Query(default="day", description="그룹화 기준 (day, model, service)")
+):
+    """LLM 토큰 사용량 통계 조회 (일자별, 모델별, 서비스별)"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime, timedelta
+        
+        # 기본값: 최근 30일
+        if not start_date:
+            start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        if not end_date:
+            end_date = datetime.now().strftime('%Y-%m-%d')
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            if group_by == "day":
+                # 일자별 토큰 사용량
+                query = """
+                    SELECT 
+                        DATE(created_at) as date,
+                        model_name,
+                        provider,
+                        SUM(prompt_tokens) as total_prompt_tokens,
+                        SUM(completion_tokens) as total_completion_tokens,
+                        SUM(total_tokens) as total_tokens,
+                        COUNT(*) as request_count
+                    FROM llm_usage_logs
+                    WHERE DATE(created_at) >= %s AND DATE(created_at) <= %s
+                    GROUP BY DATE(created_at), model_name, provider
+                    ORDER BY date DESC, model_name
+                """
+                cursor.execute(query, (start_date, end_date))
+            elif group_by == "model":
+                # 모델별 토큰 사용량
+                query = """
+                    SELECT 
+                        model_name,
+                        provider,
+                        SUM(prompt_tokens) as total_prompt_tokens,
+                        SUM(completion_tokens) as total_completion_tokens,
+                        SUM(total_tokens) as total_tokens,
+                        COUNT(*) as request_count,
+                        AVG(duration_ms) as avg_duration_ms
+                    FROM llm_usage_logs
+                    WHERE DATE(created_at) >= %s AND DATE(created_at) <= %s
+                    GROUP BY model_name, provider
+                    ORDER BY total_tokens DESC
+                """
+                cursor.execute(query, (start_date, end_date))
+            elif group_by == "service":
+                # 서비스별 토큰 사용량
+                query = """
+                    SELECT 
+                        service_name,
+                        SUM(prompt_tokens) as total_prompt_tokens,
+                        SUM(completion_tokens) as total_completion_tokens,
+                        SUM(total_tokens) as total_tokens,
+                        COUNT(*) as request_count,
+                        AVG(duration_ms) as avg_duration_ms
+                    FROM llm_usage_logs
+                    WHERE DATE(created_at) >= %s AND DATE(created_at) <= %s
+                    GROUP BY service_name
+                    ORDER BY total_tokens DESC
+                """
+                cursor.execute(query, (start_date, end_date))
+            else:
+                raise HTTPException(status_code=400, detail="Invalid group_by. Must be: day, model, or service")
+            
+            results = cursor.fetchall()
+            
+            # datetime 객체를 문자열로 변환
+            for result in results:
+                if result.get('date'):
+                    result['date'] = result['date'].isoformat() if hasattr(result['date'], 'isoformat') else str(result['date'])
+            
+            return {
+                "status": "success",
+                "group_by": group_by,
+                "start_date": start_date,
+                "end_date": end_date,
+                "data": results
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"LLM 토큰 사용량 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # API 라우터를 앱에 포함
 app.include_router(api_router)
 

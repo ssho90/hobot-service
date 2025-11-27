@@ -249,6 +249,27 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='종목명-티커 매핑 (KIS API 수집)'
         """)
         
+        # LLM 사용 로그 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS llm_usage_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                model_name VARCHAR(100) NOT NULL COMMENT 'LLM 모델명 (예: gpt-4o-mini, gemini-2.5-pro)',
+                provider VARCHAR(50) NOT NULL COMMENT 'LLM 제공자 (예: OpenAI, Google)',
+                request_prompt TEXT COMMENT '요청 프롬프트',
+                response_prompt TEXT COMMENT '응답 프롬프트',
+                prompt_tokens INT DEFAULT 0 COMMENT '프롬프트 토큰 수',
+                completion_tokens INT DEFAULT 0 COMMENT '완료 토큰 수',
+                total_tokens INT DEFAULT 0 COMMENT '총 토큰 수',
+                service_name VARCHAR(100) COMMENT '서비스명 (어떤 기능에서 호출했는지)',
+                duration_ms INT COMMENT '응답 시간 (밀리초)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                INDEX idx_model_name (model_name) COMMENT '모델명 인덱스',
+                INDEX idx_provider (provider) COMMENT '제공자 인덱스',
+                INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스 (일자별 조회용)',
+                INDEX idx_service_name (service_name) COMMENT '서비스명 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='LLM 사용 로그'
+        """)
+        
         conn.commit()
 
 

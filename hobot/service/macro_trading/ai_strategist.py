@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from service.llm import llm_gemini_pro
 from service.database.db import get_db_connection
+from service.llm_monitoring import track_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -251,8 +252,16 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         logger.info("Gemini 2.5 Pro 분석 중...")
         llm = llm_gemini_pro()
         
-        # JSON 응답 강제
-        response = llm.invoke(prompt)
+        # LLM 호출 추적
+        with track_llm_call(
+            model_name="gemini-2.5-pro",
+            provider="Google",
+            service_name="ai_strategist",
+            request_prompt=prompt
+        ) as tracker:
+            # JSON 응답 강제
+            response = llm.invoke(prompt)
+            tracker.set_response(response)
         
         # 응답 파싱
         response_text = response.content if hasattr(response, 'content') else str(response)
