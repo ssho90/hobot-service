@@ -21,10 +21,10 @@ export GEMINI_API_KEY="${GEMINI_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
 
 # 유틸리티 함수
-log_info() { echo "ℹ️  $*"; }
-log_success() { echo "✅ $*"; }
-log_error() { echo "❌ $*"; exit 1; }
-log_warn() { echo "⚠️  $*"; }
+log_info() { echo "[INFO] $*"; }
+log_success() { echo "[OK] $*"; }
+log_error() { echo "[ERROR] $*"; exit 1; }
+log_warn() { echo "[WARN] $*"; }
 
 # Git 업데이트
 update_repository() {
@@ -264,14 +264,14 @@ try:
     if modified:
         with open('/etc/nginx/nginx.conf', 'w') as f:
             f.writelines(result)
-        print("✅ Disabled default server block")
+        print("[OK] Disabled default server block")
         sys.exit(0)
     else:
-        print("ℹ️  No default server block found")
+        print("[INFO] No default server block found")
         sys.exit(0)
         
 except Exception as e:
-    print(f"⚠️  Error: {e}")
+    print(f"[ERROR] Error: {e}")
     sys.exit(1)
 PYEOF
   sudo python3 /tmp/disable_nginx_server.py
@@ -393,11 +393,11 @@ try:
     
     with open('/etc/nginx/conf.d/00-hobot.conf', 'w') as f:
         f.writelines(result)
-    print("✅ Removed SSL blocks")
+    print("[OK] Removed SSL blocks")
     sys.exit(0)
         
 except Exception as e:
-    print(f"⚠️  Error: {e}")
+    print(f"[ERROR] Error: {e}")
     sys.exit(1)
 PYEOF
     sudo python3 /tmp/remove_ssl_blocks.py
