@@ -43,6 +43,24 @@ logging.basicConfig(
     force=True  # 기존 핸들러가 있어도 재설정
 )
 
+# Selenium 및 HTTP 클라이언트 관련 불필요한 로그 비활성화
+selenium_loggers = [
+    'selenium',
+    'selenium.webdriver',
+    'selenium.webdriver.remote',
+    'selenium.webdriver.remote.remote_connection',
+    'urllib3',
+    'urllib3.connectionpool',
+    'urllib3.util',
+    'httpcore',
+    'httpx',
+    'httpcore.http11',
+    'httpcore.connection'
+]
+for logger_name in selenium_loggers:
+    selenium_logger = logging.getLogger(logger_name)
+    selenium_logger.setLevel(logging.WARNING)  # WARNING 이상만 로깅
+
 # Pydantic 모델
 class StrategyRequest(BaseModel):
     strategy: str
@@ -1667,7 +1685,8 @@ async def get_logs(
             # log.txt 형식: 2025-11-01 21:51:25,255 - INFO - ...
             timestamp_pattern = re.compile(r'^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:,\d+)?)')
             # access.log/error.log 형식 (Gunicorn): IP - - [01/Nov/2025:21:51:25 +0000] ...
-            gunicorn_timestamp_pattern = re.compile(r'\[(\d{2}/\w+/\d{4}:\d{2}:\d{2}:\d{2})')
+            # 타임존 정보(+0000) 포함 패턴
+            gunicorn_timestamp_pattern = re.compile(r'\[(\d{2}/\w+/\d{4}:\d{2}:\d{2}:\d{2}(?:\s+[+-]\d{4})?)\]')
             
             def parse_timestamp(line):
                 """로그 라인에서 타임스탬프를 파싱하여 datetime 객체로 반환"""
@@ -1676,19 +1695,26 @@ async def get_logs(
                     match = timestamp_pattern.match(line)
                     if match:
                         ts_str = match.group(1).replace(',', '.')
-                        return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S.%f')
+                        try:
+                            return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S.%f')
+                        except ValueError:
+                            # 밀리초가 없는 경우
+                            return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
                     
-                    # Gunicorn access.log/error.log 형식: [01/Nov/2025:21:51:25:00]
+                    # Gunicorn access.log/error.log 형식: [01/Nov/2025:21:51:25 +0000] 또는 [01/Nov/2025:21:51:25]
                     match = gunicorn_timestamp_pattern.search(line)
                     if match:
                         ts_str = match.group(1)
+                        # 타임존 정보 제거 (naive datetime으로 처리)
+                        ts_str = re.sub(r'\s+[+-]\d{4}$', '', ts_str)
                         return datetime.strptime(ts_str, '%d/%b/%Y:%H:%M:%S')
                     
-                    # 타임스탬프를 찾을 수 없으면 현재 시간 반환 (맨 뒤로 정렬)
-                    return datetime.now()
-                except:
-                    # 파싱 실패 시 현재 시간 반환
-                    return datetime.now()
+                    # 타임스탬프를 찾을 수 없으면 None 반환
+                    return None
+                except Exception as e:
+                    # 파싱 실패 시 None 반환
+                    logging.debug(f"Failed to parse timestamp from line: {line[:100]}... Error: {e}")
+                    return None
             
             # 로그 파일 읽기
             # 시간 필터가 없으면 파일 끝에서 최근 N줄만 읽기 (tail과 동일하게)
@@ -1724,30 +1750,64 @@ async def get_logs(
                         # 타임스탬프가 없는 줄(예: Traceback의 일부)을 처리하기 위해
                         # 이전 줄의 타임스탬프를 상속받도록 처리
                         last_timestamp = None
+                        line_index = 0  # 줄 번호 (타임스탬프가 없을 때 순서 유지용)
                         for line in file_lines:
                             line = line.rstrip('\n\r')
                             if not line.strip():  # 빈 줄은 건너뛰기
                                 continue
                             
-                            # 타임스탬프 패턴이 있는지 먼저 확인
-                            has_timestamp = bool(timestamp_pattern.match(line) or gunicorn_timestamp_pattern.search(line))
+                            # 타임스탬프 파싱 시도
+                            timestamp = parse_timestamp(line)
                             
-                            if has_timestamp:
-                                # 타임스탬프가 있으면 파싱
-                                timestamp = parse_timestamp(line)
+                            if timestamp is not None:
+                                # 타임스탬프가 있으면 사용
                                 last_timestamp = timestamp
+                                all_log_entries.append((timestamp, line))
                             else:
                                 # 타임스탬프가 없으면 이전 줄의 타임스탬프 상속
                                 if last_timestamp is not None:
-                                    timestamp = last_timestamp
+                                    # 이전 타임스탬프가 있으면 상속
+                                    all_log_entries.append((last_timestamp, line))
                                 else:
-                                    # 첫 줄이 타임스탬프가 없으면 건너뛰기
-                                    continue
+                                    # 첫 줄이 타임스탬프가 없으면 파일 수정 시간 기반으로 추정
+                                    # 또는 줄 번호를 이용해 순서 유지 (타임스탬프는 현재 시간으로 설정)
+                                    file_mtime = os.path.getmtime(log_path)
+                                    estimated_time = datetime.fromtimestamp(file_mtime)
+                                    # 줄 번호만큼 초를 빼서 순서 유지
+                                    estimated_time = estimated_time.replace(second=max(0, estimated_time.second - line_index))
+                                    all_log_entries.append((estimated_time, line))
                             
-                            all_log_entries.append((timestamp, line))
+                            line_index += 1
             except Exception as e:
                 logging.warning(f"Could not read {log_path}: {e}")
                 return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_name}
+            
+            # 파일이 존재하고 읽을 수 있지만 로그 항목이 없는 경우
+            # (예: 타임스탬프 파싱 실패로 모든 줄이 필터링된 경우)
+            if not all_log_entries:
+                # 파일이 실제로 비어있는지 확인
+                try:
+                    with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        sample_lines = f.readlines()[:10]  # 처음 10줄만 확인
+                        non_empty_lines = [line.strip() for line in sample_lines if line.strip()]
+                        if non_empty_lines:
+                            # 파일에 내용이 있지만 파싱에 실패한 경우
+                            # 타임스탬프 없이 최근 N줄만 반환
+                            logging.warning(f"Could not parse timestamps from {log_name}, returning raw lines")
+                            with open(log_path, 'r', encoding='utf-8', errors='ignore') as f2:
+                                all_lines = f2.readlines()
+                                recent_lines = [line.rstrip('\n\r') for line in all_lines[-lines:] if line.strip()]
+                                if recent_lines:
+                                    log_content = '\n'.join(recent_lines)
+                                    return {
+                                        "status": "success",
+                                        "log_type": log_type,
+                                        "content": log_content,
+                                        "file": f"{log_name} (raw, no timestamp parsing)",
+                                        "lines": len(recent_lines)
+                                    }
+                except Exception as e:
+                    logging.debug(f"Error checking file content: {e}")
             
             if all_log_entries:
                 # 타임스탬프 기준으로 정렬 (오래된 것부터 최신 순)

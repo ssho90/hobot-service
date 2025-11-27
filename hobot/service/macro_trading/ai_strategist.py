@@ -6,7 +6,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, model_validator
 
 from service.llm import llm_gemini_pro
 from service.database.db import get_db_connection
@@ -22,15 +22,13 @@ class TargetAllocation(BaseModel):
     Alternatives: float = Field(..., ge=0, le=100, description="대체투자 비중 (%)")
     Cash: float = Field(..., ge=0, le=100, description="현금 비중 (%)")
     
-    @field_validator('*')
-    @classmethod
-    def validate_total(cls, v, info):
+    @model_validator(mode='after')
+    def validate_total(self):
         """총합이 100%인지 검증"""
-        if info.data:
-            total = sum(info.data.values())
-            if abs(total - 100.0) > 0.01:
-                raise ValueError(f"총 비중이 100%가 아닙니다. (현재: {total}%)")
-        return v
+        total = self.Stocks + self.Bonds + self.Alternatives + self.Cash
+        if abs(total - 100.0) > 0.01:
+            raise ValueError(f"총 비중이 100%가 아닙니다. (현재: {total}%)")
+        return self
 
 
 class AIStrategyDecision(BaseModel):
