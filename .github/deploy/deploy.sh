@@ -22,17 +22,21 @@ export TAVILY_API_KEY="${TAVILY_API_KEY}"
 
 # 유틸리티 함수
 log_info() {
-  echo "[INFO]" "$@"
+  local msg="$*"
+  echo "[INFO] $msg"
 }
 log_success() {
-  echo "[OK]" "$@"
+  local msg="$*"
+  echo "[OK] $msg"
 }
 log_error() {
-  echo "[ERROR]" "$@"
+  local msg="$*"
+  echo "[ERROR] $msg" >&2
   exit 1
 }
 log_warn() {
-  echo "[WARN]" "$@"
+  local msg="$*"
+  echo "[WARN] $msg"
 }
 
 # Git 업데이트
