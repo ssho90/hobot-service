@@ -41,12 +41,14 @@ Get the daily news on the following topics:
 
 # 5. LLM 호출 (tool call 포함)
 def call_llm(state: State):
-    # 프롬프트 추출
-    request_prompt = ""
-    if state["messages"]:
-        last_msg = state["messages"][-1]
-        if hasattr(last_msg, 'content'):
-            request_prompt = str(last_msg.content)
+    # 프롬프트 추출 (전체 메시지 히스토리에서)
+    request_prompt_parts = []
+    for msg in state["messages"]:
+        if hasattr(msg, 'content'):
+            role = getattr(msg, 'role', 'unknown')
+            content = str(msg.content)
+            request_prompt_parts.append(f"{role}: {content}")
+    request_prompt = "\n".join(request_prompt_parts)
     
     # LLM 호출 추적
     with track_llm_call(
@@ -101,12 +103,22 @@ Summarize the following news by category. 주어진 뉴스들 중 카테고리�
 *Translate the summary into Korean. Don't include the English original text, only the Korean summary.
 """
     
+    # 프롬프트 추출 (전체 메시지 히스토리 + 요약 프롬프트)
+    request_prompt_parts = []
+    for msg in state["messages"]:
+        if hasattr(msg, 'content'):
+            role = getattr(msg, 'role', 'unknown')
+            content = str(msg.content)
+            request_prompt_parts.append(f"{role}: {content}")
+    request_prompt_parts.append(f"user: {summary_prompt}")
+    request_prompt = "\n".join(request_prompt_parts)
+    
     # LLM 호출 추적
     with track_llm_call(
         model_name="gpt-4o-mini",
         provider="OpenAI",
         service_name="daily_news_agent_summarize",
-        request_prompt=summary_prompt
+        request_prompt=request_prompt
     ) as tracker:
         summary = llm.invoke([
             *state["messages"],

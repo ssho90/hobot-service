@@ -100,16 +100,19 @@ def gpt(messages: List[ChatMessage], temperature: float = 0.5) -> str:
     try:
         prepared_messages = _prepare_llm_messages(messages)
         
-        # 프롬프트 추출 (요청 메시지에서)
-        request_prompt = ""
-        if messages:
-            last_msg = messages[-1]
-            if isinstance(last_msg.get('content'), str):
-                request_prompt = last_msg['content']
-            elif isinstance(last_msg.get('content'), list):
+        # 프롬프트 추출 (전체 메시지 히스토리에서)
+        request_prompt_parts = []
+        for msg in messages:
+            role = msg.get('role', 'unknown')
+            content = msg.get('content', '')
+            if isinstance(content, str):
+                request_prompt_parts.append(f"{role}: {content}")
+            elif isinstance(content, list):
                 # 멀티모달 메시지인 경우 텍스트 부분만 추출
-                text_parts = [part.get('text', '') for part in last_msg['content'] if part.get('type') == 'text']
-                request_prompt = ' '.join(text_parts)
+                text_parts = [part.get('text', '') for part in content if part.get('type') == 'text']
+                if text_parts:
+                    request_prompt_parts.append(f"{role}: {' '.join(text_parts)}")
+        request_prompt = "\n".join(request_prompt_parts)
 
         # 모델명과 제공자 가져오기
         model_name = st.session_state.get('llm_model', 'unknown')
@@ -170,16 +173,19 @@ def gpt_stream(messages: List[ChatMessage], temperature: float = 0.5):
     try:
         prepared_messages = _prepare_llm_messages(messages)
         
-        # 프롬프트 추출 (요청 메시지에서)
-        request_prompt = ""
-        if messages:
-            last_msg = messages[-1]
-            if isinstance(last_msg.get('content'), str):
-                request_prompt = last_msg['content']
-            elif isinstance(last_msg.get('content'), list):
+        # 프롬프트 추출 (전체 메시지 히스토리에서)
+        request_prompt_parts = []
+        for msg in messages:
+            role = msg.get('role', 'unknown')
+            content = msg.get('content', '')
+            if isinstance(content, str):
+                request_prompt_parts.append(f"{role}: {content}")
+            elif isinstance(content, list):
                 # 멀티모달 메시지인 경우 텍스트 부분만 추출
-                text_parts = [part.get('text', '') for part in last_msg['content'] if part.get('type') == 'text']
-                request_prompt = ' '.join(text_parts)
+                text_parts = [part.get('text', '') for part in content if part.get('type') == 'text']
+                if text_parts:
+                    request_prompt_parts.append(f"{role}: {' '.join(text_parts)}")
+        request_prompt = "\n".join(request_prompt_parts)
 
         # 모델명과 제공자 가져오기
         model_name = st.session_state.get('llm_model', 'unknown')
