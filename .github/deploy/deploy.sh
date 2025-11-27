@@ -104,8 +104,8 @@ setup_python_env() {
   
   # 의존성 설치
   log_info "Installing dependencies..."
-  ${PYTHON_CMD} -m pip install --upgrade pip || true
-  ${PYTHON_CMD} -m pip install -r requirements.txt
+  ${PYTHON_CMD} -m pip install --upgrade pip >&2 || true
+  ${PYTHON_CMD} -m pip install -r requirements.txt >&2
   
   # gunicorn 확인
   if ! ${PYTHON_CMD} -m gunicorn --version &>/dev/null; then
@@ -148,7 +148,9 @@ deploy_backend() {
   
   # 전략 초기화
   log_info "Initializing strategies..."
-  ${PYTHON_CMD} service/utils/init_strategy_pause.py
+  if ! ${PYTHON_CMD} service/utils/init_strategy_pause.py >&2; then
+    log_error "Failed to initialize strategies"
+  fi
   
   mkdir -p logs
   
