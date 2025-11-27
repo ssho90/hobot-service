@@ -508,12 +508,6 @@ const LLMMonitoringPage = () => {
                 <p><strong>응답 시간:</strong> {selectedLog.duration_ms ? `${selectedLog.duration_ms}ms` : '-'}</p>
               </div>
               <div className="detail-section">
-                <h3>토큰 사용량</h3>
-                <p><strong>프롬프트 토큰:</strong> {formatNumber(selectedLog.prompt_tokens)}</p>
-                <p><strong>완료 토큰:</strong> {formatNumber(selectedLog.completion_tokens)}</p>
-                <p><strong>총 토큰:</strong> {formatNumber(selectedLog.total_tokens)}</p>
-              </div>
-              <div className="detail-section">
                 <h3>요청 프롬프트</h3>
                 <pre className="prompt-box">
                   {selectedLog.request_prompt || '-'}
