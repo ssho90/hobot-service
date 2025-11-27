@@ -20,14 +20,14 @@ export OPENAI_API_KEY="${OPENAI_API_KEY}"
 export GEMINI_API_KEY="${GEMINI_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
 
-# 유틸리티 함수
+# 유틸리티 함수 (모든 로그는 stderr로 출력하여 변수 할당에 영향을 주지 않도록)
 log_info() {
   local msg="$*"
-  echo "[INFO] $msg"
+  echo "[INFO] $msg" >&2
 }
 log_success() {
   local msg="$*"
-  echo "[OK] $msg"
+  echo "[OK] $msg" >&2
 }
 log_error() {
   local msg="$*"
@@ -36,7 +36,7 @@ log_error() {
 }
 log_warn() {
   local msg="$*"
-  echo "[WARN] $msg"
+  echo "[WARN] $msg" >&2
 }
 
 # Git 업데이트
