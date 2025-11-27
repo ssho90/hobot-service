@@ -21,10 +21,19 @@ export GEMINI_API_KEY="${GEMINI_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
 
 # 유틸리티 함수
-log_info() { echo "[INFO] $*"; }
-log_success() { echo "[OK] $*"; }
-log_error() { echo "[ERROR] $*"; exit 1; }
-log_warn() { echo "[WARN] $*"; }
+log_info() {
+  echo "[INFO] $*"
+}
+log_success() {
+  echo "[OK] $*"
+}
+log_error() {
+  echo "[ERROR] $*"
+  exit 1
+}
+log_warn() {
+  echo "[WARN] $*"
+}
 
 # Git 업데이트
 update_repository() {
