@@ -1829,12 +1829,39 @@ async def get_logs(
         logging.error(f"Error getting logs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/llm-monitoring/options")
+async def get_llm_monitoring_options():
+    """LLM 모니터링 필터 옵션 조회 (모델명, 서비스명 목록)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 고유한 모델명 목록 조회
+            cursor.execute("SELECT DISTINCT model_name FROM llm_usage_logs ORDER BY model_name")
+            models = [row['model_name'] for row in cursor.fetchall()]
+            
+            # 고유한 서비스명 목록 조회
+            cursor.execute("SELECT DISTINCT service_name FROM llm_usage_logs WHERE service_name IS NOT NULL ORDER BY service_name")
+            services = [row['service_name'] for row in cursor.fetchall()]
+            
+            return {
+                "status": "success",
+                "models": models,
+                "services": services
+            }
+    except Exception as e:
+        logging.error(f"LLM 모니터링 옵션 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/llm-monitoring/logs")
 async def get_llm_monitoring_logs(
     limit: int = Query(default=100, ge=1, le=1000, description="조회할 로그 수"),
     offset: int = Query(default=0, ge=0, description="오프셋"),
-    model_name: Optional[str] = Query(default=None, description="모델명 필터"),
-    service_name: Optional[str] = Query(default=None, description="서비스명 필터"),
+    model_name: Optional[str] = Query(default=None, description="모델명 필터 (All 또는 특정 모델명)"),
+    service_name: Optional[str] = Query(default=None, description="서비스명 필터 (All 또는 특정 서비스명)"),
     start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)")
 ):
@@ -1850,20 +1877,28 @@ async def get_llm_monitoring_logs(
             conditions = []
             params = []
             
-            if model_name:
+            if model_name and model_name.lower() != 'all':
                 conditions.append("model_name = %s")
                 params.append(model_name)
             
-            if service_name:
+            if service_name and service_name.lower() != 'all':
                 conditions.append("service_name = %s")
                 params.append(service_name)
             
             if start_date:
-                conditions.append("DATE(created_at) >= %s")
+                # 날짜 형식이 시간까지 포함되어 있는지 확인
+                if ' ' in start_date or 'T' in start_date:
+                    conditions.append("created_at >= %s")
+                else:
+                    conditions.append("DATE(created_at) >= %s")
                 params.append(start_date)
             
             if end_date:
-                conditions.append("DATE(created_at) <= %s")
+                # 날짜 형식이 시간까지 포함되어 있는지 확인
+                if ' ' in end_date or 'T' in end_date:
+                    conditions.append("created_at <= %s")
+                else:
+                    conditions.append("DATE(created_at) <= %s")
                 params.append(end_date)
             
             where_clause = " AND ".join(conditions) if conditions else "1=1"
@@ -1910,25 +1945,56 @@ async def get_llm_monitoring_logs(
 async def get_llm_token_usage(
     start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)"),
-    group_by: str = Query(default="day", description="그룹화 기준 (day, model, service)")
+    group_by: str = Query(default="day", description="그룹화 기준 (day, model, service)"),
+    model_name: Optional[str] = Query(default=None, description="모델명 필터 (All 또는 특정 모델명)"),
+    service_name: Optional[str] = Query(default=None, description="서비스명 필터 (All 또는 특정 서비스명)")
 ):
     """LLM 토큰 사용량 통계 조회 (일자별, 모델별, 서비스별)"""
     try:
         from service.database.db import get_db_connection
         from datetime import datetime, timedelta
         
-        # 기본값: 최근 30일
+        # 기본값: 최근 1시간
         if not start_date:
-            start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
         if not end_date:
-            end_date = datetime.now().strftime('%Y-%m-%d')
+            end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
             
+            # WHERE 조건 구성
+            conditions = []
+            params = []
+            
+            # 날짜 조건 (시간 포함)
+            if ' ' in start_date:
+                conditions.append("created_at >= %s")
+            else:
+                conditions.append("DATE(created_at) >= %s")
+            params.append(start_date)
+            
+            if ' ' in end_date:
+                conditions.append("created_at <= %s")
+            else:
+                conditions.append("DATE(created_at) <= %s")
+            params.append(end_date)
+            
+            # 모델명 필터
+            if model_name and model_name.lower() != 'all':
+                conditions.append("model_name = %s")
+                params.append(model_name)
+            
+            # 서비스명 필터
+            if service_name and service_name.lower() != 'all':
+                conditions.append("service_name = %s")
+                params.append(service_name)
+            
+            where_clause = " AND ".join(conditions) if conditions else "1=1"
+            
             if group_by == "day":
                 # 일자별 토큰 사용량
-                query = """
+                query = f"""
                     SELECT 
                         DATE(created_at) as date,
                         model_name,
@@ -1938,14 +2004,14 @@ async def get_llm_token_usage(
                         SUM(total_tokens) as total_tokens,
                         COUNT(*) as request_count
                     FROM llm_usage_logs
-                    WHERE DATE(created_at) >= %s AND DATE(created_at) <= %s
+                    WHERE {where_clause}
                     GROUP BY DATE(created_at), model_name, provider
                     ORDER BY date DESC, model_name
                 """
-                cursor.execute(query, (start_date, end_date))
+                cursor.execute(query, params)
             elif group_by == "model":
                 # 모델별 토큰 사용량
-                query = """
+                query = f"""
                     SELECT 
                         model_name,
                         provider,
@@ -1955,14 +2021,14 @@ async def get_llm_token_usage(
                         COUNT(*) as request_count,
                         AVG(duration_ms) as avg_duration_ms
                     FROM llm_usage_logs
-                    WHERE DATE(created_at) >= %s AND DATE(created_at) <= %s
+                    WHERE {where_clause}
                     GROUP BY model_name, provider
                     ORDER BY total_tokens DESC
                 """
-                cursor.execute(query, (start_date, end_date))
+                cursor.execute(query, params)
             elif group_by == "service":
                 # 서비스별 토큰 사용량
-                query = """
+                query = f"""
                     SELECT 
                         service_name,
                         SUM(prompt_tokens) as total_prompt_tokens,
@@ -1971,11 +2037,11 @@ async def get_llm_token_usage(
                         COUNT(*) as request_count,
                         AVG(duration_ms) as avg_duration_ms
                     FROM llm_usage_logs
-                    WHERE DATE(created_at) >= %s AND DATE(created_at) <= %s
+                    WHERE {where_clause}
                     GROUP BY service_name
                     ORDER BY total_tokens DESC
                 """
-                cursor.execute(query, (start_date, end_date))
+                cursor.execute(query, params)
             else:
                 raise HTTPException(status_code=400, detail="Invalid group_by. Must be: day, model, or service")
             

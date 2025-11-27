@@ -8,14 +8,87 @@ const LLMMonitoringPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedLog, setSelectedLog] = useState(null);
+  const [models, setModels] = useState([]);
+  const [services, setServices] = useState([]);
   const [filters, setFilters] = useState({
-    model_name: '',
-    service_name: '',
+    model_name: 'All',
+    service_name: 'All',
     start_date: '',
     end_date: ''
   });
+  const [timeRange, setTimeRange] = useState('1hour'); // 기본값: 1시간
   const [groupBy, setGroupBy] = useState('day');
   const { getAuthHeaders } = useAuth();
+
+  // 필터 옵션 조회 (모델명, 서비스명 목록)
+  const fetchOptions = useCallback(async () => {
+    try {
+      const response = await fetch('/api/llm-monitoring/options', {
+        headers: getAuthHeaders()
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setModels(data.models || []);
+        setServices(data.services || []);
+      }
+    } catch (err) {
+      console.error('필터 옵션 조회 실패:', err);
+    }
+  }, [getAuthHeaders]);
+
+  // 날짜 범위 계산 함수
+  const calculateDateRange = (range) => {
+    const now = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+      case '5min':
+        startDate = new Date(now.getTime() - 5 * 60 * 1000);
+        break;
+      case '10min':
+        startDate = new Date(now.getTime() - 10 * 60 * 1000);
+        break;
+      case '15min':
+        startDate = new Date(now.getTime() - 15 * 60 * 1000);
+        break;
+      case '30min':
+        startDate = new Date(now.getTime() - 30 * 60 * 1000);
+        break;
+      case '1hour':
+        startDate = new Date(now.getTime() - 60 * 60 * 1000);
+        break;
+      case '1day':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '1week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '1month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(now.getTime() - 60 * 60 * 1000);
+    }
+
+    endDate = now;
+
+    return {
+      start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
+      end_date: endDate.toISOString().slice(0, 19).replace('T', ' ')
+    };
+  };
+
+  // 초기화: 필터 옵션 조회 및 기본 날짜 범위 설정
+  useEffect(() => {
+    fetchOptions();
+    const dateRange = calculateDateRange('1hour');
+    setFilters(prev => ({
+      ...prev,
+      start_date: dateRange.start_date,
+      end_date: dateRange.end_date
+    }));
+  }, [fetchOptions]);
 
   // 로그 조회
   const fetchLogs = useCallback(async () => {
@@ -26,8 +99,12 @@ const LLMMonitoringPage = () => {
         offset: '0'
       });
       
-      if (filters.model_name) params.append('model_name', filters.model_name);
-      if (filters.service_name) params.append('service_name', filters.service_name);
+      if (filters.model_name && filters.model_name !== 'All') {
+        params.append('model_name', filters.model_name);
+      }
+      if (filters.service_name && filters.service_name !== 'All') {
+        params.append('service_name', filters.service_name);
+      }
       if (filters.start_date) params.append('start_date', filters.start_date);
       if (filters.end_date) params.append('end_date', filters.end_date);
 
@@ -57,6 +134,12 @@ const LLMMonitoringPage = () => {
       
       if (filters.start_date) params.append('start_date', filters.start_date);
       if (filters.end_date) params.append('end_date', filters.end_date);
+      if (filters.model_name && filters.model_name !== 'All') {
+        params.append('model_name', filters.model_name);
+      }
+      if (filters.service_name && filters.service_name !== 'All') {
+        params.append('service_name', filters.service_name);
+      }
 
       const response = await fetch(`/api/llm-monitoring/token-usage?${params}`, {
         headers: getAuthHeaders()
@@ -71,10 +154,24 @@ const LLMMonitoringPage = () => {
     }
   }, [groupBy, filters, getAuthHeaders]);
 
+  // 필터 변경 시 자동 조회 (초기 로드 후)
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   useEffect(() => {
-    fetchLogs();
-    fetchTokenUsage();
-  }, [fetchLogs, fetchTokenUsage]);
+    if (isInitialized && filters.start_date && filters.end_date) {
+      fetchLogs();
+      fetchTokenUsage();
+    }
+  }, [filters.model_name, filters.service_name, filters.start_date, filters.end_date, groupBy, isInitialized]);
+
+  // 초기 로드
+  useEffect(() => {
+    if (filters.start_date && filters.end_date && !isInitialized) {
+      fetchLogs();
+      fetchTokenUsage();
+      setIsInitialized(true);
+    }
+  }, [filters.start_date, filters.end_date, isInitialized]);
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -86,12 +183,30 @@ const LLMMonitoringPage = () => {
   };
 
   const handleResetFilters = () => {
+    const dateRange = calculateDateRange('1hour');
+    setTimeRange('1hour');
     setFilters({
-      model_name: '',
-      service_name: '',
-      start_date: '',
-      end_date: ''
+      model_name: 'All',
+      service_name: 'All',
+      start_date: dateRange.start_date,
+      end_date: dateRange.end_date
     });
+  };
+
+  const handleTimeRangeChange = (range) => {
+    setTimeRange(range);
+    const dateRange = calculateDateRange(range);
+    const newFilters = {
+      ...filters,
+      start_date: dateRange.start_date,
+      end_date: dateRange.end_date
+    };
+    setFilters(newFilters);
+    // 날짜 범위 변경 시 즉시 조회
+    setTimeout(() => {
+      fetchLogs();
+      fetchTokenUsage();
+    }, 100);
   };
 
   const formatDate = (dateString) => {
@@ -152,40 +267,92 @@ const LLMMonitoringPage = () => {
       {/* 필터 섹션 */}
       <div className="card" style={{ marginBottom: '20px' }}>
         <h2>필터</h2>
+        
+        {/* 날짜 범위 버튼 */}
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>
+            날짜 범위
+          </label>
+          <div className="time-range-buttons">
+            <button
+              className={`time-range-btn ${timeRange === '5min' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('5min')}
+            >
+              5분
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '10min' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('10min')}
+            >
+              10분
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '15min' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('15min')}
+            >
+              15분
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '30min' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('30min')}
+            >
+              30분
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '1hour' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('1hour')}
+            >
+              1시간
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '1day' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('1day')}
+            >
+              1일
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '1week' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('1week')}
+            >
+              1주일
+            </button>
+            <button
+              className={`time-range-btn ${timeRange === '1month' ? 'active' : ''}`}
+              onClick={() => handleTimeRangeChange('1month')}
+            >
+              1달
+            </button>
+          </div>
+        </div>
+
         <div className="filter-grid">
           <div className="filter-item">
             <label>모델명</label>
-            <input
-              type="text"
+            <select
               value={filters.model_name}
               onChange={(e) => handleFilterChange('model_name', e.target.value)}
-              placeholder="예: gemini-2.5-pro"
-            />
+            >
+              <option value="All">All</option>
+              {models.map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="filter-item">
             <label>서비스명</label>
-            <input
-              type="text"
+            <select
               value={filters.service_name}
               onChange={(e) => handleFilterChange('service_name', e.target.value)}
-              placeholder="예: ai_strategist"
-            />
-          </div>
-          <div className="filter-item">
-            <label>시작 날짜</label>
-            <input
-              type="date"
-              value={filters.start_date}
-              onChange={(e) => handleFilterChange('start_date', e.target.value)}
-            />
-          </div>
-          <div className="filter-item">
-            <label>종료 날짜</label>
-            <input
-              type="date"
-              value={filters.end_date}
-              onChange={(e) => handleFilterChange('end_date', e.target.value)}
-            />
+            >
+              <option value="All">All</option>
+              {services.map((service) => (
+                <option key={service} value={service}>
+                  {service}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="filter-actions">
