@@ -5,6 +5,7 @@ from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import ToolMessage, HumanMessage
 from typing import TypedDict, Annotated
 from langgraph.graph.message import add_messages
+from service.llm_monitoring import track_llm_call
 
 load_dotenv(override=True)
 
@@ -40,8 +41,37 @@ Get the daily news on the following topics:
 
 # 5. LLM 호출 (tool call 포함)
 def call_llm(state: State):
-    answer = llm_with_tools.invoke(state["messages"])
-    return {"messages": [answer]}
+    # 프롬프트 추출
+    request_prompt = ""
+    if state["messages"]:
+        last_msg = state["messages"][-1]
+        if hasattr(last_msg, 'content'):
+            request_prompt = str(last_msg.content)
+    
+    # LLM 호출 추적
+    with track_llm_call(
+        model_name="gpt-4o-mini",
+        provider="OpenAI",
+        service_name="daily_news_agent",
+        request_prompt=request_prompt
+    ) as tracker:
+        answer = llm_with_tools.invoke(state["messages"])
+        
+        # 응답 설정
+        if hasattr(answer, 'content'):
+            tracker.set_response(str(answer.content))
+        
+        # 토큰 사용량 추출 (LangChain 응답에 포함될 수 있음)
+        if hasattr(answer, 'response_metadata') and answer.response_metadata:
+            usage = answer.response_metadata.get('token_usage', {})
+            if usage:
+                tracker.set_token_usage(
+                    prompt_tokens=usage.get('prompt_tokens', 0),
+                    completion_tokens=usage.get('completion_tokens', 0),
+                    total_tokens=usage.get('total_tokens', 0)
+                )
+        
+        return {"messages": [answer]}
 
 # 6. tool 실행 노드
 import json
@@ -59,9 +89,7 @@ def run_tool(state: State):
 
 # 7. 요약 노드
 def summarize(state: State):
-    summary = llm.invoke([
-        *state["messages"],
-        HumanMessage(content="""
+    summary_prompt = """
 Summarize the following news by category. 주어진 뉴스들 중 카테고리별로 중요하다고 생각되는 뉴스들을 5~8개씩 추려서 요약해줘.
 1. AI Technology.
 2. Blockchain Technology.
@@ -71,9 +99,35 @@ Summarize the following news by category. 주어진 뉴스들 중 카테고리�
 6. Other Technology.
 
 *Translate the summary into Korean. Don't include the English original text, only the Korean summary.
-""")
-    ])
-    return {"messages": [summary]}
+"""
+    
+    # LLM 호출 추적
+    with track_llm_call(
+        model_name="gpt-4o-mini",
+        provider="OpenAI",
+        service_name="daily_news_agent_summarize",
+        request_prompt=summary_prompt
+    ) as tracker:
+        summary = llm.invoke([
+            *state["messages"],
+            HumanMessage(content=summary_prompt)
+        ])
+        
+        # 응답 설정
+        if hasattr(summary, 'content'):
+            tracker.set_response(str(summary.content))
+        
+        # 토큰 사용량 추출
+        if hasattr(summary, 'response_metadata') and summary.response_metadata:
+            usage = summary.response_metadata.get('token_usage', {})
+            if usage:
+                tracker.set_token_usage(
+                    prompt_tokens=usage.get('prompt_tokens', 0),
+                    completion_tokens=usage.get('completion_tokens', 0),
+                    total_tokens=usage.get('total_tokens', 0)
+                )
+        
+        return {"messages": [summary]}
 
 # 8. 그래프 연결
 graph = StateGraph(State)
