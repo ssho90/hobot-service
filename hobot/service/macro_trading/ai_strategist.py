@@ -268,24 +268,42 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         
         # JSON 추출 (마크다운 코드 블록 제거)
         response_text = response_text.strip()
+        
+        # ```json 또는 ```로 시작하는 코드 블록 제거
         if response_text.startswith('```'):
-            # 코드 블록 제거
             lines = response_text.split('\n')
-            response_text = '\n'.join(lines[1:-1]) if lines[-1].startswith('```') else '\n'.join(lines[1:])
+            # 첫 번째 줄이 ```json 또는 ```로 시작하면 제거
+            if len(lines) > 1:
+                # 마지막 줄이 ```로 끝나는지 확인
+                if lines[-1].strip() == '```' or lines[-1].strip().startswith('```'):
+                    # 첫 줄과 마지막 줄 제거
+                    response_text = '\n'.join(lines[1:-1])
+                else:
+                    # 마지막 줄이 없으면 첫 줄만 제거
+                    response_text = '\n'.join(lines[1:])
         
         # JSON 파싱
         try:
             decision_data = json.loads(response_text)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             # JSON 파싱 실패 시 재시도
-            logger.warning("JSON 파싱 실패, 재시도 중...")
-            # 간단한 JSON 추출 시도
+            logger.warning(f"JSON 파싱 실패, 재시도 중... (오류: {e})")
+            logger.debug(f"응답 텍스트: {response_text[:500]}...")
+            
+            # 정규식으로 JSON 객체 추출 시도
             import re
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            # 중괄호로 시작하고 끝나는 JSON 객체 찾기
+            json_match = re.search(r'\{[\s\S]*\}', response_text, re.MULTILINE)
             if json_match:
-                decision_data = json.loads(json_match.group())
+                try:
+                    decision_data = json.loads(json_match.group())
+                    logger.info("정규식으로 JSON 추출 성공")
+                except json.JSONDecodeError as e2:
+                    logger.error(f"정규식 추출 후 JSON 파싱 실패: {e2}")
+                    raise ValueError(f"JSON 형식이 올바르지 않습니다. 원본 오류: {e}, 추출 오류: {e2}")
             else:
-                raise ValueError("JSON 형식이 올바르지 않습니다.")
+                logger.error(f"JSON 객체를 찾을 수 없습니다. 응답: {response_text[:200]}")
+                raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
         
         # Pydantic 모델로 검증
         decision = AIStrategyDecision(**decision_data)
