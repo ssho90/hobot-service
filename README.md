@@ -3,6 +3,8 @@
 > **AI 기반 거시경제 자동매매 시스템**  
 > 연준 금리, 인플레이션, 유동성 지표를 실시간 분석하여 포트폴리오를 자동으로 리밸런싱하는 지능형 투자 시스템
 
+**🌐 서비스 도메인**: [https://stockoverflow.org](https://stockoverflow.org)
+
 ---
 
 ## 💡 서비스 소개
@@ -229,28 +231,37 @@ python -m service.macro_trading.scripts.initial_data_load
 
 ## 📡 API 엔드포인트
 
+**기본 URL**: `https://stockoverflow.org`
+
 ### 거시경제 데이터
 
 - `GET /api/macro-trading/quantitative-signals`  
-  정량 시그널 조회 (장단기 금리차, 실질금리, 테일러준칙, 유동성 등)
+  정량 시그널 조회 (장단기 금리차, 실질금리, 테일러준칙, 유동성 등)  
+  예시: `https://stockoverflow.org/api/macro-trading/quantitative-signals`
 
 - `GET /api/macro-trading/economic-news?hours=24`  
-  최근 N시간 내 경제 뉴스 조회
+  최근 N시간 내 경제 뉴스 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/economic-news?hours=24`
 
 - `GET /api/macro-trading/fred-data`  
-  FRED 지표 데이터 조회
+  FRED 지표 데이터 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/fred-data?indicator_code=DGS10&days=365`
 
 ### 계좌 및 거래
 
 - `GET /api/macro-trading/account-snapshots`  
-  계좌 상태 스냅샷 조회
+  계좌 상태 스냅샷 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/account-snapshots`
 
 - `GET /api/macro-trading/rebalancing-history`  
-  리밸런싱 실행 이력 조회
+  리밸런싱 실행 이력 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/rebalancing-history`
 
 ### API 문서
-- `GET /docs` - Swagger UI
-- `GET /redoc` - ReDoc
+- `GET /docs` - Swagger UI  
+  예시: `https://stockoverflow.org/docs`
+- `GET /redoc` - ReDoc  
+  예시: `https://stockoverflow.org/redoc`
 
 ---
 
