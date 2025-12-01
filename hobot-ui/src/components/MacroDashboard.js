@@ -11,6 +11,7 @@ const MacroDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const { isAdmin, getAuthHeaders } = useAuth();
 
   // Overview 데이터 로드
@@ -88,15 +89,23 @@ const MacroDashboard = () => {
       <div className="overview-section">
         <div className="overview-header-section">
           <h2>overview</h2>
-          {isAdmin() && (
+          <div className="overview-buttons">
             <button
-              className="btn btn-primary btn-update"
-              onClick={handleManualUpdate}
-              disabled={updating || loading}
+              className="btn btn-secondary btn-history"
+              onClick={() => setShowHistoryModal(true)}
             >
-              {updating ? '분석 중...' : '수동 업데이트'}
+              지난 분석 보기
             </button>
-          )}
+            {isAdmin() && (
+              <button
+                className="btn btn-primary btn-update"
+                onClick={handleManualUpdate}
+                disabled={updating || loading}
+              >
+                {updating ? '분석 중...' : '수동 업데이트'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="card overview-card">
           {loading && <div className="loading">분석 중...</div>}
@@ -178,6 +187,13 @@ const MacroDashboard = () => {
         {subTab === 'fred' && <FredIndicatorsTab />}
         {subTab === 'news' && <EconomicNewsTab />}
       </div>
+
+      {/* 지난 분석 보기 모달 */}
+      {showHistoryModal && (
+        <AnalysisHistoryModal
+          onClose={() => setShowHistoryModal(false)}
+        />
+      )}
     </div>
   );
 };
@@ -861,6 +877,167 @@ const EconomicNewsTab = () => {
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+// 지난 분석 보기 모달 컴포넌트
+const AnalysisHistoryModal = ({ onClose }) => {
+  const [decisions, setDecisions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [daysPerPage] = useState(3);
+
+  // 분석 이력 로드
+  const fetchHistory = async (pageNum) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/macro-trading/strategy-decisions-history?page=${pageNum}&days_per_page=${daysPerPage}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success') {
+          setDecisions(data.data || []);
+          setTotalPages(data.total_pages || 1);
+        } else {
+          throw new Error(data.message || '분석 이력을 불러오는데 실패했습니다.');
+        }
+      } else {
+        throw new Error('분석 이력을 불러오는데 실패했습니다.');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching analysis history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory(page);
+  }, [page]);
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content history-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>지난 AI 분석 내용</h2>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="modal-body history-modal-body">
+          {loading && <div className="loading">로딩 중...</div>}
+          {error && <div className="error">오류: {error}</div>}
+          
+          {!loading && !error && decisions.length === 0 && (
+            <div className="no-data">분석 이력이 없습니다.</div>
+          )}
+          
+          {!loading && !error && decisions.length > 0 && (
+            <div className="history-list">
+              {decisions.map((decision) => (
+                <div key={decision.id} className="history-item">
+                  <div className="history-header">
+                    <div className="history-date">
+                      {decision.decision_date || decision.created_at}
+                    </div>
+                  </div>
+                  
+                  {decision.analysis_summary && (
+                    <div className="history-section">
+                      <h3>분석 요약</h3>
+                      <p>{decision.analysis_summary}</p>
+                    </div>
+                  )}
+                  
+                  {decision.reasoning && (
+                    <div className="history-section">
+                      <h3>판단 근거</h3>
+                      <p>{decision.reasoning}</p>
+                    </div>
+                  )}
+                  
+                  {decision.target_allocation && (
+                    <div className="history-section">
+                      <h3>목표 자산 배분</h3>
+                      <div className="allocation-grid">
+                        {decision.target_allocation.Stocks !== undefined && (
+                          <div className="allocation-item">
+                            <span className="allocation-label">주식</span>
+                            <span className="allocation-value">
+                              {decision.target_allocation.Stocks?.toFixed(1) || 0}%
+                            </span>
+                          </div>
+                        )}
+                        {decision.target_allocation.Bonds !== undefined && (
+                          <div className="allocation-item">
+                            <span className="allocation-label">채권</span>
+                            <span className="allocation-value">
+                              {decision.target_allocation.Bonds?.toFixed(1) || 0}%
+                            </span>
+                          </div>
+                        )}
+                        {decision.target_allocation.Alternatives !== undefined && (
+                          <div className="allocation-item">
+                            <span className="allocation-label">대체투자</span>
+                            <span className="allocation-value">
+                              {decision.target_allocation.Alternatives?.toFixed(1) || 0}%
+                            </span>
+                          </div>
+                        )}
+                        {decision.target_allocation.Cash !== undefined && (
+                          <div className="allocation-item">
+                            <span className="allocation-label">현금</span>
+                            <span className="allocation-value">
+                              {decision.target_allocation.Cash?.toFixed(1) || 0}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <div className="modal-footer">
+          <div className="pagination">
+            <button
+              className="pagination-btn"
+              onClick={handlePrevPage}
+              disabled={page === 1 || loading}
+            >
+              이전
+            </button>
+            <span className="pagination-info">
+              {page} / {totalPages}
+            </span>
+            <button
+              className="pagination-btn"
+              onClick={handleNextPage}
+              disabled={page >= totalPages || loading}
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

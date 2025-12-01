@@ -846,6 +846,135 @@ async def get_latest_strategy_decision():
             "message": "AI 전략 결정을 조회할 수 없습니다."
         }
 
+@api_router.get("/macro-trading/strategy-decisions-history")
+async def get_strategy_decisions_history(
+    page: int = Query(default=1, ge=1, description="페이지 번호 (기본값: 1)"),
+    days_per_page: int = Query(default=3, ge=1, le=30, description="페이지당 일수 (기본값: 3일)")
+):
+    """지난 AI 전략 결정 이력 조회 (페이징 처리)
+    
+    Args:
+        page: 페이지 번호 (1부터 시작)
+        days_per_page: 페이지당 일수 (기본값: 3일)
+    
+    Returns:
+        {
+            "status": "success",
+            "page": 1,
+            "days_per_page": 3,
+            "total_pages": 5,
+            "total_count": 15,
+            "data": [
+                {
+                    "id": 1,
+                    "decision_date": "2024-12-19 10:00:00",
+                    "analysis_summary": "...",
+                    "target_allocation": {...},
+                    ...
+                },
+                ...
+            ]
+        }
+    """
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime, timedelta
+        import json
+        
+        # 페이지 계산: 마지막 날짜부터 역순으로 계산
+        # page 1: 오늘부터 3일 전까지
+        # page 2: 3일 전부터 6일 전까지
+        # ...
+        end_date = datetime.now() - timedelta(days=(page - 1) * days_per_page)
+        start_date = end_date - timedelta(days=days_per_page)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 전체 개수 조회 (페이징 계산용)
+            cursor.execute("""
+                SELECT COUNT(*) as total_count
+                FROM ai_strategy_decisions
+            """)
+            total_count = cursor.fetchone()['total_count']
+            
+            # 해당 기간의 데이터 조회
+            cursor.execute("""
+                SELECT 
+                    id,
+                    decision_date,
+                    analysis_summary,
+                    target_allocation,
+                    quant_signals,
+                    qual_sentiment,
+                    account_pnl,
+                    created_at
+                FROM ai_strategy_decisions
+                WHERE decision_date >= %s AND decision_date < %s
+                ORDER BY decision_date DESC
+            """, (start_date, end_date))
+            
+            rows = cursor.fetchall()
+            
+            # JSON 필드 파싱
+            decisions = []
+            for row in rows:
+                target_allocation = row['target_allocation']
+                if isinstance(target_allocation, str):
+                    target_allocation = json.loads(target_allocation)
+                
+                quant_signals = row.get('quant_signals')
+                if quant_signals and isinstance(quant_signals, str):
+                    quant_signals = json.loads(quant_signals)
+                
+                qual_sentiment = row.get('qual_sentiment')
+                if qual_sentiment and isinstance(qual_sentiment, str):
+                    qual_sentiment = json.loads(qual_sentiment)
+                
+                account_pnl = row.get('account_pnl')
+                if account_pnl and isinstance(account_pnl, str):
+                    account_pnl = json.loads(account_pnl)
+                
+                # analysis_summary에서 reasoning 추출
+                analysis_summary = row.get('analysis_summary', '')
+                reasoning = None
+                if analysis_summary and '판단 근거:' in analysis_summary:
+                    parts = analysis_summary.split('판단 근거:')
+                    if len(parts) > 1:
+                        analysis_summary = parts[0].strip()
+                        reasoning = parts[1].strip()
+                
+                decisions.append({
+                    "id": row['id'],
+                    "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
+                    "analysis_summary": analysis_summary,
+                    "reasoning": reasoning,
+                    "target_allocation": target_allocation,
+                    "quant_signals": quant_signals,
+                    "qual_sentiment": qual_sentiment,
+                    "account_pnl": account_pnl,
+                    "created_at": row['created_at'].strftime("%Y-%m-%d %H:%M:%S") if row['created_at'] else None
+                })
+            
+            # 전체 페이지 수 계산 (대략적인 추정)
+            # 실제로는 날짜 기반이므로 정확하지 않을 수 있음
+            total_pages = max(1, (total_count // (days_per_page * 2) + 1))  # 하루에 2회 분석 가정
+            
+            return {
+                "status": "success",
+                "page": page,
+                "days_per_page": days_per_page,
+                "total_pages": total_pages,
+                "total_count": total_count,
+                "start_date": start_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "end_date": end_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "data": decisions
+            }
+            
+    except Exception as e:
+        logging.error(f"Error fetching strategy decisions history: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/rebalancing-history")
 async def get_rebalancing_history(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
