@@ -17,6 +17,30 @@ from service.macro_trading.ai_strategist import run_ai_analysis
 
 logger = logging.getLogger(__name__)
 
+# AI 분석 실행 중복 방지를 위한 락
+_ai_analysis_lock = threading.Lock()
+_ai_analysis_running = False
+
+def is_ai_analysis_running():
+    """AI 분석이 현재 실행 중인지 확인"""
+    return _ai_analysis_running
+
+def acquire_ai_analysis_lock():
+    """AI 분석 락 획득 (수동 실행용)"""
+    if _ai_analysis_running:
+        return False
+    if _ai_analysis_lock.acquire(blocking=False):
+        global _ai_analysis_running
+        _ai_analysis_running = True
+        return True
+    return False
+
+def release_ai_analysis_lock():
+    """AI 분석 락 해제"""
+    global _ai_analysis_running
+    _ai_analysis_running = False
+    _ai_analysis_lock.release()
+
 
 def retry_on_failure(max_retries: int = 3, delay: int = 60):
     """
@@ -310,7 +334,13 @@ def run_ai_strategy_analysis():
     """
     AI 전략 분석을 실행합니다.
     매일 08:30에 실행되도록 스케줄에 등록됩니다.
+    중복 실행을 방지하기 위해 락을 사용합니다.
     """
+    # 락 획득 시도
+    if not acquire_ai_analysis_lock():
+        logger.warning("AI 전략 분석이 이미 실행 중입니다. 중복 실행을 건너뜁니다.")
+        return False
+    
     try:
         logger.info("AI 전략 분석 실행 시작")
         success = run_ai_analysis()
@@ -322,14 +352,29 @@ def run_ai_strategy_analysis():
     except Exception as e:
         logger.error(f"AI 전략 분석 중 오류 발생: {e}", exc_info=True)
         raise
+    finally:
+        release_ai_analysis_lock()
 
 
 def setup_ai_analysis_scheduler():
     """
     AI 전략 분석 스케줄을 설정합니다.
     매일 08:30에 실행되도록 등록합니다.
+    중복 등록을 방지하기 위해 기존 스케줄을 먼저 제거합니다.
     """
     try:
+        # 기존 'ai_analysis' 태그가 있는 스케줄 제거
+        jobs = schedule.get_jobs()
+        removed_count = 0
+        for job in jobs[:]:  # 복사본을 순회하면서 제거
+            if 'ai_analysis' in job.tags:
+                schedule.cancel_job(job)
+                removed_count += 1
+                logger.debug(f"기존 AI 분석 스케줄 제거: {job}")
+        
+        if removed_count > 0:
+            logger.info(f"기존 AI 분석 스케줄 {removed_count}개를 제거했습니다.")
+        
         # 매일 08:30에 실행
         schedule.every().day.at("08:30").do(run_ai_strategy_analysis).tag('ai_analysis')
         logger.info("AI 전략 분석 스케줄 등록: 매일 08:30 KST")

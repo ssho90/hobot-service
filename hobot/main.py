@@ -754,23 +754,51 @@ async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
     """수동 AI 분석 실행 (Admin 전용)"""
     try:
         from service.macro_trading.ai_strategist import run_ai_analysis
+        from service.macro_trading.scheduler import (
+            is_ai_analysis_running,
+            acquire_ai_analysis_lock,
+            release_ai_analysis_lock
+        )
         
         logging.info(f"수동 AI 분석 실행 요청: {admin_user.get('username')}")
         
-        success = run_ai_analysis()
+        # 이미 실행 중이면 에러 반환
+        if is_ai_analysis_running():
+            raise HTTPException(
+                status_code=409,
+                detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
+            )
         
-        if success:
-            return {
-                "status": "success",
-                "message": "AI 분석이 완료되었습니다."
-            }
-        else:
-            raise HTTPException(status_code=500, detail="AI 분석 실행에 실패했습니다.")
+        # 락 획득 시도
+        if not acquire_ai_analysis_lock():
+            raise HTTPException(
+                status_code=409,
+                detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
+            )
+        
+        try:
+            success = run_ai_analysis()
+            
+            if success:
+                return {
+                    "status": "success",
+                    "message": "AI 분석이 완료되었습니다."
+                }
+            else:
+                raise HTTPException(status_code=500, detail="AI 분석 실행에 실패했습니다.")
+        finally:
+            release_ai_analysis_lock()
             
     except HTTPException:
         raise
     except Exception as e:
         logging.error(f"Error running AI analysis: {e}", exc_info=True)
+        # 락이 획득된 상태에서 에러가 발생했을 수 있으므로 해제 시도
+        try:
+            from service.macro_trading.scheduler import release_ai_analysis_lock
+            release_ai_analysis_lock()
+        except:
+            pass
         raise HTTPException(status_code=500, detail=str(e))
 
 
