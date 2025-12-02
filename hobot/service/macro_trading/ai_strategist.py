@@ -496,10 +496,31 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
             tracker.set_response(response)
         
         # 응답 파싱
-        response_text = response.content if hasattr(response, 'content') else str(response)
+        # response.content가 리스트인 경우 (예: [{'type': 'text', 'text': '...'}])
+        if hasattr(response, 'content'):
+            if isinstance(response.content, list) and len(response.content) > 0:
+                # 첫 번째 텍스트 항목 추출
+                first_item = response.content[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            elif isinstance(response.content, str):
+                response_text = response.content
+            else:
+                response_text = str(response.content)
+        elif hasattr(response, 'text'):
+            response_text = response.text
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            response_text = str(response)
         
         # JSON 추출 (마크다운 코드 블록 제거)
         response_text = response_text.strip()
+        
+        logger.debug(f"응답 텍스트 길이: {len(response_text)} 문자")
+        logger.debug(f"응답 텍스트 시작 부분: {response_text[:200]}...")
         
         # ```json 또는 ```로 시작하는 코드 블록 제거
         if response_text.startswith('```'):
@@ -538,15 +559,28 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
                 raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
         
         # Pydantic 모델로 검증
-        decision = AIStrategyDecision(**decision_data)
+        try:
+            decision = AIStrategyDecision(**decision_data)
+            logger.info(f"AI 분석 완료: {decision.analysis_summary[:50]}...")
+            return decision
+        except Exception as validation_error:
+            logger.error(f"Pydantic 모델 검증 실패: {validation_error}")
+            logger.error(f"검증 실패한 데이터: {json.dumps(decision_data, indent=2, ensure_ascii=False)}")
+            raise ValueError(f"AI 응답 데이터 검증 실패: {validation_error}")
         
-        logger.info(f"AI 분석 완료: {decision.analysis_summary[:50]}...")
-        
-        return decision
-        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 파싱 실패: {e}")
+        logger.error(f"파싱 실패한 응답 텍스트: {response_text[:1000] if 'response_text' in locals() else 'N/A'}")
+        raise
+    except ValueError as e:
+        logger.error(f"데이터 검증 실패: {e}")
+        raise
     except Exception as e:
         logger.error(f"AI 분석 실패: {e}", exc_info=True)
-        return None
+        logger.error(f"에러 타입: {type(e).__name__}")
+        if 'response_text' in locals():
+            logger.error(f"응답 텍스트 (처음 500자): {response_text[:500]}")
+        raise
 
 
 def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict, account_status: Dict) -> bool:
@@ -597,17 +631,30 @@ def run_ai_analysis():
         logger.info("=" * 60)
         
         # 데이터 수집
+        logger.info("1단계: FRED 시그널 수집 중...")
         fred_signals = collect_fred_signals()
+        if not fred_signals:
+            logger.warning("FRED 시그널 수집 실패 (None 반환)")
+        
+        logger.info("2단계: 경제 뉴스 수집 중...")
         economic_news = collect_economic_news(hours=24)  # hours 파라미터는 무시되고 항상 지난 1주일치 특정 국가 뉴스 수집
+        if not economic_news:
+            logger.warning("경제 뉴스 수집 실패 (None 반환)")
+        
+        logger.info("3단계: 계좌 현황 수집 중...")
         account_status = collect_account_status()
+        if not account_status:
+            logger.warning("계좌 현황 수집 실패 (None 반환)")
         
         # AI 분석
+        logger.info("4단계: AI 분석 및 전략 결정 중...")
         decision = analyze_and_decide()
         
         if not decision:
-            logger.error("AI 분석 실패")
+            logger.error("AI 분석 실패: analyze_and_decide()가 None 반환")
             return False
         
+        logger.info("5단계: 결과 저장 중...")
         # 결과 저장
         success = save_strategy_decision(decision, fred_signals, economic_news, account_status)
         
@@ -619,10 +666,20 @@ def run_ai_analysis():
                        f"Bonds={decision.target_allocation.Bonds}%, "
                        f"Alternatives={decision.target_allocation.Alternatives}%, "
                        f"Cash={decision.target_allocation.Cash}%")
+            if decision.recommended_stocks:
+                logger.info(f"추천 섹터: {len(decision.recommended_stocks.Stocks or [])}개 주식, "
+                           f"{len(decision.recommended_stocks.Bonds or [])}개 채권, "
+                           f"{len(decision.recommended_stocks.Alternatives or [])}개 대체투자, "
+                           f"{len(decision.recommended_stocks.Cash or [])}개 현금")
             logger.info("=" * 60)
+        else:
+            logger.error("결과 저장 실패")
         
         return success
         
     except Exception as e:
         logger.error(f"AI 분석 실행 실패: {e}", exc_info=True)
+        logger.error(f"에러 타입: {type(e).__name__}")
+        import traceback
+        logger.error(f"전체 traceback:\n{traceback.format_exc()}")
         return False
