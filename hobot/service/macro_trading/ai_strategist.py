@@ -497,12 +497,16 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         
         # 응답 파싱
         # response.content가 리스트인 경우 (예: [{'type': 'text', 'text': '...'}])
+        response_text = None
         if hasattr(response, 'content'):
             if isinstance(response.content, list) and len(response.content) > 0:
                 # 첫 번째 텍스트 항목 추출
                 first_item = response.content[0]
                 if isinstance(first_item, dict) and 'text' in first_item:
                     response_text = first_item['text']
+                elif isinstance(first_item, dict) and 'type' in first_item and first_item.get('type') == 'text':
+                    # 'text' 키가 없지만 'type'이 'text'인 경우
+                    response_text = str(first_item.get('text', ''))
                 else:
                     response_text = str(first_item)
             elif isinstance(response.content, str):
@@ -515,6 +519,21 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
             response_text = response
         else:
             response_text = str(response)
+        
+        # response_text가 여전히 리스트인 경우 처리
+        if isinstance(response_text, list):
+            if len(response_text) > 0:
+                first_item = response_text[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            else:
+                response_text = ""
+        
+        # 문자열이 아닌 경우 문자열로 변환
+        if not isinstance(response_text, str):
+            response_text = str(response_text)
         
         # JSON 추출 (마크다운 코드 블록 제거)
         response_text = response_text.strip()
