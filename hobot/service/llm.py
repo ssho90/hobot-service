@@ -31,7 +31,7 @@ def llm_gemini_pro(model="gemini-2.5-pro"):
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=0,
-        timeout=120,
+        timeout=None,
         max_retries=2,
         transport='rest'
     )
@@ -45,7 +45,7 @@ def llm_gemini_flash(model="gemini-2.5-flash"):
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=0.5,
-        timeout=120,
+        timeout=None,
         max_retries=2,
     )
 
