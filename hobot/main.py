@@ -757,7 +757,14 @@ async def get_ai_overview():
 
 @api_router.post("/macro-trading/run-ai-analysis")
 async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
-    """수동 AI 분석 실행 (Admin 전용)"""
+    """수동 AI 분석 실행 (Admin 전용)
+    
+    백그라운드에서 실행되며 즉시 응답을 반환합니다.
+    분석 완료 여부는 /api/macro-trading/overview API로 확인할 수 있습니다.
+    """
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+    
     try:
         from service.macro_trading.ai_strategist import run_ai_analysis
         from service.macro_trading.scheduler import (
@@ -766,7 +773,8 @@ async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
             release_ai_analysis_lock
         )
         
-        logging.info(f"수동 AI 분석 실행 요청: {admin_user.get('username')}")
+        username = admin_user.get('username', 'unknown')
+        logging.info(f"수동 AI 분석 실행 요청: {username}")
         
         # 이미 실행 중이면 에러 반환
         if is_ai_analysis_running():
@@ -782,23 +790,39 @@ async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
                 detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
             )
         
-        try:
-            success = run_ai_analysis()
-            
-            if success:
-                return {
-                    "status": "success",
-                    "message": "AI 분석이 완료되었습니다."
-                }
-            else:
-                raise HTTPException(status_code=500, detail="AI 분석 실행에 실패했습니다.")
-        finally:
-            release_ai_analysis_lock()
+        # 백그라운드에서 실행
+        def run_analysis_background():
+            try:
+                logging.info(f"[백그라운드] AI 분석 시작 - 사용자: {username}")
+                success = run_ai_analysis()
+                if success:
+                    logging.info(f"[백그라운드] AI 분석 완료 - 사용자: {username}")
+                else:
+                    logging.error(f"[백그라운드] AI 분석 실패 - 사용자: {username}")
+            except Exception as e:
+                logging.error(f"[백그라운드] AI 분석 중 오류 발생 - 사용자: {username}, 오류: {e}", exc_info=True)
+            finally:
+                try:
+                    release_ai_analysis_lock()
+                    logging.info(f"[백그라운드] 락 해제 완료 - 사용자: {username}")
+                except Exception as release_error:
+                    logging.error(f"[백그라운드] 락 해제 실패: {release_error}")
+        
+        # 별도 스레드에서 실행
+        executor = ThreadPoolExecutor(max_workers=1)
+        executor.submit(run_analysis_background)
+        executor.shutdown(wait=False)  # wait=False로 즉시 반환
+        
+        # 즉시 응답 반환
+        return {
+            "status": "accepted",
+            "message": "AI 분석이 백그라운드에서 시작되었습니다. 완료되면 /api/macro-trading/overview에서 결과를 확인할 수 있습니다."
+        }
             
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f"Error running AI analysis: {e}", exc_info=True)
+        logging.error(f"Error starting AI analysis: {e}", exc_info=True)
         # 락이 획득된 상태에서 에러가 발생했을 수 있으므로 해제 시도
         try:
             from service.macro_trading.scheduler import release_ai_analysis_lock
