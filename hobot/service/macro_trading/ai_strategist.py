@@ -61,9 +61,16 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
 
 
 def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
-    """경제 뉴스 수집"""
+    """
+    경제 뉴스 수집
+    지난 1주일간 특정 국가의 뉴스만 수집합니다.
+    """
     try:
-        cutoff_time = datetime.now() - timedelta(hours=hours)
+        # 지난 1주일 (7일) 기준으로 cutoff_time 설정
+        cutoff_time = datetime.now() - timedelta(days=7)
+        
+        # AI 분석에 사용할 국가 목록
+        target_countries = ['Crypto', 'Commodity', 'Euro Area', 'China', 'United States']
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -84,9 +91,9 @@ def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
                     source
                 FROM economic_news
                 WHERE published_at >= %s
+                  AND country IN (%s, %s, %s, %s, %s)
                 ORDER BY published_at DESC
-                LIMIT 50
-            """, (cutoff_time,))
+            """, (cutoff_time, *target_countries))
             
             news = cursor.fetchall()
             
@@ -97,9 +104,12 @@ def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
                 if item.get('collected_at'):
                     item['collected_at'] = item['collected_at'].strftime('%Y-%m-%d %H:%M:%S')
             
+            logger.info(f"경제 뉴스 수집 완료: 지난 1주일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
+            
             return {
                 "total_count": len(news),
-                "hours": hours,
+                "days": 7,
+                "target_countries": target_countries,
                 "news": news
             }
     except Exception as e:
@@ -168,6 +178,10 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
     # 경제 뉴스 요약
     news_summary = "\n=== 경제 뉴스 (비중 낮게 참고) ===\n"
     if economic_news and economic_news.get('news'):
+        target_countries = economic_news.get('target_countries', [])
+        total_count = economic_news.get('total_count', 0)
+        days = economic_news.get('days', 7)
+        news_summary += f"지난 {days}일간 {', '.join(target_countries)} 국가 뉴스 {total_count}개\n\n"
         news_list = economic_news['news'][:10]  # 최근 10개만
         for news in news_list:
             news_summary += f"- [{news.get('country', 'N/A')}] {news.get('title', 'N/A')}\n"
@@ -237,8 +251,8 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         logger.info("FRED 시그널 수집 중...")
         fred_signals = collect_fred_signals()
         
-        logger.info("경제 뉴스 수집 중...")
-        economic_news = collect_economic_news(hours=24)
+        logger.info("경제 뉴스 수집 중... (지난 1주일, 특정 국가 필터)")
+        economic_news = collect_economic_news(hours=24)  # hours 파라미터는 무시되고 항상 7일치 수집
         
         logger.info("계좌 현황 수집 중...")
         account_status = collect_account_status()
@@ -362,7 +376,7 @@ def run_ai_analysis():
         
         # 데이터 수집
         fred_signals = collect_fred_signals()
-        economic_news = collect_economic_news(hours=24)
+        economic_news = collect_economic_news(hours=24)  # hours 파라미터는 무시되고 항상 지난 1주일치 특정 국가 뉴스 수집
         account_status = collect_account_status()
         
         # AI 분석
