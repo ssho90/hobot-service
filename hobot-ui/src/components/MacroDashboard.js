@@ -158,6 +158,68 @@ const MacroDashboard = () => {
                   </div>
                 </div>
               )}
+              
+              {overviewData.recommended_stocks && (
+                <div className="recommended-stocks">
+                  <h3>추천 종목</h3>
+                  {overviewData.recommended_stocks.Stocks && overviewData.recommended_stocks.Stocks.length > 0 && (
+                    <div className="recommended-stocks-section">
+                      <h4>주식 (Stocks)</h4>
+                      <div className="recommended-stocks-list">
+                        {overviewData.recommended_stocks.Stocks.map((stock, idx) => (
+                          <div key={idx} className="recommended-stock-item">
+                            <span className="stock-name">{stock.name}</span>
+                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {overviewData.recommended_stocks.Bonds && overviewData.recommended_stocks.Bonds.length > 0 && (
+                    <div className="recommended-stocks-section">
+                      <h4>채권 (Bonds)</h4>
+                      <div className="recommended-stocks-list">
+                        {overviewData.recommended_stocks.Bonds.map((stock, idx) => (
+                          <div key={idx} className="recommended-stock-item">
+                            <span className="stock-name">{stock.name}</span>
+                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {overviewData.recommended_stocks.Alternatives && overviewData.recommended_stocks.Alternatives.length > 0 && (
+                    <div className="recommended-stocks-section">
+                      <h4>대체투자 (Alternatives)</h4>
+                      <div className="recommended-stocks-list">
+                        {overviewData.recommended_stocks.Alternatives.map((stock, idx) => (
+                          <div key={idx} className="recommended-stock-item">
+                            <span className="stock-name">{stock.name}</span>
+                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {overviewData.recommended_stocks.Cash && overviewData.recommended_stocks.Cash.length > 0 && (
+                    <div className="recommended-stocks-section">
+                      <h4>현금 (Cash)</h4>
+                      <div className="recommended-stocks-list">
+                        {overviewData.recommended_stocks.Cash.map((stock, idx) => (
+                          <div key={idx} className="recommended-stock-item">
+                            <span className="stock-name">{stock.name}</span>
+                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

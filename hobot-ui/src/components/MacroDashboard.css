@@ -231,6 +231,72 @@
   color: #2196F3;
 }
 
+.recommended-stocks {
+  margin-top: 30px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.recommended-stocks h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.recommended-stocks-section {
+  margin-bottom: 20px;
+}
+
+.recommended-stocks-section:last-child {
+  margin-bottom: 0;
+}
+
+.recommended-stocks-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #555;
+  font-weight: 600;
+}
+
+.recommended-stocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommended-stock-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.recommended-stock-item .stock-name {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.recommended-stock-item .stock-ticker {
+  font-size: 12px;
+  color: #666;
+  font-family: monospace;
+}
+
+.recommended-stock-item .stock-weight {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
+}
+
 .info-note {
   padding: 20px;
   background: #e3f2fd;
@@ -405,19 +471,13 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   max-width: 900px;
   width: 90%;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  max-height: 95vh;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .history-modal {
   max-width: 1000px;
-  width: 85%;
-  max-height: 95vh;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .modal-header {
@@ -455,28 +515,27 @@
 
 .modal-body {
   flex: 1;
+  overflow-y: auto;
   padding: 20px;
-  min-height: 0;
-  overflow: visible;
 }
 
 .history-modal-body {
-  padding: 20px;
-  min-height: 0;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
   display: flex;
-  flex-direction: column;
-  overflow: visible;
+  justify-content: center;
 }
 
 /* 페이징 스타일 */
 .pagination {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 15px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
 }
 
 .pagination-btn {
@@ -507,9 +566,10 @@
 }
 
 /* 지난 분석 이력 스타일 */
-.history-content {
+.history-list {
   display: flex;
   flex-direction: column;
+  gap: 25px;
 }
 
 .history-item {
@@ -518,7 +578,6 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   transition: box-shadow 0.3s;
-  flex: 1;
 }
 
 .history-item:hover {

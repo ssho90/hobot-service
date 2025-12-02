@@ -31,11 +31,25 @@ class TargetAllocation(BaseModel):
         return self
 
 
+class RecommendedStock(BaseModel):
+    """추천 종목 모델"""
+    ticker: str = Field(..., description="ETF 티커")
+    name: str = Field(..., description="ETF 이름")
+    weight: float = Field(..., ge=0, le=1, description="자산군 내 비중 (0-1)")
+
+class RecommendedStocks(BaseModel):
+    """자산군별 추천 종목 모델"""
+    Stocks: Optional[List[RecommendedStock]] = Field(default=None, description="주식 추천 종목")
+    Bonds: Optional[List[RecommendedStock]] = Field(default=None, description="채권 추천 종목")
+    Alternatives: Optional[List[RecommendedStock]] = Field(default=None, description="대체투자 추천 종목")
+    Cash: Optional[List[RecommendedStock]] = Field(default=None, description="현금 추천 종목")
+
 class AIStrategyDecision(BaseModel):
     """AI 전략 결정 결과 모델"""
     analysis_summary: str = Field(..., description="AI 분석 요약")
     target_allocation: TargetAllocation = Field(..., description="목표 자산 배분")
     reasoning: str = Field(..., description="판단 근거")
+    recommended_stocks: Optional[RecommendedStocks] = Field(default=None, description="자산군별 추천 종목")
 
 
 def collect_fred_signals() -> Optional[Dict[str, Any]]:
@@ -200,6 +214,74 @@ def collect_account_status() -> Optional[Dict[str, Any]]:
         return None
 
 
+def get_available_etf_list() -> Dict[str, List[Dict]]:
+    """사용 가능한 ETF 목록 조회 (DB 우선, 없으면 설정 파일)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        # 먼저 DB에서 조회
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT asset_class, ticker, name, weight
+                FROM asset_class_details
+                WHERE is_active = TRUE
+                ORDER BY asset_class, weight DESC
+            """)
+            rows = cursor.fetchall()
+            
+            if rows:
+                result = {
+                    "stocks": [],
+                    "bonds": [],
+                    "alternatives": [],
+                    "cash": []
+                }
+                for row in rows:
+                    asset_class = row["asset_class"]
+                    if asset_class in result:
+                        result[asset_class].append({
+                            "ticker": row["ticker"],
+                            "name": row["name"],
+                            "weight": float(row["weight"])
+                        })
+                return result
+    except Exception as e:
+        logger.warning(f"DB에서 ETF 목록 조회 실패: {e}")
+    
+    # DB 조회 실패 시 설정 파일에서 로드
+    try:
+        from service.macro_trading.config.config_loader import get_config
+        config = get_config()
+        etf_mapping = config.etf_mapping
+        
+        result = {
+            "stocks": [],
+            "bonds": [],
+            "alternatives": [],
+            "cash": []
+        }
+        
+        for asset_class, mapping in etf_mapping.items():
+            if asset_class in result:
+                for ticker, name, weight in zip(mapping.tickers, mapping.names, mapping.weights):
+                    result[asset_class].append({
+                        "ticker": ticker,
+                        "name": name,
+                        "weight": weight
+                    })
+        
+        return result
+    except Exception as e:
+        logger.warning(f"설정 파일에서 ETF 목록 로드 실패: {e}")
+        return {
+            "stocks": [],
+            "bonds": [],
+            "alternatives": [],
+            "cash": []
+        }
+
+
 def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_status: Dict) -> str:
     """AI 분석용 프롬프트 생성"""
     
@@ -308,6 +390,21 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
     else:
         account_summary += "계좌 정보 없음\n"
     
+    # 사용 가능한 ETF 목록
+    available_etfs = get_available_etf_list()
+    etf_list_summary = "\n=== 사용 가능한 ETF 목록 ===\n"
+    for asset_class, etfs in available_etfs.items():
+        if etfs:
+            asset_class_kr = {
+                "stocks": "주식",
+                "bonds": "채권",
+                "alternatives": "대체투자",
+                "cash": "현금"
+            }.get(asset_class, asset_class)
+            etf_list_summary += f"\n{asset_class_kr} ({asset_class}):\n"
+            for etf in etfs:
+                etf_list_summary += f"  - 티커: {etf['ticker']}, 이름: {etf['name']}, 기본 비중: {etf['weight']*100:.1f}%\n"
+    
     prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 자산 배분 전략을 결정하세요.
 
 {fred_summary}
@@ -315,6 +412,8 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
 {news_summary}
 
 {account_summary}
+
+{etf_list_summary}
 
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
@@ -335,8 +434,33 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
         "Alternatives": 20.0,
         "Cash": 10.0
     }},
-    "reasoning": "판단 근거 (한국어, 300-500자)"
+    "reasoning": "판단 근거 (한국어, 300-500자)",
+    "recommended_stocks": {{
+        "Stocks": [
+            {{"ticker": "360750", "name": "TIGER 미국 S&P500", "weight": 0.333}},
+            {{"ticker": "133690", "name": "TIGER 미국나스닥100", "weight": 0.333}},
+            {{"ticker": "069500", "name": "KODEX 200", "weight": 0.334}}
+        ],
+        "Bonds": [
+            {{"ticker": "티커", "name": "ETF 이름", "weight": 0.5}},
+            {{"ticker": "티커", "name": "ETF 이름", "weight": 0.5}}
+        ],
+        "Alternatives": [
+            {{"ticker": "132030", "name": "KODEX 골드선물(H)", "weight": 0.7}},
+            {{"ticker": "138230", "name": "KODEX 미국달러선물", "weight": 0.3}}
+        ],
+        "Cash": [
+            {{"ticker": "130730", "name": "TIGER CD금리투자KIS", "weight": 0.5}},
+            {{"ticker": "114260", "name": "KODEX KOFR금리액티브", "weight": 0.5}}
+        ]
+    }}
 }}
+
+**추천 종목 규칙:**
+- 각 자산군별로 위의 "사용 가능한 ETF 목록"에서 선택하세요.
+- 각 자산군 내 추천 종목의 weight 합계는 1.0이어야 합니다.
+- 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
+- Stocks, Bonds, Alternatives, Cash 각 자산군별로 최소 1개 이상의 종목을 추천하세요 (해당 자산군 비중이 0%가 아닌 경우).
 
 JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
 """
@@ -447,14 +571,16 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl
-                ) VALUES (%s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 datetime.now(),
                 analysis_summary_with_reasoning,
                 json.dumps(decision.target_allocation.model_dump()),
+                json.dumps(decision.recommended_stocks.model_dump()) if decision.recommended_stocks else None,
                 json.dumps(fred_signals) if fred_signals else None,
                 json.dumps(economic_news) if economic_news else None,
                 json.dumps(account_status) if account_status else None

@@ -270,6 +270,30 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='LLM 사용 로그'
         """)
         
+        # AI 전략 결정 이력 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ai_strategy_decisions (
+                id INT PRIMARY KEY AUTO_INCREMENT COMMENT '고유 ID',
+                decision_date DATETIME NOT NULL COMMENT '의사결정 일시',
+                analysis_summary TEXT COMMENT 'AI 분석 요약',
+                target_allocation JSON NOT NULL COMMENT '목표 자산 배분 (Stocks, Bonds, Alternatives, Cash)',
+                recommended_stocks JSON COMMENT '자산군별 추천 종목',
+                quant_signals JSON COMMENT '정량 시그널 데이터 (장단기 금리차, 실질 금리, 테일러 준칙 등)',
+                qual_sentiment JSON COMMENT '정성 분석 데이터 (연준 발표문 요약, 경제 이벤트 등)',
+                account_pnl JSON COMMENT '계좌 손익 데이터 (자산군별 손익률)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                INDEX idx_decision_date (decision_date) COMMENT '의사결정 일시 인덱스 (최신 조회용)',
+                INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI 전략 결정 이력'
+        """)
+        
+        # recommended_stocks 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE ai_strategy_decisions ADD COLUMN recommended_stocks JSON COMMENT '자산군별 추천 종목'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
+        
         conn.commit()
 
 

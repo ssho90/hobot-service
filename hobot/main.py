@@ -704,6 +704,7 @@ async def get_ai_overview():
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     created_at
                 FROM ai_strategy_decisions
                 ORDER BY decision_date DESC
@@ -724,6 +725,10 @@ async def get_ai_overview():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks and isinstance(recommended_stocks, str):
+                recommended_stocks = json.loads(recommended_stocks)
+            
             # analysis_summary에서 reasoning 추출 (판단 근거: 이후 텍스트)
             analysis_summary = row['analysis_summary'] or ''
             reasoning = ''
@@ -740,6 +745,7 @@ async def get_ai_overview():
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
                     "target_allocation": target_allocation,
+                    "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
                 }
             }
@@ -817,6 +823,7 @@ async def get_latest_strategy_decision():
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl,
@@ -840,6 +847,10 @@ async def get_latest_strategy_decision():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks and isinstance(recommended_stocks, str):
+                recommended_stocks = json.loads(recommended_stocks)
+            
             quant_signals = row.get('quant_signals')
             if quant_signals and isinstance(quant_signals, str):
                 quant_signals = json.loads(quant_signals)
@@ -859,6 +870,7 @@ async def get_latest_strategy_decision():
                     "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
                     "analysis_summary": row.get('analysis_summary'),
                     "target_allocation": target_allocation,
+                    "recommended_stocks": recommended_stocks,
                     "quant_signals": quant_signals,
                     "qual_sentiment": qual_sentiment,
                     "account_pnl": account_pnl,
@@ -920,6 +932,7 @@ async def get_strategy_decisions_history(
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl,
@@ -944,6 +957,10 @@ async def get_strategy_decisions_history(
             target_allocation = row['target_allocation']
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
+            
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks and isinstance(recommended_stocks, str):
+                recommended_stocks = json.loads(recommended_stocks)
             
             quant_signals = row.get('quant_signals')
             if quant_signals and isinstance(quant_signals, str):
@@ -972,6 +989,7 @@ async def get_strategy_decisions_history(
                 "analysis_summary": analysis_summary,
                 "reasoning": reasoning,
                 "target_allocation": target_allocation,
+                "recommended_stocks": recommended_stocks,
                 "quant_signals": quant_signals,
                 "qual_sentiment": qual_sentiment,
                 "account_pnl": account_pnl,
