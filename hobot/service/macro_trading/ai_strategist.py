@@ -42,10 +42,68 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
     """FRED 정량 시그널 수집"""
     try:
         from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+        from service.macro_trading.collectors.fred_collector import get_fred_collector
         
         calculator = QuantSignalCalculator()
         signals = calculator.calculate_all_signals()
         additional_indicators = calculator.get_additional_indicators()
+        
+        # 추가 지표: Core PCE, CPI, 실업률, 비농업 고용의 지난 10개 데이터
+        fred_collector = get_fred_collector()
+        inflation_employment_data = {}
+        
+        # Core PCE (PCEPILFE - Personal Consumption Expenditures Price Index, Less Food and Energy)
+        try:
+            pcepilfe_data = fred_collector.get_latest_data("PCEPILFE", days=365)
+            if len(pcepilfe_data) > 0:
+                # 최근 10개 데이터 (날짜와 값)
+                latest_10 = pcepilfe_data.tail(10)
+                inflation_employment_data["core_pce"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"Core PCE 데이터 수집 실패: {e}")
+            inflation_employment_data["core_pce"] = []
+        
+        # CPI (CPIAUCSL)
+        try:
+            cpi_data = fred_collector.get_latest_data("CPIAUCSL", days=365)
+            if len(cpi_data) > 0:
+                latest_10 = cpi_data.tail(10)
+                inflation_employment_data["cpi"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"CPI 데이터 수집 실패: {e}")
+            inflation_employment_data["cpi"] = []
+        
+        # 실업률 (UNRATE)
+        try:
+            unrate_data = fred_collector.get_latest_data("UNRATE", days=365)
+            if len(unrate_data) > 0:
+                latest_10 = unrate_data.tail(10)
+                inflation_employment_data["unemployment_rate"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"실업률 데이터 수집 실패: {e}")
+            inflation_employment_data["unemployment_rate"] = []
+        
+        # 비농업 고용 (PAYEMS)
+        try:
+            payems_data = fred_collector.get_latest_data("PAYEMS", days=365)
+            if len(payems_data) > 0:
+                latest_10 = payems_data.tail(10)
+                inflation_employment_data["nonfarm_payroll"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"비농업 고용 데이터 수집 실패: {e}")
+            inflation_employment_data["nonfarm_payroll"] = []
         
         return {
             "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
@@ -53,7 +111,8 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
             "taylor_rule_signal": signals.get("taylor_rule_signal"),
             "net_liquidity": signals.get("net_liquidity"),
             "high_yield_spread": signals.get("high_yield_spread"),
-            "additional_indicators": additional_indicators
+            "additional_indicators": additional_indicators,
+            "inflation_employment_data": inflation_employment_data
         }
     except Exception as e:
         logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
@@ -174,6 +233,49 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
             signal_name = hy_spread.get('signal_name', 'N/A')
             spread_val = hy_spread.get('spread', 'N/A')
             fred_summary += f"하이일드 스프레드: {signal_name} ({spread_val}%)\n"
+        
+        # 물가 및 고용 지표 (지난 10개 데이터)
+        inflation_employment = fred_signals.get('inflation_employment_data', {})
+        if inflation_employment:
+            fred_summary += "\n=== 물가 지표 (지난 10개 데이터) ===\n"
+            
+            # Core PCE
+            core_pce = inflation_employment.get('core_pce', [])
+            if core_pce:
+                fred_summary += "Core PCE (Personal Consumption Expenditures Price Index):\n"
+                for item in core_pce:
+                    fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
+            else:
+                fred_summary += "Core PCE: 데이터 없음\n"
+            
+            # CPI
+            cpi = inflation_employment.get('cpi', [])
+            if cpi:
+                fred_summary += "\nCPI (Consumer Price Index):\n"
+                for item in cpi:
+                    fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
+            else:
+                fred_summary += "\nCPI: 데이터 없음\n"
+            
+            fred_summary += "\n=== 고용 지표 (지난 10개 데이터) ===\n"
+            
+            # 실업률
+            unrate = inflation_employment.get('unemployment_rate', [])
+            if unrate:
+                fred_summary += "실업률 (Unemployment Rate, %):\n"
+                for item in unrate:
+                    fred_summary += f"  {item['date']}: {item['value']:.2f}%\n"
+            else:
+                fred_summary += "실업률: 데이터 없음\n"
+            
+            # 비농업 고용
+            payroll = inflation_employment.get('nonfarm_payroll', [])
+            if payroll:
+                fred_summary += "\n비농업 고용 (Nonfarm Payroll, Thousands):\n"
+                for item in payroll:
+                    fred_summary += f"  {item['date']}: {item['value']:,.0f}\n"
+            else:
+                fred_summary += "\n비농업 고용: 데이터 없음\n"
     
     # 경제 뉴스 요약
     news_summary = "\n=== 경제 뉴스 (비중 낮게 참고) ===\n"
