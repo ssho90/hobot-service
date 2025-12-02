@@ -430,6 +430,10 @@ def start_news_scheduler_thread():
     return scheduler_thread
 
 
+# 스케줄러가 이미 시작되었는지 추적
+_scheduler_thread_started = False
+_scheduler_thread = None
+
 def start_all_schedulers():
     """
     모든 스케줄러를 시작합니다.
@@ -437,9 +441,23 @@ def start_all_schedulers():
     주의: schedule 라이브러리는 전역 상태를 사용하므로,
     모든 스케줄을 하나의 스레드에서 실행하는 것이 더 효율적입니다.
     
+    중복 실행 방지: 이미 스케줄러가 시작되었다면 다시 시작하지 않습니다.
+    
     Returns:
         List[threading.Thread]: 스케줄러 스레드 리스트
     """
+    global _scheduler_thread_started, _scheduler_thread
+    
+    # 이미 스케줄러가 시작되었다면 기존 스레드 반환
+    if _scheduler_thread_started and _scheduler_thread is not None:
+        if _scheduler_thread.is_alive():
+            logger.warning("스케줄러가 이미 실행 중입니다. 중복 실행을 건너뜁니다.")
+            return [_scheduler_thread]
+        else:
+            # 스레드가 죽었다면 다시 시작
+            logger.warning("스케줄러 스레드가 종료되었습니다. 다시 시작합니다.")
+            _scheduler_thread_started = False
+    
     threads = []
     
     # 먼저 모든 스케줄을 설정
@@ -469,13 +487,14 @@ def start_all_schedulers():
     
     # 하나의 통합 스케줄러 스레드에서 모든 스케줄 실행
     try:
-        scheduler_thread = threading.Thread(
+        _scheduler_thread = threading.Thread(
             target=run_scheduler,
             name="UnifiedScheduler",
             daemon=True
         )
-        scheduler_thread.start()
-        threads.append(scheduler_thread)
+        _scheduler_thread.start()
+        threads.append(_scheduler_thread)
+        _scheduler_thread_started = True
         logger.info("통합 스케줄러 스레드가 시작되었습니다.")
     except Exception as e:
         logger.error(f"스케줄러 스레드 시작 실패: {e}")

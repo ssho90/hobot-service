@@ -2297,15 +2297,25 @@ app.include_router(api_router)
 # ============================================
 # 애플리케이션 시작 시 초기화
 # ============================================
+_schedulers_started = False  # 스케줄러가 이미 시작되었는지 추적
+
 @app.on_event("startup")
 async def startup_event():
     """애플리케이션 시작 시 실행되는 이벤트"""
+    global _schedulers_started
+    
+    # 이미 스케줄러가 시작되었다면 중복 실행 방지
+    if _schedulers_started:
+        logging.warning("스케줄러가 이미 시작되어 있습니다. 중복 실행을 건너뜁니다.")
+        return
+    
     logging.info("Hobot 애플리케이션 시작 중...")
     
     # 모든 스케줄러 시작 (FRED 데이터 수집 + 뉴스 수집)
     try:
         from service.macro_trading.scheduler import start_all_schedulers
         threads = start_all_schedulers()
+        _schedulers_started = True
         logging.info(f"모든 스케줄러가 시작되었습니다. (총 {len(threads)}개 스레드)")
     except Exception as e:
         logging.error(f"스케줄러 시작 실패: {e}", exc_info=True)
