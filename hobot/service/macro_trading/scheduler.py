@@ -27,10 +27,10 @@ def is_ai_analysis_running():
 
 def acquire_ai_analysis_lock():
     """AI 분석 락 획득 (수동 실행용)"""
+    global _ai_analysis_running
     if _ai_analysis_running:
         return False
     if _ai_analysis_lock.acquire(blocking=False):
-        global _ai_analysis_running
         _ai_analysis_running = True
         return True
     return False
