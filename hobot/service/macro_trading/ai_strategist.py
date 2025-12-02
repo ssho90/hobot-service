@@ -1,6 +1,6 @@
 """
 AI 전략가 모듈
-Gemini 2.5 Pro를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
+Gemini 3 Pro Preview를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
 """
 import json
 import logging
@@ -32,9 +32,10 @@ class TargetAllocation(BaseModel):
 
 
 class RecommendedStock(BaseModel):
-    """추천 종목 모델"""
-    ticker: str = Field(..., description="ETF 티커")
-    name: str = Field(..., description="ETF 이름")
+    """추천 종목/섹터 모델"""
+    category: str = Field(..., description="카테고리/섹터 (예: '미국 대형주', '테크 섹터', '금', '미국 장기채권' 등)")
+    ticker: Optional[str] = Field(default=None, description="특정 ETF 티커 (선택적, 특정 종목을 추천하는 경우에만)")
+    name: Optional[str] = Field(default=None, description="ETF 이름 또는 설명 (선택적)")
     weight: float = Field(..., ge=0, le=1, description="자산군 내 비중 (0-1)")
 
 class RecommendedStocks(BaseModel):
@@ -390,21 +391,6 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
     else:
         account_summary += "계좌 정보 없음\n"
     
-    # 사용 가능한 ETF 목록
-    available_etfs = get_available_etf_list()
-    etf_list_summary = "\n=== 사용 가능한 ETF 목록 ===\n"
-    for asset_class, etfs in available_etfs.items():
-        if etfs:
-            asset_class_kr = {
-                "stocks": "주식",
-                "bonds": "채권",
-                "alternatives": "대체투자",
-                "cash": "현금"
-            }.get(asset_class, asset_class)
-            etf_list_summary += f"\n{asset_class_kr} ({asset_class}):\n"
-            for etf in etfs:
-                etf_list_summary += f"  - 티커: {etf['ticker']}, 이름: {etf['name']}, 기본 비중: {etf['weight']*100:.1f}%\n"
-    
     prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 자산 배분 전략을 결정하세요.
 
 {fred_summary}
@@ -412,8 +398,6 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
 {news_summary}
 
 {account_summary}
-
-{etf_list_summary}
 
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
@@ -437,30 +421,35 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
     "reasoning": "판단 근거 (한국어, 300-500자)",
     "recommended_stocks": {{
         "Stocks": [
-            {{"ticker": "360750", "name": "TIGER 미국 S&P500", "weight": 0.333}},
-            {{"ticker": "133690", "name": "TIGER 미국나스닥100", "weight": 0.333}},
-            {{"ticker": "069500", "name": "KODEX 200", "weight": 0.334}}
+            {{"category": "미국 대형주", "weight": 0.4}},
+            {{"category": "테크 섹터", "weight": 0.3}},
+            {{"category": "한국 주식", "weight": 0.3}}
         ],
         "Bonds": [
-            {{"ticker": "티커", "name": "ETF 이름", "weight": 0.5}},
-            {{"ticker": "티커", "name": "ETF 이름", "weight": 0.5}}
+            {{"category": "미국 장기채권", "weight": 0.6}},
+            {{"category": "한국 단기채권", "weight": 0.4}}
         ],
         "Alternatives": [
-            {{"ticker": "132030", "name": "KODEX 골드선물(H)", "weight": 0.7}},
-            {{"ticker": "138230", "name": "KODEX 미국달러선물", "weight": 0.3}}
+            {{"category": "금", "weight": 0.7}},
+            {{"category": "달러", "weight": 0.3}}
         ],
         "Cash": [
-            {{"ticker": "130730", "name": "TIGER CD금리투자KIS", "weight": 0.5}},
-            {{"ticker": "114260", "name": "KODEX KOFR금리액티브", "weight": 0.5}}
+            {{"category": "현금성 자산", "weight": 1.0}}
         ]
     }}
 }}
 
-**추천 종목 규칙:**
-- 각 자산군별로 위의 "사용 가능한 ETF 목록"에서 선택하세요.
-- 각 자산군 내 추천 종목의 weight 합계는 1.0이어야 합니다.
+**추천 종목/섹터 규칙:**
+- 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 특정 종목을 콕 집어 추천할 필요는 없습니다.
+- 섹터별 추천 예시:
+  - Stocks: "미국 대형주", "테크 섹터", "한국 주식", "유럽 주식", "신흥국 주식", "배당주" 등
+  - Bonds: "미국 장기채권", "미국 단기채권", "한국 채권", "회사채" 등
+  - Alternatives: "금", "달러", "원유", "부동산" 등
+  - Cash: "현금성 자산", "단기 예금" 등
+- 각 자산군 내 추천 카테고리의 weight 합계는 1.0이어야 합니다.
 - 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
-- Stocks, Bonds, Alternatives, Cash 각 자산군별로 최소 1개 이상의 종목을 추천하세요 (해당 자산군 비중이 0%가 아닌 경우).
+- 특정 ETF를 추천하고 싶은 경우에만 ticker와 name을 포함하세요 (선택적).
+- Stocks, Bonds, Alternatives, Cash 각 자산군별로 최소 1개 이상의 카테고리를 추천하세요 (해당 자산군 비중이 0%가 아닌 경우).
 
 JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
 """
@@ -486,13 +475,18 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         # 프롬프트 생성
         prompt = create_analysis_prompt(fred_signals, economic_news, account_status)
         
+        # 설정에서 모델명 가져오기
+        from service.macro_trading.config.config_loader import get_config
+        config = get_config()
+        model_name = config.llm.model
+        
         # LLM 호출
-        logger.info("Gemini 2.5 Pro 분석 중...")
-        llm = llm_gemini_pro()
+        logger.info(f"Gemini {model_name} 분석 중...")
+        llm = llm_gemini_pro(model=model_name)
         
         # LLM 호출 추적
         with track_llm_call(
-            model_name="gemini-2.5-pro",
+            model_name=model_name,
             provider="Google",
             service_name="ai_strategist",
             request_prompt=prompt

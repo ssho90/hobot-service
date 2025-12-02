@@ -161,15 +161,20 @@ const MacroDashboard = () => {
               
               {overviewData.recommended_stocks && (
                 <div className="recommended-stocks">
-                  <h3>추천 종목</h3>
+                  <h3>추천 섹터/카테고리</h3>
                   {overviewData.recommended_stocks.Stocks && overviewData.recommended_stocks.Stocks.length > 0 && (
                     <div className="recommended-stocks-section">
                       <h4>주식 (Stocks)</h4>
                       <div className="recommended-stocks-list">
                         {overviewData.recommended_stocks.Stocks.map((stock, idx) => (
                           <div key={idx} className="recommended-stock-item">
-                            <span className="stock-name">{stock.name}</span>
-                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-category">{stock.category || stock.name || 'N/A'}</span>
+                            {stock.ticker && (
+                              <span className="stock-ticker">({stock.ticker})</span>
+                            )}
+                            {stock.name && stock.name !== stock.category && (
+                              <span className="stock-name"> - {stock.name}</span>
+                            )}
                             <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
                           </div>
                         ))}
@@ -182,8 +187,13 @@ const MacroDashboard = () => {
                       <div className="recommended-stocks-list">
                         {overviewData.recommended_stocks.Bonds.map((stock, idx) => (
                           <div key={idx} className="recommended-stock-item">
-                            <span className="stock-name">{stock.name}</span>
-                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-category">{stock.category || stock.name || 'N/A'}</span>
+                            {stock.ticker && (
+                              <span className="stock-ticker">({stock.ticker})</span>
+                            )}
+                            {stock.name && stock.name !== stock.category && (
+                              <span className="stock-name"> - {stock.name}</span>
+                            )}
                             <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
                           </div>
                         ))}
@@ -196,8 +206,13 @@ const MacroDashboard = () => {
                       <div className="recommended-stocks-list">
                         {overviewData.recommended_stocks.Alternatives.map((stock, idx) => (
                           <div key={idx} className="recommended-stock-item">
-                            <span className="stock-name">{stock.name}</span>
-                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-category">{stock.category || stock.name || 'N/A'}</span>
+                            {stock.ticker && (
+                              <span className="stock-ticker">({stock.ticker})</span>
+                            )}
+                            {stock.name && stock.name !== stock.category && (
+                              <span className="stock-name"> - {stock.name}</span>
+                            )}
                             <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
                           </div>
                         ))}
@@ -210,8 +225,13 @@ const MacroDashboard = () => {
                       <div className="recommended-stocks-list">
                         {overviewData.recommended_stocks.Cash.map((stock, idx) => (
                           <div key={idx} className="recommended-stock-item">
-                            <span className="stock-name">{stock.name}</span>
-                            <span className="stock-ticker">({stock.ticker})</span>
+                            <span className="stock-category">{stock.category || stock.name || 'N/A'}</span>
+                            {stock.ticker && (
+                              <span className="stock-ticker">({stock.ticker})</span>
+                            )}
+                            {stock.name && stock.name !== stock.category && (
+                              <span className="stock-name"> - {stock.name}</span>
+                            )}
                             <span className="stock-weight">{((stock.weight || 0) * 100).toFixed(1)}%</span>
                           </div>
                         ))}
