@@ -63,7 +63,7 @@ const MacroDashboard = () => {
   const fetchHistoryData = async (page = 1) => {
     setHistoryLoading(true);
     try {
-      const response = await fetch(`/api/macro-trading/strategy-decisions-history?page=${page}`);
+      const response = await fetch(`/api/macro-trading/strategy-decisions-history?page=${page}&limit=1`);
       if (response.ok) {
         const result = await response.json();
         if (result.status === 'success' && result.data) {

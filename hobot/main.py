@@ -840,7 +840,7 @@ async def get_latest_strategy_decision():
 @api_router.get("/macro-trading/strategy-decisions-history")
 async def get_strategy_decisions_history(
     page: int = Query(default=1, ge=1, description="페이지 번호"),
-    limit: int = Query(default=10, ge=1, le=100, description="페이지당 항목 수")
+    limit: int = Query(default=1, ge=1, le=100, description="페이지당 항목 수")
 ):
     """AI 전략 결정 이력 조회 (페이지네이션)"""
     try:
