@@ -574,24 +574,25 @@
   width: 90%;
   display: flex;
   flex-direction: column;
-  max-height: 85vh;
-  overflow: hidden;
-  margin-top: 60px;
+  max-height: 90vh;
+  overflow: visible;
+  margin: 60px auto;
 }
 
 .ai-info-modal {
   max-width: 800px;
   width: 90%;
-  max-height: 85vh;
-  margin-top: 60px;
+  max-height: 90vh;
+  margin: 60px auto;
+  overflow: visible;
 }
 
 .history-modal {
   max-width: 1000px;
   width: 85%;
-  max-height: 95vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  max-height: 90vh;
+  overflow: visible;
+  margin: 60px auto;
 }
 
 .modal-header {
@@ -633,6 +634,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  max-height: calc(90vh - 100px);
 }
 
 .history-modal-body {
@@ -640,7 +642,9 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(90vh - 100px);
 }
 
 /* 페이징 스타일 */
@@ -855,11 +859,11 @@
 .ai-info-modal {
   max-width: 800px;
   width: 90%;
-  max-height: 85vh;
-  margin-top: 60px;
+  max-height: 90vh;
+  margin: 60px auto;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .ai-info-content {
