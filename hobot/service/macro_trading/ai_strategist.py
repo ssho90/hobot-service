@@ -283,7 +283,7 @@ def get_available_etf_list() -> Dict[str, List[Dict]]:
         }
 
 
-def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_status: Dict) -> str:
+def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     """AI 분석용 프롬프트 생성"""
     
     # FRED 시그널 요약
@@ -376,32 +376,15 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
     else:
         news_summary += "최근 뉴스 없음\n"
     
-    # 계좌 현황 요약
-    account_summary = "\n=== 계좌 현황 (비중 낮게 참고) ===\n"
-    if account_status:
-        total = account_status.get('total_eval_amount', 0)
-        account_summary += f"총 평가금액: {total:,} 원\n"
-        
-        asset_info = account_status.get('asset_class_info', {})
-        for asset_class, info in asset_info.items():
-            if isinstance(info, dict):
-                total_eval = info.get('total_eval_amount', 0)
-                pnl_rate = info.get('total_pnl_rate', 0)
-                account_summary += f"{asset_class}: {total_eval:,} 원 (수익률: {pnl_rate:.2f}%)\n"
-    else:
-        account_summary += "계좌 정보 없음\n"
-    
     prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 자산 배분 전략을 결정하세요.
 
 {fred_summary}
 
 {news_summary}
 
-{account_summary}
-
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
-2. **경제 뉴스와 계좌 현황은 보조적으로만** 참고하세요. 비중을 낮게 두세요.
+2. **경제 뉴스는 보조적으로만** 참고하세요. 비중을 낮게 두세요.
 3. 자산군별 비중을 결정하세요:
    - Stocks (주식): 0-100%
    - Bonds (채권): 0-100%
@@ -469,11 +452,8 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         logger.info("경제 뉴스 수집 중... (지난 1주일, 특정 국가 필터)")
         economic_news = collect_economic_news(hours=24)  # hours 파라미터는 무시되고 항상 7일치 수집
         
-        logger.info("계좌 현황 수집 중...")
-        account_status = collect_account_status()
-        
         # 프롬프트 생성
-        prompt = create_analysis_prompt(fred_signals, economic_news, account_status)
+        prompt = create_analysis_prompt(fred_signals, economic_news)
         
         # 설정에서 모델명 가져오기
         from service.macro_trading.config.config_loader import get_config
@@ -602,7 +582,7 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         raise
 
 
-def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict, account_status: Dict) -> bool:
+def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict) -> bool:
     """전략 결정 결과를 DB에 저장"""
     try:
         with get_db_connection() as conn:
@@ -630,7 +610,7 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                 json.dumps(decision.recommended_stocks.model_dump()) if decision.recommended_stocks else None,
                 json.dumps(fred_signals) if fred_signals else None,
                 json.dumps(economic_news) if economic_news else None,
-                json.dumps(account_status) if account_status else None
+                None  # account_pnl은 더 이상 사용하지 않음
             ))
             
             conn.commit()
@@ -660,22 +640,17 @@ def run_ai_analysis():
         if not economic_news:
             logger.warning("경제 뉴스 수집 실패 (None 반환)")
         
-        logger.info("3단계: 계좌 현황 수집 중...")
-        account_status = collect_account_status()
-        if not account_status:
-            logger.warning("계좌 현황 수집 실패 (None 반환)")
-        
         # AI 분석
-        logger.info("4단계: AI 분석 및 전략 결정 중...")
+        logger.info("3단계: AI 분석 및 전략 결정 중...")
         decision = analyze_and_decide()
         
         if not decision:
             logger.error("AI 분석 실패: analyze_and_decide()가 None 반환")
             return False
         
-        logger.info("5단계: 결과 저장 중...")
+        logger.info("4단계: 결과 저장 중...")
         # 결과 저장
-        success = save_strategy_decision(decision, fred_signals, economic_news, account_status)
+        success = save_strategy_decision(decision, fred_signals, economic_news)
         
         if success:
             logger.info("=" * 60)

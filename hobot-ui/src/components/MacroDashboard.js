@@ -390,14 +390,6 @@ const MacroDashboard = () => {
                       </ul>
                     </div>
 
-                    <div className="data-source-item">
-                      <h4>3. 계좌 현황</h4>
-                      <ul>
-                        <li>현재 포트폴리오의 총 평가금액</li>
-                        <li>자산군별(주식, 채권, 대체투자, 현금) 보유 비중</li>
-                        <li>자산군별 손익 현황</li>
-                      </ul>
-                    </div>
                   </div>
                 </section>
 
@@ -406,7 +398,7 @@ const MacroDashboard = () => {
                   <ol className="process-steps">
                     <li>
                       <strong>데이터 수집</strong>
-                      <p>FRED API에서 최신 거시경제 지표를 수집하고, TradingEconomics에서 경제 뉴스를 수집하며, KIS API로 계좌 현황을 조회합니다.</p>
+                      <p>FRED API에서 최신 거시경제 지표와 물가 지표를 수집하고, TradingEconomics에서 경제 뉴스를 수집합니다.</p>
                     </li>
                     <li>
                       <strong>시그널 계산</strong>
