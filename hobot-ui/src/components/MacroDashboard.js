@@ -569,38 +569,37 @@ const MacroDashboard = () => {
               ) : (
                 <div className="no-data">분석 데이터가 없습니다.</div>
               )}
-              
-              {/* 페이징 */}
-              {historyTotalPages > 1 && (
-                <div className="pagination">
-                  <button
-                    className="pagination-btn"
-                    onClick={() => {
-                      const newPage = Math.max(1, historyPage - 1);
-                      setHistoryPage(newPage);
-                      fetchHistoryData(newPage);
-                    }}
-                    disabled={historyPage === 1}
-                  >
-                    이전
-                  </button>
-                  <span className="pagination-info">
-                    {historyPage} / {historyTotalPages}
-                  </span>
-                  <button
-                    className="pagination-btn"
-                    onClick={() => {
-                      const newPage = Math.min(historyTotalPages, historyPage + 1);
-                      setHistoryPage(newPage);
-                      fetchHistoryData(newPage);
-                    }}
-                    disabled={historyPage === historyTotalPages}
-                  >
-                    다음
-                  </button>
-                </div>
-              )}
             </div>
+            {/* 페이징 - 모달 body 밖으로 이동 */}
+            {historyTotalPages > 1 && (
+              <div className="pagination">
+                <button
+                  className="pagination-btn"
+                  onClick={() => {
+                    const newPage = Math.max(1, historyPage - 1);
+                    setHistoryPage(newPage);
+                    fetchHistoryData(newPage);
+                  }}
+                  disabled={historyPage === 1}
+                >
+                  이전
+                </button>
+                <span className="pagination-info">
+                  {historyPage} / {historyTotalPages}
+                </span>
+                <button
+                  className="pagination-btn"
+                  onClick={() => {
+                    const newPage = Math.min(historyTotalPages, historyPage + 1);
+                    setHistoryPage(newPage);
+                    fetchHistoryData(newPage);
+                  }}
+                  disabled={historyPage === historyTotalPages}
+                >
+                  다음
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
