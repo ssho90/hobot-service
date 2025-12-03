@@ -212,7 +212,18 @@ const LLMMonitoringPage = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('ko-KR');
+    // UTC 시간을 KST(UTC+9)로 변환
+    const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+    // KST 시간을 한국어 형식으로 포맷팅 (예: 2025. 12. 1. 오후 11:31:22)
+    const year = kstDate.getUTCFullYear();
+    const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kstDate.getUTCDate()).padStart(2, '0');
+    const hours24 = kstDate.getUTCHours();
+    const hours12 = hours24 > 12 ? hours24 - 12 : (hours24 === 0 ? 12 : hours24);
+    const ampm = hours24 >= 12 ? '오후' : '오전';
+    const minutes = String(kstDate.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(kstDate.getUTCSeconds()).padStart(2, '0');
+    return `${year}. ${month}. ${day}. ${ampm} ${hours12}:${minutes}:${seconds}`;
   };
 
   const formatNumber = (num) => {
