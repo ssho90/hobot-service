@@ -779,11 +779,30 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
 
   // 장단기 금리차 차트 렌더링
   useEffect(() => {
-    if (!yieldSpreadData || !chartContainerRef?.current) {
+    console.log('[OtherIndicatorsCharts] Yield spread chart effect triggered', {
+      hasYieldSpreadData: !!yieldSpreadData,
+      hasChartContainer: !!chartContainerRef?.current,
+      spreadDataLength: yieldSpreadData?.spread_data?.length,
+      ma20Length: yieldSpreadData?.ma20?.length,
+      ma120Length: yieldSpreadData?.ma120?.length,
+    });
+
+    if (!yieldSpreadData) {
+      console.log('[OtherIndicatorsCharts] No yield spread data, cleaning up chart');
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
       }
+      return;
+    }
+
+    if (!chartContainerRef?.current) {
+      console.log('[OtherIndicatorsCharts] Chart container not ready yet');
+      return;
+    }
+
+    if (!yieldSpreadData.spread_data || yieldSpreadData.spread_data.length === 0) {
+      console.warn('[OtherIndicatorsCharts] Spread data is empty');
       return;
     }
 
@@ -792,7 +811,15 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
     }
 
     const timer = setTimeout(() => {
-      if (!chartContainerRef.current) return;
+      if (!chartContainerRef.current) {
+        console.warn('[OtherIndicatorsCharts] Chart container is null after timeout');
+        return;
+      }
+
+      console.log('[OtherIndicatorsCharts] Creating chart', {
+        containerWidth: chartContainerRef.current.clientWidth,
+        spreadDataCount: yieldSpreadData.spread_data.length,
+      });
 
       const chart = createChart(chartContainerRef.current, {
         layout: {
@@ -829,28 +856,44 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         lineWidth: 1,
       });
 
-      const spreadData = yieldSpreadData.spread_data.map(item => ({
-        time: item.date,
-        value: item.value,
-      }));
-
-      const ma20Data = yieldSpreadData.ma20
-        .filter(item => item.value !== null)
+      const spreadData = yieldSpreadData.spread_data
+        .filter(item => item && item.date && item.value !== null && item.value !== undefined)
         .map(item => ({
           time: item.date,
-          value: item.value,
+          value: parseFloat(item.value),
         }));
 
-      const ma120Data = yieldSpreadData.ma120
-        .filter(item => item.value !== null)
+      const ma20Data = (yieldSpreadData.ma20 || [])
+        .filter(item => item && item.value !== null && item.value !== undefined && item.date)
         .map(item => ({
           time: item.date,
-          value: item.value,
+          value: parseFloat(item.value),
         }));
 
-      spreadSeries.setData(spreadData);
-      ma20Series.setData(ma20Data);
-      ma120Series.setData(ma120Data);
+      const ma120Data = (yieldSpreadData.ma120 || [])
+        .filter(item => item && item.value !== null && item.value !== undefined && item.date)
+        .map(item => ({
+          time: item.date,
+          value: parseFloat(item.value),
+        }));
+
+      console.log('[OtherIndicatorsCharts] Chart data prepared', {
+        spreadDataCount: spreadData.length,
+        ma20Count: ma20Data.length,
+        ma120Count: ma120Data.length,
+        firstSpreadItem: spreadData[0],
+        lastSpreadItem: spreadData[spreadData.length - 1],
+      });
+
+      if (spreadData.length > 0) {
+        spreadSeries.setData(spreadData);
+      }
+      if (ma20Data.length > 0) {
+        ma20Series.setData(ma20Data);
+      }
+      if (ma120Data.length > 0) {
+        ma120Series.setData(ma120Data);
+      }
 
       chartRef.current = chart;
 
@@ -877,6 +920,22 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         chartRef.current = null;
       }
     };
+  }, [yieldSpreadData, chartContainerRef]);
+
+  // chartContainerRef가 설정될 때까지 대기
+  useEffect(() => {
+    if (yieldSpreadData && !chartContainerRef?.current) {
+      // ref가 아직 설정되지 않았으면 잠시 후 다시 확인
+      const checkRef = setInterval(() => {
+        if (chartContainerRef?.current) {
+          clearInterval(checkRef);
+          // ref가 설정되면 차트 렌더링을 다시 트리거하기 위해 상태 업데이트
+          // (실제로는 의존성 배열에 chartContainerRef가 있으므로 자동으로 재실행됨)
+        }
+      }, 100);
+
+      return () => clearInterval(checkRef);
+    }
   }, [yieldSpreadData, chartContainerRef]);
 
   if (loading) {
@@ -1093,7 +1152,13 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
                   )}
                 </div>
               )}
-              <div ref={chartContainerRef} className="yield-spread-chart" />
+              {(!yieldSpreadData.spread_data || yieldSpreadData.spread_data.length === 0) ? (
+                <div className="indicator-error-message">
+                  차트 데이터가 없습니다. API 응답을 확인해주세요.
+                </div>
+              ) : (
+                <div ref={chartContainerRef} className="yield-spread-chart" style={{ minHeight: '300px' }} />
+              )}
             </div>
           )}
         </div>
