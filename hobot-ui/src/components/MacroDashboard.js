@@ -804,7 +804,7 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
           background: { type: ColorType.Solid, color: 'white' },
           textColor: 'black',
         },
-        width: chartContainerRef.current.clientWidth,
+        width: containerElement.clientWidth,
         height: 300,
         grid: {
           vertLines: { color: '#e0e0e0' },
@@ -813,6 +813,12 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         timeScale: {
           timeVisible: true,
           secondsVisible: false,
+        },
+        rightPriceScale: {
+          borderVisible: false,
+        },
+        leftPriceScale: {
+          borderVisible: false,
         },
       });
 

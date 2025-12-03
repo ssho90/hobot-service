@@ -874,6 +874,28 @@
 .yield-spread-chart {
   width: 100%;
   height: 300px;
+  position: relative;
+  padding-top: 40px;
+  box-sizing: border-box;
+}
+
+/* lightweight-charts 범례를 위쪽으로 이동 */
+.yield-spread-chart .tv-lightweight-charts {
+  position: relative;
+}
+
+/* 범례 스타일 조정 - 차트 위쪽에 고정 */
+.yield-spread-chart .tv-lightweight-charts__legend {
+  position: absolute !important;
+  top: 5px !important;
+  right: 10px !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .data-quality-warning {

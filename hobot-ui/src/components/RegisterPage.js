@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './LoginPage.css';
+import './RegisterPage.css';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -43,7 +43,7 @@ const RegisterPage = () => {
           if (loginResult.success) {
             navigate('/dashboard');
           } else {
-            navigate('/login');
+            navigate('/');
           }
         }, 1000);
       } else {
@@ -121,10 +121,8 @@ const RegisterPage = () => {
           </button>
         </form>
         
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <Link to="/login" style={{ color: '#6366f1', textDecoration: 'none' }}>
-            이미 계정이 있으신가요? 로그인
-          </Link>
+        <div style={{ marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px' }}>
+          이미 계정이 있으신가요? 상단의 로그인 버튼을 사용해주세요.
         </div>
       </div>
     </div>
