@@ -658,6 +658,116 @@
   font-size: 16px;
 }
 
+/* 지표 그룹 스타일 */
+.other-indicators {
+  margin-top: 40px;
+}
+
+.indicator-group {
+  margin-bottom: 50px;
+}
+
+.indicator-group-header {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.indicator-group-header h2 {
+  font-size: 24px;
+  margin: 0 0 10px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.group-description {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.indicator-chart {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.indicator-chart h3 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+  color: #555;
+  font-weight: 600;
+}
+
+.indicator-description {
+  margin: 0 0 15px 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.indicator-warning {
+  background: #fff3e0;
+  border-left: 3px solid #ff9800;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  color: #e65100;
+  font-size: 13px;
+}
+
+.indicator-error {
+  background: #ffebee;
+  border: 1px solid #d32f2f;
+}
+
+.indicator-error-message {
+  padding: 20px;
+  text-align: center;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.indicators-loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+}
+
+.yield-spread-chart {
+  width: 100%;
+  height: 300px;
+}
+
+.data-quality-warning {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  color: #e65100;
+  font-size: 14px;
+}
+
+.data-quality-warning ul {
+  margin: 8px 0 0 20px;
+  padding: 0;
+}
+
+.data-quality-warning li {
+  margin: 4px 0;
+}
+
 /* AI 정보 모달 스타일 */
 .ai-info-modal {
   max-width: 800px;

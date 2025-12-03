@@ -345,8 +345,6 @@ const FredIndicatorsTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const chartContainerRef = useRef(null);
-  const chartRef = useRef(null);
-  const resizeHandlerRef = useRef(null);
 
   // 장단기 금리차 데이터 로드
   useEffect(() => {
@@ -435,9 +433,89 @@ const FredIndicatorsTab = () => {
     fetchYieldSpreadData();
   }, []);
 
-  // Tradingview Lightweight Charts로 장단기 금리차 차트 렌더링
+  return (
+    <div className="fred-indicators-tab">
+      {loading && <div className="macro-monitoring-loading">데이터를 불러오는 중...</div>}
+      {error && (
+        <div className="macro-monitoring-error-banner">
+          <strong>⚠️ 경고:</strong> {error}
+        </div>
+      )}
+      
+      {!loading && yieldSpreadData && (
+        <>
+          {/* 기타 지표 차트 (장단기 금리차 포함) */}
+          <OtherIndicatorsCharts yieldSpreadData={yieldSpreadData} chartContainerRef={chartContainerRef} />
+        </>
+      )}
+    </div>
+  );
+};
+
+// 기타 지표 차트 컴포넌트
+const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
+  const [indicators, setIndicators] = useState({
+    FEDFUNDS: null,
+    CPIAUCSL: null,
+    PCEPI: null,
+    GDP: null,
+    UNRATE: null,
+    PAYEMS: null,
+    WALCL: null,
+    WTREGEN: null,
+    RRPONTSYD: null,
+    BAMLH0A0HYM2: null,
+  });
+  const [loading, setLoading] = useState(true);
+  const chartRef = useRef(null);
+  const resizeHandlerRef = useRef(null);
+
   useEffect(() => {
-    if (!yieldSpreadData || !chartContainerRef.current) {
+    const fetchAllIndicators = async () => {
+      try {
+        const indicatorCodes = Object.keys(indicators);
+        const promises = indicatorCodes.map(async (code) => {
+          try {
+            const response = await fetch(`/api/macro-trading/fred-data?indicator_code=${code}&days=365`);
+            if (response.ok) {
+              const data = await response.json();
+              return { code, data: data.data };
+            }
+            return { code, data: null };
+          } catch (err) {
+            // 네트워크 에러는 조용히 처리 (개별 지표 실패는 전체를 막지 않음)
+            if (err.name === 'TypeError' && err.message.includes('fetch')) {
+              console.error(`Network error fetching ${code}: 서버에 연결할 수 없습니다.`);
+            } else {
+              console.error(`Error fetching ${code}:`, err);
+            }
+            return { code, data: null };
+          }
+        });
+
+        const results = await Promise.all(promises);
+        const newIndicators = {};
+        results.forEach(({ code, data }) => {
+          newIndicators[code] = data;
+        });
+        setIndicators(newIndicators);
+      } catch (err) {
+        console.error('Error fetching indicators:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllIndicators();
+  }, []);
+
+  if (loading) {
+    return <div className="indicators-loading">지표 데이터를 불러오는 중...</div>;
+  }
+
+  // 장단기 금리차 차트 렌더링
+  useEffect(() => {
+    if (!yieldSpreadData || !chartContainerRef?.current) {
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
@@ -458,7 +536,7 @@ const FredIndicatorsTab = () => {
           textColor: 'black',
         },
         width: chartContainerRef.current.clientWidth,
-        height: 500,
+        height: 300,
         grid: {
           vertLines: { color: '#e0e0e0' },
           horzLines: { color: '#e0e0e0' },
@@ -535,122 +613,225 @@ const FredIndicatorsTab = () => {
         chartRef.current = null;
       }
     };
-  }, [yieldSpreadData]);
-
-  return (
-    <div className="fred-indicators-tab">
-      {loading && <div className="macro-monitoring-loading">데이터를 불러오는 중...</div>}
-      {error && (
-        <div className="macro-monitoring-error-banner">
-          <strong>⚠️ 경고:</strong> {error}
-        </div>
-      )}
-      
-      {!loading && yieldSpreadData && (
-        <>
-          {/* 장단기 금리차 차트 */}
-          <div className="chart-section">
-            <h2>장단기 금리차 (DGS10 - DGS2) - 지난 1년</h2>
-            {yieldSpreadData.error && (
-              <div className="data-quality-warning">
-                <strong>⚠️ 데이터 품질 경고:</strong> {yieldSpreadData.error.message}
-                {yieldSpreadData.error.details && (
-                  <ul>
-                    {yieldSpreadData.error.details.map((detail, idx) => (
-                      <li key={idx}>{detail}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-            <div ref={chartContainerRef} className="yield-spread-chart" />
-          </div>
-
-          {/* 기타 지표 차트 */}
-          <OtherIndicatorsCharts />
-        </>
-      )}
-    </div>
-  );
-};
-
-// 기타 지표 차트 컴포넌트
-const OtherIndicatorsCharts = () => {
-  const [indicators, setIndicators] = useState({
-    FEDFUNDS: null,
-    CPIAUCSL: null,
-    PCEPI: null,
-    GDP: null,
-    UNRATE: null,
-    PAYEMS: null,
-    WALCL: null,
-    WTREGEN: null,
-    RRPONTSYD: null,
-    BAMLH0A0HYM2: null,
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAllIndicators = async () => {
-      try {
-        const indicatorCodes = Object.keys(indicators);
-        const promises = indicatorCodes.map(async (code) => {
-          try {
-            const response = await fetch(`/api/macro-trading/fred-data?indicator_code=${code}&days=365`);
-            if (response.ok) {
-              const data = await response.json();
-              return { code, data: data.data };
-            }
-            return { code, data: null };
-          } catch (err) {
-            // 네트워크 에러는 조용히 처리 (개별 지표 실패는 전체를 막지 않음)
-            if (err.name === 'TypeError' && err.message.includes('fetch')) {
-              console.error(`Network error fetching ${code}: 서버에 연결할 수 없습니다.`);
-            } else {
-              console.error(`Error fetching ${code}:`, err);
-            }
-            return { code, data: null };
-          }
-        });
-
-        const results = await Promise.all(promises);
-        const newIndicators = {};
-        results.forEach(({ code, data }) => {
-          newIndicators[code] = data;
-        });
-        setIndicators(newIndicators);
-      } catch (err) {
-        console.error('Error fetching indicators:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllIndicators();
-  }, []);
-
-  if (loading) {
-    return <div className="indicators-loading">지표 데이터를 불러오는 중...</div>;
-  }
+  }, [yieldSpreadData, chartContainerRef]);
 
   const indicatorInfo = {
-    FEDFUNDS: { name: '연준 금리', unit: '%' },
-    CPIAUCSL: { name: 'CPI (소비자물가지수)', unit: 'Index' },
-    PCEPI: { name: 'PCE (개인소비지출)', unit: 'Index' },
-    GDP: { name: 'GDP', unit: 'Billions of $' },
-    UNRATE: { name: '실업률', unit: '%' },
-    PAYEMS: { name: '비농업 고용', unit: 'Thousands' },
-    WALCL: { name: '연준 총자산', unit: 'Millions of $' },
-    WTREGEN: { name: '연준 총유동성', unit: 'Millions of $' },
-    RRPONTSYD: { name: '역RP 잔액', unit: 'Billions of $' },
-    BAMLH0A0HYM2: { name: '하이일드 스프레드', unit: '%' },
+    FEDFUNDS: { 
+      name: '연준 금리', 
+      unit: '%',
+      description: '연방준비제도가 설정하는 기준금리로, 통화정책의 핵심 지표입니다.'
+    },
+    CPIAUCSL: { 
+      name: 'CPI (소비자물가지수)', 
+      unit: 'Index',
+      description: '소비자가 구매하는 상품과 서비스의 가격 변화를 측정하는 물가 지표입니다.'
+    },
+    PCEPI: { 
+      name: 'PCE (개인소비지출)', 
+      unit: 'Index',
+      description: '연준이 선호하는 물가 지표로, CPI보다 소비 패턴 변화를 더 잘 반영합니다.'
+    },
+    GDP: { 
+      name: 'GDP', 
+      unit: 'Billions of $',
+      description: '국내총생산으로, 한 국가의 경제 성장을 측정하는 핵심 지표입니다.'
+    },
+    UNRATE: { 
+      name: '실업률', 
+      unit: '%',
+      description: '노동력 중 실업자 비율로, 노동 시장의 건강도를 나타냅니다.'
+    },
+    PAYEMS: { 
+      name: '비농업 고용', 
+      unit: 'Thousands',
+      description: '농업을 제외한 모든 산업의 고용자 수로, 경제 활동의 강도를 나타냅니다.'
+    },
+    WALCL: { 
+      name: '연준 총자산', 
+      unit: 'Millions of $',
+      description: '연준의 총 자산 규모로, 양적완화(QE)나 긴축 정책의 규모를 나타냅니다.'
+    },
+    WTREGEN: { 
+      name: '재무부 일반계정', 
+      unit: 'Millions of $',
+      description: '미국 재무부의 일반계정 잔액으로, 정부의 현금 보유량을 나타냅니다.'
+    },
+    RRPONTSYD: { 
+      name: '역RP 잔액', 
+      unit: 'Billions of $',
+      description: '역레포 거래 잔액으로, 금융 시장의 유동성 흡수 규모를 나타냅니다.'
+    },
+    BAMLH0A0HYM2: { 
+      name: '하이일드 스프레드', 
+      unit: '%',
+      description: '고수익 채권과 국채 간 금리차로, 시장의 위험 선호도를 나타냅니다.'
+    },
+  };
+
+  // 그룹별 지표 분류
+  const indicatorGroups = {
+    liquidity: {
+      title: '유동성',
+      codes: ['WALCL', 'WTREGEN', 'RRPONTSYD'],
+      description: '시장 유동성과 연준의 통화정책 규모를 나타내는 지표들입니다.'
+    },
+    employment: {
+      title: '고용',
+      codes: ['UNRATE', 'PAYEMS'],
+      description: '노동 시장의 건강도와 경제 활동 강도를 나타내는 지표들입니다.'
+    },
+    inflation: {
+      title: '물가 및 통화정책',
+      codes: ['FEDFUNDS', 'CPIAUCSL', 'PCEPI'],
+      description: '물가 수준과 통화정책 방향을 나타내는 지표들입니다.'
+    },
+    growth: {
+      title: '경기 성장 및 리스크 신호',
+      codes: ['GDP', 'BAMLH0A0HYM2'],
+      description: '경제 성장과 시장 리스크를 나타내는 지표들입니다.'
+    }
+  };
+
+  const renderIndicatorChart = (code, indicatorData) => {
+    const data = indicatorData?.data || indicatorData;
+    if (!data || data.length === 0) {
+      if (indicatorData?.error) {
+        const info = indicatorInfo[code];
+        return (
+          <div key={code} className="indicator-chart indicator-error">
+            <h3>{info?.name || code} ({code})</h3>
+            <div className="indicator-error-message">
+              <strong>⚠️ 오류:</strong> {indicatorData.error.message}
+            </div>
+          </div>
+        );
+      }
+      return null;
+    }
+
+    const info = indicatorInfo[code];
+    if (!info) return null;
+
+    return (
+      <div key={code} className="indicator-chart">
+        <h3>{info.name} ({code})</h3>
+        <p className="indicator-description">{info.description}</p>
+        {indicatorData?.error && (
+          <div className="indicator-warning">
+            <strong>⚠️ 경고:</strong> {indicatorData.error.message}
+          </div>
+        )}
+        {indicatorData?.warning && (
+          <div className="indicator-warning">
+            <strong>⚠️ 데이터 품질 경고:</strong> {indicatorData.warning.message}
+          </div>
+        )}
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id={`color${code}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#2196F3" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#2196F3" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="date" 
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
+            <YAxis 
+              tick={{ fontSize: 12 }}
+              label={{ value: info.unit, angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip 
+              formatter={(value) => [`${value} ${info.unit}`, info.name]}
+              labelFormatter={(label) => `날짜: ${label}`}
+            />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#2196F3"
+              fillOpacity={1}
+              fill={`url(#color${code})`}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    );
   };
 
   return (
     <div className="other-indicators">
-      <h2>기타 거시경제 지표</h2>
-      <div className="indicators-grid">
-        {Object.entries(indicators).map(([code, indicatorData]) => {
+      {/* 유동성 그룹 */}
+      <div className="indicator-group">
+        <div className="indicator-group-header">
+          <h2>💧 유동성</h2>
+          <p className="group-description">{indicatorGroups.liquidity.description}</p>
+        </div>
+        <div className="indicators-grid">
+          {indicatorGroups.liquidity.codes.map(code => renderIndicatorChart(code, indicators[code]))}
+        </div>
+      </div>
+
+      {/* 고용 그룹 */}
+      <div className="indicator-group">
+        <div className="indicator-group-header">
+          <h2>👥 고용</h2>
+          <p className="group-description">{indicatorGroups.employment.description}</p>
+        </div>
+        <div className="indicators-grid">
+          {indicatorGroups.employment.codes.map(code => renderIndicatorChart(code, indicators[code]))}
+        </div>
+      </div>
+
+      {/* 물가 및 통화정책 그룹 */}
+      <div className="indicator-group">
+        <div className="indicator-group-header">
+          <h2>💰 물가 및 통화정책</h2>
+          <p className="group-description">{indicatorGroups.inflation.description}</p>
+        </div>
+        <div className="indicators-grid">
+          {indicatorGroups.inflation.codes.map(code => renderIndicatorChart(code, indicators[code]))}
+        </div>
+      </div>
+
+      {/* 경기 성장 및 리스크 신호 그룹 */}
+      <div className="indicator-group">
+        <div className="indicator-group-header">
+          <h2>📈 경기 성장 및 리스크 신호</h2>
+          <p className="group-description">{indicatorGroups.growth.description}</p>
+        </div>
+        <div className="indicators-grid">
+          {indicatorGroups.growth.codes.map(code => renderIndicatorChart(code, indicators[code]))}
+          {/* 장단기 금리차 차트 */}
+          {yieldSpreadData && (
+            <div className="indicator-chart">
+              <h3>장단기 금리차 (DGS10 - DGS2)</h3>
+              <p className="indicator-description">
+                10년 국채와 2년 국채의 금리차로, 경기 사이클과 금리 곡선의 변화를 나타냅니다. 양수면 정상 곡선, 음수면 역전을 의미합니다.
+              </p>
+              {yieldSpreadData.error && (
+                <div className="data-quality-warning">
+                  <strong>⚠️ 데이터 품질 경고:</strong> {yieldSpreadData.error.message}
+                  {yieldSpreadData.error.details && (
+                    <ul>
+                      {yieldSpreadData.error.details.map((detail, idx) => (
+                        <li key={idx}>{detail}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+              <div ref={chartContainerRef} className="yield-spread-chart" />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
           const data = indicatorData?.data || indicatorData;
           if (!data || data.length === 0) {
             if (indicatorData?.error) {
