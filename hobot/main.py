@@ -686,7 +686,6 @@ async def get_ai_overview():
                     decision_date,
                     analysis_summary,
                     target_allocation,
-                    reasoning,
                     created_at
                 FROM ai_strategy_decisions
                 ORDER BY decision_date DESC
