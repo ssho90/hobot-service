@@ -231,6 +231,62 @@ def init_database():
         except Exception:
             pass  # 이미 존재하는 경우 무시
         
+        # Overview AI 추천 섹터/그룹 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS overview_recommended_sectors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                asset_class VARCHAR(50) NOT NULL COMMENT '자산군 (stocks, bonds, alternatives, cash)',
+                sector_group VARCHAR(100) NOT NULL COMMENT '섹터/그룹명 (예: 미국 지수, 미국 테크, 배당/방어 등)',
+                ticker VARCHAR(20) NOT NULL COMMENT 'ETF 티커',
+                name VARCHAR(255) NOT NULL COMMENT 'ETF 이름',
+                display_order INT DEFAULT 0 COMMENT '표시 순서',
+                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY unique_asset_class_sector_ticker (asset_class, sector_group, ticker) COMMENT '자산군-섹터-티커 중복 방지',
+                INDEX idx_asset_class (asset_class) COMMENT '자산군 인덱스',
+                INDEX idx_sector_group (sector_group) COMMENT '섹터 그룹 인덱스',
+                INDEX idx_is_active (is_active) COMMENT '활성화 여부 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Overview AI 추천 섹터/그룹 리스트'
+        """)
+        
+        # 초기 데이터 삽입 (데이터가 없을 때만)
+        cursor.execute("SELECT COUNT(*) as count FROM overview_recommended_sectors")
+        count_result = cursor.fetchone()
+        if count_result and count_result.get('count', 0) == 0:
+            initial_data = [
+                # 주식 - 미국 지수
+                ('stocks', '미국 지수', '360750', 'TIGER 미국S&P500', 1),
+                ('stocks', '미국 지수', '360200', 'ACE 미국S&P500', 2),
+                # 주식 - 미국 테크
+                ('stocks', '미국 테크', '381170', 'TIGER 미국테크TOP10 INDXX', 1),
+                ('stocks', '미국 테크', '133690', 'TIGER 미국나스닥100', 2),
+                # 주식 - 배당/방어
+                ('stocks', '배당/방어', '458730', 'TIGER 미국배당다우존스', 1),
+                ('stocks', '배당/방어', '446720', 'SOL 미국배당다우존스', 2),
+                # 채권 - 미국 장기채
+                ('bonds', '미국 장기채', '453850', 'ACE 미국30년국채액티브(H)', 1),
+                ('bonds', '미국 장기채', '476760', 'ACE 미국30년국채액티브', 2),
+                # 채권 - 단기/파킹
+                ('bonds', '단기/파킹', '459580', 'KODEX CD금리액티브(합성)', 1),
+                # 대체투자 - 골드
+                ('alternatives', '골드', '411060', 'ACE KRX금현물', 1),
+                # 대체투자 - 달러
+                ('alternatives', '달러', '456610', 'TIGER 미국달러SOFR금리액티브(합성)', 1),
+                # 현금 - 원화
+                ('cash', '원화', '', '원화', 1),
+                # 현금 - 파킹통장형
+                ('cash', '파킹통장형', '459580', 'KODEX CD금리액티브(합성)', 1),
+                ('cash', '파킹통장형', '488770', 'KODEX 머니마켓액티브', 2),
+            ]
+            
+            for asset_class, sector_group, ticker, name, display_order in initial_data:
+                cursor.execute("""
+                    INSERT INTO overview_recommended_sectors 
+                    (asset_class, sector_group, ticker, name, display_order, is_active)
+                    VALUES (%s, %s, %s, %s, %s, TRUE)
+                """, (asset_class, sector_group, ticker, name, display_order))
+        
         # 종목명-티커 매핑 테이블 (KIS API에서 수집)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stock_tickers (

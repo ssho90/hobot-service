@@ -43,24 +43,6 @@ logging.basicConfig(
     force=True  # 기존 핸들러가 있어도 재설정
 )
 
-# Selenium 및 HTTP 클라이언트 관련 불필요한 로그 비활성화
-selenium_loggers = [
-    'selenium',
-    'selenium.webdriver',
-    'selenium.webdriver.remote',
-    'selenium.webdriver.remote.remote_connection',
-    'urllib3',
-    'urllib3.connectionpool',
-    'urllib3.util',
-    'httpcore',
-    'httpx',
-    'httpcore.http11',
-    'httpcore.connection'
-]
-for logger_name in selenium_loggers:
-    selenium_logger = logging.getLogger(logger_name)
-    selenium_logger.setLevel(logging.WARNING)  # WARNING 이상만 로깅
-
 # Pydantic 모델
 class StrategyRequest(BaseModel):
     strategy: str
@@ -697,14 +679,14 @@ async def get_ai_overview():
         import json
         
         with get_db_connection() as conn:
-            cursor = conn.cursor()
+            cursor = conn.cursor(dictionary=True)
             cursor.execute("""
                 SELECT 
                     id,
                     decision_date,
                     analysis_summary,
                     target_allocation,
-                    recommended_stocks,
+                    reasoning,
                     created_at
                 FROM ai_strategy_decisions
                 ORDER BY decision_date DESC
@@ -725,10 +707,6 @@ async def get_ai_overview():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
-            recommended_stocks = row.get('recommended_stocks')
-            if recommended_stocks and isinstance(recommended_stocks, str):
-                recommended_stocks = json.loads(recommended_stocks)
-            
             # analysis_summary에서 reasoning 추출 (판단 근거: 이후 텍스트)
             analysis_summary = row['analysis_summary'] or ''
             reasoning = ''
@@ -745,7 +723,6 @@ async def get_ai_overview():
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
                     "target_allocation": target_allocation,
-                    "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
                 }
             }
@@ -757,78 +734,26 @@ async def get_ai_overview():
 
 @api_router.post("/macro-trading/run-ai-analysis")
 async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
-    """수동 AI 분석 실행 (Admin 전용)
-    
-    백그라운드에서 실행되며 즉시 응답을 반환합니다.
-    분석 완료 여부는 /api/macro-trading/overview API로 확인할 수 있습니다.
-    """
-    import asyncio
-    from concurrent.futures import ThreadPoolExecutor
-    
+    """수동 AI 분석 실행 (Admin 전용)"""
     try:
         from service.macro_trading.ai_strategist import run_ai_analysis
-        from service.macro_trading.scheduler import (
-            is_ai_analysis_running,
-            acquire_ai_analysis_lock,
-            release_ai_analysis_lock
-        )
         
-        username = admin_user.get('username', 'unknown')
-        logging.info(f"수동 AI 분석 실행 요청: {username}")
+        logging.info(f"수동 AI 분석 실행 요청: {admin_user.get('username')}")
         
-        # 이미 실행 중이면 에러 반환
-        if is_ai_analysis_running():
-            raise HTTPException(
-                status_code=409,
-                detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
-            )
+        success = run_ai_analysis()
         
-        # 락 획득 시도
-        if not acquire_ai_analysis_lock():
-            raise HTTPException(
-                status_code=409,
-                detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
-            )
-        
-        # 백그라운드에서 실행
-        def run_analysis_background():
-            try:
-                logging.info(f"[백그라운드] AI 분석 시작 - 사용자: {username}")
-                success = run_ai_analysis()
-                if success:
-                    logging.info(f"[백그라운드] AI 분석 완료 - 사용자: {username}")
-                else:
-                    logging.error(f"[백그라운드] AI 분석 실패 - 사용자: {username}")
-            except Exception as e:
-                logging.error(f"[백그라운드] AI 분석 중 오류 발생 - 사용자: {username}, 오류: {e}", exc_info=True)
-            finally:
-                try:
-                    release_ai_analysis_lock()
-                    logging.info(f"[백그라운드] 락 해제 완료 - 사용자: {username}")
-                except Exception as release_error:
-                    logging.error(f"[백그라운드] 락 해제 실패: {release_error}")
-        
-        # 별도 스레드에서 실행
-        executor = ThreadPoolExecutor(max_workers=1)
-        executor.submit(run_analysis_background)
-        executor.shutdown(wait=False)  # wait=False로 즉시 반환
-        
-        # 즉시 응답 반환
-        return {
-            "status": "accepted",
-            "message": "AI 분석이 백그라운드에서 시작되었습니다. 완료되면 /api/macro-trading/overview에서 결과를 확인할 수 있습니다."
-        }
+        if success:
+            return {
+                "status": "success",
+                "message": "AI 분석이 완료되었습니다."
+            }
+        else:
+            raise HTTPException(status_code=500, detail="AI 분석 실행에 실패했습니다.")
             
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f"Error starting AI analysis: {e}", exc_info=True)
-        # 락이 획득된 상태에서 에러가 발생했을 수 있으므로 해제 시도
-        try:
-            from service.macro_trading.scheduler import release_ai_analysis_lock
-            release_ai_analysis_lock()
-        except:
-            pass
+        logging.error(f"Error running AI analysis: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -840,14 +765,13 @@ async def get_latest_strategy_decision():
         import json
         
         with get_db_connection() as conn:
-            cursor = conn.cursor()
+            cursor = conn.cursor(dictionary=True)
             cursor.execute("""
                 SELECT 
                     id,
                     decision_date,
                     analysis_summary,
                     target_allocation,
-                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl,
@@ -871,10 +795,6 @@ async def get_latest_strategy_decision():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
-            recommended_stocks = row.get('recommended_stocks')
-            if recommended_stocks and isinstance(recommended_stocks, str):
-                recommended_stocks = json.loads(recommended_stocks)
-            
             quant_signals = row.get('quant_signals')
             if quant_signals and isinstance(quant_signals, str):
                 quant_signals = json.loads(quant_signals)
@@ -894,7 +814,6 @@ async def get_latest_strategy_decision():
                     "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
                     "analysis_summary": row.get('analysis_summary'),
                     "target_allocation": target_allocation,
-                    "recommended_stocks": recommended_stocks,
                     "quant_signals": quant_signals,
                     "qual_sentiment": qual_sentiment,
                     "account_pnl": account_pnl,
@@ -909,130 +828,6 @@ async def get_latest_strategy_decision():
             "data": None,
             "message": "AI 전략 결정을 조회할 수 없습니다."
         }
-
-@api_router.get("/macro-trading/strategy-decisions-history")
-async def get_strategy_decisions_history(
-    page: int = Query(default=1, ge=1, description="페이지 번호 (기본값: 1)")
-):
-    """지난 AI 전략 결정 이력 조회 (한 개씩 페이징 처리)
-    
-    Args:
-        page: 페이지 번호 (1부터 시작, 한 페이지당 1개)
-    
-    Returns:
-        {
-            "status": "success",
-            "page": 1,
-            "total_pages": 15,
-            "total_count": 15,
-            "data": {
-                "id": 1,
-                "decision_date": "2024-12-19 10:00:00",
-                "analysis_summary": "...",
-                "target_allocation": {...},
-                ...
-            }
-        }
-    """
-    try:
-        from service.database.db import get_db_connection
-        import json
-        
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            
-            # 전체 개수 조회 (페이징 계산용)
-            cursor.execute("""
-                SELECT COUNT(*) as total_count
-                FROM ai_strategy_decisions
-            """)
-            total_count = cursor.fetchone()['total_count']
-            
-            # 한 개씩 조회 (최신순, OFFSET 사용)
-            offset = (page - 1) * 1
-            cursor.execute("""
-                SELECT 
-                    id,
-                    decision_date,
-                    analysis_summary,
-                    target_allocation,
-                    recommended_stocks,
-                    quant_signals,
-                    qual_sentiment,
-                    account_pnl,
-                    created_at
-                FROM ai_strategy_decisions
-                ORDER BY decision_date DESC
-                LIMIT 1 OFFSET %s
-            """, (offset,))
-            
-            row = cursor.fetchone()
-            
-            if not row:
-                return {
-                    "status": "success",
-                    "page": page,
-                    "total_pages": max(1, total_count),
-                    "total_count": total_count,
-                    "data": None
-                }
-            
-            # JSON 필드 파싱
-            target_allocation = row['target_allocation']
-            if isinstance(target_allocation, str):
-                target_allocation = json.loads(target_allocation)
-            
-            recommended_stocks = row.get('recommended_stocks')
-            if recommended_stocks and isinstance(recommended_stocks, str):
-                recommended_stocks = json.loads(recommended_stocks)
-            
-            quant_signals = row.get('quant_signals')
-            if quant_signals and isinstance(quant_signals, str):
-                quant_signals = json.loads(quant_signals)
-            
-            qual_sentiment = row.get('qual_sentiment')
-            if qual_sentiment and isinstance(qual_sentiment, str):
-                qual_sentiment = json.loads(qual_sentiment)
-            
-            account_pnl = row.get('account_pnl')
-            if account_pnl and isinstance(account_pnl, str):
-                account_pnl = json.loads(account_pnl)
-            
-            # analysis_summary에서 reasoning 추출
-            analysis_summary = row.get('analysis_summary', '')
-            reasoning = None
-            if analysis_summary and '판단 근거:' in analysis_summary:
-                parts = analysis_summary.split('판단 근거:')
-                if len(parts) > 1:
-                    analysis_summary = parts[0].strip()
-                    reasoning = parts[1].strip()
-            
-            decision = {
-                "id": row['id'],
-                "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
-                "analysis_summary": analysis_summary,
-                "reasoning": reasoning,
-                "target_allocation": target_allocation,
-                "recommended_stocks": recommended_stocks,
-                "quant_signals": quant_signals,
-                "qual_sentiment": qual_sentiment,
-                "account_pnl": account_pnl,
-                "created_at": row['created_at'].strftime("%Y-%m-%d %H:%M:%S") if row['created_at'] else None
-            }
-            
-            total_pages = max(1, total_count)
-            
-            return {
-                "status": "success",
-                "page": page,
-                "total_pages": total_pages,
-                "total_count": total_count,
-                "data": decision
-            }
-            
-    except Exception as e:
-        logging.error(f"Error fetching strategy decisions history: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/macro-trading/rebalancing-history")
 async def get_rebalancing_history(
@@ -1873,8 +1668,7 @@ async def get_logs(
             # log.txt 형식: 2025-11-01 21:51:25,255 - INFO - ...
             timestamp_pattern = re.compile(r'^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:,\d+)?)')
             # access.log/error.log 형식 (Gunicorn): IP - - [01/Nov/2025:21:51:25 +0000] ...
-            # 타임존 정보(+0000) 포함 패턴
-            gunicorn_timestamp_pattern = re.compile(r'\[(\d{2}/\w+/\d{4}:\d{2}:\d{2}:\d{2}(?:\s+[+-]\d{4})?)\]')
+            gunicorn_timestamp_pattern = re.compile(r'\[(\d{2}/\w+/\d{4}:\d{2}:\d{2}:\d{2})')
             
             def parse_timestamp(line):
                 """로그 라인에서 타임스탬프를 파싱하여 datetime 객체로 반환"""
@@ -1883,26 +1677,19 @@ async def get_logs(
                     match = timestamp_pattern.match(line)
                     if match:
                         ts_str = match.group(1).replace(',', '.')
-                        try:
-                            return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S.%f')
-                        except ValueError:
-                            # 밀리초가 없는 경우
-                            return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
+                        return datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S.%f')
                     
-                    # Gunicorn access.log/error.log 형식: [01/Nov/2025:21:51:25 +0000] 또는 [01/Nov/2025:21:51:25]
+                    # Gunicorn access.log/error.log 형식: [01/Nov/2025:21:51:25:00]
                     match = gunicorn_timestamp_pattern.search(line)
                     if match:
                         ts_str = match.group(1)
-                        # 타임존 정보 제거 (naive datetime으로 처리)
-                        ts_str = re.sub(r'\s+[+-]\d{4}$', '', ts_str)
                         return datetime.strptime(ts_str, '%d/%b/%Y:%H:%M:%S')
                     
-                    # 타임스탬프를 찾을 수 없으면 None 반환
-                    return None
-                except Exception as e:
-                    # 파싱 실패 시 None 반환
-                    logging.debug(f"Failed to parse timestamp from line: {line[:100]}... Error: {e}")
-                    return None
+                    # 타임스탬프를 찾을 수 없으면 현재 시간 반환 (맨 뒤로 정렬)
+                    return datetime.now()
+                except:
+                    # 파싱 실패 시 현재 시간 반환
+                    return datetime.now()
             
             # 로그 파일 읽기
             # 시간 필터가 없으면 파일 끝에서 최근 N줄만 읽기 (tail과 동일하게)
@@ -1938,64 +1725,30 @@ async def get_logs(
                         # 타임스탬프가 없는 줄(예: Traceback의 일부)을 처리하기 위해
                         # 이전 줄의 타임스탬프를 상속받도록 처리
                         last_timestamp = None
-                        line_index = 0  # 줄 번호 (타임스탬프가 없을 때 순서 유지용)
                         for line in file_lines:
                             line = line.rstrip('\n\r')
                             if not line.strip():  # 빈 줄은 건너뛰기
                                 continue
                             
-                            # 타임스탬프 파싱 시도
-                            timestamp = parse_timestamp(line)
+                            # 타임스탬프 패턴이 있는지 먼저 확인
+                            has_timestamp = bool(timestamp_pattern.match(line) or gunicorn_timestamp_pattern.search(line))
                             
-                            if timestamp is not None:
-                                # 타임스탬프가 있으면 사용
+                            if has_timestamp:
+                                # 타임스탬프가 있으면 파싱
+                                timestamp = parse_timestamp(line)
                                 last_timestamp = timestamp
-                                all_log_entries.append((timestamp, line))
                             else:
                                 # 타임스탬프가 없으면 이전 줄의 타임스탬프 상속
                                 if last_timestamp is not None:
-                                    # 이전 타임스탬프가 있으면 상속
-                                    all_log_entries.append((last_timestamp, line))
+                                    timestamp = last_timestamp
                                 else:
-                                    # 첫 줄이 타임스탬프가 없으면 파일 수정 시간 기반으로 추정
-                                    # 또는 줄 번호를 이용해 순서 유지 (타임스탬프는 현재 시간으로 설정)
-                                    file_mtime = os.path.getmtime(log_path)
-                                    estimated_time = datetime.fromtimestamp(file_mtime)
-                                    # 줄 번호만큼 초를 빼서 순서 유지
-                                    estimated_time = estimated_time.replace(second=max(0, estimated_time.second - line_index))
-                                    all_log_entries.append((estimated_time, line))
+                                    # 첫 줄이 타임스탬프가 없으면 건너뛰기
+                                    continue
                             
-                            line_index += 1
+                            all_log_entries.append((timestamp, line))
             except Exception as e:
                 logging.warning(f"Could not read {log_path}: {e}")
                 return {"status": "error", "message": f"Error reading log file: {str(e)}", "file": log_name}
-            
-            # 파일이 존재하고 읽을 수 있지만 로그 항목이 없는 경우
-            # (예: 타임스탬프 파싱 실패로 모든 줄이 필터링된 경우)
-            if not all_log_entries:
-                # 파일이 실제로 비어있는지 확인
-                try:
-                    with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        sample_lines = f.readlines()[:10]  # 처음 10줄만 확인
-                        non_empty_lines = [line.strip() for line in sample_lines if line.strip()]
-                        if non_empty_lines:
-                            # 파일에 내용이 있지만 파싱에 실패한 경우
-                            # 타임스탬프 없이 최근 N줄만 반환
-                            logging.warning(f"Could not parse timestamps from {log_name}, returning raw lines")
-                            with open(log_path, 'r', encoding='utf-8', errors='ignore') as f2:
-                                all_lines = f2.readlines()
-                                recent_lines = [line.rstrip('\n\r') for line in all_lines[-lines:] if line.strip()]
-                                if recent_lines:
-                                    log_content = '\n'.join(recent_lines)
-                                    return {
-                                        "status": "success",
-                                        "log_type": log_type,
-                                        "content": log_content,
-                                        "file": f"{log_name} (raw, no timestamp parsing)",
-                                        "lines": len(recent_lines)
-                                    }
-                except Exception as e:
-                    logging.debug(f"Error checking file content: {e}")
             
             if all_log_entries:
                 # 타임스탬프 기준으로 정렬 (오래된 것부터 최신 순)
@@ -2077,240 +1830,162 @@ async def get_logs(
         logging.error(f"Error getting logs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/llm-monitoring/options")
-async def get_llm_monitoring_options():
-    """LLM 모니터링 필터 옵션 조회 (모델명, 서비스명 목록)"""
+# ============================================
+# Overview 추천 섹터 관리 API (Admin 전용)
+# ============================================
+
+class OverviewSectorItem(BaseModel):
+    sector_group: str
+    ticker: str
+    name: str
+    display_order: int = 0
+    is_active: bool = True
+
+class OverviewSectorRequest(BaseModel):
+    asset_class: str  # stocks, bonds, alternatives, cash
+    items: list[OverviewSectorItem]
+
+@api_router.get("/admin/overview-recommended-sectors")
+async def get_overview_recommended_sectors(
+    admin_user: dict = Depends(require_admin)
+):
+    """Overview 추천 섹터/그룹 리스트 조회 (Admin 전용)"""
     try:
         from service.database.db import get_db_connection
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    id,
+                    asset_class,
+                    sector_group,
+                    ticker,
+                    name,
+                    display_order,
+                    is_active,
+                    created_at,
+                    updated_at
+                FROM overview_recommended_sectors
+                ORDER BY asset_class, sector_group, display_order
+            """)
             
-            # 고유한 모델명 목록 조회
-            cursor.execute("SELECT DISTINCT model_name FROM llm_usage_logs ORDER BY model_name")
-            models = [row['model_name'] for row in cursor.fetchall()]
+            rows = cursor.fetchall()
             
-            # 고유한 서비스명 목록 조회
-            cursor.execute("SELECT DISTINCT service_name FROM llm_usage_logs WHERE service_name IS NOT NULL ORDER BY service_name")
-            services = [row['service_name'] for row in cursor.fetchall()]
+            # 자산군 > 섹터 그룹 > ETF 구조로 그룹화
+            result = {
+                "stocks": {},
+                "bonds": {},
+                "alternatives": {},
+                "cash": {}
+            }
+            
+            for row in rows:
+                asset_class = row["asset_class"]
+                sector_group = row["sector_group"]
+                if asset_class in result:
+                    if sector_group not in result[asset_class]:
+                        result[asset_class][sector_group] = []
+                    result[asset_class][sector_group].append({
+                        "id": row["id"],
+                        "ticker": row["ticker"],
+                        "name": row["name"],
+                        "display_order": row["display_order"],
+                        "is_active": bool(row["is_active"]),
+                        "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None,
+                        "updated_at": row["updated_at"].strftime("%Y-%m-%d %H:%M:%S") if row["updated_at"] else None
+                    })
             
             return {
                 "status": "success",
-                "models": models,
-                "services": services
+                "data": result
             }
     except Exception as e:
-        logging.error(f"LLM 모니터링 옵션 조회 실패: {e}", exc_info=True)
+        logging.error(f"Error fetching overview recommended sectors: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@api_router.get("/llm-monitoring/logs")
-async def get_llm_monitoring_logs(
-    limit: int = Query(default=100, ge=1, le=1000, description="조회할 로그 수"),
-    offset: int = Query(default=0, ge=0, description="오프셋"),
-    model_name: Optional[str] = Query(default=None, description="모델명 필터 (All 또는 특정 모델명)"),
-    service_name: Optional[str] = Query(default=None, description="서비스명 필터 (All 또는 특정 서비스명)"),
-    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)")
+@api_router.post("/admin/overview-recommended-sectors")
+async def save_overview_recommended_sectors(
+    request: OverviewSectorRequest,
+    admin_user: dict = Depends(require_admin)
 ):
-    """LLM 사용 로그 조회"""
+    """Overview 추천 섹터/그룹 리스트 저장 (Admin 전용)"""
     try:
         from service.database.db import get_db_connection
         from datetime import datetime
         
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            
-            # WHERE 조건 구성
-            conditions = []
-            params = []
-            
-            if model_name and model_name.lower() != 'all':
-                conditions.append("model_name = %s")
-                params.append(model_name)
-            
-            if service_name and service_name.lower() != 'all':
-                conditions.append("service_name = %s")
-                params.append(service_name)
-            
-            if start_date:
-                # 날짜 형식이 시간까지 포함되어 있는지 확인
-                if ' ' in start_date or 'T' in start_date:
-                    conditions.append("created_at >= %s")
-                else:
-                    conditions.append("DATE(created_at) >= %s")
-                params.append(start_date)
-            
-            if end_date:
-                # 날짜 형식이 시간까지 포함되어 있는지 확인
-                if ' ' in end_date or 'T' in end_date:
-                    conditions.append("created_at <= %s")
-                else:
-                    conditions.append("DATE(created_at) <= %s")
-                params.append(end_date)
-            
-            where_clause = " AND ".join(conditions) if conditions else "1=1"
-            
-            # 전체 개수 조회
-            count_query = f"SELECT COUNT(*) as total FROM llm_usage_logs WHERE {where_clause}"
-            cursor.execute(count_query, params)
-            total = cursor.fetchone()['total']
-            
-            # 로그 조회
-            query = f"""
-                SELECT 
-                    id, model_name, provider, request_prompt, response_prompt,
-                    prompt_tokens, completion_tokens, total_tokens,
-                    service_name, duration_ms, created_at
-                FROM llm_usage_logs
-                WHERE {where_clause}
-                ORDER BY created_at DESC
-                LIMIT %s OFFSET %s
-            """
-            params.extend([limit, offset])
-            cursor.execute(query, params)
-            
-            logs = cursor.fetchall()
-            
-            # datetime 객체를 문자열로 변환
-            for log in logs:
-                if log.get('created_at'):
-                    log['created_at'] = log['created_at'].isoformat() if hasattr(log['created_at'], 'isoformat') else str(log['created_at'])
-            
-            return {
-                "status": "success",
-                "total": total,
-                "limit": limit,
-                "offset": offset,
-                "logs": logs
-            }
-    except Exception as e:
-        logging.error(f"LLM 모니터링 로그 조회 실패: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@api_router.get("/llm-monitoring/token-usage")
-async def get_llm_token_usage(
-    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)"),
-    group_by: str = Query(default="day", description="그룹화 기준 (day, model, service)"),
-    model_name: Optional[str] = Query(default=None, description="모델명 필터 (All 또는 특정 모델명)"),
-    service_name: Optional[str] = Query(default=None, description="서비스명 필터 (All 또는 특정 서비스명)")
-):
-    """LLM 토큰 사용량 통계 조회 (일자별, 모델별, 서비스별)"""
-    try:
-        from service.database.db import get_db_connection
-        from datetime import datetime, timedelta
-        
-        # 기본값: 최근 1시간
-        if not start_date:
-            start_date = (datetime.now() - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
-        if not end_date:
-            end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # 자산군 유효성 검사
+        valid_asset_classes = ["stocks", "bonds", "alternatives", "cash"]
+        if request.asset_class not in valid_asset_classes:
+            raise HTTPException(status_code=400, detail=f"Invalid asset_class. Must be one of: {', '.join(valid_asset_classes)}")
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
             
-            # WHERE 조건 구성
-            conditions = []
-            params = []
+            # 기존 항목들을 비활성화
+            cursor.execute("""
+                UPDATE overview_recommended_sectors
+                SET is_active = FALSE
+                WHERE asset_class = %s
+            """, (request.asset_class,))
             
-            # 날짜 조건 (시간 포함)
-            if ' ' in start_date:
-                conditions.append("created_at >= %s")
-            else:
-                conditions.append("DATE(created_at) >= %s")
-            params.append(start_date)
+            # 새 항목들 저장
+            now = datetime.now()
+            for item in request.items:
+                cursor.execute("""
+                    INSERT INTO overview_recommended_sectors 
+                    (asset_class, sector_group, ticker, name, display_order, is_active, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        name = VALUES(name),
+                        display_order = VALUES(display_order),
+                        is_active = VALUES(is_active),
+                        updated_at = VALUES(updated_at)
+                """, (request.asset_class, item.sector_group, item.ticker, item.name, item.display_order, item.is_active, now, now))
             
-            if ' ' in end_date:
-                conditions.append("created_at <= %s")
-            else:
-                conditions.append("DATE(created_at) <= %s")
-            params.append(end_date)
-            
-            # 모델명 필터
-            if model_name and model_name.lower() != 'all':
-                conditions.append("model_name = %s")
-                params.append(model_name)
-            
-            # 서비스명 필터
-            if service_name and service_name.lower() != 'all':
-                conditions.append("service_name = %s")
-                params.append(service_name)
-            
-            where_clause = " AND ".join(conditions) if conditions else "1=1"
-            
-            if group_by == "day":
-                # 일자별 토큰 사용량
-                query = f"""
-                    SELECT 
-                        DATE(created_at) as date,
-                        model_name,
-                        provider,
-                        SUM(prompt_tokens) as total_prompt_tokens,
-                        SUM(completion_tokens) as total_completion_tokens,
-                        SUM(total_tokens) as total_tokens,
-                        COUNT(*) as request_count
-                    FROM llm_usage_logs
-                    WHERE {where_clause}
-                    GROUP BY DATE(created_at), model_name, provider
-                    ORDER BY date DESC, model_name
-                """
-                cursor.execute(query, params)
-            elif group_by == "model":
-                # 모델별 토큰 사용량
-                query = f"""
-                    SELECT 
-                        model_name,
-                        provider,
-                        SUM(prompt_tokens) as total_prompt_tokens,
-                        SUM(completion_tokens) as total_completion_tokens,
-                        SUM(total_tokens) as total_tokens,
-                        COUNT(*) as request_count,
-                        AVG(duration_ms) as avg_duration_ms
-                    FROM llm_usage_logs
-                    WHERE {where_clause}
-                    GROUP BY model_name, provider
-                    ORDER BY total_tokens DESC
-                """
-                cursor.execute(query, params)
-            elif group_by == "service":
-                # 서비스별 토큰 사용량
-                query = f"""
-                    SELECT 
-                        service_name,
-                        SUM(prompt_tokens) as total_prompt_tokens,
-                        SUM(completion_tokens) as total_completion_tokens,
-                        SUM(total_tokens) as total_tokens,
-                        COUNT(*) as request_count,
-                        AVG(duration_ms) as avg_duration_ms
-                    FROM llm_usage_logs
-                    WHERE {where_clause}
-                    GROUP BY service_name
-                    ORDER BY total_tokens DESC
-                """
-                cursor.execute(query, params)
-            else:
-                raise HTTPException(status_code=400, detail="Invalid group_by. Must be: day, model, or service")
-            
-            results = cursor.fetchall()
-            
-            # datetime 객체를 문자열로 변환
-            for result in results:
-                if result.get('date'):
-                    result['date'] = result['date'].isoformat() if hasattr(result['date'], 'isoformat') else str(result['date'])
+            conn.commit()
             
             return {
                 "status": "success",
-                "group_by": group_by,
-                "start_date": start_date,
-                "end_date": end_date,
-                "data": results
+                "message": f"Overview recommended sectors saved for {request.asset_class}",
+                "asset_class": request.asset_class,
+                "items_count": len(request.items)
             }
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f"LLM 토큰 사용량 조회 실패: {e}", exc_info=True)
+        logging.error(f"Error saving overview recommended sectors: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/admin/overview-recommended-sectors/{sector_id}")
+async def delete_overview_recommended_sector(
+    sector_id: int,
+    admin_user: dict = Depends(require_admin)
+):
+    """Overview 추천 섹터/그룹 삭제 (Admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                DELETE FROM overview_recommended_sectors
+                WHERE id = %s
+            """, (sector_id,))
+            
+            if cursor.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Sector not found")
+            
+            conn.commit()
+            
+            return {
+                "status": "success",
+                "message": f"Sector {sector_id} deleted"
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting overview recommended sector: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -2321,25 +1996,15 @@ app.include_router(api_router)
 # ============================================
 # 애플리케이션 시작 시 초기화
 # ============================================
-_schedulers_started = False  # 스케줄러가 이미 시작되었는지 추적
-
 @app.on_event("startup")
 async def startup_event():
     """애플리케이션 시작 시 실행되는 이벤트"""
-    global _schedulers_started
-    
-    # 이미 스케줄러가 시작되었다면 중복 실행 방지
-    if _schedulers_started:
-        logging.warning("스케줄러가 이미 시작되어 있습니다. 중복 실행을 건너뜁니다.")
-        return
-    
     logging.info("Hobot 애플리케이션 시작 중...")
     
     # 모든 스케줄러 시작 (FRED 데이터 수집 + 뉴스 수집)
     try:
         from service.macro_trading.scheduler import start_all_schedulers
         threads = start_all_schedulers()
-        _schedulers_started = True
         logging.info(f"모든 스케줄러가 시작되었습니다. (총 {len(threads)}개 스레드)")
     except Exception as e:
         logging.error(f"스케줄러 시작 실패: {e}", exc_info=True)

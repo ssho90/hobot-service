@@ -215,6 +215,52 @@ def collect_account_status() -> Optional[Dict[str, Any]]:
         return None
 
 
+def get_overview_recommended_sectors() -> Dict[str, Dict[str, List[Dict]]]:
+    """Overview AI 추천 가능한 섹터/그룹 리스트 조회"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT asset_class, sector_group, ticker, name, display_order
+                FROM overview_recommended_sectors
+                WHERE is_active = TRUE
+                ORDER BY asset_class, sector_group, display_order
+            """)
+            
+            rows = cursor.fetchall()
+            
+            # 자산군 > 섹터 그룹 > ETF 구조로 그룹화
+            result = {
+                "stocks": {},
+                "bonds": {},
+                "alternatives": {},
+                "cash": {}
+            }
+            
+            for row in rows:
+                asset_class = row["asset_class"]
+                sector_group = row["sector_group"]
+                if asset_class in result:
+                    if sector_group not in result[asset_class]:
+                        result[asset_class][sector_group] = []
+                    result[asset_class][sector_group].append({
+                        "ticker": row["ticker"],
+                        "name": row["name"]
+                    })
+            
+            return result
+    except Exception as e:
+        logger.warning(f"Overview 추천 섹터 조회 실패: {e}")
+        return {
+            "stocks": {},
+            "bonds": {},
+            "alternatives": {},
+            "cash": {}
+        }
+
+
 def get_available_etf_list() -> Dict[str, List[Dict]]:
     """사용 가능한 ETF 목록 조회 (DB 우선, 없으면 설정 파일)"""
     try:
@@ -285,6 +331,24 @@ def get_available_etf_list() -> Dict[str, List[Dict]]:
 
 def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     """AI 분석용 프롬프트 생성"""
+    
+    # 추천 가능한 섹터/그룹 리스트 조회
+    recommended_sectors = get_overview_recommended_sectors()
+    
+    # 섹터 리스트를 프롬프트에 포함
+    sectors_info = "\n=== 추천 가능한 섹터/그룹 리스트 ===\n"
+    for asset_class, sectors in recommended_sectors.items():
+        if sectors:
+            asset_class_kr = {
+                "stocks": "주식",
+                "bonds": "채권",
+                "alternatives": "대체투자",
+                "cash": "현금"
+            }.get(asset_class, asset_class)
+            sectors_info += f"\n{asset_class_kr}:\n"
+            for sector_group, etfs in sectors.items():
+                etf_names = [etf['name'] for etf in etfs]
+                sectors_info += f"  - {sector_group}: {', '.join(etf_names)}\n"
     
     # FRED 시그널 요약
     fred_summary = "=== FRED 정량 시그널 (가장 신뢰도 높음) ===\n"
@@ -382,6 +446,8 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
 
 {news_summary}
 
+{sectors_info}
+
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
 2. **경제 뉴스는 보조적으로만** 참고하세요. 비중을 낮게 두세요.
@@ -423,15 +489,10 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
 }}
 
 **추천 종목/섹터 규칙:**
-- 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 특정 종목을 콕 집어 추천할 필요는 없습니다.
-- 섹터별 추천 예시:
-  - Stocks: "미국 대형주", "테크 섹터", "한국 주식", "유럽 주식", "신흥국 주식", "배당주" 등
-  - Bonds: "미국 장기채권", "미국 단기채권", "한국 채권", "회사채" 등
-  - Alternatives: "금", "달러", "원유", "부동산" 등
-  - Cash: "현금성 자산", "단기 예금" 등
+- 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 개별 종목은 추천하지 마세요.
+- 추천 가능한 섹터/그룹은 위의 "추천 가능한 섹터/그룹 리스트"에 명시된 것만 사용하세요.
 - 각 자산군 내 추천 카테고리의 weight 합계는 1.0이어야 합니다.
 - 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
-- 특정 ETF를 추천하고 싶은 경우에만 ticker와 name을 포함하세요 (선택적).
 - Stocks, Bonds, Alternatives, Cash 각 자산군별로 최소 1개 이상의 카테고리를 추천하세요 (해당 자산군 비중이 0%가 아닌 경우).
 
 JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
