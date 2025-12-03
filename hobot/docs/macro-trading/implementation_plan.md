@@ -519,41 +519,104 @@
 ### 3.1 모듈 4: Gemini LLM 통합
 
 #### 작업 항목
-- [ ] **3.1.1** LLM 통합
-  - [ ] 기존 `llm.py`의 `llm_gemini_pro()` 활용
-  - [ ] Temperature=0 설정 (일관성 보장)
-  - [ ] JSON 출력 강제 (Pydantic 스키마)
+- [x] **3.1.1** LLM 통합
+  - [x] 기존 `llm.py`의 `llm_gemini_pro()` 활용
+  - [x] Temperature=0 설정 (일관성 보장)
+  - [x] JSON 출력 강제 (Pydantic 스키마)
+  - [x] LangGraph 기반 워크플로우 구현
 
-- [ ] **3.1.2** 프롬프트 엔지니어링
-  - [ ] System Prompt 설계
-    - [ ] 역할 정의 (거시경제 전문가)
-    - [ ] 입력 데이터 설명 (FRED 정량 시그널, 물가 지표, 경제 뉴스)
-    - [ ] 출력 형식 명시 (JSON 스키마)
-  - [ ] 규칙 명시
-    - [ ] 총 비중 100% 검증
-    - [ ] 각 자산군별 비중 범위 (0-100%)
-    - [ ] 손실 중인 자산에 대한 판단 명시
+- [x] **3.1.2** 프롬프트 엔지니어링
+  - [x] System Prompt 설계
+    - [x] 역할 정의 (거시경제 전문가)
+    - [x] 입력 데이터 설명 (FRED 정량 시그널, 물가 지표, 경제 뉴스)
+    - [x] 출력 형식 명시 (JSON 스키마)
+  - [x] 규칙 명시
+    - [x] 총 비중 100% 검증
+    - [x] 각 자산군별 비중 범위 (0-100%)
+    - [x] 손실 중인 자산에 대한 판단 명시
 
-- [ ] **3.1.3** 출력 검증
-  - [ ] Pydantic 모델 정의
+- [x] **3.1.3** 출력 검증
+  - [x] Pydantic 모델 정의
     ```python
     class TargetAllocation(BaseModel):
         Stocks: float
-        Bonds_US_Long: float
-        Bonds_KR_Short: float
+        Bonds: float
         Alternatives: float
         Cash: float
     ```
-  - [ ] 총합 100% 자동 검증
-  - [ ] 각 비중 범위 검증 (0-100%)
+  - [x] 총합 100% 자동 검증
+  - [x] 각 비중 범위 검증 (0-100%)
 
-- [ ] **3.1.4** 결과 저장
-  - [ ] AI 의사결정을 `ai_strategy_decisions` 테이블에 저장
-  - [ ] 분석 요약, 목표 비중, 입력 데이터 모두 저장
+- [x] **3.1.4** 결과 저장
+  - [x] AI 의사결정을 `ai_strategy_decisions` 테이블에 저장
+  - [x] 분석 요약, 목표 비중, 입력 데이터 모두 저장
+
+- [x] **3.1.5** LangGraph 워크플로우 구현
+  - [x] State 정의 (AIAnalysisState)
+  - [x] 노드 구현:
+    - [x] `collect_fred_node`: FRED 시그널 수집
+    - [x] `collect_news_node`: 경제 뉴스 수집 (지난 20일, 특정 국가)
+    - [x] `summarize_news_node`: 뉴스 LLM 요약 (gemini-3.0-pro)
+    - [x] `analyze_node`: AI 분석 및 전략 결정 (gemini-3-pro-preview)
+    - [x] `save_decision_node`: 결과 저장
+  - [x] 워크플로우 그래프 구성 및 순차 실행 보장
+  - [x] 에러 핸들링 및 상태 관리
+
+- [x] **3.1.6** 뉴스 정제 및 요약
+  - [x] 지난 20일간 특정 국가 뉴스 수집 (Crypto, Commodity, Euro Area, China, United States)
+  - [x] gemini-3.0-pro를 사용한 뉴스 요약
+  - [x] 주요 경제 지표 변화, 경제 흐름, 주요 이벤트 도출
+  - [x] 정제된 요약을 AI 분석 프롬프트에 포함
+
+#### AI 분석 워크플로우 (LangGraph)
+
+**워크플로우 구조:**
+```
+START
+  ↓
+[노드 1] collect_fred_node
+  - FRED 정량 시그널 수집
+  - 금리차, 실질금리, 테일러준칙, 유동성, 하이일드 스프레드
+  - 물가 지표 (Core PCE, CPI) - 지난 10개 데이터
+  - 고용 지표 (실업률, 비농업 고용) - 지난 10개 데이터
+  ↓
+[노드 2] collect_news_node
+  - 지난 20일간 경제 뉴스 수집
+  - 필터링 국가: Crypto, Commodity, Euro Area, China, United States
+  - LLM 요약 제외 (별도 노드에서 처리)
+  ↓
+[노드 3] summarize_news_node
+  - gemini-3.0-pro로 뉴스 요약
+  - 주요 경제 지표 변화 도출
+  - 경제 흐름 및 트렌드 분석
+  - 주요 이벤트 추출
+  ↓
+[노드 4] analyze_node
+  - FRED 시그널 + 정제된 뉴스 요약 종합 분석
+  - gemini-3-pro-preview로 포트폴리오 목표 비중 결정
+  - 자산군별 추천 섹터/카테고리 제시
+  ↓
+[노드 5] save_decision_node
+  - AI 의사결정을 DB에 저장
+  - 분석 요약, 목표 비중, 입력 데이터 저장
+  ↓
+END
+```
+
+**워크플로우 장점:**
+- 순차 실행 보장: 뉴스 요약 완료 후 분석 실행
+- 중복 실행 방지: 각 단계가 명확히 분리되어 관리
+- 에러 핸들링 개선: 각 노드별 독립적 에러 처리
+- 코드 가독성 향상: 워크플로우가 시각적으로 명확
+- 재사용성: 각 노드를 독립적으로 테스트 및 재사용 가능
 
 #### 의사결정 필요 사항
 - [x] 폴백 전략의 구체적인 룰 정의 (아래 참조)
-- [x] LLM 호출 빈도: 주기적 (09:10, 14:40) (결정 완료)
+- [x] LLM 호출 빈도: 주기적 (08:30) (결정 완료)
+- [x] 뉴스 수집 기간: 지난 20일 (결정 완료)
+- [x] 뉴스 요약 모델: gemini-3.0-pro (결정 완료)
+- [x] 전략 결정 모델: gemini-3-pro-preview (결정 완료)
+- [x] 워크플로우 관리: LangGraph 사용 (결정 완료)
 
 
 #### 추가 작업 항목

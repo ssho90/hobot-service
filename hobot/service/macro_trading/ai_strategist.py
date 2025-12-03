@@ -1,12 +1,15 @@
 """
 AI 전략가 모듈
 Gemini 3 Pro Preview를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
+LangGraph를 사용하여 워크플로우를 관리합니다.
 """
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional, Any, List, TypedDict
 from pydantic import BaseModel, Field, model_validator
+
+from langgraph.graph import StateGraph, START, END
 
 from service.llm import llm_gemini_pro
 from service.database.db import get_db_connection
@@ -232,13 +235,14 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
         return None
 
 
-def collect_economic_news(days: int = 20) -> Optional[Dict[str, Any]]:
+def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optional[Dict[str, Any]]:
     """
     경제 뉴스 수집 및 LLM 요약
     지난 N일간 특정 국가의 뉴스를 수집하고, gemini-3.0-pro로 정제하여 요약합니다.
     
     Args:
         days: 수집할 기간 (일 단위, 기본값: 20일)
+        include_summary: LLM 요약 포함 여부 (기본값: True)
     """
     try:
         # 지난 N일 기준으로 cutoff_time 설정
@@ -279,11 +283,11 @@ def collect_economic_news(days: int = 20) -> Optional[Dict[str, Any]]:
                 if item.get('collected_at'):
                     item['collected_at'] = item['collected_at'].strftime('%Y-%m-%d %H:%M:%S')
             
-            logger.info(f"경제 뉴스 수집 완료: 지난 20일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
+            logger.info(f"경제 뉴스 수집 완료: 지난 {days}일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
             
-            # LLM으로 뉴스 요약
+            # LLM으로 뉴스 요약 (include_summary가 True인 경우에만)
             news_summary = None
-            if news:
+            if include_summary and news:
                 news_summary = summarize_news_with_llm(news, target_countries)
             
             return {
@@ -619,17 +623,24 @@ JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
     return prompt
 
 
-def analyze_and_decide() -> Optional[AIStrategyDecision]:
-    """AI 분석 및 전략 결정"""
+def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optional[Dict] = None) -> Optional[AIStrategyDecision]:
+    """AI 분석 및 전략 결정
+    
+    Args:
+        fred_signals: FRED 시그널 데이터 (None이면 수집)
+        economic_news: 경제 뉴스 데이터 (None이면 수집)
+    """
     try:
         logger.info("AI 전략 분석 시작")
         
-        # 데이터 수집
-        logger.info("FRED 시그널 수집 중...")
-        fred_signals = collect_fred_signals()
+        # 데이터 수집 (파라미터로 전달되지 않은 경우에만)
+        if fred_signals is None:
+            logger.info("FRED 시그널 수집 중...")
+            fred_signals = collect_fred_signals()
         
-        logger.info("경제 뉴스 수집 중... (지난 20일, 특정 국가 필터)")
-        economic_news = collect_economic_news(days=20)  # 지난 20일치 수집 및 LLM 요약
+        if economic_news is None:
+            logger.info("경제 뉴스 수집 중... (지난 20일, 특정 국가 필터)")
+            economic_news = collect_economic_news(days=20)  # 지난 20일치 수집 및 LLM 요약
         
         # 프롬프트 생성
         prompt = create_analysis_prompt(fred_signals, economic_news)
@@ -761,6 +772,211 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         raise
 
 
+# ============================================================================
+# LangGraph 워크플로우 정의
+# ============================================================================
+
+class AIAnalysisState(TypedDict):
+    """AI 분석 워크플로우 상태"""
+    fred_signals: Optional[Dict[str, Any]]
+    economic_news: Optional[Dict[str, Any]]
+    news_summary: Optional[str]
+    decision: Optional[AIStrategyDecision]
+    error: Optional[str]
+    success: bool
+
+
+def collect_fred_node(state: AIAnalysisState) -> AIAnalysisState:
+    """FRED 시그널 수집 노드"""
+    try:
+        logger.info("1단계: FRED 시그널 수집 중...")
+        fred_signals = collect_fred_signals()
+        if not fred_signals:
+            logger.warning("FRED 시그널 수집 실패 (None 반환)")
+        return {
+            **state,
+            "fred_signals": fred_signals
+        }
+    except Exception as e:
+        logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "fred_signals": None,
+            "error": f"FRED 시그널 수집 실패: {str(e)}"
+        }
+
+
+def collect_news_node(state: AIAnalysisState) -> AIAnalysisState:
+    """경제 뉴스 수집 노드 (LLM 요약 제외)"""
+    try:
+        logger.info("2단계: 경제 뉴스 수집 중...")
+        # LLM 요약 없이 뉴스만 수집
+        economic_news = collect_economic_news(days=20, include_summary=False)
+        if not economic_news:
+            logger.warning("경제 뉴스 수집 실패 (None 반환)")
+        return {
+            **state,
+            "economic_news": economic_news
+        }
+    except Exception as e:
+        logger.error(f"경제 뉴스 수집 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "economic_news": None,
+            "error": f"경제 뉴스 수집 실패: {str(e)}"
+        }
+
+
+def summarize_news_node(state: AIAnalysisState) -> AIAnalysisState:
+    """뉴스 LLM 요약 노드"""
+    try:
+        economic_news = state.get("economic_news")
+        if not economic_news or not economic_news.get("news"):
+            logger.warning("요약할 뉴스가 없습니다.")
+            return {
+                **state,
+                "news_summary": None
+            }
+        
+        news_list = economic_news.get("news", [])
+        target_countries = economic_news.get("target_countries", [])
+        
+        logger.info("2-1단계: 뉴스 LLM 요약 중...")
+        news_summary = summarize_news_with_llm(news_list, target_countries)
+        
+        # economic_news에 요약 결과 추가
+        if economic_news:
+            economic_news["news_summary"] = news_summary
+        
+        return {
+            **state,
+            "economic_news": economic_news,
+            "news_summary": news_summary
+        }
+    except Exception as e:
+        logger.error(f"뉴스 요약 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "news_summary": None,
+            "error": f"뉴스 요약 실패: {str(e)}"
+        }
+
+
+def analyze_node(state: AIAnalysisState) -> AIAnalysisState:
+    """AI 분석 및 전략 결정 노드"""
+    try:
+        logger.info("3단계: AI 분석 및 전략 결정 중...")
+        fred_signals = state.get("fred_signals")
+        economic_news = state.get("economic_news")
+        
+        decision = analyze_and_decide(fred_signals=fred_signals, economic_news=economic_news)
+        
+        if not decision:
+            logger.error("AI 분석 실패: analyze_and_decide()가 None 반환")
+            return {
+                **state,
+                "decision": None,
+                "error": "AI 분석 실패: analyze_and_decide()가 None 반환"
+            }
+        
+        return {
+            **state,
+            "decision": decision
+        }
+    except Exception as e:
+        logger.error(f"AI 분석 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "decision": None,
+            "error": f"AI 분석 실패: {str(e)}"
+        }
+
+
+def save_decision_node(state: AIAnalysisState) -> AIAnalysisState:
+    """전략 결정 결과 저장 노드"""
+    try:
+        logger.info("4단계: 결과 저장 중...")
+        decision = state.get("decision")
+        fred_signals = state.get("fred_signals")
+        economic_news = state.get("economic_news")
+        
+        if not decision:
+            logger.error("저장할 결정이 없습니다.")
+            return {
+                **state,
+                "success": False,
+                "error": "저장할 결정이 없습니다."
+            }
+        
+        success = save_strategy_decision(decision, fred_signals, economic_news)
+        
+        if success:
+            logger.info("=" * 60)
+            logger.info("AI 전략 분석 완료")
+            logger.info(f"분석 요약: {decision.analysis_summary}")
+            logger.info(f"목표 배분: Stocks={decision.target_allocation.Stocks}%, "
+                       f"Bonds={decision.target_allocation.Bonds}%, "
+                       f"Alternatives={decision.target_allocation.Alternatives}%, "
+                       f"Cash={decision.target_allocation.Cash}%")
+            if decision.recommended_stocks:
+                logger.info(f"추천 섹터: {len(decision.recommended_stocks.Stocks or [])}개 주식, "
+                           f"{len(decision.recommended_stocks.Bonds or [])}개 채권, "
+                           f"{len(decision.recommended_stocks.Alternatives or [])}개 대체투자, "
+                           f"{len(decision.recommended_stocks.Cash or [])}개 현금")
+            logger.info("=" * 60)
+        
+        return {
+            **state,
+            "success": success
+        }
+    except Exception as e:
+        logger.error(f"결과 저장 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "success": False,
+            "error": f"결과 저장 실패: {str(e)}"
+        }
+
+
+# LangGraph 워크플로우 구성
+def create_ai_analysis_graph():
+    """AI 분석 워크플로우 그래프 생성"""
+    graph = StateGraph(AIAnalysisState)
+    
+    # 노드 추가
+    graph.add_node("collect_fred", collect_fred_node)
+    graph.add_node("collect_news", collect_news_node)
+    graph.add_node("summarize_news", summarize_news_node)
+    graph.add_node("analyze", analyze_node)
+    graph.add_node("save_decision", save_decision_node)
+    
+    # 엣지 연결: 순차 실행
+    graph.add_edge(START, "collect_fred")
+    graph.add_edge("collect_fred", "collect_news")
+    graph.add_edge("collect_news", "summarize_news")
+    graph.add_edge("summarize_news", "analyze")
+    graph.add_edge("analyze", "save_decision")
+    graph.add_edge("save_decision", END)
+    
+    return graph.compile()
+
+
+# 전역 그래프 인스턴스 (필요시 재사용)
+_ai_analysis_graph = None
+
+
+def get_ai_analysis_graph():
+    """AI 분석 그래프 인스턴스 반환 (싱글톤)"""
+    global _ai_analysis_graph
+    if _ai_analysis_graph is None:
+        _ai_analysis_graph = create_ai_analysis_graph()
+    return _ai_analysis_graph
+
+
+# ============================================================================
+# 기존 함수들 (하위 호환성 유지)
+# ============================================================================
+
 def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict) -> bool:
     """전략 결정 결과를 DB에 저장"""
     try:
@@ -802,51 +1018,30 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
 
 
 def run_ai_analysis():
-    """AI 분석 실행 (스케줄러용)"""
+    """AI 분석 실행 (스케줄러용) - LangGraph 기반"""
     try:
         logger.info("=" * 60)
         logger.info("AI 전략 분석 시작")
         logger.info("=" * 60)
         
-        # 데이터 수집
-        logger.info("1단계: FRED 시그널 수집 중...")
-        fred_signals = collect_fred_signals()
-        if not fred_signals:
-            logger.warning("FRED 시그널 수집 실패 (None 반환)")
+        # LangGraph 워크플로우 실행
+        graph = get_ai_analysis_graph()
+        initial_state: AIAnalysisState = {
+            "fred_signals": None,
+            "economic_news": None,
+            "news_summary": None,
+            "decision": None,
+            "error": None,
+            "success": False
+        }
         
-        logger.info("2단계: 경제 뉴스 수집 중...")
-        economic_news = collect_economic_news(days=20)  # 지난 20일치 특정 국가 뉴스 수집 및 LLM 요약
-        if not economic_news:
-            logger.warning("경제 뉴스 수집 실패 (None 반환)")
+        final_state = graph.invoke(initial_state)
         
-        # AI 분석
-        logger.info("3단계: AI 분석 및 전략 결정 중...")
-        decision = analyze_and_decide()
+        success = final_state.get("success", False)
+        error = final_state.get("error")
         
-        if not decision:
-            logger.error("AI 분석 실패: analyze_and_decide()가 None 반환")
-            return False
-        
-        logger.info("4단계: 결과 저장 중...")
-        # 결과 저장
-        success = save_strategy_decision(decision, fred_signals, economic_news)
-        
-        if success:
-            logger.info("=" * 60)
-            logger.info("AI 전략 분석 완료")
-            logger.info(f"분석 요약: {decision.analysis_summary}")
-            logger.info(f"목표 배분: Stocks={decision.target_allocation.Stocks}%, "
-                       f"Bonds={decision.target_allocation.Bonds}%, "
-                       f"Alternatives={decision.target_allocation.Alternatives}%, "
-                       f"Cash={decision.target_allocation.Cash}%")
-            if decision.recommended_stocks:
-                logger.info(f"추천 섹터: {len(decision.recommended_stocks.Stocks or [])}개 주식, "
-                           f"{len(decision.recommended_stocks.Bonds or [])}개 채권, "
-                           f"{len(decision.recommended_stocks.Alternatives or [])}개 대체투자, "
-                           f"{len(decision.recommended_stocks.Cash or [])}개 현금")
-            logger.info("=" * 60)
-        else:
-            logger.error("결과 저장 실패")
+        if error:
+            logger.error(f"워크플로우 실행 중 오류: {error}")
         
         return success
         
