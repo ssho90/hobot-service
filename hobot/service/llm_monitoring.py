@@ -197,7 +197,18 @@ class LLMCallTracker:
         """
         # 응답 텍스트 추출
         if hasattr(response, 'content'):
-            self.response_prompt = response.content
+            # content가 리스트인 경우 (예: [{'type': 'text', 'text': '...'}])
+            if isinstance(response.content, list) and len(response.content) > 0:
+                # 첫 번째 텍스트 항목 추출
+                first_item = response.content[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    self.response_prompt = first_item['text']
+                else:
+                    self.response_prompt = str(first_item)
+            elif isinstance(response.content, str):
+                self.response_prompt = response.content
+            else:
+                self.response_prompt = str(response.content)
         elif hasattr(response, 'text'):
             self.response_prompt = response.text
         elif isinstance(response, str):
@@ -205,14 +216,67 @@ class LLMCallTracker:
         else:
             self.response_prompt = str(response)
         
-        # 토큰 정보 추출 (LangChain callback 사용)
+        # 토큰 정보 추출 (LangChain 응답 객체의 usage_metadata에서)
         try:
-            from langchain.callbacks import get_openai_callback
-            # OpenAI의 경우 callback에서 토큰 정보를 가져올 수 있음
-            # 하지만 이미 호출이 끝난 후이므로, 실제로는 호출 전에 callback을 설정해야 함
-            pass
-        except Exception:
-            pass
+            usage_found = False
+            
+            # 1. response_metadata에서 usage_metadata 추출 시도
+            if hasattr(response, 'response_metadata'):
+                metadata = response.response_metadata
+                if isinstance(metadata, dict) and 'usage_metadata' in metadata:
+                    usage = metadata['usage_metadata']
+                    if isinstance(usage, dict):
+                        # input_tokens, output_tokens, total_tokens 추출
+                        self.prompt_tokens = usage.get('input_tokens', 0)
+                        self.completion_tokens = usage.get('output_tokens', 0)
+                        self.total_tokens = usage.get('total_tokens', 0)
+                        usage_found = True
+                        
+                        # output_token_details에서 reasoning 토큰도 확인 가능
+                        output_details = usage.get('output_token_details', {})
+                        if isinstance(output_details, dict) and 'reasoning' in output_details:
+                            reasoning_tokens = output_details.get('reasoning', 0)
+                            logger.debug(f"Reasoning tokens: {reasoning_tokens}")
+                        
+                        logger.info(f"토큰 사용량 추출 (response_metadata): input={self.prompt_tokens}, output={self.completion_tokens}, total={self.total_tokens}")
+            
+            # 2. usage_metadata 속성이 직접 있는 경우 확인 (elif가 아닌 if로 변경)
+            if not usage_found and hasattr(response, 'usage_metadata'):
+                usage = response.usage_metadata
+                if isinstance(usage, dict):
+                    self.prompt_tokens = usage.get('input_tokens', 0)
+                    self.completion_tokens = usage.get('output_tokens', 0)
+                    self.total_tokens = usage.get('total_tokens', 0)
+                    usage_found = True
+                    logger.info(f"토큰 사용량 추출 (직접 속성): input={self.prompt_tokens}, output={self.completion_tokens}, total={self.total_tokens}")
+            
+            # 3. response_metadata 자체에 토큰 정보가 있는 경우 (OpenAI 형식)
+            if not usage_found and hasattr(response, 'response_metadata'):
+                metadata = response.response_metadata
+                if isinstance(metadata, dict):
+                    # OpenAI 형식: token_usage
+                    if 'token_usage' in metadata:
+                        token_usage = metadata['token_usage']
+                        if isinstance(token_usage, dict):
+                            self.prompt_tokens = token_usage.get('prompt_tokens', 0)
+                            self.completion_tokens = token_usage.get('completion_tokens', 0)
+                            self.total_tokens = token_usage.get('total_tokens', 0)
+                            usage_found = True
+                            logger.info(f"토큰 사용량 추출 (token_usage): input={self.prompt_tokens}, output={self.completion_tokens}, total={self.total_tokens}")
+            
+            # 4. 디버깅: response 객체의 모든 속성 확인
+            if not usage_found:
+                logger.warning("토큰 정보를 찾을 수 없습니다. response 객체 속성 확인 중...")
+                logger.debug(f"response 타입: {type(response)}")
+                logger.debug(f"response 속성: {dir(response)}")
+                if hasattr(response, 'response_metadata'):
+                    logger.debug(f"response_metadata: {response.response_metadata}")
+                if hasattr(response, 'usage_metadata'):
+                    logger.debug(f"usage_metadata: {response.usage_metadata}")
+                    
+        except Exception as e:
+            logger.error(f"토큰 정보 추출 실패: {e}", exc_info=True)
+            # 토큰 정보 추출 실패해도 계속 진행
     
     def set_token_usage(
         self,

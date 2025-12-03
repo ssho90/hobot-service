@@ -11,6 +11,7 @@ const MacroDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const { isAdmin, getAuthHeaders } = useAuth();
 
   // Overview 데이터 로드
@@ -99,7 +100,29 @@ const MacroDashboard = () => {
       {/* Overview 섹션 (항상 표시) */}
       <div className="overview-section">
         <div className="overview-header-section">
-          <h2>overview</h2>
+          <div className="overview-title-wrapper">
+            <h2>
+              <span className="ai-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                </svg>
+                <span className="ai-badge-text">AI 분석</span>
+              </span>
+              overview
+            </h2>
+            {overviewData && (
+              <button
+                className="info-button"
+                onClick={() => setShowInfoModal(true)}
+                title="AI 분석 방법 알아보기"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+                  <path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            )}
+          </div>
           {isAdmin() && (
             <button
               className="btn btn-primary btn-update"
@@ -122,12 +145,25 @@ const MacroDashboard = () => {
             <div className="overview-content">
               <div className="overview-header">
                 <div className="overview-date">
+                  <span className="ai-badge-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                    </svg>
+                    AI 생성
+                  </span>
                   분석 일시: {overviewData.decision_date || overviewData.created_at}
                 </div>
               </div>
               
               <div className="analysis-summary">
-                <h3>분석 요약</h3>
+                <h3>
+                  <span className="ai-icon-inline">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  분석 요약
+                </h3>
                 <p>{overviewData.analysis_summary}</p>
               </div>
               
@@ -190,6 +226,115 @@ const MacroDashboard = () => {
         {subTab === 'fred' && <FredIndicatorsTab />}
         {subTab === 'news' && <EconomicNewsTab />}
       </div>
+
+      {/* AI 분석 정보 모달 */}
+      {showInfoModal && (
+        <div className="modal-overlay" onClick={() => setShowInfoModal(false)}>
+          <div className="modal-content ai-info-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>
+                <span className="ai-badge">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                  </svg>
+                  <span className="ai-badge-text">AI 분석 방법</span>
+                </span>
+              </h2>
+              <button className="modal-close" onClick={() => setShowInfoModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="ai-info-content">
+                <section className="info-section">
+                  <h3>📊 분석 개요</h3>
+                  <p>
+                    이 분석은 <strong>Google Gemini 2.5 Pro</strong> AI 모델을 사용하여 매일 오전 8시 30분에 자동으로 실행됩니다.
+                    거시경제 데이터와 뉴스를 종합적으로 분석하여 최적의 자산 배분 전략을 제시합니다.
+                  </p>
+                </section>
+
+                <section className="info-section">
+                  <h3>📈 사용 데이터</h3>
+                  <div className="data-sources">
+                    <div className="data-source-item">
+                      <h4>1. FRED 정량 시그널 (가장 신뢰도 높음)</h4>
+                      <ul>
+                        <li><strong>장단기 금리차 추세</strong>: 10년-2년 국채 금리차의 20일/120일 이동평균 분석</li>
+                        <li><strong>실질 금리</strong>: 명목 금리에서 인플레이션을 차감한 실질 금리</li>
+                        <li><strong>테일러 룰 시그널</strong>: 연준의 정책 금리 적정성 평가</li>
+                        <li><strong>순유동성</strong>: 연준 총자산에서 역RP 잔액을 차감한 순유동성 (4주 이동평균)</li>
+                        <li><strong>하이일드 스프레드</strong>: 고수익 채권과 국채 간 금리차</li>
+                        <li><strong>기타 지표</strong>: CPI, PCE, GDP, 실업률, 고용 데이터 등</li>
+                      </ul>
+                    </div>
+
+                    <div className="data-source-item">
+                      <h4>2. 경제 뉴스 (정성적 감정 분석)</h4>
+                      <ul>
+                        <li>최근 <strong>1주일</strong> 이내의 주요 경제 뉴스 수집</li>
+                        <li>특정 국가 필터링: Crypto, Commodity, Euro Area, China, United States</li>
+                        <li>뉴스의 내용과 톤을 분석하여 시장 심리 파악</li>
+                        <li>정량 시그널에 비해 낮은 비중으로 참고</li>
+                      </ul>
+                    </div>
+
+                    <div className="data-source-item">
+                      <h4>3. 계좌 현황</h4>
+                      <ul>
+                        <li>현재 포트폴리오의 총 평가금액</li>
+                        <li>자산군별(주식, 채권, 대체투자, 현금) 보유 비중</li>
+                        <li>자산군별 손익 현황</li>
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="info-section">
+                  <h3>🤖 분석 프로세스</h3>
+                  <ol className="process-steps">
+                    <li>
+                      <strong>데이터 수집</strong>
+                      <p>FRED API에서 최신 거시경제 지표를 수집하고, TradingEconomics에서 경제 뉴스를 수집하며, KIS API로 계좌 현황을 조회합니다.</p>
+                    </li>
+                    <li>
+                      <strong>시그널 계산</strong>
+                      <p>정량적 지표들을 분석하여 투자 시그널을 계산합니다 (예: 금리차 추세, 유동성 상태, 하이일드 스프레드 등).</p>
+                    </li>
+                    <li>
+                      <strong>AI 종합 분석</strong>
+                      <p>수집된 모든 데이터를 Gemini 2.5 Pro AI 모델에 제공하여 종합적인 시장 분석과 투자 전략을 생성합니다.</p>
+                    </li>
+                    <li>
+                      <strong>자산 배분 결정</strong>
+                      <p>AI가 분석 결과를 바탕으로 주식, 채권, 대체투자, 현금의 최적 비중을 제시합니다.</p>
+                    </li>
+                    <li>
+                      <strong>판단 근거 제공</strong>
+                      <p>각 결정에 대한 상세한 판단 근거를 한국어로 제공하여 투자자가 이해할 수 있도록 합니다.</p>
+                    </li>
+                  </ol>
+                </section>
+
+                <section className="info-section">
+                  <h3>⚙️ 실행 주기</h3>
+                  <p>
+                    AI 분석은 <strong>매일 오전 8시 30분</strong>에 자동으로 실행됩니다.
+                    관리자는 필요시 "수동 업데이트" 버튼을 통해 언제든지 분석을 실행할 수 있습니다.
+                  </p>
+                </section>
+
+                <section className="info-section">
+                  <h3>⚠️ 주의사항</h3>
+                  <ul>
+                    <li>이 분석은 AI가 생성한 것으로, 투자 결정의 참고 자료로만 사용해야 합니다.</li>
+                    <li>실제 투자 결정은 개인의 위험 성향과 재무 상황을 고려하여 신중하게 내려야 합니다.</li>
+                    <li>시장 상황은 빠르게 변할 수 있으므로, 분석 결과를 맹신하지 마세요.</li>
+                  </ul>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

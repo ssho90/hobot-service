@@ -704,6 +704,7 @@ async def get_ai_overview():
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     created_at
                 FROM ai_strategy_decisions
                 ORDER BY decision_date DESC
@@ -724,6 +725,10 @@ async def get_ai_overview():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks and isinstance(recommended_stocks, str):
+                recommended_stocks = json.loads(recommended_stocks)
+            
             # analysis_summary에서 reasoning 추출 (판단 근거: 이후 텍스트)
             analysis_summary = row['analysis_summary'] or ''
             reasoning = ''
@@ -740,6 +745,7 @@ async def get_ai_overview():
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
                     "target_allocation": target_allocation,
+                    "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
                 }
             }
@@ -751,26 +757,78 @@ async def get_ai_overview():
 
 @api_router.post("/macro-trading/run-ai-analysis")
 async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
-    """수동 AI 분석 실행 (Admin 전용)"""
+    """수동 AI 분석 실행 (Admin 전용)
+    
+    백그라운드에서 실행되며 즉시 응답을 반환합니다.
+    분석 완료 여부는 /api/macro-trading/overview API로 확인할 수 있습니다.
+    """
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+    
     try:
         from service.macro_trading.ai_strategist import run_ai_analysis
+        from service.macro_trading.scheduler import (
+            is_ai_analysis_running,
+            acquire_ai_analysis_lock,
+            release_ai_analysis_lock
+        )
         
-        logging.info(f"수동 AI 분석 실행 요청: {admin_user.get('username')}")
+        username = admin_user.get('username', 'unknown')
+        logging.info(f"수동 AI 분석 실행 요청: {username}")
         
-        success = run_ai_analysis()
+        # 이미 실행 중이면 에러 반환
+        if is_ai_analysis_running():
+            raise HTTPException(
+                status_code=409,
+                detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
+            )
         
-        if success:
-            return {
-                "status": "success",
-                "message": "AI 분석이 완료되었습니다."
-            }
-        else:
-            raise HTTPException(status_code=500, detail="AI 분석 실행에 실패했습니다.")
+        # 락 획득 시도
+        if not acquire_ai_analysis_lock():
+            raise HTTPException(
+                status_code=409,
+                detail="AI 분석이 이미 실행 중입니다. 잠시 후 다시 시도해주세요."
+            )
+        
+        # 백그라운드에서 실행
+        def run_analysis_background():
+            try:
+                logging.info(f"[백그라운드] AI 분석 시작 - 사용자: {username}")
+                success = run_ai_analysis()
+                if success:
+                    logging.info(f"[백그라운드] AI 분석 완료 - 사용자: {username}")
+                else:
+                    logging.error(f"[백그라운드] AI 분석 실패 - 사용자: {username}")
+            except Exception as e:
+                logging.error(f"[백그라운드] AI 분석 중 오류 발생 - 사용자: {username}, 오류: {e}", exc_info=True)
+            finally:
+                try:
+                    release_ai_analysis_lock()
+                    logging.info(f"[백그라운드] 락 해제 완료 - 사용자: {username}")
+                except Exception as release_error:
+                    logging.error(f"[백그라운드] 락 해제 실패: {release_error}")
+        
+        # 별도 스레드에서 실행
+        executor = ThreadPoolExecutor(max_workers=1)
+        executor.submit(run_analysis_background)
+        executor.shutdown(wait=False)  # wait=False로 즉시 반환
+        
+        # 즉시 응답 반환
+        return {
+            "status": "accepted",
+            "message": "AI 분석이 백그라운드에서 시작되었습니다. 완료되면 /api/macro-trading/overview에서 결과를 확인할 수 있습니다."
+        }
             
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f"Error running AI analysis: {e}", exc_info=True)
+        logging.error(f"Error starting AI analysis: {e}", exc_info=True)
+        # 락이 획득된 상태에서 에러가 발생했을 수 있으므로 해제 시도
+        try:
+            from service.macro_trading.scheduler import release_ai_analysis_lock
+            release_ai_analysis_lock()
+        except:
+            pass
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -789,6 +847,7 @@ async def get_latest_strategy_decision():
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl,
@@ -812,6 +871,10 @@ async def get_latest_strategy_decision():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks and isinstance(recommended_stocks, str):
+                recommended_stocks = json.loads(recommended_stocks)
+            
             quant_signals = row.get('quant_signals')
             if quant_signals and isinstance(quant_signals, str):
                 quant_signals = json.loads(quant_signals)
@@ -831,6 +894,7 @@ async def get_latest_strategy_decision():
                     "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
                     "analysis_summary": row.get('analysis_summary'),
                     "target_allocation": target_allocation,
+                    "recommended_stocks": recommended_stocks,
                     "quant_signals": quant_signals,
                     "qual_sentiment": qual_sentiment,
                     "account_pnl": account_pnl,
@@ -892,6 +956,7 @@ async def get_strategy_decisions_history(
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl,
@@ -916,6 +981,10 @@ async def get_strategy_decisions_history(
             target_allocation = row['target_allocation']
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
+            
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks and isinstance(recommended_stocks, str):
+                recommended_stocks = json.loads(recommended_stocks)
             
             quant_signals = row.get('quant_signals')
             if quant_signals and isinstance(quant_signals, str):
@@ -944,6 +1013,7 @@ async def get_strategy_decisions_history(
                 "analysis_summary": analysis_summary,
                 "reasoning": reasoning,
                 "target_allocation": target_allocation,
+                "recommended_stocks": recommended_stocks,
                 "quant_signals": quant_signals,
                 "qual_sentiment": qual_sentiment,
                 "account_pnl": account_pnl,
@@ -2251,15 +2321,25 @@ app.include_router(api_router)
 # ============================================
 # 애플리케이션 시작 시 초기화
 # ============================================
+_schedulers_started = False  # 스케줄러가 이미 시작되었는지 추적
+
 @app.on_event("startup")
 async def startup_event():
     """애플리케이션 시작 시 실행되는 이벤트"""
+    global _schedulers_started
+    
+    # 이미 스케줄러가 시작되었다면 중복 실행 방지
+    if _schedulers_started:
+        logging.warning("스케줄러가 이미 시작되어 있습니다. 중복 실행을 건너뜁니다.")
+        return
+    
     logging.info("Hobot 애플리케이션 시작 중...")
     
     # 모든 스케줄러 시작 (FRED 데이터 수집 + 뉴스 수집)
     try:
         from service.macro_trading.scheduler import start_all_schedulers
         threads = start_all_schedulers()
+        _schedulers_started = True
         logging.info(f"모든 스케줄러가 시작되었습니다. (총 {len(threads)}개 스레드)")
     except Exception as e:
         logging.error(f"스케줄러 시작 실패: {e}", exc_info=True)
