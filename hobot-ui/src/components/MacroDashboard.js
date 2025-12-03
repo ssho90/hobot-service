@@ -197,6 +197,73 @@ const MacroDashboard = () => {
                   </div>
                 </div>
               )}
+
+              {overviewData.recommended_stocks && (
+                <div className="recommended-stocks">
+                  <h3>
+                    <span className="ai-icon-inline">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    AI 추천 종목
+                  </h3>
+                  <div className="recommended-stocks-content">
+                    {overviewData.recommended_stocks.Stocks && overviewData.recommended_stocks.Stocks.length > 0 && (
+                      <div className="recommended-category">
+                        <h4>주식 ({overviewData.target_allocation?.Stocks?.toFixed(1) || 0}%)</h4>
+                        <ul className="recommended-list">
+                          {overviewData.recommended_stocks.Stocks.map((item, idx) => (
+                            <li key={idx}>
+                              <span className="category-name">{item.category}</span>
+                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {overviewData.recommended_stocks.Bonds && overviewData.recommended_stocks.Bonds.length > 0 && (
+                      <div className="recommended-category">
+                        <h4>채권 ({overviewData.target_allocation?.Bonds?.toFixed(1) || 0}%)</h4>
+                        <ul className="recommended-list">
+                          {overviewData.recommended_stocks.Bonds.map((item, idx) => (
+                            <li key={idx}>
+                              <span className="category-name">{item.category}</span>
+                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {overviewData.recommended_stocks.Alternatives && overviewData.recommended_stocks.Alternatives.length > 0 && (
+                      <div className="recommended-category">
+                        <h4>대체투자 ({overviewData.target_allocation?.Alternatives?.toFixed(1) || 0}%)</h4>
+                        <ul className="recommended-list">
+                          {overviewData.recommended_stocks.Alternatives.map((item, idx) => (
+                            <li key={idx}>
+                              <span className="category-name">{item.category}</span>
+                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {overviewData.recommended_stocks.Cash && overviewData.recommended_stocks.Cash.length > 0 && (
+                      <div className="recommended-category">
+                        <h4>현금 ({overviewData.target_allocation?.Cash?.toFixed(1) || 0}%)</h4>
+                        <ul className="recommended-list">
+                          {overviewData.recommended_stocks.Cash.map((item, idx) => (
+                            <li key={idx}>
+                              <span className="category-name">{item.category}</span>
+                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -829,77 +896,6 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-          const data = indicatorData?.data || indicatorData;
-          if (!data || data.length === 0) {
-            if (indicatorData?.error) {
-              const info = indicatorInfo[code];
-              return (
-                <div key={code} className="indicator-chart indicator-error">
-                  <h3>{info?.name || code} ({code})</h3>
-                  <div className="indicator-error-message">
-                    <strong>⚠️ 오류:</strong> {indicatorData.error.message}
-                  </div>
-                </div>
-              );
-            }
-            return null;
-          }
-
-          const info = indicatorInfo[code];
-          if (!info) return null;
-
-          return (
-            <div key={code} className="indicator-chart">
-              <h3>{info.name} ({code})</h3>
-              {indicatorData?.error && (
-                <div className="indicator-warning">
-                  <strong>⚠️ 경고:</strong> {indicatorData.error.message}
-                </div>
-              )}
-              {indicatorData?.warning && (
-                <div className="indicator-warning">
-                  <strong>⚠️ 데이터 품질 경고:</strong> {indicatorData.warning.message}
-                </div>
-              )}
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id={`color${code}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2196F3" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#2196F3" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12 }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    label={{ value: info.unit, angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`${value} ${info.unit}`, info.name]}
-                    labelFormatter={(label) => `날짜: ${label}`}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#2196F3"
-                    fillOpacity={1}
-                    fill={`url(#color${code})`}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
