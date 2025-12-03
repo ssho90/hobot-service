@@ -125,7 +125,11 @@ const Header = () => {
   return (
     <header className="top-header">
       <div className="header-left">
-        <div className="header-logo">
+        <div 
+          className="header-logo" 
+          onClick={() => navigate('/')}
+          style={{ cursor: 'pointer' }}
+        >
           <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
         </div>
         <nav className="header-tabs">
