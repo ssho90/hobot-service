@@ -18,6 +18,82 @@ from service.llm_monitoring import track_llm_call
 logger = logging.getLogger(__name__)
 
 
+# ============================================================================
+# 모델 포트폴리오 (MP) 시나리오 정의
+# ============================================================================
+
+MODEL_PORTFOLIOS = {
+    "MP-1": {
+        "id": "MP-1",
+        "name": "Risk On (골디락스)",
+        "description": "경기 지표(GDP, PMI)가 확장 국면이며 기업 이익이 증가하지만, 물가는 안정적인 최상의 시나리오. 실업률은 완전고용 수준을 유지하며, 시장에 위험자산 선호 심리(Risk-on)가 지배적임.",
+        "strategy": "주식 풀매수",
+        "allocation": {
+            "Stocks": 80.0,
+            "Bonds": 10.0,
+            "Alternatives": 5.0,
+            "Cash": 5.0
+        }
+    },
+    "MP-2": {
+        "id": "MP-2",
+        "name": "Reflation (물가상승)",
+        "description": "경기는 여전히 확장세이나, 수요 과열 또는 공급 충격으로 인해 물가(CPI/PCE)가 목표치를 상회하며 급등하는 구간. 금리 인상 압력이 존재하며, 화폐 가치 하락 방어를 위해 실물 자산이 선호됨.",
+        "strategy": "원자재/금 헤지 (인플레이션 방어)",
+        "allocation": {
+            "Stocks": 50.0,
+            "Bonds": 10.0,
+            "Alternatives": 30.0,
+            "Cash": 10.0
+        }
+    },
+    "MP-3": {
+        "id": "MP-3",
+        "name": "Neutral (중립)",
+        "description": "경제 지표가 호재와 악재가 섞여 뚜렷한 방향성(추세)이 보이지 않는 구간. 고용은 견조하나 소비가 둔화되는 등 지표 간 괴리가 발생하며, 시장은 연준의 정책 결정이나 새로운 모멘텀을 기다리며 박스권 등락을 반복함.",
+        "strategy": "자산배분 정석 (균형 투자)",
+        "allocation": {
+            "Stocks": 40.0,
+            "Bonds": 40.0,
+            "Alternatives": 10.0,
+            "Cash": 10.0
+        }
+    },
+    "MP-4": {
+        "id": "MP-4",
+        "name": "Defensive (경기둔화)",
+        "description": "제조업 PMI 등 선행 지표가 위축되고 실업률이 바닥을 찍고 완만하게 상승하기 시작하는 경기 하강 초기 국면. 물가 상승 압력이 둔화되면서 중앙은행의 '금리 인하' 기대감이 형성되어 채권 가격 상승(수익률 하락)이 유력함.",
+        "strategy": "채권 매집 (자본 차익 기대)",
+        "allocation": {
+            "Stocks": 20.0,
+            "Bonds": 50.0,
+            "Alternatives": 20.0,
+            "Cash": 10.0
+        }
+    },
+    "MP-5": {
+        "id": "MP-5",
+        "name": "Recession (침체/공포)",
+        "description": "실업률이 급격히 치솟으며(샴의 법칙 발동 등), 하이일드 스프레드가 급등하는 등 신용 위험이 현실화된 위기 국면. 주식 등 위험자산 투매가 나오며 안전자산(달러, 초단기 국채)으로의 자금 쏠림(Flight to Quality)이 발생함.",
+        "strategy": "안전자산 올인 (자산 방어 최우선)",
+        "allocation": {
+            "Stocks": 10.0,
+            "Bonds": 60.0,
+            "Alternatives": 10.0,
+            "Cash": 20.0
+        }
+    }
+}
+
+
+def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
+    """MP ID에 해당하는 자산 배분 비율 반환"""
+    mp = MODEL_PORTFOLIOS.get(mp_id)
+    if mp:
+        return mp["allocation"].copy()
+    return None
+
+
 class TargetAllocation(BaseModel):
     """목표 자산 배분 모델"""
     Stocks: float = Field(..., ge=0, le=100, description="주식 비중 (%)")
@@ -51,9 +127,16 @@ class RecommendedStocks(BaseModel):
 class AIStrategyDecision(BaseModel):
     """AI 전략 결정 결과 모델"""
     analysis_summary: str = Field(..., description="AI 분석 요약")
-    target_allocation: TargetAllocation = Field(..., description="목표 자산 배분")
+    mp_id: str = Field(..., description="선택된 모델 포트폴리오 ID (MP-1 ~ MP-5)")
     reasoning: str = Field(..., description="판단 근거")
     recommended_stocks: Optional[RecommendedStocks] = Field(default=None, description="자산군별 추천 종목")
+    
+    def get_target_allocation(self) -> TargetAllocation:
+        """MP ID에 해당하는 자산 배분 비율 반환"""
+        allocation = get_model_portfolio_allocation(self.mp_id)
+        if not allocation:
+            raise ValueError(f"유효하지 않은 MP ID: {self.mp_id}")
+        return TargetAllocation(**allocation)
 
 
 def collect_fred_signals() -> Optional[Dict[str, Any]]:
@@ -562,7 +645,16 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     else:
         news_summary += "최근 뉴스 없음\n"
     
-    prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 자산 배분 전략을 결정하세요.
+    # MP 시나리오 정보를 프롬프트에 포함
+    mp_info = "\n=== 모델 포트폴리오 (MP) 시나리오 ===\n"
+    mp_info += "현재 거시경제 국면을 분석하여 다음 5가지 모델 포트폴리오 중 하나를 선택하세요:\n\n"
+    for mp_id, mp in MODEL_PORTFOLIOS.items():
+        mp_info += f"{mp_id}: {mp['name']}\n"
+        mp_info += f"  - 특징: {mp['description']}\n"
+        mp_info += f"  - 핵심 전략: {mp['strategy']}\n"
+        mp_info += f"  - 자산 배분: 주식 {mp['allocation']['Stocks']}% / 채권 {mp['allocation']['Bonds']}% / 대체투자 {mp['allocation']['Alternatives']}% / 현금 {mp['allocation']['Cash']}%\n\n"
+    
+    prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 현재 거시경제 국면에 가장 적합한 모델 포트폴리오(MP)를 선택하세요.
 
 {fred_summary}
 
@@ -570,26 +662,25 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
 
 {sectors_info}
 
+{mp_info}
+
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
 2. **경제 뉴스는 보조 수단입니다.** FRED 지표 기반 분석한 내용을 한번 더 검토하는 수단입니다.
-3. 자산군별 비중을 결정하세요:
-   - Stocks (주식): 0-100%
-   - Bonds (채권): 0-100%
-   - Alternatives (대체투자: 금, 달러 등): 0-100%
-   - Cash (현금): 0-100%
-4. 총 비중은 반드시 100%가 되어야 합니다.
+3. **현재 거시경제 국면을 정확히 파악**하여 위의 5가지 MP 시나리오 중 하나를 선택하세요.
+4. MP 선택 시 고려사항:
+   - 성장률 추세 (상승/하락/중립)
+   - 물가 추세 (상승/안정/하락)
+   - 금리 정책 방향 (인상/안정/인하)
+   - 유동성 상황 (확대/축소)
+   - 하이일드 스프레드 (Greed/Fear/Panic)
+   - 실업률 및 고용 동향
 
 ## 출력 형식 (JSON):
 {{
     "analysis_summary": "분석 요약 (한국어, 200-300자)",
-    "target_allocation": {{
-        "Stocks": 40.0,
-        "Bonds": 30.0,
-        "Alternatives": 20.0,
-        "Cash": 10.0
-    }},
-    "reasoning": "판단 근거 (한국어, 300-500자)",
+    "mp_id": "MP-4",
+    "reasoning": "판단 근거 (한국어, 300-500자) - 왜 이 MP를 선택했는지 설명",
     "recommended_stocks": {{
         "Stocks": [
             {{"category": "미국 대형주", "weight": 0.4}},
@@ -610,12 +701,14 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     }}
 }}
 
-**추천 종목/섹터 규칙:**
-- 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 개별 종목은 추천하지 마세요.
-- 추천 가능한 섹터/그룹은 위의 "추천 가능한 섹터/그룹 리스트"에 명시된 것만 사용하세요.
-- 각 자산군 내 추천 카테고리의 weight 합계는 1.0이어야 합니다.
-- 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
-- Stocks, Bonds, Alternatives, Cash 각 자산군별로 최소 1개 이상의 카테고리를 추천하세요 (해당 자산군 비중이 0%가 아닌 경우).
+**중요:**
+- mp_id는 반드시 "MP-1", "MP-2", "MP-3", "MP-4", "MP-5" 중 하나여야 합니다.
+- 자산 배분 비율은 선택한 MP에 따라 자동으로 결정되므로, target_allocation을 출력하지 마세요.
+- 추천 종목/섹터 규칙:
+  - 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 개별 종목은 추천하지 마세요.
+  - 추천 가능한 섹터/그룹은 위의 "추천 가능한 섹터/그룹 리스트"에 명시된 것만 사용하세요.
+  - 각 자산군 내 추천 카테고리의 weight 합계는 1.0이어야 합니다.
+  - 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
 
 JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
 """
@@ -747,10 +840,21 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
                 logger.error(f"JSON 객체를 찾을 수 없습니다. 응답: {response_text[:200]}")
                 raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
         
+        # MP ID 검증
+        mp_id = decision_data.get('mp_id')
+        if not mp_id or mp_id not in MODEL_PORTFOLIOS:
+            valid_mp_ids = ', '.join(MODEL_PORTFOLIOS.keys())
+            logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
+            raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
+        
         # Pydantic 모델로 검증
         try:
             decision = AIStrategyDecision(**decision_data)
-            logger.info(f"AI 분석 완료: {decision.analysis_summary[:50]}...")
+            # MP ID로 자산 배분 비율 확인
+            target_allocation = decision.get_target_allocation()
+            logger.info(f"AI 분석 완료: MP={decision.mp_id}, {decision.analysis_summary[:50]}...")
+            logger.info(f"자산 배분: Stocks={target_allocation.Stocks}%, Bonds={target_allocation.Bonds}%, "
+                       f"Alternatives={target_allocation.Alternatives}%, Cash={target_allocation.Cash}%")
             return decision
         except Exception as validation_error:
             logger.error(f"Pydantic 모델 검증 실패: {validation_error}")
@@ -911,13 +1015,16 @@ def save_decision_node(state: AIAnalysisState) -> AIAnalysisState:
         success = save_strategy_decision(decision, fred_signals, economic_news)
         
         if success:
+            target_allocation = decision.get_target_allocation()
+            mp_info = MODEL_PORTFOLIOS.get(decision.mp_id, {})
             logger.info("=" * 60)
             logger.info("AI 전략 분석 완료")
+            logger.info(f"선택된 MP: {decision.mp_id} - {mp_info.get('name', 'N/A')}")
             logger.info(f"분석 요약: {decision.analysis_summary}")
-            logger.info(f"목표 배분: Stocks={decision.target_allocation.Stocks}%, "
-                       f"Bonds={decision.target_allocation.Bonds}%, "
-                       f"Alternatives={decision.target_allocation.Alternatives}%, "
-                       f"Cash={decision.target_allocation.Cash}%")
+            logger.info(f"목표 배분: Stocks={target_allocation.Stocks}%, "
+                       f"Bonds={target_allocation.Bonds}%, "
+                       f"Alternatives={target_allocation.Alternatives}%, "
+                       f"Cash={target_allocation.Cash}%")
             if decision.recommended_stocks:
                 logger.info(f"추천 섹터: {len(decision.recommended_stocks.Stocks or [])}개 주식, "
                            f"{len(decision.recommended_stocks.Bonds or [])}개 채권, "
@@ -988,6 +1095,16 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             if decision.reasoning:
                 analysis_summary_with_reasoning += f"\n\n판단 근거:\n{decision.reasoning}"
             
+            # MP ID로 자산 배분 비율 계산
+            target_allocation = decision.get_target_allocation()
+            
+            # mp_id를 포함한 저장 데이터 준비
+            # DB에 mp_id 컬럼이 있으면 저장, 없으면 target_allocation에 포함
+            save_data = {
+                "mp_id": decision.mp_id,
+                "target_allocation": target_allocation.model_dump()
+            }
+            
             cursor.execute("""
                 INSERT INTO ai_strategy_decisions (
                     decision_date,
@@ -1001,7 +1118,7 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             """, (
                 datetime.now(),
                 analysis_summary_with_reasoning,
-                json.dumps(decision.target_allocation.model_dump()),
+                json.dumps(save_data),  # mp_id와 target_allocation을 함께 저장
                 json.dumps(decision.recommended_stocks.model_dump()) if decision.recommended_stocks else None,
                 json.dumps(fred_signals) if fred_signals else None,
                 json.dumps(economic_news) if economic_news else None,
@@ -1009,7 +1126,7 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             ))
             
             conn.commit()
-            logger.info("전략 결정 결과 저장 완료")
+            logger.info(f"전략 결정 결과 저장 완료: MP={decision.mp_id}")
             return True
             
     except Exception as e:

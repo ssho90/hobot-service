@@ -703,9 +703,23 @@ async def get_ai_overview():
                 }
             
             # JSON 필드 파싱
-            target_allocation = row['target_allocation']
-            if isinstance(target_allocation, str):
-                target_allocation = json.loads(target_allocation)
+            target_allocation_raw = row['target_allocation']
+            if isinstance(target_allocation_raw, str):
+                target_allocation_raw = json.loads(target_allocation_raw)
+            
+            # MP 기반 저장 형식 처리 (mp_id와 target_allocation이 함께 저장됨)
+            mp_id = None
+            target_allocation = None
+            if isinstance(target_allocation_raw, dict):
+                # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}}
+                if "mp_id" in target_allocation_raw:
+                    mp_id = target_allocation_raw["mp_id"]
+                    target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
+                else:
+                    # 기존 형식: 직접 target_allocation만 있음
+                    target_allocation = target_allocation_raw
+            else:
+                target_allocation = target_allocation_raw
             
             recommended_stocks = row.get('recommended_stocks')
             if recommended_stocks:
@@ -729,6 +743,7 @@ async def get_ai_overview():
                     "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
+                    "mp_id": mp_id,
                     "target_allocation": target_allocation,
                     "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
@@ -799,9 +814,21 @@ async def get_latest_strategy_decision():
                 }
             
             # JSON 필드 파싱
-            target_allocation = row['target_allocation']
-            if isinstance(target_allocation, str):
-                target_allocation = json.loads(target_allocation)
+            target_allocation_raw = row['target_allocation']
+            if isinstance(target_allocation_raw, str):
+                target_allocation_raw = json.loads(target_allocation_raw)
+            
+            # MP 기반 저장 형식 처리
+            mp_id = None
+            target_allocation = None
+            if isinstance(target_allocation_raw, dict):
+                if "mp_id" in target_allocation_raw:
+                    mp_id = target_allocation_raw["mp_id"]
+                    target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
+                else:
+                    target_allocation = target_allocation_raw
+            else:
+                target_allocation = target_allocation_raw
             
             quant_signals = row.get('quant_signals')
             if quant_signals and isinstance(quant_signals, str):
@@ -821,6 +848,7 @@ async def get_latest_strategy_decision():
                     "id": row['id'],
                     "decision_date": row['decision_date'].strftime("%Y-%m-%d %H:%M:%S") if row['decision_date'] else None,
                     "analysis_summary": row.get('analysis_summary'),
+                    "mp_id": mp_id,
                     "target_allocation": target_allocation,
                     "quant_signals": quant_signals,
                     "qual_sentiment": qual_sentiment,
