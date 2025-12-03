@@ -178,12 +178,12 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
 한국어로 간결하게 요약해주세요 (500-800자 정도).
 """
         
-        # gemini-3.0-pro 사용
+        # gemini-3.0-pro-preview 사용
         logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
         llm = llm_gemini_pro(model="gemini-3.0-pro-preview")
         
         with track_llm_call(
-            model_name="gemini-3.0-pro",
+            model_name="gemini-3.0-pro-preview",
             provider="Google",
             service_name="ai_strategist_news_summary",
             request_prompt=prompt
