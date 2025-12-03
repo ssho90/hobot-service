@@ -252,56 +252,68 @@ const MacroDashboard = () => {
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
                       </svg>
                     </span>
-                    AI 추천 종목
+                    AI 추천 섹터/그룹
                   </h3>
                   <div className="recommended-stocks-content">
-                    {overviewData.recommended_stocks.Stocks && overviewData.recommended_stocks.Stocks.length > 0 && (
+                    {overviewData.recommended_stocks.Stocks && Array.isArray(overviewData.recommended_stocks.Stocks) && overviewData.recommended_stocks.Stocks.length > 0 && (
                       <div className="recommended-category">
-                        <h4>주식 ({overviewData.target_allocation?.Stocks?.toFixed(1) || 0}%)</h4>
+                        <h4>
+                          <span className="category-icon">📈</span>
+                          주식 ({overviewData.target_allocation?.Stocks?.toFixed(1) || 0}%)
+                        </h4>
                         <ul className="recommended-list">
                           {overviewData.recommended_stocks.Stocks.map((item, idx) => (
                             <li key={idx}>
-                              <span className="category-name">{item.category}</span>
-                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                              <span className="category-name">{item.category || 'N/A'}</span>
+                              <span className="category-weight">{(item.weight ? (item.weight * 100).toFixed(0) : 0)}%</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     )}
-                    {overviewData.recommended_stocks.Bonds && overviewData.recommended_stocks.Bonds.length > 0 && (
+                    {overviewData.recommended_stocks.Bonds && Array.isArray(overviewData.recommended_stocks.Bonds) && overviewData.recommended_stocks.Bonds.length > 0 && (
                       <div className="recommended-category">
-                        <h4>채권 ({overviewData.target_allocation?.Bonds?.toFixed(1) || 0}%)</h4>
+                        <h4>
+                          <span className="category-icon">📊</span>
+                          채권 ({overviewData.target_allocation?.Bonds?.toFixed(1) || 0}%)
+                        </h4>
                         <ul className="recommended-list">
                           {overviewData.recommended_stocks.Bonds.map((item, idx) => (
                             <li key={idx}>
-                              <span className="category-name">{item.category}</span>
-                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                              <span className="category-name">{item.category || 'N/A'}</span>
+                              <span className="category-weight">{(item.weight ? (item.weight * 100).toFixed(0) : 0)}%</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     )}
-                    {overviewData.recommended_stocks.Alternatives && overviewData.recommended_stocks.Alternatives.length > 0 && (
+                    {overviewData.recommended_stocks.Alternatives && Array.isArray(overviewData.recommended_stocks.Alternatives) && overviewData.recommended_stocks.Alternatives.length > 0 && (
                       <div className="recommended-category">
-                        <h4>대체투자 ({overviewData.target_allocation?.Alternatives?.toFixed(1) || 0}%)</h4>
+                        <h4>
+                          <span className="category-icon">💎</span>
+                          대체투자 ({overviewData.target_allocation?.Alternatives?.toFixed(1) || 0}%)
+                        </h4>
                         <ul className="recommended-list">
                           {overviewData.recommended_stocks.Alternatives.map((item, idx) => (
                             <li key={idx}>
-                              <span className="category-name">{item.category}</span>
-                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                              <span className="category-name">{item.category || 'N/A'}</span>
+                              <span className="category-weight">{(item.weight ? (item.weight * 100).toFixed(0) : 0)}%</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     )}
-                    {overviewData.recommended_stocks.Cash && overviewData.recommended_stocks.Cash.length > 0 && (
+                    {overviewData.recommended_stocks.Cash && Array.isArray(overviewData.recommended_stocks.Cash) && overviewData.recommended_stocks.Cash.length > 0 && (
                       <div className="recommended-category">
-                        <h4>현금 ({overviewData.target_allocation?.Cash?.toFixed(1) || 0}%)</h4>
+                        <h4>
+                          <span className="category-icon">💰</span>
+                          현금 ({overviewData.target_allocation?.Cash?.toFixed(1) || 0}%)
+                        </h4>
                         <ul className="recommended-list">
                           {overviewData.recommended_stocks.Cash.map((item, idx) => (
                             <li key={idx}>
-                              <span className="category-name">{item.category}</span>
-                              <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                              <span className="category-name">{item.category || 'N/A'}</span>
+                              <span className="category-weight">{(item.weight ? (item.weight * 100).toFixed(0) : 0)}%</span>
                             </li>
                           ))}
                         </ul>

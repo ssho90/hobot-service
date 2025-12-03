@@ -325,37 +325,60 @@
 
 /* AI 추천 종목 스타일 */
 .recommended-stocks {
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  margin-top: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .recommended-stocks h3 {
-  margin: 0 0 20px 0;
-  font-size: 18px;
-  color: #333;
+  margin: 0 0 25px 0;
+  font-size: 22px;
+  color: #1976d2;
   display: flex;
   align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e3f2fd;
 }
 
 .recommended-stocks-content {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
 }
 
 .recommended-category {
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
   border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recommended-category:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .recommended-category h4 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: #333;
-  font-weight: 600;
+  margin: 0 0 15px 0;
+  font-size: 17px;
+  color: #1976d2;
+  font-weight: 700;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e3f2fd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-icon {
+  font-size: 20px;
 }
 
 .recommended-list {
@@ -384,6 +407,23 @@
 }
 
 .category-name {
+  font-weight: 500;
+  color: #333;
+  font-size: 15px;
+}
+
+.category-weight {
+  font-weight: 700;
+  color: #1976d2;
+  font-size: 15px;
+  background: #e3f2fd;
+  padding: 4px 12px;
+  border-radius: 12px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* 기존 category-name 스타일 (중복 방지) */
   font-size: 14px;
   color: #555;
   font-weight: 500;

@@ -686,6 +686,7 @@ async def get_ai_overview():
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     created_at
                 FROM ai_strategy_decisions
                 ORDER BY decision_date DESC
@@ -706,6 +707,13 @@ async def get_ai_overview():
             if isinstance(target_allocation, str):
                 target_allocation = json.loads(target_allocation)
             
+            recommended_stocks = row.get('recommended_stocks')
+            if recommended_stocks:
+                if isinstance(recommended_stocks, str):
+                    recommended_stocks = json.loads(recommended_stocks)
+            else:
+                recommended_stocks = None
+            
             # analysis_summary에서 reasoning 추출 (판단 근거: 이후 텍스트)
             analysis_summary = row['analysis_summary'] or ''
             reasoning = ''
@@ -722,6 +730,7 @@ async def get_ai_overview():
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
                     "target_allocation": target_allocation,
+                    "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
                 }
             }
