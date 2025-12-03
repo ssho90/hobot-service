@@ -134,14 +134,115 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
         return None
 
 
-def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
+def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) -> Optional[str]:
     """
-    경제 뉴스 수집
-    지난 1주일간 특정 국가의 뉴스만 수집합니다.
+    LLM을 사용하여 뉴스를 정제하고 요약
+    gemini-3.0-pro를 사용하여 주요 경제 지표와 흐름을 도출
     """
     try:
-        # 지난 1주일 (7일) 기준으로 cutoff_time 설정
-        cutoff_time = datetime.now() - timedelta(days=7)
+        if not news_list:
+            return None
+        
+        # 뉴스 데이터를 텍스트로 변환
+        news_text = ""
+        for idx, news in enumerate(news_list[:100], 1):  # 최대 100개까지만 처리
+            title = news.get('title_ko') or news.get('title', 'N/A')
+            description = news.get('description_ko') or news.get('description', '')
+            country = news.get('country_ko') or news.get('country', 'N/A')
+            published_at = news.get('published_at', 'N/A')
+            
+            news_text += f"[{idx}] [{country}] {published_at}\n"
+            news_text += f"제목: {title}\n"
+            if description:
+                news_text += f"내용: {description[:500]}\n"  # 최대 500자만
+            news_text += "\n"
+        
+        # LLM 프롬프트 생성
+        prompt = f"""당신은 거시경제 전문가입니다. 다음은 지난 20일간 {', '.join(target_countries)} 국가의 경제 뉴스입니다.
+
+이 뉴스들을 분석하여:
+1. 주요 경제 지표의 변화 (GDP, 인플레이션, 고용, 금리 등)
+2. 경제 흐름과 트렌드
+3. 시장에 영향을 미칠 수 있는 주요 이벤트
+
+를 도출하고 요약해주세요.
+
+뉴스 목록:
+{news_text}
+
+요약 형식:
+- 주요 경제 지표 변화: (각 지표별로 간단히 설명)
+- 경제 흐름 및 트렌드: (전반적인 경제 동향 설명)
+- 주요 이벤트: (시장에 영향을 미칠 수 있는 중요한 사건들)
+
+한국어로 간결하게 요약해주세요 (500-800자 정도).
+"""
+        
+        # gemini-3.0-pro 사용
+        logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
+        llm = llm_gemini_pro(model="gemini-3.0-pro")
+        
+        with track_llm_call(
+            model_name="gemini-3.0-pro",
+            provider="Google",
+            service_name="ai_strategist_news_summary",
+            request_prompt=prompt
+        ) as tracker:
+            response = llm.invoke(prompt)
+            tracker.set_response(response)
+        
+        # 응답 텍스트 추출
+        response_text = None
+        if hasattr(response, 'content'):
+            if isinstance(response.content, list) and len(response.content) > 0:
+                first_item = response.content[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            elif isinstance(response.content, str):
+                response_text = response.content
+            else:
+                response_text = str(response.content)
+        elif hasattr(response, 'text'):
+            response_text = response.text
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            response_text = str(response)
+        
+        if isinstance(response_text, list):
+            if len(response_text) > 0:
+                first_item = response_text[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            else:
+                response_text = ""
+        
+        if not isinstance(response_text, str):
+            response_text = str(response_text)
+        
+        logger.info(f"뉴스 요약 완료: {len(response_text)}자")
+        return response_text.strip()
+        
+    except Exception as e:
+        logger.error(f"LLM 뉴스 요약 실패: {e}", exc_info=True)
+        return None
+
+
+def collect_economic_news(days: int = 20) -> Optional[Dict[str, Any]]:
+    """
+    경제 뉴스 수집 및 LLM 요약
+    지난 N일간 특정 국가의 뉴스를 수집하고, gemini-3.0-pro로 정제하여 요약합니다.
+    
+    Args:
+        days: 수집할 기간 (일 단위, 기본값: 20일)
+    """
+    try:
+        # 지난 N일 기준으로 cutoff_time 설정
+        cutoff_time = datetime.now() - timedelta(days=days)
         
         # AI 분석에 사용할 국가 목록
         target_countries = ['Crypto', 'Commodity', 'Euro Area', 'China', 'United States']
@@ -178,13 +279,19 @@ def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
                 if item.get('collected_at'):
                     item['collected_at'] = item['collected_at'].strftime('%Y-%m-%d %H:%M:%S')
             
-            logger.info(f"경제 뉴스 수집 완료: 지난 1주일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
+            logger.info(f"경제 뉴스 수집 완료: 지난 20일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
+            
+            # LLM으로 뉴스 요약
+            news_summary = None
+            if news:
+                news_summary = summarize_news_with_llm(news, target_countries)
             
             return {
                 "total_count": len(news),
-                "days": 7,
+                "days": days,
                 "target_countries": target_countries,
-                "news": news
+                "news": news,
+                "news_summary": news_summary  # LLM 요약 결과 추가
             }
     except Exception as e:
         logger.error(f"경제 뉴스 수집 실패: {e}", exc_info=True)
@@ -424,19 +531,30 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
             else:
                 fred_summary += "\n비농업 고용: 데이터 없음\n"
     
-    # 경제 뉴스 요약
+    # 경제 뉴스 요약 (LLM으로 정제된 요약 사용)
     news_summary = "\n=== 경제 뉴스 (비중 낮게 참고) ===\n"
-    if economic_news and economic_news.get('news'):
+    if economic_news:
         target_countries = economic_news.get('target_countries', [])
         total_count = economic_news.get('total_count', 0)
-        days = economic_news.get('days', 7)
-        news_summary += f"지난 {days}일간 {', '.join(target_countries)} 국가 뉴스 {total_count}개\n\n"
-        news_list = economic_news['news'][:10]  # 최근 10개만
-        for news in news_list:
-            news_summary += f"- [{news.get('country', 'N/A')}] {news.get('title', 'N/A')}\n"
-            if news.get('description'):
-                desc = news.get('description', '')[:100]  # 처음 100자만
-                news_summary += f"  {desc}...\n"
+        days = economic_news.get('days', 20)
+        
+        # LLM으로 정제된 요약이 있으면 사용
+        llm_summary = economic_news.get('news_summary')
+        if llm_summary:
+            news_summary += f"지난 {days}일간 {', '.join(target_countries)} 국가 뉴스 {total_count}개를 분석한 결과:\n\n"
+            news_summary += llm_summary
+        elif economic_news.get('news'):
+            # LLM 요약이 없는 경우 기존 방식으로 표시
+            news_summary += f"지난 {days}일간 {', '.join(target_countries)} 국가 뉴스 {total_count}개\n\n"
+            news_summary += "(LLM 요약 실패 - 원본 뉴스 일부 표시)\n\n"
+            news_list = economic_news['news'][:10]  # 최근 10개만
+            for news in news_list:
+                news_summary += f"- [{news.get('country', 'N/A')}] {news.get('title', 'N/A')}\n"
+                if news.get('description'):
+                    desc = news.get('description', '')[:100]  # 처음 100자만
+                    news_summary += f"  {desc}...\n"
+        else:
+            news_summary += "최근 뉴스 없음\n"
     else:
         news_summary += "최근 뉴스 없음\n"
     
@@ -450,7 +568,7 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
 
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
-2. **경제 뉴스는 보조적으로만** 참고하세요. 비중을 낮게 두세요.
+2. **경제 뉴스는 보조 수단입니다.** FRED 지표 기반 분석한 내용을 한번 더 검토하는 수단입니다.
 3. 자산군별 비중을 결정하세요:
    - Stocks (주식): 0-100%
    - Bonds (채권): 0-100%
@@ -510,8 +628,8 @@ def analyze_and_decide() -> Optional[AIStrategyDecision]:
         logger.info("FRED 시그널 수집 중...")
         fred_signals = collect_fred_signals()
         
-        logger.info("경제 뉴스 수집 중... (지난 1주일, 특정 국가 필터)")
-        economic_news = collect_economic_news(hours=24)  # hours 파라미터는 무시되고 항상 7일치 수집
+        logger.info("경제 뉴스 수집 중... (지난 20일, 특정 국가 필터)")
+        economic_news = collect_economic_news(days=20)  # 지난 20일치 수집 및 LLM 요약
         
         # 프롬프트 생성
         prompt = create_analysis_prompt(fred_signals, economic_news)
@@ -697,7 +815,7 @@ def run_ai_analysis():
             logger.warning("FRED 시그널 수집 실패 (None 반환)")
         
         logger.info("2단계: 경제 뉴스 수집 중...")
-        economic_news = collect_economic_news(hours=24)  # hours 파라미터는 무시되고 항상 지난 1주일치 특정 국가 뉴스 수집
+        economic_news = collect_economic_news(days=20)  # 지난 20일치 특정 국가 뉴스 수집 및 LLM 요약
         if not economic_news:
             logger.warning("경제 뉴스 수집 실패 (None 반환)")
         
