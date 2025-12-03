@@ -511,14 +511,6 @@ const LLMMonitoringPage = () => {
             </div>
             <div className="modal-body">
               <div className="detail-section">
-                <h3>기본 정보</h3>
-                <p><strong>모델:</strong> {selectedLog.model_name}</p>
-                <p><strong>제공자:</strong> {selectedLog.provider}</p>
-                <p><strong>서비스:</strong> {selectedLog.service_name || '-'}</p>
-                <p><strong>시간:</strong> {formatDate(selectedLog.created_at)}</p>
-                <p><strong>응답 시간:</strong> {selectedLog.duration_ms ? `${selectedLog.duration_ms}ms` : '-'}</p>
-              </div>
-              <div className="detail-section">
                 <h3>요청 프롬프트</h3>
                 <pre className="prompt-box">
                   {selectedLog.request_prompt || '-'}
