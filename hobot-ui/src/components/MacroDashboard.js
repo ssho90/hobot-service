@@ -576,10 +576,6 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
     fetchAllIndicators();
   }, []);
 
-  if (loading) {
-    return <div className="indicators-loading">지표 데이터를 불러오는 중...</div>;
-  }
-
   // 장단기 금리차 차트 렌더링
   useEffect(() => {
     if (!yieldSpreadData || !chartContainerRef?.current) {
@@ -681,6 +677,10 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
       }
     };
   }, [yieldSpreadData, chartContainerRef]);
+
+  if (loading) {
+    return <div className="indicators-loading">지표 데이터를 불러오는 중...</div>;
+  }
 
   const indicatorInfo = {
     FEDFUNDS: { 
