@@ -1988,6 +1988,235 @@ async def delete_overview_recommended_sector(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================
+# LLM 모니터링 API
+# ============================================
+
+@api_router.get("/llm-monitoring/options")
+async def get_llm_monitoring_options():
+    """LLM 모니터링 필터 옵션 조회 (모델명, 서비스명 목록)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 모델명 목록 조회
+            cursor.execute("""
+                SELECT DISTINCT model_name
+                FROM llm_usage_logs
+                WHERE model_name IS NOT NULL
+                ORDER BY model_name
+            """)
+            models = [row['model_name'] for row in cursor.fetchall()]
+            
+            # 서비스명 목록 조회
+            cursor.execute("""
+                SELECT DISTINCT service_name
+                FROM llm_usage_logs
+                WHERE service_name IS NOT NULL
+                ORDER BY service_name
+            """)
+            services = [row['service_name'] for row in cursor.fetchall()]
+            
+            return {
+                "status": "success",
+                "models": models,
+                "services": services
+            }
+    except Exception as e:
+        logging.error(f"LLM 모니터링 옵션 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/llm-monitoring/logs")
+async def get_llm_monitoring_logs(
+    limit: int = Query(default=100, ge=1, le=1000, description="조회할 로그 수"),
+    offset: int = Query(default=0, ge=0, description="오프셋"),
+    model_name: Optional[str] = Query(default=None, description="모델명 필터 (All 또는 특정 모델명)"),
+    service_name: Optional[str] = Query(default=None, description="서비스명 필터 (All 또는 특정 서비스명)"),
+    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)")
+):
+    """LLM 사용 로그 조회"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # WHERE 조건 구성
+            conditions = []
+            params = []
+            
+            if model_name and model_name.lower() != 'all':
+                conditions.append("model_name = %s")
+                params.append(model_name)
+            
+            if service_name and service_name.lower() != 'all':
+                conditions.append("service_name = %s")
+                params.append(service_name)
+            
+            if start_date:
+                # 날짜 형식이 시간까지 포함되어 있는지 확인
+                if ' ' in start_date or 'T' in start_date:
+                    conditions.append("created_at >= %s")
+                else:
+                    conditions.append("DATE(created_at) >= %s")
+                params.append(start_date)
+            
+            if end_date:
+                # 날짜 형식이 시간까지 포함되어 있는지 확인
+                if ' ' in end_date or 'T' in end_date:
+                    conditions.append("created_at <= %s")
+                else:
+                    conditions.append("DATE(created_at) <= %s")
+                params.append(end_date)
+            
+            where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+            
+            # 전체 개수 조회
+            count_query = f"SELECT COUNT(*) as total FROM llm_usage_logs {where_clause}"
+            cursor.execute(count_query, params)
+            total = cursor.fetchone()['total']
+            
+            # 로그 조회
+            query = f"""
+                SELECT 
+                    id,
+                    model_name,
+                    provider,
+                    service_name,
+                    prompt_tokens,
+                    completion_tokens,
+                    total_tokens,
+                    duration_ms,
+                    request_prompt,
+                    response_prompt,
+                    created_at
+                FROM llm_usage_logs
+                {where_clause}
+                ORDER BY created_at DESC
+                LIMIT %s OFFSET %s
+            """
+            params.extend([limit, offset])
+            cursor.execute(query, params)
+            
+            logs = cursor.fetchall()
+            
+            # datetime 객체를 문자열로 변환
+            for log in logs:
+                if log.get('created_at'):
+                    log['created_at'] = log['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+            
+            return {
+                "status": "success",
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "logs": logs,
+                "data": logs  # 호환성을 위해 둘 다 반환
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"LLM 사용 로그 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/llm-monitoring/token-usage")
+async def get_llm_token_usage(
+    group_by: str = Query(default="day", description="그룹화 기준 (day, model, service)"),
+    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD)"),
+    model_name: Optional[str] = Query(default=None, description="모델명 필터"),
+    service_name: Optional[str] = Query(default=None, description="서비스명 필터")
+):
+    """LLM 토큰 사용량 조회"""
+    try:
+        from service.database.db import get_db_connection
+        from datetime import datetime
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # WHERE 조건 구성
+            conditions = []
+            params = []
+            
+            if start_date:
+                if ' ' in start_date or 'T' in start_date:
+                    conditions.append("created_at >= %s")
+                else:
+                    conditions.append("DATE(created_at) >= %s")
+                params.append(start_date)
+            
+            if end_date:
+                if ' ' in end_date or 'T' in end_date:
+                    conditions.append("created_at <= %s")
+                else:
+                    conditions.append("DATE(created_at) <= %s")
+                params.append(end_date)
+            
+            if model_name:
+                conditions.append("model_name = %s")
+                params.append(model_name)
+            
+            if service_name:
+                conditions.append("service_name = %s")
+                params.append(service_name)
+            
+            where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+            
+            # 그룹화 기준에 따라 쿼리 구성
+            if group_by == "day":
+                group_by_clause = "DATE(created_at)"
+                select_fields = "DATE(created_at) as date"
+            elif group_by == "model":
+                group_by_clause = "model_name, provider"
+                select_fields = "model_name, provider"
+            elif group_by == "service":
+                group_by_clause = "service_name"
+                select_fields = "service_name"
+            else:
+                raise HTTPException(status_code=400, detail="Invalid group_by. Must be: day, model, or service")
+            
+            query = f"""
+                SELECT 
+                    {select_fields},
+                    SUM(prompt_tokens) as prompt_tokens,
+                    SUM(completion_tokens) as completion_tokens,
+                    SUM(total_tokens) as total_tokens,
+                    COUNT(*) as request_count
+                FROM llm_usage_logs
+                {where_clause}
+                GROUP BY {group_by_clause}
+                ORDER BY {group_by_clause} DESC
+            """
+            
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            
+            # datetime 객체를 문자열로 변환
+            for result in results:
+                if result.get('date'):
+                    result['date'] = result['date'].isoformat() if hasattr(result['date'], 'isoformat') else str(result['date'])
+            
+            return {
+                "status": "success",
+                "group_by": group_by,
+                "start_date": start_date,
+                "end_date": end_date,
+                "data": results
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"LLM 토큰 사용량 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # API 라우터를 앱에 포함
 app.include_router(api_router)
 
