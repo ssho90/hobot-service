@@ -13,7 +13,7 @@ const MacroDashboard = () => {
   const [updating, setUpdating] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [historyData, setHistoryData] = useState(null);
+  const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
   const [historyTotalPages, setHistoryTotalPages] = useState(1);
@@ -67,18 +67,18 @@ const MacroDashboard = () => {
       if (response.ok) {
         const result = await response.json();
         if (result.status === 'success' && result.data) {
-          setHistoryData(result.data);
+          setHistoryData(Array.isArray(result.data) ? result.data : [result.data]);
           setHistoryTotalPages(result.total_pages || 1);
           setHistoryPage(result.page || 1);
         } else {
-          setHistoryData(null);
+          setHistoryData([]);
         }
       } else {
         throw new Error('이전 분석 데이터를 불러오는데 실패했습니다.');
       }
     } catch (err) {
       console.error('Error fetching history:', err);
-      setHistoryData(null);
+      setHistoryData([]);
     } finally {
       setHistoryLoading(false);
     }
@@ -464,111 +464,113 @@ const MacroDashboard = () => {
             <div className="history-modal-body">
               {historyLoading ? (
                 <div className="loading">로딩 중...</div>
-              ) : historyData ? (
+              ) : historyData && historyData.length > 0 ? (
                 <div className="history-content">
-                  <div className="history-item">
-                    <div className="history-header">
-                      <div className="history-date">
-                        분석 일시: {historyData.decision_date || historyData.created_at}
-                      </div>
-                    </div>
-                    
-                    <div className="history-section">
-                      <h3>분석 요약</h3>
-                      <p>{historyData.analysis_summary}</p>
-                    </div>
-                    
-                    {historyData.reasoning && (
-                      <div className="history-section">
-                        <h3>판단 근거</h3>
-                        <p>{historyData.reasoning}</p>
-                      </div>
-                    )}
-                    
-                    {historyData.target_allocation && (
-                      <div className="history-section">
-                        <h3>목표 자산 배분</h3>
-                        <div className="allocation-grid">
-                          <div className="allocation-item">
-                            <span className="allocation-label">주식</span>
-                            <span className="allocation-value">{historyData.target_allocation.Stocks?.toFixed(1) || 0}%</span>
-                          </div>
-                          <div className="allocation-item">
-                            <span className="allocation-label">채권</span>
-                            <span className="allocation-value">{historyData.target_allocation.Bonds?.toFixed(1) || 0}%</span>
-                          </div>
-                          <div className="allocation-item">
-                            <span className="allocation-label">대체투자</span>
-                            <span className="allocation-value">{historyData.target_allocation.Alternatives?.toFixed(1) || 0}%</span>
-                          </div>
-                          <div className="allocation-item">
-                            <span className="allocation-label">현금</span>
-                            <span className="allocation-value">{historyData.target_allocation.Cash?.toFixed(1) || 0}%</span>
-                          </div>
+                  {historyData.map((item, index) => (
+                    <div key={item.id || index} className="history-item">
+                      <div className="history-header">
+                        <div className="history-date">
+                          분석 일시: {item.decision_date || item.created_at}
                         </div>
                       </div>
-                    )}
+                      
+                      <div className="history-section">
+                        <h3>분석 요약</h3>
+                        <p>{item.analysis_summary}</p>
+                      </div>
+                      
+                      {item.reasoning && (
+                        <div className="history-section">
+                          <h3>판단 근거</h3>
+                          <p>{item.reasoning}</p>
+                        </div>
+                      )}
+                      
+                      {item.target_allocation && (
+                        <div className="history-section">
+                          <h3>목표 자산 배분</h3>
+                          <div className="allocation-grid">
+                            <div className="allocation-item">
+                              <span className="allocation-label">주식</span>
+                              <span className="allocation-value">{item.target_allocation.Stocks?.toFixed(1) || 0}%</span>
+                            </div>
+                            <div className="allocation-item">
+                              <span className="allocation-label">채권</span>
+                              <span className="allocation-value">{item.target_allocation.Bonds?.toFixed(1) || 0}%</span>
+                            </div>
+                            <div className="allocation-item">
+                              <span className="allocation-label">대체투자</span>
+                              <span className="allocation-value">{item.target_allocation.Alternatives?.toFixed(1) || 0}%</span>
+                            </div>
+                            <div className="allocation-item">
+                              <span className="allocation-label">현금</span>
+                              <span className="allocation-value">{item.target_allocation.Cash?.toFixed(1) || 0}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-                    {historyData.recommended_stocks && (
-                      <div className="history-section">
-                        <h3>AI 추천 종목</h3>
-                        <div className="recommended-stocks-content">
-                          {historyData.recommended_stocks.Stocks && historyData.recommended_stocks.Stocks.length > 0 && (
-                            <div className="recommended-category">
-                              <h4>주식 ({historyData.target_allocation?.Stocks?.toFixed(1) || 0}%)</h4>
-                              <ul className="recommended-list">
-                                {historyData.recommended_stocks.Stocks.map((item, idx) => (
-                                  <li key={idx}>
-                                    <span className="category-name">{item.category}</span>
-                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {historyData.recommended_stocks.Bonds && historyData.recommended_stocks.Bonds.length > 0 && (
-                            <div className="recommended-category">
-                              <h4>채권 ({historyData.target_allocation?.Bonds?.toFixed(1) || 0}%)</h4>
-                              <ul className="recommended-list">
-                                {historyData.recommended_stocks.Bonds.map((item, idx) => (
-                                  <li key={idx}>
-                                    <span className="category-name">{item.category}</span>
-                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {historyData.recommended_stocks.Alternatives && historyData.recommended_stocks.Alternatives.length > 0 && (
-                            <div className="recommended-category">
-                              <h4>대체투자 ({historyData.target_allocation?.Alternatives?.toFixed(1) || 0}%)</h4>
-                              <ul className="recommended-list">
-                                {historyData.recommended_stocks.Alternatives.map((item, idx) => (
-                                  <li key={idx}>
-                                    <span className="category-name">{item.category}</span>
-                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {historyData.recommended_stocks.Cash && historyData.recommended_stocks.Cash.length > 0 && (
-                            <div className="recommended-category">
-                              <h4>현금 ({historyData.target_allocation?.Cash?.toFixed(1) || 0}%)</h4>
-                              <ul className="recommended-list">
-                                {historyData.recommended_stocks.Cash.map((item, idx) => (
-                                  <li key={idx}>
-                                    <span className="category-name">{item.category}</span>
-                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                      {item.recommended_stocks && (
+                        <div className="history-section">
+                          <h3>AI 추천 섹터/그룹</h3>
+                          <div className="recommended-stocks-content">
+                            {item.recommended_stocks.Stocks && Array.isArray(item.recommended_stocks.Stocks) && item.recommended_stocks.Stocks.length > 0 && (
+                              <div className="recommended-category">
+                                <h4>주식 ({item.target_allocation?.Stocks?.toFixed(1) || 0}%)</h4>
+                                <ul className="recommended-list">
+                                  {item.recommended_stocks.Stocks.map((stock, idx) => (
+                                    <li key={idx}>
+                                      <span className="category-name">{stock.category}</span>
+                                      <span className="category-weight">{(stock.weight ? (stock.weight * 100).toFixed(0) : 0)}%</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {item.recommended_stocks.Bonds && Array.isArray(item.recommended_stocks.Bonds) && item.recommended_stocks.Bonds.length > 0 && (
+                              <div className="recommended-category">
+                                <h4>채권 ({item.target_allocation?.Bonds?.toFixed(1) || 0}%)</h4>
+                                <ul className="recommended-list">
+                                  {item.recommended_stocks.Bonds.map((bond, idx) => (
+                                    <li key={idx}>
+                                      <span className="category-name">{bond.category}</span>
+                                      <span className="category-weight">{(bond.weight ? (bond.weight * 100).toFixed(0) : 0)}%</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {item.recommended_stocks.Alternatives && Array.isArray(item.recommended_stocks.Alternatives) && item.recommended_stocks.Alternatives.length > 0 && (
+                              <div className="recommended-category">
+                                <h4>대체투자 ({item.target_allocation?.Alternatives?.toFixed(1) || 0}%)</h4>
+                                <ul className="recommended-list">
+                                  {item.recommended_stocks.Alternatives.map((alt, idx) => (
+                                    <li key={idx}>
+                                      <span className="category-name">{alt.category}</span>
+                                      <span className="category-weight">{(alt.weight ? (alt.weight * 100).toFixed(0) : 0)}%</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {item.recommended_stocks.Cash && Array.isArray(item.recommended_stocks.Cash) && item.recommended_stocks.Cash.length > 0 && (
+                              <div className="recommended-category">
+                                <h4>현금 ({item.target_allocation?.Cash?.toFixed(1) || 0}%)</h4>
+                                <ul className="recommended-list">
+                                  {item.recommended_stocks.Cash.map((cash, idx) => (
+                                    <li key={idx}>
+                                      <span className="category-name">{cash.category}</span>
+                                      <span className="category-weight">{(cash.weight ? (cash.weight * 100).toFixed(0) : 0)}%</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="no-data">분석 데이터가 없습니다.</div>

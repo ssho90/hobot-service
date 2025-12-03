@@ -837,6 +837,89 @@ async def get_latest_strategy_decision():
             "message": "AI 전략 결정을 조회할 수 없습니다."
         }
 
+@api_router.get("/macro-trading/strategy-decisions-history")
+async def get_strategy_decisions_history(
+    page: int = Query(default=1, ge=1, description="페이지 번호"),
+    limit: int = Query(default=10, ge=1, le=100, description="페이지당 항목 수")
+):
+    """AI 전략 결정 이력 조회 (페이지네이션)"""
+    try:
+        from service.database.db import get_db_connection
+        import json
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 전체 개수 조회
+            cursor.execute("SELECT COUNT(*) as total FROM ai_strategy_decisions")
+            total_count = cursor.fetchone()['total']
+            
+            # 페이지네이션 계산
+            total_pages = (total_count + limit - 1) // limit
+            offset = (page - 1) * limit
+            
+            # 데이터 조회
+            cursor.execute("""
+                SELECT 
+                    id,
+                    decision_date,
+                    analysis_summary,
+                    target_allocation,
+                    recommended_stocks,
+                    created_at
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT %s OFFSET %s
+            """, (limit, offset))
+            
+            rows = cursor.fetchall()
+            
+            # JSON 필드 파싱 및 데이터 변환
+            result = []
+            for row in rows:
+                target_allocation = row['target_allocation']
+                if isinstance(target_allocation, str):
+                    target_allocation = json.loads(target_allocation)
+                
+                recommended_stocks = row.get('recommended_stocks')
+                if recommended_stocks:
+                    if isinstance(recommended_stocks, str):
+                        recommended_stocks = json.loads(recommended_stocks)
+                else:
+                    recommended_stocks = None
+                
+                # analysis_summary에서 reasoning 추출
+                analysis_summary = row['analysis_summary'] or ''
+                reasoning = ''
+                if '판단 근거:' in analysis_summary:
+                    parts = analysis_summary.split('판단 근거:')
+                    if len(parts) > 1:
+                        reasoning = parts[1].strip()
+                        analysis_summary = parts[0].strip()
+                
+                result.append({
+                    "id": row['id'],
+                    "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
+                    "analysis_summary": analysis_summary,
+                    "reasoning": reasoning,
+                    "target_allocation": target_allocation,
+                    "recommended_stocks": recommended_stocks,
+                    "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
+                })
+            
+            return {
+                "status": "success",
+                "data": result,
+                "page": page,
+                "limit": limit,
+                "total": total_count,
+                "total_pages": total_pages
+            }
+    except Exception as e:
+        logging.error(f"Error fetching strategy decisions history: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/macro-trading/rebalancing-history")
 async def get_rebalancing_history(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
