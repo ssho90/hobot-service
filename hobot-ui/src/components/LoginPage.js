@@ -35,7 +35,7 @@ const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h2>Hobot Dashboard</h2>
+        <h2>Stockoverflow</h2>
         <p>로그인하여 계속하세요</p>
         
         <form onSubmit={handleSubmit}>

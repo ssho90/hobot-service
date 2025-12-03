@@ -57,8 +57,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <span className="logo-icon">🤖</span>
-          <span className="logo-text">Hobot</span>
+          <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
         </div>
       </div>
 

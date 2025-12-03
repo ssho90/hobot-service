@@ -126,8 +126,7 @@ const Header = () => {
     <header className="top-header">
       <div className="header-left">
         <div className="header-logo">
-          <span className="logo-icon">🤖</span>
-          <span className="logo-text">Hobot</span>
+          <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
         </div>
         <nav className="header-tabs">
           <button
