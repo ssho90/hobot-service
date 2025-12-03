@@ -423,21 +423,6 @@
   text-align: center;
 }
 
-/* 기존 category-name 스타일 (중복 방지) */
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
-}
-
-.category-weight {
-  font-size: 14px;
-  color: #2196F3;
-  font-weight: 600;
-  padding: 4px 10px;
-  background: #e3f2fd;
-  border-radius: 12px;
-}
-
 .info-note {
   padding: 20px;
   background: #e3f2fd;
