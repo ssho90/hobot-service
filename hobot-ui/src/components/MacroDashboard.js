@@ -12,6 +12,11 @@ const MacroDashboard = () => {
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyData, setHistoryData] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const { isAdmin, getAuthHeaders } = useAuth();
 
   // Overview 데이터 로드
@@ -53,6 +58,38 @@ const MacroDashboard = () => {
       isMounted = false;
     };
   }, []);
+
+  // 이전 분석 데이터 조회
+  const fetchHistoryData = async (page = 1) => {
+    setHistoryLoading(true);
+    try {
+      const response = await fetch(`/api/macro-trading/strategy-decisions-history?page=${page}`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === 'success' && result.data) {
+          setHistoryData(result.data);
+          setHistoryTotalPages(result.total_pages || 1);
+          setHistoryPage(result.page || 1);
+        } else {
+          setHistoryData(null);
+        }
+      } else {
+        throw new Error('이전 분석 데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('Error fetching history:', err);
+      setHistoryData(null);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // 이전 분석 모달 열기
+  useEffect(() => {
+    if (showHistoryModal) {
+      fetchHistoryData(1);
+    }
+  }, [showHistoryModal]);
 
   // 수동 AI 분석 실행
   const handleManualUpdate = async () => {
@@ -123,15 +160,24 @@ const MacroDashboard = () => {
               </button>
             )}
           </div>
-          {isAdmin() && (
+          <div className="overview-buttons">
             <button
-              className="btn btn-primary btn-update"
-              onClick={handleManualUpdate}
-              disabled={updating || loading}
+              className="btn-history"
+              onClick={() => setShowHistoryModal(true)}
+              title="이전 분석 검색"
             >
-              {updating ? '분석 중...' : '수동 업데이트'}
+              이전 분석 검색
             </button>
-          )}
+            {isAdmin() && (
+              <button
+                className="btn btn-primary btn-update"
+                onClick={handleManualUpdate}
+                disabled={updating || loading}
+              >
+                {updating ? '분석 중...' : '수동 업데이트'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="card overview-card">
           {loading && <div className="loading">분석 중...</div>}
@@ -398,6 +444,162 @@ const MacroDashboard = () => {
                   </ul>
                 </section>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 이전 분석 검색 모달 */}
+      {showHistoryModal && (
+        <div className="modal-overlay" onClick={() => setShowHistoryModal(false)}>
+          <div className="modal-content history-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>이전 분석 검색</h2>
+              <button className="modal-close" onClick={() => setShowHistoryModal(false)}>×</button>
+            </div>
+            <div className="history-modal-body">
+              {historyLoading ? (
+                <div className="loading">로딩 중...</div>
+              ) : historyData ? (
+                <div className="history-content">
+                  <div className="history-item">
+                    <div className="history-header">
+                      <div className="history-date">
+                        분석 일시: {historyData.decision_date || historyData.created_at}
+                      </div>
+                    </div>
+                    
+                    <div className="history-section">
+                      <h3>분석 요약</h3>
+                      <p>{historyData.analysis_summary}</p>
+                    </div>
+                    
+                    {historyData.reasoning && (
+                      <div className="history-section">
+                        <h3>판단 근거</h3>
+                        <p>{historyData.reasoning}</p>
+                      </div>
+                    )}
+                    
+                    {historyData.target_allocation && (
+                      <div className="history-section">
+                        <h3>목표 자산 배분</h3>
+                        <div className="allocation-grid">
+                          <div className="allocation-item">
+                            <span className="allocation-label">주식</span>
+                            <span className="allocation-value">{historyData.target_allocation.Stocks?.toFixed(1) || 0}%</span>
+                          </div>
+                          <div className="allocation-item">
+                            <span className="allocation-label">채권</span>
+                            <span className="allocation-value">{historyData.target_allocation.Bonds?.toFixed(1) || 0}%</span>
+                          </div>
+                          <div className="allocation-item">
+                            <span className="allocation-label">대체투자</span>
+                            <span className="allocation-value">{historyData.target_allocation.Alternatives?.toFixed(1) || 0}%</span>
+                          </div>
+                          <div className="allocation-item">
+                            <span className="allocation-label">현금</span>
+                            <span className="allocation-value">{historyData.target_allocation.Cash?.toFixed(1) || 0}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {historyData.recommended_stocks && (
+                      <div className="history-section">
+                        <h3>AI 추천 종목</h3>
+                        <div className="recommended-stocks-content">
+                          {historyData.recommended_stocks.Stocks && historyData.recommended_stocks.Stocks.length > 0 && (
+                            <div className="recommended-category">
+                              <h4>주식 ({historyData.target_allocation?.Stocks?.toFixed(1) || 0}%)</h4>
+                              <ul className="recommended-list">
+                                {historyData.recommended_stocks.Stocks.map((item, idx) => (
+                                  <li key={idx}>
+                                    <span className="category-name">{item.category}</span>
+                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {historyData.recommended_stocks.Bonds && historyData.recommended_stocks.Bonds.length > 0 && (
+                            <div className="recommended-category">
+                              <h4>채권 ({historyData.target_allocation?.Bonds?.toFixed(1) || 0}%)</h4>
+                              <ul className="recommended-list">
+                                {historyData.recommended_stocks.Bonds.map((item, idx) => (
+                                  <li key={idx}>
+                                    <span className="category-name">{item.category}</span>
+                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {historyData.recommended_stocks.Alternatives && historyData.recommended_stocks.Alternatives.length > 0 && (
+                            <div className="recommended-category">
+                              <h4>대체투자 ({historyData.target_allocation?.Alternatives?.toFixed(1) || 0}%)</h4>
+                              <ul className="recommended-list">
+                                {historyData.recommended_stocks.Alternatives.map((item, idx) => (
+                                  <li key={idx}>
+                                    <span className="category-name">{item.category}</span>
+                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {historyData.recommended_stocks.Cash && historyData.recommended_stocks.Cash.length > 0 && (
+                            <div className="recommended-category">
+                              <h4>현금 ({historyData.target_allocation?.Cash?.toFixed(1) || 0}%)</h4>
+                              <ul className="recommended-list">
+                                {historyData.recommended_stocks.Cash.map((item, idx) => (
+                                  <li key={idx}>
+                                    <span className="category-name">{item.category}</span>
+                                    <span className="category-weight">{(item.weight * 100).toFixed(0)}%</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="no-data">분석 데이터가 없습니다.</div>
+              )}
+              
+              {/* 페이징 */}
+              {historyTotalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => {
+                      const newPage = Math.max(1, historyPage - 1);
+                      setHistoryPage(newPage);
+                      fetchHistoryData(newPage);
+                    }}
+                    disabled={historyPage === 1}
+                  >
+                    이전
+                  </button>
+                  <span className="pagination-info">
+                    {historyPage} / {historyTotalPages}
+                  </span>
+                  <button
+                    className="pagination-btn"
+                    onClick={() => {
+                      const newPage = Math.min(historyTotalPages, historyPage + 1);
+                      setHistoryPage(newPage);
+                      fetchHistoryData(newPage);
+                    }}
+                    disabled={historyPage === historyTotalPages}
+                  >
+                    다음
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

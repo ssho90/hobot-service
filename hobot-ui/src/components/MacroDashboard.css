@@ -574,9 +574,16 @@
   width: 90%;
   display: flex;
   flex-direction: column;
-  max-height: 95vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  max-height: 85vh;
+  overflow: hidden;
+  margin-top: 60px;
+}
+
+.ai-info-modal {
+  max-width: 800px;
+  width: 90%;
+  max-height: 85vh;
+  margin-top: 60px;
 }
 
 .history-modal {
@@ -624,7 +631,8 @@
   flex: 1;
   padding: 20px;
   min-height: 0;
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .history-modal-body {
@@ -847,6 +855,11 @@
 .ai-info-modal {
   max-width: 800px;
   width: 90%;
+  max-height: 85vh;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .ai-info-content {
