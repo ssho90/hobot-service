@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
@@ -737,6 +737,7 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
   const [loading, setLoading] = useState(true);
   const chartRef = useRef(null);
   const resizeHandlerRef = useRef(null);
+  const internalChartContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchAllIndicators = async () => {
@@ -777,32 +778,15 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
     fetchAllIndicators();
   }, []);
 
-  // 장단기 금리차 차트 렌더링
-  useEffect(() => {
-    console.log('[OtherIndicatorsCharts] Yield spread chart effect triggered', {
-      hasYieldSpreadData: !!yieldSpreadData,
-      hasChartContainer: !!chartContainerRef?.current,
-      spreadDataLength: yieldSpreadData?.spread_data?.length,
-      ma20Length: yieldSpreadData?.ma20?.length,
-      ma120Length: yieldSpreadData?.ma120?.length,
-    });
-
-    if (!yieldSpreadData) {
-      console.log('[OtherIndicatorsCharts] No yield spread data, cleaning up chart');
-      if (chartRef.current) {
-        chartRef.current.remove();
-        chartRef.current = null;
-      }
+  // 차트 생성 함수
+  const createChartInstance = (containerElement) => {
+    if (!containerElement) {
+      console.warn('[OtherIndicatorsCharts] Chart container is null');
       return;
     }
 
-    if (!chartContainerRef?.current) {
-      console.log('[OtherIndicatorsCharts] Chart container not ready yet');
-      return;
-    }
-
-    if (!yieldSpreadData.spread_data || yieldSpreadData.spread_data.length === 0) {
-      console.warn('[OtherIndicatorsCharts] Spread data is empty');
+    if (!yieldSpreadData || !yieldSpreadData.spread_data || yieldSpreadData.spread_data.length === 0) {
+      console.warn('[OtherIndicatorsCharts] No valid spread data');
       return;
     }
 
@@ -810,18 +794,12 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
       chartRef.current.remove();
     }
 
-    const timer = setTimeout(() => {
-      if (!chartContainerRef.current) {
-        console.warn('[OtherIndicatorsCharts] Chart container is null after timeout');
-        return;
-      }
+    console.log('[OtherIndicatorsCharts] Creating chart', {
+      containerWidth: containerElement.clientWidth,
+      spreadDataCount: yieldSpreadData.spread_data.length,
+    });
 
-      console.log('[OtherIndicatorsCharts] Creating chart', {
-        containerWidth: chartContainerRef.current.clientWidth,
-        spreadDataCount: yieldSpreadData.spread_data.length,
-      });
-
-      const chart = createChart(chartContainerRef.current, {
+    const chart = createChart(containerElement, {
         layout: {
           background: { type: ColorType.Solid, color: 'white' },
           textColor: 'black',
@@ -897,20 +875,47 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
 
       chartRef.current = chart;
 
-      const handleResize = () => {
-        if (chartContainerRef.current && chartRef.current) {
-          chartRef.current.applyOptions({
-            width: chartContainerRef.current.clientWidth,
-          });
-        }
-      };
+    const handleResize = () => {
+      if (containerElement && chartRef.current) {
+        chartRef.current.applyOptions({
+          width: containerElement.clientWidth,
+        });
+      }
+    };
 
-      resizeHandlerRef.current = handleResize;
-      window.addEventListener('resize', handleResize);
-    }, 100);
+    resizeHandlerRef.current = handleResize;
+    window.addEventListener('resize', handleResize);
+  };
+
+  // ref callback을 사용하여 ref가 설정될 때 차트 생성
+  const handleChartContainerRef = (element) => {
+    internalChartContainerRef.current = element;
+    
+    // 부모 컴포넌트의 ref도 업데이트
+    if (chartContainerRef) {
+      if (typeof chartContainerRef === 'function') {
+        chartContainerRef(element);
+      } else if (chartContainerRef.current !== undefined) {
+        chartContainerRef.current = element;
+      }
+    }
+
+    // ref가 설정되면 차트 생성
+    if (element && yieldSpreadData) {
+      // DOM이 완전히 렌더링될 때까지 약간의 지연
+      setTimeout(() => {
+        createChartInstance(element);
+      }, 0);
+    }
+  };
+
+  // yieldSpreadData가 변경될 때 차트 업데이트
+  useEffect(() => {
+    if (internalChartContainerRef.current && yieldSpreadData) {
+      createChartInstance(internalChartContainerRef.current);
+    }
 
     return () => {
-      clearTimeout(timer);
       if (resizeHandlerRef.current) {
         window.removeEventListener('resize', resizeHandlerRef.current);
         resizeHandlerRef.current = null;
@@ -920,23 +925,7 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         chartRef.current = null;
       }
     };
-  }, [yieldSpreadData, chartContainerRef]);
-
-  // chartContainerRef가 설정될 때까지 대기
-  useEffect(() => {
-    if (yieldSpreadData && !chartContainerRef?.current) {
-      // ref가 아직 설정되지 않았으면 잠시 후 다시 확인
-      const checkRef = setInterval(() => {
-        if (chartContainerRef?.current) {
-          clearInterval(checkRef);
-          // ref가 설정되면 차트 렌더링을 다시 트리거하기 위해 상태 업데이트
-          // (실제로는 의존성 배열에 chartContainerRef가 있으므로 자동으로 재실행됨)
-        }
-      }, 100);
-
-      return () => clearInterval(checkRef);
-    }
-  }, [yieldSpreadData, chartContainerRef]);
+  }, [yieldSpreadData]);
 
   if (loading) {
     return <div className="indicators-loading">지표 데이터를 불러오는 중...</div>;
@@ -1157,7 +1146,7 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
                   차트 데이터가 없습니다. API 응답을 확인해주세요.
                 </div>
               ) : (
-                <div ref={chartContainerRef} className="yield-spread-chart" style={{ minHeight: '300px' }} />
+                <div ref={handleChartContainerRef} className="yield-spread-chart" style={{ minHeight: '300px' }} />
               )}
             </div>
           )}
