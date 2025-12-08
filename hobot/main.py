@@ -714,7 +714,14 @@ async def get_ai_overview():
                 # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}}
                 if "mp_id" in target_allocation_raw:
                     mp_id = target_allocation_raw["mp_id"]
-                    target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
+                    # mp_id가 있으면 get_model_portfolio_allocation을 사용하여 실제 allocation 가져오기
+                    from service.macro_trading.ai_strategist import get_model_portfolio_allocation
+                    allocation_from_mp = get_model_portfolio_allocation(mp_id)
+                    if allocation_from_mp:
+                        target_allocation = allocation_from_mp
+                    else:
+                        # MP ID가 유효하지 않으면 저장된 target_allocation 사용
+                        target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
                 else:
                     # 기존 형식: 직접 target_allocation만 있음
                     target_allocation = target_allocation_raw
@@ -905,9 +912,31 @@ async def get_strategy_decisions_history(
             # JSON 필드 파싱 및 데이터 변환
             result = []
             for row in rows:
-                target_allocation = row['target_allocation']
-                if isinstance(target_allocation, str):
-                    target_allocation = json.loads(target_allocation)
+                # target_allocation 파싱
+                target_allocation_raw = row['target_allocation']
+                if isinstance(target_allocation_raw, str):
+                    target_allocation_raw = json.loads(target_allocation_raw)
+                
+                # MP 기반 저장 형식 처리 (mp_id와 target_allocation이 함께 저장됨)
+                mp_id = None
+                target_allocation = None
+                if isinstance(target_allocation_raw, dict):
+                    # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}}
+                    if "mp_id" in target_allocation_raw:
+                        mp_id = target_allocation_raw["mp_id"]
+                        # mp_id가 있으면 get_model_portfolio_allocation을 사용하여 실제 allocation 가져오기
+                        from service.macro_trading.ai_strategist import get_model_portfolio_allocation
+                        allocation_from_mp = get_model_portfolio_allocation(mp_id)
+                        if allocation_from_mp:
+                            target_allocation = allocation_from_mp
+                        else:
+                            # MP ID가 유효하지 않으면 저장된 target_allocation 사용
+                            target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
+                    else:
+                        # 기존 형식: 직접 target_allocation만 있음
+                        target_allocation = target_allocation_raw
+                else:
+                    target_allocation = target_allocation_raw
                 
                 recommended_stocks = row.get('recommended_stocks')
                 if recommended_stocks:
@@ -930,6 +959,7 @@ async def get_strategy_decisions_history(
                     "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
+                    "mp_id": mp_id,
                     "target_allocation": target_allocation,
                     "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
