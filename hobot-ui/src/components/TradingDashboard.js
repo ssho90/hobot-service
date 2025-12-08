@@ -314,7 +314,7 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
               });
               
               if (response.ok) {
-                const data = await response.json();
+                await response.json();
                 alert('리밸런싱이 요청되었습니다.');
                 setShowRebalanceConfirm(false);
               } else {
@@ -606,7 +606,7 @@ const AssetClassPerformance = ({ assetClassInfo }) => {
     <div className="asset-class-performance">
       {assetClassOrder.map((assetClass) => {
         const info = assetClassInfo[assetClass];
-        if (!info || info.count === 0 && assetClass !== 'cash') {
+        if (!info || (info.count === 0 && assetClass !== 'cash')) {
           return null;
         }
 
@@ -822,12 +822,6 @@ const RebalancingChart = ({ balance }) => {
 
 // 자산군 상세 설정 모달 컴포넌트
 const AssetClassDetailsModal = ({ onClose }) => {
-  const [assetClassDetails, setAssetClassDetails] = useState({
-    stocks: [],
-    bonds: [],
-    alternatives: [],
-    cash: []
-  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('stocks');
@@ -849,12 +843,6 @@ const AssetClassDetailsModal = ({ onClose }) => {
       const response = await fetch('/api/macro-trading/asset-class-details');
       if (response.ok) {
         const data = await response.json();
-        setAssetClassDetails(data.data || {
-          stocks: [],
-          bonds: [],
-          alternatives: [],
-          cash: []
-        });
         // 각 자산군별로 편집 가능한 상태 초기화
         const editing = {};
         Object.keys(data.data || {}).forEach(assetClass => {

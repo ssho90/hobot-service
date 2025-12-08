@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import HobotStatus from './HobotStatus';
 import CurrentPosition from './CurrentPosition';
@@ -16,7 +15,6 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const { isSystemAdmin } = useAuth();
-  const navigate = useNavigate();
   const [currentStrategy, setCurrentStrategy] = useState('');
   const [activeTab, setActiveTab] = useState('macro-dashboard');
   const [activePlatform, setActivePlatform] = useState('upbit');

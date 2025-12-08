@@ -162,7 +162,7 @@ const LLMMonitoringPage = () => {
       fetchLogs();
       fetchTokenUsage();
     }
-  }, [filters.model_name, filters.service_name, filters.start_date, filters.end_date, groupBy, isInitialized]);
+  }, [filters.model_name, filters.service_name, filters.start_date, filters.end_date, groupBy, isInitialized, fetchLogs, fetchTokenUsage]);
 
   // 초기 로드
   useEffect(() => {
@@ -171,7 +171,7 @@ const LLMMonitoringPage = () => {
       fetchTokenUsage();
       setIsInitialized(true);
     }
-  }, [filters.start_date, filters.end_date, isInitialized]);
+  }, [filters.start_date, filters.end_date, isInitialized, fetchLogs, fetchTokenUsage]);
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -259,8 +259,6 @@ const LLMMonitoringPage = () => {
       }))
     };
   };
-
-  const chartData = prepareChartData();
 
   return (
     <div className="admin-page">

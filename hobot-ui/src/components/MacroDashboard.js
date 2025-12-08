@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
@@ -782,6 +782,7 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
     };
 
     fetchAllIndicators();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 차트 생성 함수
@@ -937,6 +938,7 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         chartRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yieldSpreadData]);
 
   if (loading) {

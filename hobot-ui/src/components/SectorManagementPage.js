@@ -25,6 +25,7 @@ const SectorManagementPage = () => {
 
   useEffect(() => {
     fetchSectors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSectors = async () => {
