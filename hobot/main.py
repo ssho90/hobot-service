@@ -2377,16 +2377,26 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def startup_event():
     """애플리케이션 시작 시 실행되는 이벤트"""
+    import os
+    
     logging.info("Hobot 애플리케이션 시작 중...")
     
-    # 모든 스케줄러 시작 (FRED 데이터 수집 + 뉴스 수집)
-    try:
-        from service.macro_trading.scheduler import start_all_schedulers
-        threads = start_all_schedulers()
-        logging.info(f"모든 스케줄러가 시작되었습니다. (총 {len(threads)}개 스레드)")
-    except Exception as e:
-        logging.error(f"스케줄러 시작 실패: {e}", exc_info=True)
-        # 스케줄러 실패해도 애플리케이션은 계속 실행
+    # Gunicorn 환경 감지: GUNICORN_WORKER_ID 환경 변수가 있으면 워커 프로세스
+    # Gunicorn 환경에서는 when_ready 훅에서 스케줄러가 시작되므로 여기서는 시작하지 않음
+    # Uvicorn 개발 환경에서만 여기서 스케줄러 시작
+    is_gunicorn_worker = os.getenv('GUNICORN_WORKER_ID') is not None
+    
+    if not is_gunicorn_worker:
+        # Uvicorn 개발 환경에서만 스케줄러 시작
+        try:
+            from service.macro_trading.scheduler import start_all_schedulers
+            threads = start_all_schedulers()
+            logging.info(f"[Uvicorn] 모든 스케줄러가 시작되었습니다. (총 {len(threads)}개 스레드)")
+        except Exception as e:
+            logging.error(f"[Uvicorn] 스케줄러 시작 실패: {e}", exc_info=True)
+            # 스케줄러 실패해도 애플리케이션은 계속 실행
+    else:
+        logging.info("[Gunicorn Worker] 스케줄러는 메인 프로세스의 when_ready 훅에서 시작됩니다.")
 
 
 if __name__ == "__main__":
