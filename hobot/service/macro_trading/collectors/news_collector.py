@@ -109,6 +109,21 @@ class NewsCollector:
             logger.warning("Selenium이 설치되지 않았습니다. pip install selenium으로 설치하세요.")
             return None
         
+        # Selenium 관련 로거 비활성화 (불필요한 로그 제거)
+        selenium_loggers = [
+            'selenium',
+            'selenium.webdriver',
+            'selenium.webdriver.remote',
+            'selenium.webdriver.remote.remote_connection',
+            'urllib3',
+            'urllib3.connectionpool',
+            'httpcore',
+            'httpx'
+        ]
+        for logger_name in selenium_loggers:
+            selenium_logger = logging.getLogger(logger_name)
+            selenium_logger.setLevel(logging.WARNING)  # WARNING 이상만 로깅
+        
         driver = None
         try:
             logger.info("Selenium을 사용하여 페이지 로드 중...")

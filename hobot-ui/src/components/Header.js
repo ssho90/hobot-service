@@ -23,7 +23,7 @@ const Header = () => {
       const tab = event.detail?.tab || null;
       setDashboardActiveTab(tab);
       // Admin 하위 탭이 활성화되면 하위 메뉴 열기
-      if (tab === 'admin-users' || tab === 'admin-logs') {
+      if (tab === 'admin-users' || tab === 'admin-logs' || tab === 'admin-llm-monitoring' || tab === 'admin-sector-management') {
         setShowAdminSubmenu(true);
       }
       // Trading 하위 탭이 활성화되면 하위 메뉴 열기
@@ -65,7 +65,7 @@ const Header = () => {
   const getActiveTab = () => {
     if (location.pathname === '/dashboard') {
       if (dashboardActiveTab === 'trading-macro' || dashboardActiveTab === 'trading-crypto') return 'trading';
-      if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs') return 'admin';
+      if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-sector-management') return 'admin';
       if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
       return 'macro-dashboard'; // 기본값
     }
@@ -101,7 +101,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
     setShowMenu(false);
   };
 
@@ -125,9 +125,12 @@ const Header = () => {
   return (
     <header className="top-header">
       <div className="header-left">
-        <div className="header-logo">
-          <span className="logo-icon">🤖</span>
-          <span className="logo-text">Hobot</span>
+        <div 
+          className="header-logo" 
+          onClick={() => navigate('/')}
+          style={{ cursor: 'pointer' }}
+        >
+          <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
         </div>
         <nav className="header-tabs">
           <button
@@ -204,6 +207,18 @@ const Header = () => {
                       onClick={() => handleAdminSubmenuClick('admin-logs')}
                     >
                       로그 관리
+                    </button>
+                    <button
+                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-llm-monitoring' ? 'active' : ''}`}
+                      onClick={() => handleAdminSubmenuClick('admin-llm-monitoring')}
+                    >
+                      LLM 모니터링
+                    </button>
+                    <button
+                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-sector-management' ? 'active' : ''}`}
+                      onClick={() => handleAdminSubmenuClick('admin-sector-management')}
+                    >
+                      종목 관리
                     </button>
                   </div>
                 )}

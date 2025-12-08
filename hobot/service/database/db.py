@@ -231,6 +231,62 @@ def init_database():
         except Exception:
             pass  # 이미 존재하는 경우 무시
         
+        # Overview AI 추천 섹터/그룹 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS overview_recommended_sectors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                asset_class VARCHAR(50) NOT NULL COMMENT '자산군 (stocks, bonds, alternatives, cash)',
+                sector_group VARCHAR(100) NOT NULL COMMENT '섹터/그룹명 (예: 미국 지수, 미국 테크, 배당/방어 등)',
+                ticker VARCHAR(20) NOT NULL COMMENT 'ETF 티커',
+                name VARCHAR(255) NOT NULL COMMENT 'ETF 이름',
+                display_order INT DEFAULT 0 COMMENT '표시 순서',
+                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY unique_asset_class_sector_ticker (asset_class, sector_group, ticker) COMMENT '자산군-섹터-티커 중복 방지',
+                INDEX idx_asset_class (asset_class) COMMENT '자산군 인덱스',
+                INDEX idx_sector_group (sector_group) COMMENT '섹터 그룹 인덱스',
+                INDEX idx_is_active (is_active) COMMENT '활성화 여부 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Overview AI 추천 섹터/그룹 리스트'
+        """)
+        
+        # 초기 데이터 삽입 (데이터가 없을 때만)
+        cursor.execute("SELECT COUNT(*) as count FROM overview_recommended_sectors")
+        count_result = cursor.fetchone()
+        if count_result and count_result.get('count', 0) == 0:
+            initial_data = [
+                # 주식 - 미국 지수
+                ('stocks', '미국 지수', '360750', 'TIGER 미국S&P500', 1),
+                ('stocks', '미국 지수', '360200', 'ACE 미국S&P500', 2),
+                # 주식 - 미국 테크
+                ('stocks', '미국 테크', '381170', 'TIGER 미국테크TOP10 INDXX', 1),
+                ('stocks', '미국 테크', '133690', 'TIGER 미국나스닥100', 2),
+                # 주식 - 배당/방어
+                ('stocks', '배당/방어', '458730', 'TIGER 미국배당다우존스', 1),
+                ('stocks', '배당/방어', '446720', 'SOL 미국배당다우존스', 2),
+                # 채권 - 미국 장기채
+                ('bonds', '미국 장기채', '453850', 'ACE 미국30년국채액티브(H)', 1),
+                ('bonds', '미국 장기채', '476760', 'ACE 미국30년국채액티브', 2),
+                # 채권 - 단기/파킹
+                ('bonds', '단기/파킹', '459580', 'KODEX CD금리액티브(합성)', 1),
+                # 대체투자 - 골드
+                ('alternatives', '골드', '411060', 'ACE KRX금현물', 1),
+                # 대체투자 - 달러
+                ('alternatives', '달러', '456610', 'TIGER 미국달러SOFR금리액티브(합성)', 1),
+                # 현금 - 원화
+                ('cash', '원화', '', '원화', 1),
+                # 현금 - 파킹통장형
+                ('cash', '파킹통장형', '459580', 'KODEX CD금리액티브(합성)', 1),
+                ('cash', '파킹통장형', '488770', 'KODEX 머니마켓액티브', 2),
+            ]
+            
+            for asset_class, sector_group, ticker, name, display_order in initial_data:
+                cursor.execute("""
+                    INSERT INTO overview_recommended_sectors 
+                    (asset_class, sector_group, ticker, name, display_order, is_active)
+                    VALUES (%s, %s, %s, %s, %s, TRUE)
+                """, (asset_class, sector_group, ticker, name, display_order))
+        
         # 종목명-티커 매핑 테이블 (KIS API에서 수집)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stock_tickers (
@@ -248,6 +304,51 @@ def init_database():
                 INDEX idx_last_updated (last_updated) COMMENT '업데이트 날짜 인덱스'
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='종목명-티커 매핑 (KIS API 수집)'
         """)
+        
+        # LLM 사용 로그 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS llm_usage_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                model_name VARCHAR(100) NOT NULL COMMENT 'LLM 모델명 (예: gpt-4o-mini, gemini-2.5-pro)',
+                provider VARCHAR(50) NOT NULL COMMENT 'LLM 제공자 (예: OpenAI, Google)',
+                request_prompt TEXT COMMENT '요청 프롬프트',
+                response_prompt TEXT COMMENT '응답 프롬프트',
+                prompt_tokens INT DEFAULT 0 COMMENT '프롬프트 토큰 수',
+                completion_tokens INT DEFAULT 0 COMMENT '완료 토큰 수',
+                total_tokens INT DEFAULT 0 COMMENT '총 토큰 수',
+                service_name VARCHAR(100) COMMENT '서비스명 (어떤 기능에서 호출했는지)',
+                duration_ms INT COMMENT '응답 시간 (밀리초)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                INDEX idx_model_name (model_name) COMMENT '모델명 인덱스',
+                INDEX idx_provider (provider) COMMENT '제공자 인덱스',
+                INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스 (일자별 조회용)',
+                INDEX idx_service_name (service_name) COMMENT '서비스명 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='LLM 사용 로그'
+        """)
+        
+        # AI 전략 결정 이력 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ai_strategy_decisions (
+                id INT PRIMARY KEY AUTO_INCREMENT COMMENT '고유 ID',
+                decision_date DATETIME NOT NULL COMMENT '의사결정 일시',
+                analysis_summary TEXT COMMENT 'AI 분석 요약',
+                target_allocation JSON NOT NULL COMMENT '목표 자산 배분 (Stocks, Bonds, Alternatives, Cash)',
+                recommended_stocks JSON COMMENT '자산군별 추천 종목',
+                quant_signals JSON COMMENT '정량 시그널 데이터 (장단기 금리차, 실질 금리, 테일러 준칙 등)',
+                qual_sentiment JSON COMMENT '정성 분석 데이터 (연준 발표문 요약, 경제 이벤트 등)',
+                account_pnl JSON COMMENT '계좌 손익 데이터 (자산군별 손익률)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                INDEX idx_decision_date (decision_date) COMMENT '의사결정 일시 인덱스 (최신 조회용)',
+                INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI 전략 결정 이력'
+        """)
+        
+        # recommended_stocks 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE ai_strategy_decisions ADD COLUMN recommended_stocks JSON COMMENT '자산군별 추천 종목'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
         
         conn.commit()
 

@@ -17,6 +17,14 @@ from service.macro_trading.ai_strategist import run_ai_analysis
 
 logger = logging.getLogger(__name__)
 
+# 스케줄러 시작 여부를 추적하는 전역 변수
+_scheduler_started = False
+_scheduler_lock = threading.Lock()
+
+# AI 분석 실행 중 여부를 추적하는 전역 변수 (동시 실행 방지)
+_ai_analysis_running = False
+_ai_analysis_lock = threading.Lock()
+
 
 def retry_on_failure(max_retries: int = 3, delay: int = 60):
     """
@@ -310,7 +318,19 @@ def run_ai_strategy_analysis():
     """
     AI 전략 분석을 실행합니다.
     매일 08:30에 실행되도록 스케줄에 등록됩니다.
+    
+    동시 실행 방지: 이미 실행 중인 경우 건너뜁니다.
     """
+    global _ai_analysis_running
+    
+    # 동시 실행 방지
+    with _ai_analysis_lock:
+        if _ai_analysis_running:
+            logger.warning("AI 전략 분석이 이미 실행 중입니다. 중복 실행을 방지합니다.")
+            return False
+        
+        _ai_analysis_running = True
+    
     try:
         logger.info("AI 전략 분석 실행 시작")
         success = run_ai_analysis()
@@ -322,6 +342,10 @@ def run_ai_strategy_analysis():
     except Exception as e:
         logger.error(f"AI 전략 분석 중 오류 발생: {e}", exc_info=True)
         raise
+    finally:
+        # 실행 완료 후 플래그 해제
+        with _ai_analysis_lock:
+            _ai_analysis_running = False
 
 
 def setup_ai_analysis_scheduler():
@@ -330,6 +354,13 @@ def setup_ai_analysis_scheduler():
     매일 08:30에 실행되도록 등록합니다.
     """
     try:
+        # 기존 'ai_analysis' 태그가 있는 스케줄 제거 (중복 등록 방지)
+        existing_jobs = schedule.get_jobs()
+        for job in existing_jobs:
+            if 'ai_analysis' in job.tags:
+                schedule.cancel_job(job)
+                logger.info(f"기존 AI 분석 스케줄 제거: {job}")
+        
         # 매일 08:30에 실행
         schedule.every().day.at("08:30").do(run_ai_strategy_analysis).tag('ai_analysis')
         logger.info("AI 전략 분석 스케줄 등록: 매일 08:30 KST")
@@ -392,9 +423,20 @@ def start_all_schedulers():
     주의: schedule 라이브러리는 전역 상태를 사용하므로,
     모든 스케줄을 하나의 스레드에서 실행하는 것이 더 효율적입니다.
     
+    중복 호출 방지: 이미 시작된 경우 다시 시작하지 않습니다.
+    
     Returns:
         List[threading.Thread]: 스케줄러 스레드 리스트
     """
+    global _scheduler_started
+    
+    with _scheduler_lock:
+        if _scheduler_started:
+            logger.warning("스케줄러가 이미 시작되었습니다. 중복 시작을 방지합니다.")
+            return []
+        
+        _scheduler_started = True
+    
     threads = []
     
     # 먼저 모든 스케줄을 설정

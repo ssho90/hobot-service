@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import Dashboard from './components/Dashboard';
 import MainPage from './components/MainPage';
@@ -15,7 +14,7 @@ const ProtectedRoute = ({ children }) => {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>로딩 중...</div>;
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/" replace />;
 };
 
 // Admin Protected Route 컴포넌트 (향후 사용 예정)
@@ -28,7 +27,7 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (!isAdmin()) {
@@ -43,14 +42,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route 
-        path="/login" 
-        element={
-          user ? 
-            <Navigate to="/dashboard" replace /> : 
-            <LoginPage />
-        } 
-      />
       <Route 
         path="/register" 
         element={

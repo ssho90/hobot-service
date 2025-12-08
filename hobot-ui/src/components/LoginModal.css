@@ -74,6 +74,12 @@
   margin-bottom: 32px;
 }
 
+.login-modal-logo .logo-image {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
 .login-modal-logo .logo-icon {
   font-size: 32px;
 }

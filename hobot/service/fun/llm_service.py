@@ -49,6 +49,7 @@ class MemoryEntry(TypedDict):
 # (이미지 입력 기능은 기억 저장소에 직접 연결되지 않습니다. 텍스트만 저장합니다.)
 # -----------------------------
 from service.database.memory_db import MemoryStore as SQLiteMemoryStore
+from service.llm_monitoring import track_llm_call
 
 # SQLite 기반 MemoryStore 사용
 class MemoryStore(SQLiteMemoryStore):
@@ -98,65 +99,145 @@ def _prepare_llm_messages(messages: List[ChatMessage]) -> List[Any]:
 def gpt(messages: List[ChatMessage], temperature: float = 0.5) -> str:
     try:
         prepared_messages = _prepare_llm_messages(messages)
+        
+        # 프롬프트 추출 (전체 메시지 히스토리에서)
+        request_prompt_parts = []
+        for msg in messages:
+            role = msg.get('role', 'unknown')
+            content = msg.get('content', '')
+            if isinstance(content, str):
+                request_prompt_parts.append(f"{role}: {content}")
+            elif isinstance(content, list):
+                # 멀티모달 메시지인 경우 텍스트 부분만 추출
+                text_parts = [part.get('text', '') for part in content if part.get('type') == 'text']
+                if text_parts:
+                    request_prompt_parts.append(f"{role}: {' '.join(text_parts)}")
+        request_prompt = "\n".join(request_prompt_parts)
 
-        if st.session_state.llm_provider == "ChatGPT":
-            # OpenAI는 content 필드에 문자열 또는 리스트를 직접 받음
-            response = openai.chat.completions.create(
-                model=st.session_state.llm_model,
-                messages=prepared_messages, # _prepare_llm_messages에서 OpenAI 형식으로 변환됨
-                temperature=temperature
-            )
-            return response.choices[0].message.content.strip()
-        elif st.session_state.llm_provider == "Gemini":
-            # Gemini는 generate_content 함수에 List[Parts] 형태로 메시지를 전달
-            # prepared_messages는 이미 Gemini Chat API의 형식에 맞게 변환되어 있음
-            model = genai.GenerativeModel(st.session_state.llm_model)
+        # 모델명과 제공자 가져오기
+        model_name = st.session_state.get('llm_model', 'unknown')
+        provider = st.session_state.get('llm_provider', 'unknown')
+        
+        # LLM 호출 추적
+        with track_llm_call(
+            model_name=model_name,
+            provider=provider,
+            service_name="llm_service",
+            request_prompt=request_prompt
+        ) as tracker:
+            if st.session_state.llm_provider == "ChatGPT":
+                # OpenAI는 content 필드에 문자열 또는 리스트를 직접 받음
+                response = openai.chat.completions.create(
+                    model=st.session_state.llm_model,
+                    messages=prepared_messages, # _prepare_llm_messages에서 OpenAI 형식으로 변환됨
+                    temperature=temperature
+                )
+                result = response.choices[0].message.content.strip()
+                
+                # 토큰 사용량 추출 (OpenAI 응답에 포함됨)
+                if hasattr(response, 'usage'):
+                    tracker.set_token_usage(
+                        prompt_tokens=response.usage.prompt_tokens if hasattr(response.usage, 'prompt_tokens') else 0,
+                        completion_tokens=response.usage.completion_tokens if hasattr(response.usage, 'completion_tokens') else 0,
+                        total_tokens=response.usage.total_tokens if hasattr(response.usage, 'total_tokens') else 0
+                    )
+                
+                tracker.set_response(result)
+                return result
+            elif st.session_state.llm_provider == "Gemini":
+                # Gemini는 generate_content 함수에 List[Parts] 형태로 메시지를 전달
+                # prepared_messages는 이미 Gemini Chat API의 형식에 맞게 변환되어 있음
+                model = genai.GenerativeModel(st.session_state.llm_model)
 
-            # Gemini의 chat 기능은 'send_message'를 통해 이루어지므로,
-            # chat session을 생성하고 기존 메시지들을 추가한 뒤 마지막 메시지를 보냅니다.
-            chat_session = model.start_chat(history=prepared_messages[:-1])
-            response = chat_session.send_message(prepared_messages[-1]['parts'])
-            return response.text.strip()
+                # Gemini의 chat 기능은 'send_message'를 통해 이루어지므로,
+                # chat session을 생성하고 기존 메시지들을 추가한 뒤 마지막 메시지를 보냅니다.
+                chat_session = model.start_chat(history=prepared_messages[:-1])
+                response = chat_session.send_message(prepared_messages[-1]['parts'])
+                result = response.text.strip()
+                
+                # Gemini는 토큰 사용량 정보를 별도로 제공하지 않을 수 있음
+                # 사용 가능한 경우 추가
+                if hasattr(response, 'usage_metadata'):
+                    tracker.set_token_usage(
+                        prompt_tokens=response.usage_metadata.prompt_token_count if hasattr(response.usage_metadata, 'prompt_token_count') else 0,
+                        completion_tokens=response.usage_metadata.candidates_token_count if hasattr(response.usage_metadata, 'candidates_token_count') else 0,
+                        total_tokens=response.usage_metadata.total_token_count if hasattr(response.usage_metadata, 'total_token_count') else 0
+                    )
+                
+                tracker.set_response(result)
+                return result
     except Exception as e:
         return f"[오류] LLM 호출 실패: {e}"
 
 def gpt_stream(messages: List[ChatMessage], temperature: float = 0.5):
     try:
         prepared_messages = _prepare_llm_messages(messages)
+        
+        # 프롬프트 추출 (전체 메시지 히스토리에서)
+        request_prompt_parts = []
+        for msg in messages:
+            role = msg.get('role', 'unknown')
+            content = msg.get('content', '')
+            if isinstance(content, str):
+                request_prompt_parts.append(f"{role}: {content}")
+            elif isinstance(content, list):
+                # 멀티모달 메시지인 경우 텍스트 부분만 추출
+                text_parts = [part.get('text', '') for part in content if part.get('type') == 'text']
+                if text_parts:
+                    request_prompt_parts.append(f"{role}: {' '.join(text_parts)}")
+        request_prompt = "\n".join(request_prompt_parts)
 
-        if st.session_state.llm_provider == "ChatGPT":
-            response = openai.chat.completions.create(
-                model=st.session_state.llm_model,
-                messages=prepared_messages, # _prepare_llm_messages에서 OpenAI 형식으로 변환됨
-                temperature=temperature,
-                stream=True
-            )
-            full_response = ""
-            for chunk in response:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    content = chunk.choices[0].delta.content
-                    yield content
-                    full_response += content
-            return full_response
-        elif st.session_state.llm_provider == "Gemini":
-            # Gemini는 현재 스트리밍 미지원 (send_message는 스트리밍이 아님) → 전체 응답 반환
-            # 하지만 gemini-1.5-pro, gemini-1.5-flash 등은 `stream=True` 파라미터를 지원할 수 있으니
-            # 여기에 해당 로직을 추가할 수도 있습니다.
-            # 이 코드에서는 편의상 스트리밍 미지원으로 처리하여 전체 응답 반환
-            # (실제 API는 .generate_content(..., stream=True) 지원)
-            model = genai.GenerativeModel(st.session_state.llm_model)
-            chat_session = model.start_chat(history=prepared_messages[:-1])
+        # 모델명과 제공자 가져오기
+        model_name = st.session_state.get('llm_model', 'unknown')
+        provider = st.session_state.get('llm_provider', 'unknown')
+        
+        # LLM 호출 추적
+        with track_llm_call(
+            model_name=model_name,
+            provider=provider,
+            service_name="llm_service_stream",
+            request_prompt=request_prompt
+        ) as tracker:
+            if st.session_state.llm_provider == "ChatGPT":
+                response = openai.chat.completions.create(
+                    model=st.session_state.llm_model,
+                    messages=prepared_messages, # _prepare_llm_messages에서 OpenAI 형식으로 변환됨
+                    temperature=temperature,
+                    stream=True
+                )
+                full_response = ""
+                for chunk in response:
+                    if chunk.choices and chunk.choices[0].delta.content:
+                        content = chunk.choices[0].delta.content
+                        yield content
+                        full_response += content
+                
+                # 스트리밍 완료 후 응답 설정
+                tracker.set_response(full_response)
+                return full_response
+            elif st.session_state.llm_provider == "Gemini":
+                # Gemini는 현재 스트리밍 미지원 (send_message는 스트리밍이 아님) → 전체 응답 반환
+                # 하지만 gemini-1.5-pro, gemini-1.5-flash 등은 `stream=True` 파라미터를 지원할 수 있으니
+                # 여기에 해당 로직을 추가할 수도 있습니다.
+                # 이 코드에서는 편의상 스트리밍 미지원으로 처리하여 전체 응답 반환
+                # (실제 API는 .generate_content(..., stream=True) 지원)
+                model = genai.GenerativeModel(st.session_state.llm_model)
+                chat_session = model.start_chat(history=prepared_messages[:-1])
 
-            # Gemini의 스트리밍은 `response.parts`를 순회하는 방식
-            full_response = ""
-            for chunk in chat_session.send_message(prepared_messages[-1]['parts'], stream=True):
-                if chunk.text: # 텍스트만 처리, 이미지나 다른 파트 무시
-                    yield chunk.text
-                    full_response += chunk.text
-            return full_response
+                # Gemini의 스트리밍은 `response.parts`를 순회하는 방식
+                full_response = ""
+                for chunk in chat_session.send_message(prepared_messages[-1]['parts'], stream=True):
+                    if chunk.text: # 텍스트만 처리, 이미지나 다른 파트 무시
+                        yield chunk.text
+                        full_response += chunk.text
+                
+                # 스트리밍 완료 후 응답 설정
+                tracker.set_response(full_response)
+                return full_response
 
     except Exception as e:
-        yield f"[오류] LLM 호출 실패: {e}"
+        error_msg = f"[오류] LLM 호출 실패: {e}"
+        yield error_msg
 
 # -----------------------------
 # 문장 요약 함수 (텍스트만 요약)

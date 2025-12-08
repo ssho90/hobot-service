@@ -1,18 +1,20 @@
-# 🚀 Hobot Macro Auto Trading Service
+# 🚀 Stockoverflow - AI 기반 거시경제 자동매매 시스템
 
 > **AI 기반 거시경제 자동매매 시스템**  
 > 연준 금리, 인플레이션, 유동성 지표를 실시간 분석하여 포트폴리오를 자동으로 리밸런싱하는 지능형 투자 시스템
+
+**🌐 서비스 도메인**: [https://stockoverflow.org](https://stockoverflow.org)
 
 ---
 
 ## 💡 서비스 소개
 
-**Hobot Macro Auto Trading Service**는 거시경제 지표와 AI를 활용한 자동 포트폴리오 관리 시스템입니다. 연준의 금리 정책, 인플레이션 추이, 시장 유동성 등 핵심 거시경제 데이터를 실시간으로 분석하고, Gemini AI가 이를 종합 판단하여 최적의 자산 배분을 결정합니다.
+**Stockoverflow**는 거시경제 지표와 AI를 활용한 자동 포트폴리오 관리 시스템입니다. 연준의 금리 정책, 인플레이션 추이, 시장 유동성 등 핵심 거시경제 데이터를 실시간으로 분석하고, Gemini AI가 이를 종합 판단하여 최적의 자산 배분을 결정합니다.
 
 ### 🎯 핵심 가치
 
 - **데이터 기반 의사결정**: FRED API를 통한 실시간 거시경제 지표 수집 및 분석
-- **AI 전략가**: Gemini 2.5 Pro가 정량 시그널과 정성 뉴스를 종합하여 포트폴리오 전략 수립
+- **AI 전략가**: Gemini 3.0 Pro가 정량 시그널과 정성 뉴스를 종합하여 포트폴리오 전략 수립
 - **자동 실행**: 임계값 기반 자동 리밸런싱으로 감정 없는 투자 실행
 - **리스크 관리**: 일일/월간 손실 한도, 드라이런 모드 등 안전장치 내장
 
@@ -22,20 +24,66 @@
 
 ### 📊 정량 시그널 분석
 - **장단기 금리차 추세 추종**: 금리 곡선의 변화를 통해 경기 사이클 판단
+  - DGS10 - DGS2 스프레드 계산
+  - 20일/120일 이동평균으로 단기/장기 추세 파악
+  - 200일 이동평균으로 금리 대세 판단
+  - 4가지 국면: Bull/Bear Steepening, Bull/Bear Flattening
 - **실질 금리 계산**: 명목 금리에서 인플레이션을 차감한 실제 수익률 분석
+  - 계산식: DGS10 (명목 금리) - CPI 증가율 (연율화)
 - **테일러 준칙 신호**: 연준의 목표 금리와 현재 금리 차이 분석
-- **연준 순유동성**: 시장에 실제 공급된 유동성 추적 (WALCL - TGA - RRP)
-- **하이일드 스프레드**: 유동성 위기 조기 감지 (Greed/Fear/Panic 구간 판단)
+  - 계산식: Target_Rate - FEDFUNDS (현재 연준 금리)
+  - Target_Rate = r* + π + 0.5(π - π*) + 0.5(y - y*)
+- **연준 순유동성**: 시장에 실제 공급된 유동성 추적
+  - 계산식: WALCL (연준 자산) - WTREGEN (재무부 일반계정) - RRPONTSYD (역레포)
+  - 이동평균 추세로 유동성 공급 방향 판단
+- **하이일드 스프레드**: 유동성 위기 조기 감지
+  - BAMLH0A0HYM2 지표 기반 Greed/Fear/Panic 구간 판단
+  - 전주 대비 변화율로 위험 심리 변화 추적
+- **물가 지표**: 인플레이션 추이 분석
+  - Core PCE (PCEPILFE): 지난 10개 데이터를 날짜와 함께 제공
+  - CPI (CPIAUCSL): 지난 10개 데이터를 날짜와 함께 제공
+- **고용 지표**: 노동 시장 동향 분석
+  - 실업률 (UNRATE): 지난 10개 데이터를 날짜와 함께 제공
+  - 비농업 고용 (PAYEMS): 지난 10개 데이터를 날짜와 함께 제공
 
 ### 📰 정성 분석
-- **경제 뉴스 수집**: TradingEconomics에서 24시간 내 경제 뉴스 자동 수집
+- **경제 뉴스 수집**: TradingEconomics에서 지난 1주일간 특정 국가 뉴스 자동 수집
+  - 필터링 국가: Crypto, Commodity, Euro Area, China, United States
+  - 1시간마다 자동 수집하여 DB에 저장
 - **LLM 요약**: Gemini AI가 뉴스를 분석하여 핵심 정책 변화점 추출
+  - AI 전략가 분석 시 지난 1주일간 필터링된 국가 뉴스만 사용
+  - 정량 시그널에 비해 낮은 비중으로 참고
 - **이벤트 추적**: CPI, FOMC, 실업률 등 주요 경제 이벤트 모니터링
 
 ### 🤖 AI 전략가
-- **종합 판단**: 정량 시그널 + 정성 분석 + 계좌 손익을 종합하여 포트폴리오 목표 비중 결정
+- **LangGraph 기반 워크플로우**: 순차적 실행 보장 및 에러 핸들링 개선
+- **종합 판단**: FRED 정량 시그널 + 물가 지표 + 경제 뉴스를 종합하여 포트폴리오 목표 비중 결정
 - **자산군별 배분**: 주식(Stocks), 채권(Bonds), 대체투자(Alternatives), 현금(Cash) 최적 비중 산출
 - **JSON 구조화 출력**: Pydantic을 통한 엄격한 스키마 검증
+
+#### AI 분석 워크플로우 (LangGraph)
+```
+START
+  ↓
+[1] FRED 시그널 수집
+  ↓
+[2] 경제 뉴스 수집 (지난 20일, 특정 국가)
+  ↓
+[3] 뉴스 LLM 요약 (gemini-3.0-pro)
+  ↓
+[4] AI 분석 및 전략 결정 (gemini-3-pro-preview)
+  ↓
+[5] 결과 저장
+  ↓
+END
+```
+
+**각 단계 설명:**
+1. **FRED 시그널 수집**: 금리차, 실질금리, 테일러준칙, 유동성, 하이일드 스프레드, 물가/고용 지표 계산
+2. **경제 뉴스 수집**: 지난 20일간 Crypto, Commodity, Euro Area, China, United States 국가 뉴스 수집
+3. **뉴스 LLM 요약**: gemini-3.0-pro로 주요 경제 지표 변화, 경제 흐름, 주요 이벤트 도출 및 요약
+4. **AI 분석**: 정제된 뉴스 요약과 FRED 시그널을 종합하여 포트폴리오 목표 비중 결정
+5. **결과 저장**: AI 의사결정을 DB에 저장하여 리밸런싱 봇이 참조
 
 ### ⚙️ 자동 실행
 - **임계값 기반 리밸런싱**: 목표 비중과 실제 비중의 편차가 5% 이상일 때 자동 실행
@@ -48,7 +96,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Hobot Macro Trading System                │
+│                    Stockoverflow Trading System             │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
@@ -81,10 +129,12 @@
    - TradingEconomics: 경제 뉴스 (1시간마다)
    - KIS API: 계좌 상태 및 손익
 
-2. **AI 분석** (09:10, 14:40)
-   - 정량 시그널 계산
-   - 뉴스 요약 및 정성 분석
-   - 포트폴리오 목표 비중 결정
+2. **AI 분석** (매일 08:30) - LangGraph 워크플로우
+   - FRED 정량 시그널 계산
+   - 지난 20일간 특정 국가 뉴스 수집
+   - 뉴스 LLM 요약 (gemini-3.0-pro)
+   - 종합 분석 및 포트폴리오 목표 비중 결정 (gemini-3-pro-preview)
+   - 결과 저장
 
 3. **자동 실행** (15:00)
    - 편차 계산 (목표 vs 실제)
@@ -103,8 +153,10 @@
 - **Selenium**: JavaScript 렌더링이 필요한 웹 크롤링
 
 ### AI/ML
-- **Google Gemini 2.5 Pro**: 포트폴리오 전략 결정
+- **Google Gemini 3.0 Pro**: 뉴스 요약 및 정제
+- **Google Gemini 3 Pro Preview**: 포트폴리오 전략 결정
 - **LangChain**: LLM 통합 및 프롬프트 관리
+- **LangGraph**: 워크플로우 관리 및 순차 실행 보장
 
 ### 데이터 소스
 - **FRED API**: 연준 거시경제 지표 (금리, 인플레이션, 유동성)
@@ -229,28 +281,37 @@ python -m service.macro_trading.scripts.initial_data_load
 
 ## 📡 API 엔드포인트
 
+**기본 URL**: `https://stockoverflow.org`
+
 ### 거시경제 데이터
 
 - `GET /api/macro-trading/quantitative-signals`  
-  정량 시그널 조회 (장단기 금리차, 실질금리, 테일러준칙, 유동성 등)
+  정량 시그널 조회 (장단기 금리차, 실질금리, 테일러준칙, 유동성 등)  
+  예시: `https://stockoverflow.org/api/macro-trading/quantitative-signals`
 
 - `GET /api/macro-trading/economic-news?hours=24`  
-  최근 N시간 내 경제 뉴스 조회
+  최근 N시간 내 경제 뉴스 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/economic-news?hours=24`
 
 - `GET /api/macro-trading/fred-data`  
-  FRED 지표 데이터 조회
+  FRED 지표 데이터 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/fred-data?indicator_code=DGS10&days=365`
 
 ### 계좌 및 거래
 
 - `GET /api/macro-trading/account-snapshots`  
-  계좌 상태 스냅샷 조회
+  계좌 상태 스냅샷 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/account-snapshots`
 
 - `GET /api/macro-trading/rebalancing-history`  
-  리밸런싱 실행 이력 조회
+  리밸런싱 실행 이력 조회  
+  예시: `https://stockoverflow.org/api/macro-trading/rebalancing-history`
 
 ### API 문서
-- `GET /docs` - Swagger UI
-- `GET /redoc` - ReDoc
+- `GET /docs` - Swagger UI  
+  예시: `https://stockoverflow.org/docs`
+- `GET /redoc` - ReDoc  
+  예시: `https://stockoverflow.org/redoc`
 
 ---
 
@@ -279,18 +340,27 @@ python -m service.macro_trading.scripts.initial_data_load
 - Selenium을 통한 JavaScript 렌더링
 - 1시간마다 자동 실행
 
-### 3. AI 전략가 (예정)
+### 3. AI 전략가 (LangGraph 기반)
 
-Gemini LLM이 정량 시그널과 정성 뉴스를 종합하여 포트폴리오 목표 비중을 결정합니다.
+LangGraph를 사용하여 워크플로우를 관리하며, Gemini LLM이 FRED 정량 시그널, 물가 지표, 정제된 경제 뉴스를 종합하여 포트폴리오 목표 비중을 결정합니다.
+
+**워크플로우:**
+- **노드 1 (collect_fred)**: FRED 정량 시그널 수집
+- **노드 2 (collect_news)**: 경제 뉴스 수집 (지난 20일, 특정 국가)
+- **노드 3 (summarize_news)**: 뉴스 LLM 요약 (gemini-3.0-pro)
+- **노드 4 (analyze)**: AI 분석 및 전략 결정 (gemini-3-pro-preview)
+- **노드 5 (save_decision)**: 결과 저장
 
 **입력:**
-- 정량 시그널 (금리차, 실질금리, 유동성 등)
-- 정성 분석 (경제 뉴스 요약)
-- 계좌 손익 (자산군별 수익률)
+- FRED 정량 시그널 (금리차, 실질금리, 유동성 등)
+- 물가 지표 (Core PCE, CPI) - 지난 10개 데이터
+- 고용 지표 (실업률, 비농업 고용) - 지난 10개 데이터
+- 정제된 경제 뉴스 요약 (LLM으로 주요 지표 변화, 흐름, 이벤트 도출)
 
 **출력:**
 - 자산군별 목표 비중 (Stocks, Bonds, Alternatives, Cash)
-- 분석 요약
+- 분석 요약 및 판단 근거
+- 자산군별 추천 섹터/카테고리
 
 ### 4. 리밸런싱 봇 (예정)
 

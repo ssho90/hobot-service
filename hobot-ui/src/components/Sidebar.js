@@ -20,7 +20,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     icon: '⚙️',
     subItems: [
       { id: 'admin-users', label: '사용자 관리', icon: '👥' },
-      { id: 'admin-logs', label: '로그 관리', icon: '📋' }
+      { id: 'admin-logs', label: '로그 관리', icon: '📋' },
+      { id: 'admin-llm-monitoring', label: 'LLM 모니터링', icon: '🤖' },
+      { id: 'admin-sector-management', label: '종목 관리', icon: '📊' }
     ]
   };
 
@@ -47,7 +49,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   const isActiveMenu = (itemId) => {
     if (itemId === 'admin') {
-      return activeTab === 'admin-users' || activeTab === 'admin-logs';
+      return activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-sector-management';
     }
     return activeTab === itemId;
   };
@@ -56,8 +58,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <span className="logo-icon">🤖</span>
-          <span className="logo-text">Hobot</span>
+          <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
         </div>
       </div>
 

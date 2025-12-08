@@ -1,17 +1,97 @@
 """
 AI 전략가 모듈
-Gemini 2.5 Pro를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
+Gemini 3 Pro Preview를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
+LangGraph를 사용하여 워크플로우를 관리합니다.
 """
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Any, List
-from pydantic import BaseModel, Field, field_validator
+from typing import Dict, Optional, Any, List, TypedDict
+from pydantic import BaseModel, Field, model_validator
+
+from langgraph.graph import StateGraph, START, END
 
 from service.llm import llm_gemini_pro
 from service.database.db import get_db_connection
+from service.llm_monitoring import track_llm_call
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# 모델 포트폴리오 (MP) 시나리오 정의
+# ============================================================================
+
+MODEL_PORTFOLIOS = {
+    "MP-1": {
+        "id": "MP-1",
+        "name": "Risk On (골디락스)",
+        "description": "경기 지표(GDP, PMI)가 확장 국면이며 기업 이익이 증가하지만, 물가는 안정적인 최상의 시나리오. 실업률은 완전고용 수준을 유지하며, 시장에 위험자산 선호 심리(Risk-on)가 지배적임.",
+        "strategy": "주식 풀매수",
+        "allocation": {
+            "Stocks": 80.0,
+            "Bonds": 10.0,
+            "Alternatives": 5.0,
+            "Cash": 5.0
+        }
+    },
+    "MP-2": {
+        "id": "MP-2",
+        "name": "Reflation (물가상승)",
+        "description": "경기는 여전히 확장세이나, 수요 과열 또는 공급 충격으로 인해 물가(CPI/PCE)가 목표치를 상회하며 급등하는 구간. 금리 인상 압력이 존재하며, 화폐 가치 하락 방어를 위해 실물 자산이 선호됨.",
+        "strategy": "원자재/금 헤지 (인플레이션 방어)",
+        "allocation": {
+            "Stocks": 50.0,
+            "Bonds": 10.0,
+            "Alternatives": 30.0,
+            "Cash": 10.0
+        }
+    },
+    "MP-3": {
+        "id": "MP-3",
+        "name": "Neutral (중립)",
+        "description": "경제 지표가 호재와 악재가 섞여 뚜렷한 방향성(추세)이 보이지 않는 구간. 고용은 견조하나 소비가 둔화되는 등 지표 간 괴리가 발생하며, 시장은 연준의 정책 결정이나 새로운 모멘텀을 기다리며 박스권 등락을 반복함.",
+        "strategy": "자산배분 정석 (균형 투자)",
+        "allocation": {
+            "Stocks": 40.0,
+            "Bonds": 40.0,
+            "Alternatives": 10.0,
+            "Cash": 10.0
+        }
+    },
+    "MP-4": {
+        "id": "MP-4",
+        "name": "Defensive (경기둔화)",
+        "description": "제조업 PMI 등 선행 지표가 위축되고 실업률이 바닥을 찍고 완만하게 상승하기 시작하는 경기 하강 초기 국면. 물가 상승 압력이 둔화되면서 중앙은행의 '금리 인하' 기대감이 형성되어 채권 가격 상승(수익률 하락)이 유력함.",
+        "strategy": "채권 매집 (자본 차익 기대)",
+        "allocation": {
+            "Stocks": 20.0,
+            "Bonds": 50.0,
+            "Alternatives": 20.0,
+            "Cash": 10.0
+        }
+    },
+    "MP-5": {
+        "id": "MP-5",
+        "name": "Recession (침체/공포)",
+        "description": "실업률이 급격히 치솟으며(샴의 법칙 발동 등), 하이일드 스프레드가 급등하는 등 신용 위험이 현실화된 위기 국면. 주식 등 위험자산 투매가 나오며 안전자산(달러, 초단기 국채)으로의 자금 쏠림(Flight to Quality)이 발생함.",
+        "strategy": "안전자산 올인 (자산 방어 최우선)",
+        "allocation": {
+            "Stocks": 10.0,
+            "Bonds": 60.0,
+            "Alternatives": 10.0,
+            "Cash": 20.0
+        }
+    }
+}
+
+
+def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
+    """MP ID에 해당하는 자산 배분 비율 반환"""
+    mp = MODEL_PORTFOLIOS.get(mp_id)
+    if mp:
+        return mp["allocation"].copy()
+    return None
 
 
 class TargetAllocation(BaseModel):
@@ -21,32 +101,110 @@ class TargetAllocation(BaseModel):
     Alternatives: float = Field(..., ge=0, le=100, description="대체투자 비중 (%)")
     Cash: float = Field(..., ge=0, le=100, description="현금 비중 (%)")
     
-    @field_validator('*')
-    @classmethod
-    def validate_total(cls, v, info):
+    @model_validator(mode='after')
+    def validate_total(self):
         """총합이 100%인지 검증"""
-        if info.data:
-            total = sum(info.data.values())
-            if abs(total - 100.0) > 0.01:
-                raise ValueError(f"총 비중이 100%가 아닙니다. (현재: {total}%)")
-        return v
+        total = self.Stocks + self.Bonds + self.Alternatives + self.Cash
+        if abs(total - 100.0) > 0.01:
+            raise ValueError(f"총 비중이 100%가 아닙니다. (현재: {total}%)")
+        return self
 
+
+class RecommendedStock(BaseModel):
+    """추천 종목/섹터 모델"""
+    category: str = Field(..., description="카테고리/섹터 (예: '미국 대형주', '테크 섹터', '금', '미국 장기채권' 등)")
+    ticker: Optional[str] = Field(default=None, description="특정 ETF 티커 (선택적, 특정 종목을 추천하는 경우에만)")
+    name: Optional[str] = Field(default=None, description="ETF 이름 또는 설명 (선택적)")
+    weight: float = Field(..., ge=0, le=1, description="자산군 내 비중 (0-1)")
+
+class RecommendedStocks(BaseModel):
+    """자산군별 추천 종목 모델"""
+    Stocks: Optional[List[RecommendedStock]] = Field(default=None, description="주식 추천 종목")
+    Bonds: Optional[List[RecommendedStock]] = Field(default=None, description="채권 추천 종목")
+    Alternatives: Optional[List[RecommendedStock]] = Field(default=None, description="대체투자 추천 종목")
+    Cash: Optional[List[RecommendedStock]] = Field(default=None, description="현금 추천 종목")
 
 class AIStrategyDecision(BaseModel):
     """AI 전략 결정 결과 모델"""
     analysis_summary: str = Field(..., description="AI 분석 요약")
-    target_allocation: TargetAllocation = Field(..., description="목표 자산 배분")
+    mp_id: str = Field(..., description="선택된 모델 포트폴리오 ID (MP-1 ~ MP-5)")
     reasoning: str = Field(..., description="판단 근거")
+    recommended_stocks: Optional[RecommendedStocks] = Field(default=None, description="자산군별 추천 종목")
+    
+    def get_target_allocation(self) -> TargetAllocation:
+        """MP ID에 해당하는 자산 배분 비율 반환"""
+        allocation = get_model_portfolio_allocation(self.mp_id)
+        if not allocation:
+            raise ValueError(f"유효하지 않은 MP ID: {self.mp_id}")
+        return TargetAllocation(**allocation)
 
 
 def collect_fred_signals() -> Optional[Dict[str, Any]]:
     """FRED 정량 시그널 수집"""
     try:
         from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+        from service.macro_trading.collectors.fred_collector import get_fred_collector
         
         calculator = QuantSignalCalculator()
         signals = calculator.calculate_all_signals()
         additional_indicators = calculator.get_additional_indicators()
+        
+        # 추가 지표: Core PCE, CPI, 실업률, 비농업 고용의 지난 10개 데이터
+        fred_collector = get_fred_collector()
+        inflation_employment_data = {}
+        
+        # Core PCE (PCEPILFE - Personal Consumption Expenditures Price Index, Less Food and Energy)
+        try:
+            pcepilfe_data = fred_collector.get_latest_data("PCEPILFE", days=365)
+            if len(pcepilfe_data) > 0:
+                # 최근 10개 데이터 (날짜와 값)
+                latest_10 = pcepilfe_data.tail(10)
+                inflation_employment_data["core_pce"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"Core PCE 데이터 수집 실패: {e}")
+            inflation_employment_data["core_pce"] = []
+        
+        # CPI (CPIAUCSL)
+        try:
+            cpi_data = fred_collector.get_latest_data("CPIAUCSL", days=365)
+            if len(cpi_data) > 0:
+                latest_10 = cpi_data.tail(10)
+                inflation_employment_data["cpi"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"CPI 데이터 수집 실패: {e}")
+            inflation_employment_data["cpi"] = []
+        
+        # 실업률 (UNRATE)
+        try:
+            unrate_data = fred_collector.get_latest_data("UNRATE", days=365)
+            if len(unrate_data) > 0:
+                latest_10 = unrate_data.tail(10)
+                inflation_employment_data["unemployment_rate"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"실업률 데이터 수집 실패: {e}")
+            inflation_employment_data["unemployment_rate"] = []
+        
+        # 비농업 고용 (PAYEMS)
+        try:
+            payems_data = fred_collector.get_latest_data("PAYEMS", days=365)
+            if len(payems_data) > 0:
+                latest_10 = payems_data.tail(10)
+                inflation_employment_data["nonfarm_payroll"] = [
+                    {"date": str(date), "value": float(value)}
+                    for date, value in zip(latest_10.index, latest_10.values)
+                ]
+        except Exception as e:
+            logger.warning(f"비농업 고용 데이터 수집 실패: {e}")
+            inflation_employment_data["nonfarm_payroll"] = []
         
         return {
             "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
@@ -54,17 +212,127 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
             "taylor_rule_signal": signals.get("taylor_rule_signal"),
             "net_liquidity": signals.get("net_liquidity"),
             "high_yield_spread": signals.get("high_yield_spread"),
-            "additional_indicators": additional_indicators
+            "additional_indicators": additional_indicators,
+            "inflation_employment_data": inflation_employment_data
         }
     except Exception as e:
         logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
         return None
 
 
-def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
-    """경제 뉴스 수집"""
+def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) -> Optional[str]:
+    """
+    LLM을 사용하여 뉴스를 정제하고 요약
+    gemini-3.0-pro를 사용하여 주요 경제 지표와 흐름을 도출
+    """
     try:
-        cutoff_time = datetime.now() - timedelta(hours=hours)
+        if not news_list:
+            return None
+        
+        # 뉴스 데이터를 텍스트로 변환
+        news_text = ""
+        for idx, news in enumerate(news_list[:150], 1):  # 최대 100개까지만 처리
+            title = news.get('title_ko') or news.get('title', 'N/A')
+            description = news.get('description_ko') or news.get('description', '')
+            country = news.get('country_ko') or news.get('country', 'N/A')
+            published_at = news.get('published_at', 'N/A')
+            
+            news_text += f"[{idx}] [{country}] {published_at}\n"
+            news_text += f"제목: {title}\n"
+            if description:
+                news_text += f"내용: {description[:500]} ...\n"  # 최대 500자만
+            news_text += "\n"
+        
+        # LLM 프롬프트 생성
+        prompt = f"""당신은 거시경제 전문가입니다. 다음은 지난 20일간 {', '.join(target_countries)} 국가의 경제 뉴스입니다.
+
+이 뉴스들을 분석하여:
+1. 주요 경제 지표의 변화 (GDP, 인플레이션, 고용, 금리 등)
+2. 경제 흐름과 트렌드
+3. 시장에 영향을 미칠 수 있는 주요 이벤트
+
+를 도출하고 요약해주세요.
+
+뉴스 목록:
+{news_text}
+
+요약 형식:
+- 주요 경제 지표 변화: (각 지표별로 간단히 설명)
+- 경제 흐름 및 트렌드: (전반적인 경제 동향 설명)
+- 주요 이벤트: (시장에 영향을 미칠 수 있는 중요한 사건들)
+
+한국어로 간결하게 요약해주세요 (500-800자 정도).
+"""
+        
+        # gemini-3.0-pro-preview 사용
+        logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
+        llm = llm_gemini_pro(model="gemini-3-pro-preview")
+        
+        with track_llm_call(
+            model_name="gemini-3-pro-preview",
+            provider="Google",
+            service_name="ai_strategist_news_summary",
+            request_prompt=prompt
+        ) as tracker:
+            response = llm.invoke(prompt)
+            tracker.set_response(response)
+        
+        # 응답 텍스트 추출
+        response_text = None
+        if hasattr(response, 'content'):
+            if isinstance(response.content, list) and len(response.content) > 0:
+                first_item = response.content[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            elif isinstance(response.content, str):
+                response_text = response.content
+            else:
+                response_text = str(response.content)
+        elif hasattr(response, 'text'):
+            response_text = response.text
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            response_text = str(response)
+        
+        if isinstance(response_text, list):
+            if len(response_text) > 0:
+                first_item = response_text[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            else:
+                response_text = ""
+        
+        if not isinstance(response_text, str):
+            response_text = str(response_text)
+        
+        logger.info(f"뉴스 요약 완료: {len(response_text)}자")
+        return response_text.strip()
+        
+    except Exception as e:
+        logger.error(f"LLM 뉴스 요약 실패: {e}", exc_info=True)
+        return None
+
+
+def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optional[Dict[str, Any]]:
+    """
+    경제 뉴스 수집 및 LLM 요약
+    지난 N일간 특정 국가의 뉴스를 수집하고, gemini-3.0-pro로 정제하여 요약합니다.
+    
+    Args:
+        days: 수집할 기간 (일 단위, 기본값: 20일)
+        include_summary: LLM 요약 포함 여부 (기본값: True)
+    """
+    try:
+        # 지난 N일 기준으로 cutoff_time 설정
+        cutoff_time = datetime.now() - timedelta(days=days)
+        
+        # AI 분석에 사용할 국가 목록
+        target_countries = ['Crypto', 'Commodity', 'Euro Area', 'China', 'United States']
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -85,9 +353,9 @@ def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
                     source
                 FROM economic_news
                 WHERE published_at >= %s
+                  AND country IN (%s, %s, %s, %s, %s)
                 ORDER BY published_at DESC
-                LIMIT 50
-            """, (cutoff_time,))
+            """, (cutoff_time, *target_countries))
             
             news = cursor.fetchall()
             
@@ -98,10 +366,19 @@ def collect_economic_news(hours: int = 24) -> Optional[Dict[str, Any]]:
                 if item.get('collected_at'):
                     item['collected_at'] = item['collected_at'].strftime('%Y-%m-%d %H:%M:%S')
             
+            logger.info(f"경제 뉴스 수집 완료: 지난 {days}일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
+            
+            # LLM으로 뉴스 요약 (include_summary가 True인 경우에만)
+            news_summary = None
+            if include_summary and news:
+                news_summary = summarize_news_with_llm(news, target_countries)
+            
             return {
                 "total_count": len(news),
-                "hours": hours,
-                "news": news
+                "days": days,
+                "target_countries": target_countries,
+                "news": news,
+                "news_summary": news_summary  # LLM 요약 결과 추가
             }
     except Exception as e:
         logger.error(f"경제 뉴스 수집 실패: {e}", exc_info=True)
@@ -132,8 +409,140 @@ def collect_account_status() -> Optional[Dict[str, Any]]:
         return None
 
 
-def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_status: Dict) -> str:
+def get_overview_recommended_sectors() -> Dict[str, Dict[str, List[Dict]]]:
+    """Overview AI 추천 가능한 섹터/그룹 리스트 조회"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT asset_class, sector_group, ticker, name, display_order
+                FROM overview_recommended_sectors
+                WHERE is_active = TRUE
+                ORDER BY asset_class, sector_group, display_order
+            """)
+            
+            rows = cursor.fetchall()
+            
+            # 자산군 > 섹터 그룹 > ETF 구조로 그룹화
+            result = {
+                "stocks": {},
+                "bonds": {},
+                "alternatives": {},
+                "cash": {}
+            }
+            
+            for row in rows:
+                asset_class = row["asset_class"]
+                sector_group = row["sector_group"]
+                if asset_class in result:
+                    if sector_group not in result[asset_class]:
+                        result[asset_class][sector_group] = []
+                    result[asset_class][sector_group].append({
+                        "ticker": row["ticker"],
+                        "name": row["name"]
+                    })
+            
+            return result
+    except Exception as e:
+        logger.warning(f"Overview 추천 섹터 조회 실패: {e}")
+        return {
+            "stocks": {},
+            "bonds": {},
+            "alternatives": {},
+            "cash": {}
+        }
+
+
+def get_available_etf_list() -> Dict[str, List[Dict]]:
+    """사용 가능한 ETF 목록 조회 (DB 우선, 없으면 설정 파일)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        # 먼저 DB에서 조회
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT asset_class, ticker, name, weight
+                FROM asset_class_details
+                WHERE is_active = TRUE
+                ORDER BY asset_class, weight DESC
+            """)
+            rows = cursor.fetchall()
+            
+            if rows:
+                result = {
+                    "stocks": [],
+                    "bonds": [],
+                    "alternatives": [],
+                    "cash": []
+                }
+                for row in rows:
+                    asset_class = row["asset_class"]
+                    if asset_class in result:
+                        result[asset_class].append({
+                            "ticker": row["ticker"],
+                            "name": row["name"],
+                            "weight": float(row["weight"])
+                        })
+                return result
+    except Exception as e:
+        logger.warning(f"DB에서 ETF 목록 조회 실패: {e}")
+    
+    # DB 조회 실패 시 설정 파일에서 로드
+    try:
+        from service.macro_trading.config.config_loader import get_config
+        config = get_config()
+        etf_mapping = config.etf_mapping
+        
+        result = {
+            "stocks": [],
+            "bonds": [],
+            "alternatives": [],
+            "cash": []
+        }
+        
+        for asset_class, mapping in etf_mapping.items():
+            if asset_class in result:
+                for ticker, name, weight in zip(mapping.tickers, mapping.names, mapping.weights):
+                    result[asset_class].append({
+                        "ticker": ticker,
+                        "name": name,
+                        "weight": weight
+                    })
+        
+        return result
+    except Exception as e:
+        logger.warning(f"설정 파일에서 ETF 목록 로드 실패: {e}")
+        return {
+            "stocks": [],
+            "bonds": [],
+            "alternatives": [],
+            "cash": []
+        }
+
+
+def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     """AI 분석용 프롬프트 생성"""
+    
+    # 추천 가능한 섹터/그룹 리스트 조회
+    recommended_sectors = get_overview_recommended_sectors()
+    
+    # 섹터 리스트를 프롬프트에 포함
+    sectors_info = "\n=== 추천 가능한 섹터/그룹 리스트 ===\n"
+    for asset_class, sectors in recommended_sectors.items():
+        if sectors:
+            asset_class_kr = {
+                "stocks": "주식",
+                "bonds": "채권",
+                "alternatives": "대체투자",
+                "cash": "현금"
+            }.get(asset_class, asset_class)
+            sectors_info += f"\n{asset_class_kr}:\n"
+            for sector_group, etfs in sectors.items():
+                etf_names = [etf['name'] for etf in etfs]
+                sectors_info += f"  - {sector_group}: {', '.join(etf_names)}\n"
     
     # FRED 시그널 요약
     fred_summary = "=== FRED 정량 시그널 (가장 신뢰도 높음) ===\n"
@@ -165,63 +574,141 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict, account_stat
             signal_name = hy_spread.get('signal_name', 'N/A')
             spread_val = hy_spread.get('spread', 'N/A')
             fred_summary += f"하이일드 스프레드: {signal_name} ({spread_val}%)\n"
+        
+        # 물가 및 고용 지표 (지난 10개 데이터)
+        inflation_employment = fred_signals.get('inflation_employment_data', {})
+        if inflation_employment:
+            fred_summary += "\n=== 물가 지표 (지난 10개 데이터) ===\n"
+            
+            # Core PCE
+            core_pce = inflation_employment.get('core_pce', [])
+            if core_pce:
+                fred_summary += "Core PCE (Personal Consumption Expenditures Price Index):\n"
+                for item in core_pce:
+                    fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
+            else:
+                fred_summary += "Core PCE: 데이터 없음\n"
+            
+            # CPI
+            cpi = inflation_employment.get('cpi', [])
+            if cpi:
+                fred_summary += "\nCPI (Consumer Price Index):\n"
+                for item in cpi:
+                    fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
+            else:
+                fred_summary += "\nCPI: 데이터 없음\n"
+            
+            fred_summary += "\n=== 고용 지표 (지난 10개 데이터) ===\n"
+            
+            # 실업률
+            unrate = inflation_employment.get('unemployment_rate', [])
+            if unrate:
+                fred_summary += "실업률 (Unemployment Rate, %):\n"
+                for item in unrate:
+                    fred_summary += f"  {item['date']}: {item['value']:.2f}%\n"
+            else:
+                fred_summary += "실업률: 데이터 없음\n"
+            
+            # 비농업 고용
+            payroll = inflation_employment.get('nonfarm_payroll', [])
+            if payroll:
+                fred_summary += "\n비농업 고용 (Nonfarm Payroll, Thousands):\n"
+                for item in payroll:
+                    fred_summary += f"  {item['date']}: {item['value']:,.0f}\n"
+            else:
+                fred_summary += "\n비농업 고용: 데이터 없음\n"
     
-    # 경제 뉴스 요약
+    # 경제 뉴스 요약 (LLM으로 정제된 요약 사용)
     news_summary = "\n=== 경제 뉴스 (비중 낮게 참고) ===\n"
-    if economic_news and economic_news.get('news'):
-        news_list = economic_news['news'][:10]  # 최근 10개만
-        for news in news_list:
-            news_summary += f"- [{news.get('country', 'N/A')}] {news.get('title', 'N/A')}\n"
-            if news.get('description'):
-                desc = news.get('description', '')[:100]  # 처음 100자만
-                news_summary += f"  {desc}...\n"
+    if economic_news:
+        target_countries = economic_news.get('target_countries', [])
+        total_count = economic_news.get('total_count', 0)
+        days = economic_news.get('days', 20)
+        
+        # LLM으로 정제된 요약이 있으면 사용
+        llm_summary = economic_news.get('news_summary')
+        if llm_summary:
+            news_summary += f"지난 {days}일간 {', '.join(target_countries)} 국가 뉴스 {total_count}개를 분석한 결과:\n\n"
+            news_summary += llm_summary
+        elif economic_news.get('news'):
+            # LLM 요약이 없는 경우 기존 방식으로 표시
+            news_summary += f"지난 {days}일간 {', '.join(target_countries)} 국가 뉴스 {total_count}개\n\n"
+            news_summary += "(LLM 요약 실패 - 원본 뉴스 일부 표시)\n\n"
+            news_list = economic_news['news'][:10]  # 최근 10개만
+            for news in news_list:
+                news_summary += f"- [{news.get('country', 'N/A')}] {news.get('title', 'N/A')}\n"
+                if news.get('description'):
+                    desc = news.get('description', '')[:100]  # 처음 100자만
+                    news_summary += f"  {desc}...\n"
+        else:
+            news_summary += "최근 뉴스 없음\n"
     else:
         news_summary += "최근 뉴스 없음\n"
     
-    # 계좌 현황 요약
-    account_summary = "\n=== 계좌 현황 (비중 낮게 참고) ===\n"
-    if account_status:
-        total = account_status.get('total_eval_amount', 0)
-        account_summary += f"총 평가금액: {total:,} 원\n"
-        
-        asset_info = account_status.get('asset_class_info', {})
-        for asset_class, info in asset_info.items():
-            if isinstance(info, dict):
-                total_eval = info.get('total_eval_amount', 0)
-                pnl_rate = info.get('total_pnl_rate', 0)
-                account_summary += f"{asset_class}: {total_eval:,} 원 (수익률: {pnl_rate:.2f}%)\n"
-    else:
-        account_summary += "계좌 정보 없음\n"
+    # MP 시나리오 정보를 프롬프트에 포함
+    mp_info = "\n=== 모델 포트폴리오 (MP) 시나리오 ===\n"
+    mp_info += "현재 거시경제 국면을 분석하여 다음 5가지 모델 포트폴리오 중 하나를 선택하세요:\n\n"
+    for mp_id, mp in MODEL_PORTFOLIOS.items():
+        mp_info += f"{mp_id}: {mp['name']}\n"
+        mp_info += f"  - 특징: {mp['description']}\n"
+        mp_info += f"  - 핵심 전략: {mp['strategy']}\n"
+        mp_info += f"  - 자산 배분: 주식 {mp['allocation']['Stocks']}% / 채권 {mp['allocation']['Bonds']}% / 대체투자 {mp['allocation']['Alternatives']}% / 현금 {mp['allocation']['Cash']}%\n\n"
     
-    prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 자산 배분 전략을 결정하세요.
+    prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 현재 거시경제 국면에 가장 적합한 모델 포트폴리오(MP)를 선택하세요.
 
 {fred_summary}
 
 {news_summary}
 
-{account_summary}
+{sectors_info}
+
+{mp_info}
 
 ## 분석 지침:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
-2. **경제 뉴스와 계좌 현황은 보조적으로만** 참고하세요. 비중을 낮게 두세요.
-3. 자산군별 비중을 결정하세요:
-   - Stocks (주식): 0-100%
-   - Bonds (채권): 0-100%
-   - Alternatives (대체투자: 금, 달러 등): 0-100%
-   - Cash (현금): 0-100%
-4. 총 비중은 반드시 100%가 되어야 합니다.
+2. **경제 뉴스는 보조 수단입니다.** FRED 지표 기반 분석한 내용을 한번 더 검토하는 수단입니다.
+3. **현재 거시경제 국면을 정확히 파악**하여 위의 5가지 MP 시나리오 중 하나를 선택하세요.
+4. MP 선택 시 고려사항:
+   - 성장률 추세 (상승/하락/중립)
+   - 물가 추세 (상승/안정/하락)
+   - 금리 정책 방향 (인상/안정/인하)
+   - 유동성 상황 (확대/축소)
+   - 하이일드 스프레드 (Greed/Fear/Panic)
+   - 실업률 및 고용 동향
 
 ## 출력 형식 (JSON):
 {{
     "analysis_summary": "분석 요약 (한국어, 200-300자)",
-    "target_allocation": {{
-        "Stocks": 40.0,
-        "Bonds": 30.0,
-        "Alternatives": 20.0,
-        "Cash": 10.0
-    }},
-    "reasoning": "판단 근거 (한국어, 300-500자)"
+    "mp_id": "MP-4",
+    "reasoning": "판단 근거 (한국어, 300-500자) - 왜 이 MP를 선택했는지 설명",
+    "recommended_stocks": {{
+        "Stocks": [
+            {{"category": "미국 대형주", "weight": 0.4}},
+            {{"category": "테크 섹터", "weight": 0.3}},
+            {{"category": "한국 주식", "weight": 0.3}}
+        ],
+        "Bonds": [
+            {{"category": "미국 장기채권", "weight": 0.6}},
+            {{"category": "한국 단기채권", "weight": 0.4}}
+        ],
+        "Alternatives": [
+            {{"category": "금", "weight": 0.7}},
+            {{"category": "달러", "weight": 0.3}}
+        ],
+        "Cash": [
+            {{"category": "현금성 자산", "weight": 1.0}}
+        ]
+    }}
 }}
+
+**중요:**
+- mp_id는 반드시 "MP-1", "MP-2", "MP-3", "MP-4", "MP-5" 중 하나여야 합니다.
+- 자산 배분 비율은 선택한 MP에 따라 자동으로 결정되므로, target_allocation을 출력하지 마세요.
+- 추천 종목/섹터 규칙:
+  - 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 개별 종목은 추천하지 마세요.
+  - 추천 가능한 섹터/그룹은 위의 "추천 가능한 섹터/그룹 리스트"에 명시된 것만 사용하세요.
+  - 각 자산군 내 추천 카테고리의 weight 합계는 1.0이어야 합니다.
+  - 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
 
 JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
 """
@@ -229,68 +716,375 @@ JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
     return prompt
 
 
-def analyze_and_decide() -> Optional[AIStrategyDecision]:
-    """AI 분석 및 전략 결정"""
+def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optional[Dict] = None) -> Optional[AIStrategyDecision]:
+    """AI 분석 및 전략 결정
+    
+    Args:
+        fred_signals: FRED 시그널 데이터 (None이면 수집)
+        economic_news: 경제 뉴스 데이터 (None이면 수집)
+    """
     try:
         logger.info("AI 전략 분석 시작")
         
-        # 데이터 수집
-        logger.info("FRED 시그널 수집 중...")
-        fred_signals = collect_fred_signals()
+        # 데이터 수집 (파라미터로 전달되지 않은 경우에만)
+        if fred_signals is None:
+            logger.info("FRED 시그널 수집 중...")
+            fred_signals = collect_fred_signals()
         
-        logger.info("경제 뉴스 수집 중...")
-        economic_news = collect_economic_news(hours=24)
-        
-        logger.info("계좌 현황 수집 중...")
-        account_status = collect_account_status()
+        if economic_news is None:
+            logger.info("경제 뉴스 수집 중... (지난 20일, 특정 국가 필터)")
+            economic_news = collect_economic_news(days=20)  # 지난 20일치 수집 및 LLM 요약
         
         # 프롬프트 생성
-        prompt = create_analysis_prompt(fred_signals, economic_news, account_status)
+        prompt = create_analysis_prompt(fred_signals, economic_news)
+        
+        # 설정에서 모델명 가져오기
+        from service.macro_trading.config.config_loader import get_config
+        config = get_config()
+        model_name = config.llm.model
         
         # LLM 호출
-        logger.info("Gemini 2.5 Pro 분석 중...")
-        llm = llm_gemini_pro()
+        logger.info(f"Gemini {model_name} 분석 중...")
+        llm = llm_gemini_pro(model=model_name)
         
-        # JSON 응답 강제
-        response = llm.invoke(prompt)
+        # LLM 호출 추적
+        with track_llm_call(
+            model_name=model_name,
+            provider="Google",
+            service_name="ai_strategist",
+            request_prompt=prompt
+        ) as tracker:
+            # JSON 응답 강제
+            response = llm.invoke(prompt)
+            tracker.set_response(response)
         
         # 응답 파싱
-        response_text = response.content if hasattr(response, 'content') else str(response)
+        # response.content가 리스트인 경우 (예: [{'type': 'text', 'text': '...'}])
+        response_text = None
+        if hasattr(response, 'content'):
+            if isinstance(response.content, list) and len(response.content) > 0:
+                # 첫 번째 텍스트 항목 추출
+                first_item = response.content[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                elif isinstance(first_item, dict) and 'type' in first_item and first_item.get('type') == 'text':
+                    # 'text' 키가 없지만 'type'이 'text'인 경우
+                    response_text = str(first_item.get('text', ''))
+                else:
+                    response_text = str(first_item)
+            elif isinstance(response.content, str):
+                response_text = response.content
+            else:
+                response_text = str(response.content)
+        elif hasattr(response, 'text'):
+            response_text = response.text
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            response_text = str(response)
+        
+        # response_text가 여전히 리스트인 경우 처리
+        if isinstance(response_text, list):
+            if len(response_text) > 0:
+                first_item = response_text[0]
+                if isinstance(first_item, dict) and 'text' in first_item:
+                    response_text = first_item['text']
+                else:
+                    response_text = str(first_item)
+            else:
+                response_text = ""
+        
+        # 문자열이 아닌 경우 문자열로 변환
+        if not isinstance(response_text, str):
+            response_text = str(response_text)
         
         # JSON 추출 (마크다운 코드 블록 제거)
         response_text = response_text.strip()
+        
+        logger.debug(f"응답 텍스트 길이: {len(response_text)} 문자")
+        logger.debug(f"응답 텍스트 시작 부분: {response_text[:200]}...")
+        
+        # ```json 또는 ```로 시작하는 코드 블록 제거
         if response_text.startswith('```'):
-            # 코드 블록 제거
             lines = response_text.split('\n')
-            response_text = '\n'.join(lines[1:-1]) if lines[-1].startswith('```') else '\n'.join(lines[1:])
+            # 첫 번째 줄이 ```json 또는 ```로 시작하면 제거
+            if len(lines) > 1:
+                # 마지막 줄이 ```로 끝나는지 확인
+                if lines[-1].strip() == '```' or lines[-1].strip().startswith('```'):
+                    # 첫 줄과 마지막 줄 제거
+                    response_text = '\n'.join(lines[1:-1])
+                else:
+                    # 마지막 줄이 없으면 첫 줄만 제거
+                    response_text = '\n'.join(lines[1:])
         
         # JSON 파싱
         try:
             decision_data = json.loads(response_text)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             # JSON 파싱 실패 시 재시도
-            logger.warning("JSON 파싱 실패, 재시도 중...")
-            # 간단한 JSON 추출 시도
+            logger.warning(f"JSON 파싱 실패, 재시도 중... (오류: {e})")
+            logger.debug(f"응답 텍스트: {response_text[:500]}...")
+            
+            # 정규식으로 JSON 객체 추출 시도
             import re
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            # 중괄호로 시작하고 끝나는 JSON 객체 찾기
+            json_match = re.search(r'\{[\s\S]*\}', response_text, re.MULTILINE)
             if json_match:
-                decision_data = json.loads(json_match.group())
+                try:
+                    decision_data = json.loads(json_match.group())
+                    logger.info("정규식으로 JSON 추출 성공")
+                except json.JSONDecodeError as e2:
+                    logger.error(f"정규식 추출 후 JSON 파싱 실패: {e2}")
+                    raise ValueError(f"JSON 형식이 올바르지 않습니다. 원본 오류: {e}, 추출 오류: {e2}")
             else:
-                raise ValueError("JSON 형식이 올바르지 않습니다.")
+                logger.error(f"JSON 객체를 찾을 수 없습니다. 응답: {response_text[:200]}")
+                raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
+        
+        # MP ID 검증
+        mp_id = decision_data.get('mp_id')
+        if not mp_id or mp_id not in MODEL_PORTFOLIOS:
+            valid_mp_ids = ', '.join(MODEL_PORTFOLIOS.keys())
+            logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
+            raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
         
         # Pydantic 모델로 검증
-        decision = AIStrategyDecision(**decision_data)
+        try:
+            decision = AIStrategyDecision(**decision_data)
+            # MP ID로 자산 배분 비율 확인
+            target_allocation = decision.get_target_allocation()
+            logger.info(f"AI 분석 완료: MP={decision.mp_id}, {decision.analysis_summary[:50]}...")
+            logger.info(f"자산 배분: Stocks={target_allocation.Stocks}%, Bonds={target_allocation.Bonds}%, "
+                       f"Alternatives={target_allocation.Alternatives}%, Cash={target_allocation.Cash}%")
+            return decision
+        except Exception as validation_error:
+            logger.error(f"Pydantic 모델 검증 실패: {validation_error}")
+            logger.error(f"검증 실패한 데이터: {json.dumps(decision_data, indent=2, ensure_ascii=False)}")
+            raise ValueError(f"AI 응답 데이터 검증 실패: {validation_error}")
         
-        logger.info(f"AI 분석 완료: {decision.analysis_summary[:50]}...")
-        
-        return decision
-        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 파싱 실패: {e}")
+        logger.error(f"파싱 실패한 응답 텍스트: {response_text[:1000] if 'response_text' in locals() else 'N/A'}")
+        raise
+    except ValueError as e:
+        logger.error(f"데이터 검증 실패: {e}")
+        raise
     except Exception as e:
         logger.error(f"AI 분석 실패: {e}", exc_info=True)
-        return None
+        logger.error(f"에러 타입: {type(e).__name__}")
+        if 'response_text' in locals():
+            logger.error(f"응답 텍스트 (처음 500자): {response_text[:500]}")
+        raise
 
 
-def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict, account_status: Dict) -> bool:
+# ============================================================================
+# LangGraph 워크플로우 정의
+# ============================================================================
+
+class AIAnalysisState(TypedDict):
+    """AI 분석 워크플로우 상태"""
+    fred_signals: Optional[Dict[str, Any]]
+    economic_news: Optional[Dict[str, Any]]
+    news_summary: Optional[str]
+    decision: Optional[AIStrategyDecision]
+    error: Optional[str]
+    success: bool
+
+
+def collect_fred_node(state: AIAnalysisState) -> AIAnalysisState:
+    """FRED 시그널 수집 노드"""
+    try:
+        logger.info("1단계: FRED 시그널 수집 중...")
+        fred_signals = collect_fred_signals()
+        if not fred_signals:
+            logger.warning("FRED 시그널 수집 실패 (None 반환)")
+        return {
+            **state,
+            "fred_signals": fred_signals
+        }
+    except Exception as e:
+        logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "fred_signals": None,
+            "error": f"FRED 시그널 수집 실패: {str(e)}"
+        }
+
+
+def collect_news_node(state: AIAnalysisState) -> AIAnalysisState:
+    """경제 뉴스 수집 노드 (LLM 요약 제외)"""
+    try:
+        logger.info("2단계: 경제 뉴스 수집 중...")
+        # LLM 요약 없이 뉴스만 수집
+        economic_news = collect_economic_news(days=20, include_summary=False)
+        if not economic_news:
+            logger.warning("경제 뉴스 수집 실패 (None 반환)")
+        return {
+            **state,
+            "economic_news": economic_news
+        }
+    except Exception as e:
+        logger.error(f"경제 뉴스 수집 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "economic_news": None,
+            "error": f"경제 뉴스 수집 실패: {str(e)}"
+        }
+
+
+def summarize_news_node(state: AIAnalysisState) -> AIAnalysisState:
+    """뉴스 LLM 요약 노드"""
+    try:
+        economic_news = state.get("economic_news")
+        if not economic_news or not economic_news.get("news"):
+            logger.warning("요약할 뉴스가 없습니다.")
+            return {
+                **state,
+                "news_summary": None
+            }
+        
+        news_list = economic_news.get("news", [])
+        target_countries = economic_news.get("target_countries", [])
+        
+        logger.info("2-1단계: 뉴스 LLM 요약 중...")
+        news_summary = summarize_news_with_llm(news_list, target_countries)
+        
+        # economic_news에 요약 결과 추가
+        if economic_news:
+            economic_news["news_summary"] = news_summary
+        
+        return {
+            **state,
+            "economic_news": economic_news,
+            "news_summary": news_summary
+        }
+    except Exception as e:
+        logger.error(f"뉴스 요약 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "news_summary": None,
+            "error": f"뉴스 요약 실패: {str(e)}"
+        }
+
+
+def analyze_node(state: AIAnalysisState) -> AIAnalysisState:
+    """AI 분석 및 전략 결정 노드"""
+    try:
+        logger.info("3단계: AI 분석 및 전략 결정 중...")
+        fred_signals = state.get("fred_signals")
+        economic_news = state.get("economic_news")
+        
+        decision = analyze_and_decide(fred_signals=fred_signals, economic_news=economic_news)
+        
+        if not decision:
+            logger.error("AI 분석 실패: analyze_and_decide()가 None 반환")
+            return {
+                **state,
+                "decision": None,
+                "error": "AI 분석 실패: analyze_and_decide()가 None 반환"
+            }
+        
+        return {
+            **state,
+            "decision": decision
+        }
+    except Exception as e:
+        logger.error(f"AI 분석 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "decision": None,
+            "error": f"AI 분석 실패: {str(e)}"
+        }
+
+
+def save_decision_node(state: AIAnalysisState) -> AIAnalysisState:
+    """전략 결정 결과 저장 노드"""
+    try:
+        logger.info("4단계: 결과 저장 중...")
+        decision = state.get("decision")
+        fred_signals = state.get("fred_signals")
+        economic_news = state.get("economic_news")
+        
+        if not decision:
+            logger.error("저장할 결정이 없습니다.")
+            return {
+                **state,
+                "success": False,
+                "error": "저장할 결정이 없습니다."
+            }
+        
+        success = save_strategy_decision(decision, fred_signals, economic_news)
+        
+        if success:
+            target_allocation = decision.get_target_allocation()
+            mp_info = MODEL_PORTFOLIOS.get(decision.mp_id, {})
+            logger.info("=" * 60)
+            logger.info("AI 전략 분석 완료")
+            logger.info(f"선택된 MP: {decision.mp_id} - {mp_info.get('name', 'N/A')}")
+            logger.info(f"분석 요약: {decision.analysis_summary}")
+            logger.info(f"목표 배분: Stocks={target_allocation.Stocks}%, "
+                       f"Bonds={target_allocation.Bonds}%, "
+                       f"Alternatives={target_allocation.Alternatives}%, "
+                       f"Cash={target_allocation.Cash}%")
+            if decision.recommended_stocks:
+                logger.info(f"추천 섹터: {len(decision.recommended_stocks.Stocks or [])}개 주식, "
+                           f"{len(decision.recommended_stocks.Bonds or [])}개 채권, "
+                           f"{len(decision.recommended_stocks.Alternatives or [])}개 대체투자, "
+                           f"{len(decision.recommended_stocks.Cash or [])}개 현금")
+            logger.info("=" * 60)
+        
+        return {
+            **state,
+            "success": success
+        }
+    except Exception as e:
+        logger.error(f"결과 저장 실패: {e}", exc_info=True)
+        return {
+            **state,
+            "success": False,
+            "error": f"결과 저장 실패: {str(e)}"
+        }
+
+
+# LangGraph 워크플로우 구성
+def create_ai_analysis_graph():
+    """AI 분석 워크플로우 그래프 생성"""
+    graph = StateGraph(AIAnalysisState)
+    
+    # 노드 추가
+    graph.add_node("collect_fred", collect_fred_node)
+    graph.add_node("collect_news", collect_news_node)
+    graph.add_node("summarize_news", summarize_news_node)
+    graph.add_node("analyze", analyze_node)
+    graph.add_node("save_decision", save_decision_node)
+    
+    # 엣지 연결: 순차 실행
+    graph.add_edge(START, "collect_fred")
+    graph.add_edge("collect_fred", "collect_news")
+    graph.add_edge("collect_news", "summarize_news")
+    graph.add_edge("summarize_news", "analyze")
+    graph.add_edge("analyze", "save_decision")
+    graph.add_edge("save_decision", END)
+    
+    return graph.compile()
+
+
+# 전역 그래프 인스턴스 (필요시 재사용)
+_ai_analysis_graph = None
+
+
+def get_ai_analysis_graph():
+    """AI 분석 그래프 인스턴스 반환 (싱글톤)"""
+    global _ai_analysis_graph
+    if _ai_analysis_graph is None:
+        _ai_analysis_graph = create_ai_analysis_graph()
+    return _ai_analysis_graph
+
+
+# ============================================================================
+# 기존 함수들 (하위 호환성 유지)
+# ============================================================================
+
+def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict) -> bool:
     """전략 결정 결과를 DB에 저장"""
     try:
         with get_db_connection() as conn:
@@ -301,26 +1095,38 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             if decision.reasoning:
                 analysis_summary_with_reasoning += f"\n\n판단 근거:\n{decision.reasoning}"
             
+            # MP ID로 자산 배분 비율 계산
+            target_allocation = decision.get_target_allocation()
+            
+            # mp_id를 포함한 저장 데이터 준비
+            # DB에 mp_id 컬럼이 있으면 저장, 없으면 target_allocation에 포함
+            save_data = {
+                "mp_id": decision.mp_id,
+                "target_allocation": target_allocation.model_dump()
+            }
+            
             cursor.execute("""
                 INSERT INTO ai_strategy_decisions (
                     decision_date,
                     analysis_summary,
                     target_allocation,
+                    recommended_stocks,
                     quant_signals,
                     qual_sentiment,
                     account_pnl
-                ) VALUES (%s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 datetime.now(),
                 analysis_summary_with_reasoning,
-                json.dumps(decision.target_allocation.model_dump()),
+                json.dumps(save_data),  # mp_id와 target_allocation을 함께 저장
+                json.dumps(decision.recommended_stocks.model_dump()) if decision.recommended_stocks else None,
                 json.dumps(fred_signals) if fred_signals else None,
                 json.dumps(economic_news) if economic_news else None,
-                json.dumps(account_status) if account_status else None
+                None  # account_pnl은 더 이상 사용하지 않음
             ))
             
             conn.commit()
-            logger.info("전략 결정 결과 저장 완료")
+            logger.info(f"전략 결정 결과 저장 완료: MP={decision.mp_id}")
             return True
             
     except Exception as e:
@@ -329,39 +1135,36 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
 
 
 def run_ai_analysis():
-    """AI 분석 실행 (스케줄러용)"""
+    """AI 분석 실행 (스케줄러용) - LangGraph 기반"""
     try:
         logger.info("=" * 60)
         logger.info("AI 전략 분석 시작")
         logger.info("=" * 60)
         
-        # 데이터 수집
-        fred_signals = collect_fred_signals()
-        economic_news = collect_economic_news(hours=24)
-        account_status = collect_account_status()
+        # LangGraph 워크플로우 실행
+        graph = get_ai_analysis_graph()
+        initial_state: AIAnalysisState = {
+            "fred_signals": None,
+            "economic_news": None,
+            "news_summary": None,
+            "decision": None,
+            "error": None,
+            "success": False
+        }
         
-        # AI 분석
-        decision = analyze_and_decide()
+        final_state = graph.invoke(initial_state)
         
-        if not decision:
-            logger.error("AI 분석 실패")
-            return False
+        success = final_state.get("success", False)
+        error = final_state.get("error")
         
-        # 결과 저장
-        success = save_strategy_decision(decision, fred_signals, economic_news, account_status)
-        
-        if success:
-            logger.info("=" * 60)
-            logger.info("AI 전략 분석 완료")
-            logger.info(f"분석 요약: {decision.analysis_summary}")
-            logger.info(f"목표 배분: Stocks={decision.target_allocation.Stocks}%, "
-                       f"Bonds={decision.target_allocation.Bonds}%, "
-                       f"Alternatives={decision.target_allocation.Alternatives}%, "
-                       f"Cash={decision.target_allocation.Cash}%")
-            logger.info("=" * 60)
+        if error:
+            logger.error(f"워크플로우 실행 중 오류: {error}")
         
         return success
         
     except Exception as e:
         logger.error(f"AI 분석 실행 실패: {e}", exc_info=True)
+        logger.error(f"에러 타입: {type(e).__name__}")
+        import traceback
+        logger.error(f"전체 traceback:\n{traceback.format_exc()}")
         return False
