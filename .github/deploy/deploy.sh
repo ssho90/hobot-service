@@ -214,10 +214,16 @@ build_frontend() {
   
   [ ! -d "build" ] && log_error "Frontend build directory not found"
   
-  # 권한 설정
+  # 권한 설정 (홈 디렉토리부터 실행 권한 부여)
+  # Nginx가 홈 디렉토리 하위의 파일에 접근하려면 상위 디렉토리들에 실행 권한(+x)이 있어야 함
+  chmod +x /home/ec2-user
+  chmod +x /home/ec2-user/hobot-service
+  chmod +x /home/ec2-user/hobot-service/hobot-ui
+  
   sudo chown -R "$(whoami):$(whoami)" build
   sudo chmod -R 755 build
-  sudo chmod -R o+rX build 2>/dev/null || true
+  
+  # nginx 사용자에게 권한 부여 확인
   id nginx &>/dev/null && sudo usermod -a -G "$(whoami)" nginx 2>/dev/null || true
   
   log_success "Frontend build completed"
