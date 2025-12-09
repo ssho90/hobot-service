@@ -293,54 +293,9 @@ PYEOF
   rm -f /tmp/disable_nginx_server.py
 }
 
-# certbot 인증서 발급/갱신
+# certbot 인증서 발급/갱신 (사용 안함 - Langfuse 제거됨)
 setup_ssl_certificates() {
-  log_info "Setting up SSL certificates for Langfuse proxy..."
-  
-  # certbot 설치 확인
-  if ! command -v certbot &> /dev/null; then
-    log_info "Installing certbot..."
-    sudo yum install -y certbot python3-certbot-nginx 2>/dev/null || \
-      (sudo apt-get update && sudo apt-get install -y certbot python3-certbot-nginx)
-  fi
-  
-  # certbot 웹루트 디렉토리 생성
-  sudo mkdir -p /var/www/certbot
-  sudo chown -R nginx:nginx /var/www/certbot 2>/dev/null || true
-  
-  # 기존 certbot 이메일 확인 (있는 경우 사용)
-  CERTBOT_EMAIL=$(sudo cat /etc/letsencrypt/renewal/*.conf 2>/dev/null | grep -oP 'email = \K[^\s]+' | head -1 || echo "admin@stockoverflow.com")
-  
-  # Langfuse 인증서 발급/갱신 (certonly 사용하여 nginx 설정은 수동 관리)
-  if [ ! -f "/etc/letsencrypt/live/langfuse.stockoverflow.com/fullchain.pem" ]; then
-    log_info "Requesting SSL certificate for langfuse.stockoverflow.com..."
-    # certbot certonly를 사용하여 인증서만 발급 (nginx 설정은 우리가 관리)
-    sudo certbot certonly --webroot \
-      -w /var/www/certbot \
-      -d langfuse.stockoverflow.com \
-      --non-interactive --agree-tos \
-      --email "${CERTBOT_EMAIL}" \
-      --preferred-challenges http || log_warn "Failed to get certificate for langfuse.stockoverflow.com (check DNS and try again)"
-  else
-    log_info "Certificate for langfuse.stockoverflow.com already exists, renewing if needed..."
-    sudo certbot renew --cert-name langfuse.stockoverflow.com --quiet --no-random-sleep-on-renew || true
-  fi
-  
-  # Langfuse US 인증서 발급/갱신
-  if [ ! -f "/etc/letsencrypt/live/langfuse-us.stockoverflow.com/fullchain.pem" ]; then
-    log_info "Requesting SSL certificate for langfuse-us.stockoverflow.com..."
-    sudo certbot certonly --webroot \
-      -w /var/www/certbot \
-      -d langfuse-us.stockoverflow.com \
-      --non-interactive --agree-tos \
-      --email "${CERTBOT_EMAIL}" \
-      --preferred-challenges http || log_warn "Failed to get certificate for langfuse-us.stockoverflow.com (check DNS and try again)"
-  else
-    log_info "Certificate for langfuse-us.stockoverflow.com already exists, renewing if needed..."
-    sudo certbot renew --cert-name langfuse-us.stockoverflow.com --quiet --no-random-sleep-on-renew || true
-  fi
-  
-  log_success "SSL certificates configured"
+  log_info "SSL setup skipped (Langfuse removed)."
 }
 
 # nginx 설정
@@ -369,80 +324,6 @@ setup_nginx() {
     sudo grep -q "^\s*server\s*{" /etc/nginx/nginx.conf && disable_default_nginx_config || true
   fi
   
-  # SSL 인증서가 있는지 확인하고 nginx 설정 조정
-  LANGFUSE_CERT="/etc/letsencrypt/live/langfuse.stockoverflow.com/fullchain.pem"
-  LANGFUSE_US_CERT="/etc/letsencrypt/live/langfuse-us.stockoverflow.com/fullchain.pem"
-  
-  # 인증서가 없으면 Langfuse 프록시 서버 블록 전체를 제거
-  if [ ! -f "$LANGFUSE_CERT" ] || [ ! -f "$LANGFUSE_US_CERT" ]; then
-    log_info "SSL certificates not found, removing Langfuse proxy blocks temporarily..."
-    cat > /tmp/remove_langfuse_blocks.py << 'PYEOF'
-import re
-import sys
-
-try:
-    with open('/etc/nginx/conf.d/00-hobot.conf', 'r') as f:
-        content = f.read()
-    
-    # Langfuse 관련 server 블록 제거 (HTTP와 HTTPS 모두)
-    # server { ... } 블록을 찾아서 server_name이 langfuse인 것만 제거
-    lines = content.split('\n')
-    result = []
-    in_server = False
-    server_depth = 0
-    is_langfuse_server = False
-    server_start_idx = -1
-    
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        
-        # server 블록 시작
-        if re.search(r'server\s*{', line):
-            in_server = True
-            server_depth = 1
-            is_langfuse_server = False
-            server_start_idx = i
-            i += 1
-            continue
-        
-        if in_server:
-            server_depth += line.count('{') - line.count('}')
-            
-            # server_name 확인
-            if re.search(r'server_name\s+(langfuse|langfuse-us)\.stockoverflow\.com', line):
-                is_langfuse_server = True
-            
-            # server 블록 종료
-            if server_depth == 0:
-                if not is_langfuse_server:
-                    # Langfuse 서버가 아니면 결과에 추가
-                    result.extend(lines[server_start_idx:i+1])
-                in_server = False
-                is_langfuse_server = False
-                server_start_idx = -1
-            
-            i += 1
-            continue
-        
-        result.append(line)
-        i += 1
-    
-    with open('/etc/nginx/conf.d/00-hobot.conf', 'w') as f:
-        f.write('\n'.join(result))
-    print("[OK] Removed Langfuse proxy blocks")
-    sys.exit(0)
-        
-except Exception as e:
-    print(f"[ERROR] Error: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-PYEOF
-    sudo python3 /tmp/remove_langfuse_blocks.py
-    rm -f /tmp/remove_langfuse_blocks.py
-  fi
-  
   # nginx 설정 테스트
   log_info "Testing nginx configuration..."
   NGINX_TEST_OUTPUT=$(sudo nginx -t 2>&1)
@@ -463,28 +344,6 @@ PYEOF
   sleep 3
   
   sudo systemctl is-active --quiet nginx || log_error "Nginx failed to start"
-  
-  # SSL 인증서 설정 (nginx가 실행 중이어야 함)
-  setup_ssl_certificates
-  
-  # 인증서가 발급되었으면 SSL 블록 복원 및 nginx 재시작
-  if [ -f "$LANGFUSE_CERT" ] && [ -f "$LANGFUSE_US_CERT" ]; then
-    log_info "SSL certificates found, restoring HTTPS blocks..."
-    # 설정 파일을 다시 복사하여 SSL 블록 포함
-    sudo cp "${DEPLOY_PATH}/.github/deploy/nginx.conf" /etc/nginx/conf.d/00-hobot.conf
-    sudo sed -i "s|/home/ec2-user/hobot-service|${DEPLOY_PATH}|g" /etc/nginx/conf.d/00-hobot.conf
-    
-    if sudo nginx -t; then
-      sudo systemctl reload nginx
-      log_success "HTTPS enabled for Langfuse proxy"
-    else
-      log_warn "Nginx configuration test failed after adding SSL blocks"
-      sudo nginx -t
-    fi
-  else
-    log_warn "SSL certificates not available yet. HTTP-only mode active."
-    log_info "After DNS propagation, run deployment again to enable HTTPS."
-  fi
   
   log_success "Nginx configured and running"
 }
@@ -518,4 +377,3 @@ main() {
 }
 
 main "$@"
-
