@@ -313,6 +313,13 @@ setup_nginx() {
     [ -f "$conf_file" ] && sudo mv "$conf_file" "${conf_file}.disabled" 2>/dev/null || true
   done
   
+  # 기존 sites-enabled 설정 제거 (중복 방지)
+  # 특히 /etc/nginx/sites-enabled/hobot 파일이 upstream backend 중복 정의의 원인이 됨
+  log_info "Cleaning up old sites configuration..."
+  [ -f "/etc/nginx/sites-enabled/default" ] && sudo rm -f /etc/nginx/sites-enabled/default
+  [ -f "/etc/nginx/sites-enabled/hobot" ] && sudo rm -f /etc/nginx/sites-enabled/hobot
+  [ -f "/etc/nginx/sites-available/hobot" ] && sudo rm -f /etc/nginx/sites-available/hobot
+  
   # 우리 설정 복사
   sudo cp "${DEPLOY_PATH}/.github/deploy/nginx.conf" /etc/nginx/conf.d/00-hobot.conf
   sudo sed -i "s|/home/ec2-user/hobot-service|${DEPLOY_PATH}|g" /etc/nginx/conf.d/00-hobot.conf
