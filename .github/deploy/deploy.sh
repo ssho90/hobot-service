@@ -216,12 +216,20 @@ build_frontend() {
   
   # 권한 설정 (홈 디렉토리부터 실행 권한 부여)
   # Nginx가 홈 디렉토리 하위의 파일에 접근하려면 상위 디렉토리들에 실행 권한(+x)이 있어야 함
-  chmod +x /home/ec2-user
-  chmod +x /home/ec2-user/hobot-service
-  chmod +x /home/ec2-user/hobot-service/hobot-ui
+  # ec2-user 홈 디렉토리 권한이 700이면 nginx 사용자가 접근 불가하므로 755로 변경 필요
+  # 보안상 홈 디렉토리 전체를 여는 것이 부담스럽다면 namei -m 명령어로 경로 확인 필요하지만
+  # 여기서는 확실한 해결을 위해 경로상 실행 권한을 부여함
+  chmod 755 /home/ec2-user
+  chmod 755 /home/ec2-user/hobot-service
+  chmod 755 /home/ec2-user/hobot-service/hobot-ui
   
   sudo chown -R "$(whoami):$(whoami)" build
   sudo chmod -R 755 build
+  
+  # SELinux가 켜져있는 경우를 대비해 컨텍스트 설정 (오류 무시)
+  if command -v chcon &> /dev/null; then
+      sudo chcon -R -t httpd_sys_content_t build 2>/dev/null || true
+  fi
   
   # nginx 사용자에게 권한 부여 확인
   id nginx &>/dev/null && sudo usermod -a -G "$(whoami)" nginx 2>/dev/null || true
