@@ -307,9 +307,35 @@ PYEOF
   rm -f /tmp/disable_nginx_server.py
 }
 
-# certbot 인증서 발급/갱신 (사용 안함 - Langfuse 제거됨)
+# certbot 인증서 발급/갱신
 setup_ssl_certificates() {
-  log_info "SSL setup skipped (Langfuse removed)."
+  log_info "Setting up SSL certificates..."
+  
+  # certbot 설치 확인
+  if ! command -v certbot &> /dev/null; then
+    log_info "Installing certbot..."
+    sudo yum install -y certbot python3-certbot-nginx 2>/dev/null || \
+      (sudo apt-get update && sudo apt-get install -y certbot python3-certbot-nginx)
+  fi
+  
+  # 기존 certbot 이메일 확인 (있는 경우 사용)
+  CERTBOT_EMAIL=$(sudo cat /etc/letsencrypt/renewal/*.conf 2>/dev/null | grep -oP 'email = \K[^\s]+' | head -1 || echo "admin@stockoverflow.com")
+  
+  # 메인 도메인에 대한 인증서 발급/갱신
+  # --nginx 옵션을 사용하면 nginx 설정을 자동으로 수정해줍니다.
+  # 비화화형 모드(--non-interactive)로 실행
+  DOMAINS="-d stockoverflow.org -d www.stockoverflow.org"
+  
+  log_info "Requesting SSL certificate for ${DOMAINS}..."
+  
+  sudo certbot --nginx \
+    ${DOMAINS} \
+    --non-interactive --agree-tos \
+    --email "${CERTBOT_EMAIL}" \
+    --redirect \
+    --keep-until-expiring || log_warn "Failed to configure SSL via certbot. Check DNS or rate limits."
+    
+  log_success "SSL certificates configured"
 }
 
 # nginx 설정
@@ -365,6 +391,9 @@ setup_nginx() {
   sleep 3
   
   sudo systemctl is-active --quiet nginx || log_error "Nginx failed to start"
+  
+  # SSL 인증서 설정 (nginx가 실행 중이어야 함)
+  setup_ssl_certificates
   
   log_success "Nginx configured and running"
 }
