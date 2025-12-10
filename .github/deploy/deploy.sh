@@ -17,8 +17,21 @@ export HT_SECRET_KEY="${HT_SECRET_KEY}"
 export HT_ACCOUNT="${HT_ACCOUNT}"
 export HT_ID="${HT_ID}"
 export OPENAI_API_KEY="${OPENAI_API_KEY}"
-export GEMINI_API_KEY="${GEMINI_API_KEY}"
+export GOOGLE_API_KEY="${GOOGLE_API_KEY}"
 export TAVILY_API_KEY="${TAVILY_API_KEY}"
+export FRED_API_KEY="${FRED_API_KEY}"
+export DOMAIN_NAME="${DOMAIN_NAME}"
+
+# MySQL Database Configuration
+export DB_HOST="${DB_HOST:-localhost}"
+export DB_PORT="${DB_PORT:-3306}"
+export DB_USER="${DB_USER}"
+export DB_PASSWORD="${DB_PASSWORD}"
+export DB_NAME="${DB_NAME:-hobot}"
+export DB_CHARSET="${DB_CHARSET:-utf8mb4}"
+
+# JWT Secret Key
+export JWT_SECRET_KEY="${JWT_SECRET_KEY}"
 
 # 유틸리티 함수 (모든 로그는 stderr로 출력하여 변수 할당에 영향을 주지 않도록)
 log_info() {
@@ -119,10 +132,18 @@ setup_python_env() {
 # .env 파일 생성
 create_env_file() {
   log_info "Creating .env file..."
+  
+  # 기존 .env 파일 삭제 (git reset --hard로 복원된 예전 버전 제거)
+  if [ -f "${DEPLOY_PATH}/hobot/.env" ]; then
+    log_info "Removing existing .env file (may be from git history)..."
+    rm -f "${DEPLOY_PATH}/hobot/.env"
+  fi
+  
   cat > "${DEPLOY_PATH}/hobot/.env" << EOF
 # Environment variables for Hobot service
-# Generated automatically during deployment
+# Generated automatically during deployment from GitHub Actions secrets/variables
 
+# API Keys
 SL_TOKEN=${SL_TOKEN}
 UP_ACCESS_KEY=${UP_ACCESS_KEY}
 UP_SECRET_KEY=${UP_SECRET_KEY}
@@ -131,8 +152,20 @@ HT_SECRET_KEY=${HT_SECRET_KEY}
 HT_ACCOUNT=${HT_ACCOUNT}
 HT_ID=${HT_ID}
 OPENAI_API_KEY=${OPENAI_API_KEY}
-GEMINI_API_KEY=${GEMINI_API_KEY}
+GOOGLE_API_KEY=${GOOGLE_API_KEY}
 TAVILY_API_KEY=${TAVILY_API_KEY}
+FRED_API_KEY=${FRED_API_KEY}
+
+# MySQL Database Configuration
+DB_HOST=${DB_HOST:-localhost}
+DB_PORT=${DB_PORT:-3306}
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASSWORD}
+DB_NAME=${DB_NAME:-hobot}
+DB_CHARSET=${DB_CHARSET:-utf8mb4}
+
+# JWT Secret Key
+JWT_SECRET_KEY=${JWT_SECRET_KEY}
 EOF
   chmod 600 "${DEPLOY_PATH}/hobot/.env"
   log_success ".env file created"
