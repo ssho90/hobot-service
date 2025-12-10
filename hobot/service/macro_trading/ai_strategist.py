@@ -149,23 +149,23 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
         signals = calculator.calculate_all_signals()
         additional_indicators = calculator.get_additional_indicators()
         
-        # 추가 지표: Core PCE, CPI, 실업률, 비농업 고용의 지난 10개 데이터
+        # 추가 지표: PCEPI, CPI, 실업률, 비농업 고용의 지난 10개 데이터
         fred_collector = get_fred_collector()
         inflation_employment_data = {}
         
-        # Core PCE (PCEPILFE - Personal Consumption Expenditures Price Index, Less Food and Energy)
+        # PCEPI (Personal Consumption Expenditures Price Index)
         try:
-            pcepilfe_data = fred_collector.get_latest_data("PCEPILFE", days=365)
-            if len(pcepilfe_data) > 0:
+            pcepi_data = fred_collector.get_latest_data("PCEPI", days=365)
+            if len(pcepi_data) > 0:
                 # 최근 10개 데이터 (날짜와 값)
-                latest_10 = pcepilfe_data.tail(10)
-                inflation_employment_data["core_pce"] = [
+                latest_10 = pcepi_data.tail(10)
+                inflation_employment_data["pcepi"] = [
                     {"date": str(date), "value": float(value)}
                     for date, value in zip(latest_10.index, latest_10.values)
                 ]
         except Exception as e:
-            logger.warning(f"Core PCE 데이터 수집 실패: {e}")
-            inflation_employment_data["core_pce"] = []
+            logger.warning(f"PCEPI 데이터 수집 실패: {e}")
+            inflation_employment_data["pcepi"] = []
         
         # CPI (CPIAUCSL)
         try:
@@ -580,14 +580,14 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
         if inflation_employment:
             fred_summary += "\n=== 물가 지표 (지난 10개 데이터) ===\n"
             
-            # Core PCE
-            core_pce = inflation_employment.get('core_pce', [])
-            if core_pce:
-                fred_summary += "Core PCE (Personal Consumption Expenditures Price Index):\n"
-                for item in core_pce:
+            # PCEPI
+            pcepi = inflation_employment.get('pcepi', [])
+            if pcepi:
+                fred_summary += "PCEPI (Personal Consumption Expenditures Price Index):\n"
+                for item in pcepi:
                     fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
             else:
-                fred_summary += "Core PCE: 데이터 없음\n"
+                fred_summary += "PCEPI: 데이터 없음\n"
             
             # CPI
             cpi = inflation_employment.get('cpi', [])

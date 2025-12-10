@@ -372,7 +372,7 @@ const MacroDashboard = () => {
                 <section className="info-section">
                   <h3>📊 분석 개요</h3>
                   <p>
-                    이 분석은 <strong>Google Gemini 2.5 Pro</strong> AI 모델을 사용하여 매일 오전 8시 30분에 자동으로 실행됩니다.
+                    이 분석은 AI 모델을 사용하여 매일 오전 8시 30분에 자동으로 실행됩니다.
                     거시경제 데이터와 뉴스를 종합적으로 분석하여 최적의 자산 배분 전략을 제시합니다.
                   </p>
                 </section>
