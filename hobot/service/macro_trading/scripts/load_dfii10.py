@@ -83,16 +83,16 @@ def load_dfii10_data(years: int = 1):
         logger.info(f"수집된 데이터: {len(data)}개 데이터 포인트")
         logger.info("")
         
-        # DB 저장
+        # DB 저장 (누락된 날짜 보간 포함)
         logger.info("DB에 저장 중...")
         saved_count = collector.save_to_db(
             "DFII10",
             data,
             indicator_info["name"],
             indicator_info["unit"],
-            fill_missing=False,  # DFII10은 일별 데이터이므로 보간 불필요
-            fill_start_date=None,
-            fill_end_date=None
+            fill_missing=True,  # 누락된 날짜 보간 적용
+            fill_start_date=start_date,
+            fill_end_date=end_date
         )
         
         logger.info("")

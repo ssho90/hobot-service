@@ -110,10 +110,10 @@ def collect_all_fred_data(request_delay: Optional[float] = None):
             else:
                 logger.warning(f"  ✗ {indicator_code}: 수집 실패 또는 데이터 없음")
         
-        # DGS10, DGS2의 누락된 날짜 보간 처리
+        # DGS10, DGS2, DFII10의 누락된 날짜 보간 처리
         logger.info("")
-        logger.info("DGS10, DGS2 누락 날짜 보간 처리 시작...")
-        for indicator_code in ["DGS10", "DGS2"]:
+        logger.info("DGS10, DGS2, DFII10 누락 날짜 보간 처리 시작...")
+        for indicator_code in ["DGS10", "DGS2", "DFII10"]:
             try:
                 # 기존 데이터 조회 (최근 1년)
                 existing_data = collector.get_latest_data(indicator_code, days=365)

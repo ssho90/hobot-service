@@ -486,8 +486,8 @@ class FREDCollector:
                         time.sleep(request_delay)
                     continue
                 
-                # DGS10, DGS2는 누락된 날짜를 보간으로 채움
-                fill_missing = indicator_code in ["DGS10", "DGS2"]
+                # DGS10, DGS2, DFII10는 누락된 날짜를 보간으로 채움
+                fill_missing = indicator_code in ["DGS10", "DGS2", "DFII10"]
                 
                 # DB 저장
                 saved_count = self.save_to_db(
@@ -513,8 +513,8 @@ class FREDCollector:
                 try:
                     data = self.fetch_indicator(indicator_code, start_date, end_date, use_rate_limit=True)
                     if len(data) > 0:
-                        # DGS10, DGS2는 누락된 날짜를 보간으로 채움
-                        fill_missing = indicator_code in ["DGS10", "DGS2"]
+                        # DGS10, DGS2, DFII10는 누락된 날짜를 보간으로 채움
+                        fill_missing = indicator_code in ["DGS10", "DGS2", "DFII10"]
                         saved_count = self.save_to_db(
                             indicator_code,
                             data,
