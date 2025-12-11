@@ -441,6 +441,98 @@ async def get_yield_curve_spread_data(
         logging.error(f"Error fetching yield curve spread data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/macro-trading/real-interest-rate")
+async def get_real_interest_rate_data(
+    days: int = Query(default=365, description="조회할 일수 (기본값: 365일)")
+):
+    """실질 금리 시계열 데이터 조회 API"""
+    try:
+        from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+        from datetime import date, timedelta
+        import pandas as pd
+        
+        calculator = QuantSignalCalculator()
+        
+        # 실질 금리 시계열 데이터 계산
+        real_rate_series = calculator.get_real_interest_rate_series(days=days)
+        
+        if real_rate_series is None or len(real_rate_series) == 0:
+            return {
+                "data": [],
+                "error": {
+                    "type": "data_insufficient",
+                    "message": "데이터가 부족합니다.",
+                    "severity": "warning"
+                },
+                "message": "데이터가 부족합니다."
+            }
+        
+        # 날짜와 값을 리스트로 변환
+        result_data = [
+            {
+                "date": date_idx.strftime("%Y-%m-%d") if hasattr(date_idx, 'strftime') else str(date_idx),
+                "value": float(value)
+            }
+            for date_idx, value in real_rate_series.items()
+        ]
+        
+        return {
+            "data": result_data,
+            "count": len(result_data),
+            "unit": "%",
+            "description": "실질 금리 (명목 금리 - CPI 증가율)"
+        }
+        
+    except Exception as e:
+        logging.error(f"Error fetching real interest rate data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/macro-trading/net-liquidity")
+async def get_net_liquidity_data(
+    days: int = Query(default=365, description="조회할 일수 (기본값: 365일)")
+):
+    """연준 순유동성 시계열 데이터 조회 API"""
+    try:
+        from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+        from datetime import date, timedelta
+        import pandas as pd
+        
+        calculator = QuantSignalCalculator()
+        
+        # 순유동성 시계열 데이터 계산
+        net_liquidity_series = calculator.get_net_liquidity_series(days=days)
+        
+        if net_liquidity_series is None or len(net_liquidity_series) == 0:
+            return {
+                "data": [],
+                "error": {
+                    "type": "data_insufficient",
+                    "message": "데이터가 부족합니다.",
+                    "severity": "warning"
+                },
+                "message": "데이터가 부족합니다."
+            }
+        
+        # 날짜와 값을 리스트로 변환
+        result_data = [
+            {
+                "date": date_idx.strftime("%Y-%m-%d") if hasattr(date_idx, 'strftime') else str(date_idx),
+                "value": float(value)
+            }
+            for date_idx, value in net_liquidity_series.items()
+        ]
+        
+        return {
+            "data": result_data,
+            "count": len(result_data),
+            "unit": "Millions of Dollars",
+            "description": "연준 순유동성 (WALCL - WTREGEN - RRPONTSYD)"
+        }
+        
+    except Exception as e:
+        logging.error(f"Error fetching net liquidity data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/account-snapshots")
 async def get_account_snapshots(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),

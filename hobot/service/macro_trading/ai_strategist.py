@@ -557,6 +557,24 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
         if real_rate is not None:
             fred_summary += f"실질 금리: {real_rate:.2f}%\n"
         
+        # 실질 금리 지난 12개월 데이터 추가
+        try:
+            from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+            calculator = QuantSignalCalculator()
+            real_rate_series = calculator.get_real_interest_rate_series(days=365)
+            if real_rate_series is not None and len(real_rate_series) > 0:
+                # 최근 12개월 데이터 추출 (월별로 샘플링)
+                import pandas as pd
+                real_rate_monthly = real_rate_series.resample('M').last().tail(12)
+                if len(real_rate_monthly) > 0:
+                    fred_summary += "\n=== 실질 금리 지난 12개월 데이터 ===\n"
+                    for date_idx, value in real_rate_monthly.items():
+                        if pd.notna(value):
+                            date_str = date_idx.strftime("%Y-%m") if hasattr(date_idx, 'strftime') else str(date_idx)
+                            fred_summary += f"  {date_str}: {value:.2f}%\n"
+        except Exception as e:
+            logger.warning(f"실질 금리 시계열 데이터 조회 실패: {e}")
+        
         taylor = fred_signals.get('taylor_rule_signal')
         if taylor is not None:
             fred_summary += f"테일러 준칙 신호: {taylor:.2f}%\n"
@@ -568,6 +586,26 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
                 fred_summary += "연준 순유동성: 상승 추세 (유동성 공급 확대)\n"
             elif trend == -1:
                 fred_summary += "연준 순유동성: 하락 추세 (유동성 공급 축소)\n"
+        
+        # 연준 순 유동성 지난 12개월 데이터 추가
+        try:
+            from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+            calculator = QuantSignalCalculator()
+            net_liquidity_series = calculator.get_net_liquidity_series(days=365)
+            if net_liquidity_series is not None and len(net_liquidity_series) > 0:
+                # 최근 12개월 데이터 추출 (월별로 샘플링)
+                import pandas as pd
+                net_liquidity_monthly = net_liquidity_series.resample('M').last().tail(12)
+                if len(net_liquidity_monthly) > 0:
+                    fred_summary += "\n=== 연준 순 유동성 지난 12개월 데이터 ===\n"
+                    for date_idx, value in net_liquidity_monthly.items():
+                        if pd.notna(value):
+                            date_str = date_idx.strftime("%Y-%m") if hasattr(date_idx, 'strftime') else str(date_idx)
+                            # Billions로 변환하여 표시
+                            value_billions = value / 1000
+                            fred_summary += f"  {date_str}: {value_billions:.2f}B $\n"
+        except Exception as e:
+            logger.warning(f"연준 순 유동성 시계열 데이터 조회 실패: {e}")
         
         hy_spread = fred_signals.get('high_yield_spread', {})
         if hy_spread:

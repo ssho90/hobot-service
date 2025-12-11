@@ -545,4 +545,129 @@ class QuantSignalCalculator:
             indicators["payroll_growth"] = None
         
         return indicators
+    
+    def get_real_interest_rate_series(self, days: int = 365) -> Optional[pd.Series]:
+        """
+        실질 금리 시계열 데이터 계산
+        
+        Args:
+            days: 조회할 일수
+            
+        Returns:
+            pd.Series: 날짜를 인덱스로 하는 실질 금리 시계열 데이터 (%) 또는 None
+        """
+        try:
+            # DGS10 (명목 금리) - 일별 데이터
+            dgs10 = self.fred_collector.get_latest_data("DGS10", days=days)
+            if len(dgs10) == 0:
+                logger.warning("DGS10 데이터가 부족합니다")
+                return None
+            
+            # CPI 데이터 (월별 데이터) - 충분한 기간 조회
+            cpi_data = self.fred_collector.get_latest_data("CPIAUCSL", days=days + 60)  # 여유 있게 조회
+            
+            if len(cpi_data) < 2:
+                logger.warning("CPI 데이터가 부족합니다")
+                return None
+            
+            # CPI를 일별로 보간 (forward fill)
+            cpi_sorted = cpi_data.sort_index()
+            
+            # CPI를 일별로 재인덱싱하고 forward fill
+            date_range = pd.date_range(start=cpi_sorted.index.min(), end=cpi_sorted.index.max(), freq='D')
+            cpi_daily = cpi_sorted.reindex(date_range, method='ffill')
+            
+            # DGS10의 날짜 범위에 맞춰 CPI 보간
+            real_rate_series = pd.Series(index=dgs10.index, dtype=float)
+            
+            for date_idx in dgs10.index:
+                # 해당 날짜 이전의 CPI 값 찾기
+                prev_cpi_values = cpi_daily[cpi_daily.index <= date_idx]
+                if len(prev_cpi_values) >= 2:
+                    # 최신 CPI와 그 전 CPI를 사용하여 인플레이션율 계산
+                    # 월별 데이터이므로 최소 30일 이상 차이가 나는 값 사용
+                    latest_cpi = prev_cpi_values.iloc[-1]
+                    # 30일 이상 이전의 CPI 값 찾기
+                    prev_cpi_candidates = prev_cpi_values[prev_cpi_values.index <= date_idx - pd.Timedelta(days=30)]
+                    if len(prev_cpi_candidates) > 0:
+                        prev_cpi = prev_cpi_candidates.iloc[-1]
+                        # 월간 증가율을 연율화 (12배)
+                        # 실제로는 약 1개월 차이이므로 30일 기준으로 연율화
+                        days_diff = (date_idx - prev_cpi_candidates.index[-1]).days
+                        if days_diff > 0:
+                            cpi_inflation_rate = ((latest_cpi / prev_cpi) - 1) * (365.25 / days_diff) * 100
+                        else:
+                            cpi_inflation_rate = 0
+                    else:
+                        # 30일 이전 데이터가 없으면 인플레이션율을 0으로 가정
+                        cpi_inflation_rate = 0
+                    
+                    # 실질 금리 = 명목 금리 - 인플레이션율
+                    real_rate = dgs10[date_idx] - cpi_inflation_rate
+                    real_rate_series[date_idx] = real_rate
+                elif len(prev_cpi_values) == 1:
+                    # CPI 데이터가 1개만 있는 경우 (초기 데이터) - 인플레이션율을 0으로 가정
+                    real_rate_series[date_idx] = dgs10[date_idx]
+                else:
+                    # CPI 데이터가 없는 경우 NaN
+                    real_rate_series[date_idx] = np.nan
+            
+            # NaN 값 제거
+            real_rate_series = real_rate_series.dropna()
+            
+            if len(real_rate_series) == 0:
+                logger.warning("실질 금리 시계열 데이터 계산 실패")
+                return None
+            
+            logger.info(f"실질 금리 시계열 데이터 계산 완료: {len(real_rate_series)}개 데이터 포인트")
+            return real_rate_series
+            
+        except Exception as e:
+            logger.error(f"실질 금리 시계열 데이터 계산 실패: {e}", exc_info=True)
+            return None
+    
+    def get_net_liquidity_series(self, days: int = 365) -> Optional[pd.Series]:
+        """
+        연준 순유동성 시계열 데이터 계산
+        
+        Args:
+            days: 조회할 일수
+            
+        Returns:
+            pd.Series: 날짜를 인덱스로 하는 순유동성 시계열 데이터 (Millions of Dollars) 또는 None
+        """
+        try:
+            # 각 지표 데이터 수집
+            walcl = self.fred_collector.get_latest_data("WALCL", days=days)
+            tga = self.fred_collector.get_latest_data("WTREGEN", days=days)
+            rrp = self.fred_collector.get_latest_data("RRPONTSYD", days=days)
+            
+            if len(walcl) == 0 or len(tga) == 0 or len(rrp) == 0:
+                logger.warning("유동성 지표 데이터가 부족합니다")
+                return None
+            
+            # 날짜 기준으로 정렬 및 병합
+            df = pd.DataFrame({
+                "WALCL": walcl,
+                "TGA": tga,
+                "RRP": rrp
+            })
+            df = df.sort_index()
+            
+            # 결측치 처리 (forward fill)
+            df = df.ffill().dropna()
+            
+            if len(df) == 0:
+                logger.warning("유동성 지표 데이터 병합 실패")
+                return None
+            
+            # 순유동성 계산
+            df["net_liquidity"] = df["WALCL"] - df["TGA"] - df["RRP"]
+            
+            logger.info(f"연준 순유동성 시계열 데이터 계산 완료: {len(df)}개 데이터 포인트")
+            return df["net_liquidity"]
+            
+        except Exception as e:
+            logger.error(f"연준 순유동성 시계열 데이터 계산 실패: {e}", exc_info=True)
+            return None
 

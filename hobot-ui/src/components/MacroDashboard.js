@@ -740,6 +740,8 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
     RRPONTSYD: null,
     BAMLH0A0HYM2: null,
   });
+  const [realInterestRateData, setRealInterestRateData] = useState(null);
+  const [netLiquidityData, setNetLiquidityData] = useState(null);
   const [loading, setLoading] = useState(true);
   const chartRef = useRef(null);
   const resizeHandlerRef = useRef(null);
@@ -768,12 +770,40 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
           }
         });
 
-        const results = await Promise.all(promises);
+        // 실질 금리와 순 유동성 데이터도 함께 가져오기
+        const realRatePromise = fetch('/api/macro-trading/real-interest-rate?days=365')
+          .then(res => res.ok ? res.json() : null)
+          .catch(err => {
+            console.error('Error fetching real interest rate:', err);
+            return null;
+          });
+
+        const netLiquidityPromise = fetch('/api/macro-trading/net-liquidity?days=365')
+          .then(res => res.ok ? res.json() : null)
+          .catch(err => {
+            console.error('Error fetching net liquidity:', err);
+            return null;
+          });
+
+        const [results, realRateResult, netLiquidityResult] = await Promise.all([
+          Promise.all(promises),
+          realRatePromise,
+          netLiquidityPromise
+        ]);
+
         const newIndicators = {};
         results.forEach(({ code, data }) => {
           newIndicators[code] = data;
         });
         setIndicators(newIndicators);
+        
+        if (realRateResult && realRateResult.data) {
+          setRealInterestRateData(realRateResult.data);
+        }
+        
+        if (netLiquidityResult && netLiquidityResult.data) {
+          setNetLiquidityData(netLiquidityResult.data);
+        }
       } catch (err) {
         console.error('Error fetching indicators:', err);
       } finally {
@@ -1125,6 +1155,49 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         </div>
         <div className="indicators-grid">
           {indicatorGroups.inflation.codes.map(code => renderIndicatorChart(code, indicators[code]))}
+          {/* 실질 금리 차트 */}
+          {realInterestRateData && realInterestRateData.length > 0 && (
+            <div className="indicator-chart">
+              <h3>실질 금리</h3>
+              <p className="indicator-description">
+                명목 금리에서 인플레이션을 차감한 실질 금리입니다. 
+                양수면 통화 정책이 경기 과열 억제 효과가 있고, 음수면 통화 완화적이며 자산 가격 상승 압력이 있습니다.
+              </p>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={realInterestRateData}>
+                  <defs>
+                    <linearGradient id="colorRealRate" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#FF9800" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#FF9800" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    label={{ value: '%', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip 
+                    formatter={(value) => [`${value}%`, '실질 금리']}
+                    labelFormatter={(label) => `날짜: ${label}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#FF9800"
+                    fillOpacity={1}
+                    fill="url(#colorRealRate)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       </div>
 
