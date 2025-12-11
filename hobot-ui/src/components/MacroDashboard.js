@@ -1133,6 +1133,49 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
         </div>
         <div className="indicators-grid">
           {indicatorGroups.liquidity.codes.map(code => renderIndicatorChart(code, indicators[code]))}
+          {/* 연준 순 유동성 차트 */}
+          {netLiquidityData && netLiquidityData.length > 0 && (
+            <div className="indicator-chart">
+              <h3>연준 순 유동성</h3>
+              <p className="indicator-description">
+                연준의 총자산에서 재무부 일반계정과 역레포를 차감한 실제 시장에 공급되는 유동성입니다. 
+                증가 추세는 유동성 공급 확대를 의미하며, 자산 가격 상승 압력으로 작용합니다.
+              </p>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={netLiquidityData}>
+                  <defs>
+                    <linearGradient id="colorNetLiquidity" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4CAF50" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#4CAF50" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    label={{ value: 'Millions of $', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip 
+                    formatter={(value) => [`${(value / 1000).toFixed(2)}B $`, '연준 순 유동성']}
+                    labelFormatter={(label) => `날짜: ${label}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#4CAF50"
+                    fillOpacity={1}
+                    fill="url(#colorNetLiquidity)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1158,9 +1201,9 @@ const OtherIndicatorsCharts = ({ yieldSpreadData, chartContainerRef }) => {
           {/* 실질 금리 차트 */}
           {realInterestRateData && realInterestRateData.length > 0 && (
             <div className="indicator-chart">
-              <h3>실질 금리</h3>
+              <h3>실질 금리 (DFII10)</h3>
               <p className="indicator-description">
-                명목 금리에서 인플레이션을 차감한 실질 금리입니다. 
+                10년물 인플레이션 연동 국채(TIPS) 금리로, 명목 금리에서 인플레이션을 차감한 실질 금리입니다. 
                 양수면 통화 정책이 경기 과열 억제 효과가 있고, 음수면 통화 완화적이며 자산 가격 상승 압력이 있습니다.
               </p>
               <ResponsiveContainer width="100%" height={300}>
