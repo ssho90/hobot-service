@@ -166,7 +166,7 @@ class QuantSignalCalculator:
     
     def get_real_interest_rate(self, days: int = 30) -> Optional[float]:
         """
-        공식 2: 실질 금리 (DGS10 - CPI 증가율)
+        실질 금리 (DFII10 - FRED에서 직접 조회)
         
         Args:
             days: 최근 N일간의 데이터 사용
@@ -175,41 +175,19 @@ class QuantSignalCalculator:
             float: 실질 금리 (%) 또는 None (데이터 부족 시)
         """
         try:
-            # DGS10 (명목 금리)
-            dgs10 = self.fred_collector.get_latest_data("DGS10", days)
-            if len(dgs10) == 0:
-                logger.warning("DGS10 데이터가 부족합니다")
+            # DFII10 (10-Year Treasury Inflation-Indexed Security, Constant Maturity)
+            dfii10 = self.fred_collector.get_latest_data("DFII10", days)
+            if len(dfii10) == 0:
+                logger.warning("DFII10 데이터가 부족합니다")
                 return None
             
-            latest_dgs10 = dgs10.iloc[-1]
+            latest_rate = dfii10.iloc[-1]
             
-            # CPI 데이터 (월별 → 일별 보간 필요)
-            cpi_data = self.fred_collector.get_latest_data("CPIAUCSL", days=365)  # 1년치 가져오기
-            
-            if len(cpi_data) < 2:
-                logger.warning("CPI 데이터가 부족합니다")
-                return None
-            
-            # CPI 증가율 계산 (전월 대비 연율화)
-            # 최신 CPI와 한 달 전 CPI 비교
-            cpi_values = cpi_data.sort_index()
-            latest_cpi = cpi_values.iloc[-1]
-            prev_cpi = cpi_values.iloc[-2] if len(cpi_values) >= 2 else cpi_values.iloc[0]
-            
-            # 월간 증가율을 연율화 (12배)
-            cpi_inflation_rate = ((latest_cpi / prev_cpi) - 1) * 12 * 100
-            
-            # 실질 금리 = 명목 금리 - 인플레이션율
-            real_rate = latest_dgs10 - cpi_inflation_rate
-            
-            logger.info(
-                f"실질 금리: {real_rate:.2f}% "
-                f"(명목 금리: {latest_dgs10:.2f}%, CPI 증가율: {cpi_inflation_rate:.2f}%)"
-            )
-            return float(real_rate)
+            logger.info(f"실질 금리 (DFII10): {latest_rate:.2f}%")
+            return float(latest_rate)
             
         except Exception as e:
-            logger.error(f"실질 금리 계산 실패: {e}")
+            logger.error(f"실질 금리 조회 실패: {e}")
             return None
     
     def get_taylor_rule_signal(
@@ -548,7 +526,7 @@ class QuantSignalCalculator:
     
     def get_real_interest_rate_series(self, days: int = 365) -> Optional[pd.Series]:
         """
-        실질 금리 시계열 데이터 계산
+        실질 금리 시계열 데이터 조회 (DFII10 - FRED에서 직접 조회)
         
         Args:
             days: 조회할 일수
@@ -557,73 +535,17 @@ class QuantSignalCalculator:
             pd.Series: 날짜를 인덱스로 하는 실질 금리 시계열 데이터 (%) 또는 None
         """
         try:
-            # DGS10 (명목 금리) - 일별 데이터
-            dgs10 = self.fred_collector.get_latest_data("DGS10", days=days)
-            if len(dgs10) == 0:
-                logger.warning("DGS10 데이터가 부족합니다")
+            # DFII10 (10-Year Treasury Inflation-Indexed Security, Constant Maturity)
+            dfii10 = self.fred_collector.get_latest_data("DFII10", days=days)
+            if len(dfii10) == 0:
+                logger.warning("DFII10 데이터가 부족합니다")
                 return None
             
-            # CPI 데이터 (월별 데이터) - 충분한 기간 조회
-            cpi_data = self.fred_collector.get_latest_data("CPIAUCSL", days=days + 60)  # 여유 있게 조회
-            
-            if len(cpi_data) < 2:
-                logger.warning("CPI 데이터가 부족합니다")
-                return None
-            
-            # CPI를 일별로 보간 (forward fill)
-            cpi_sorted = cpi_data.sort_index()
-            
-            # CPI를 일별로 재인덱싱하고 forward fill
-            date_range = pd.date_range(start=cpi_sorted.index.min(), end=cpi_sorted.index.max(), freq='D')
-            cpi_daily = cpi_sorted.reindex(date_range, method='ffill')
-            
-            # DGS10의 날짜 범위에 맞춰 CPI 보간
-            real_rate_series = pd.Series(index=dgs10.index, dtype=float)
-            
-            for date_idx in dgs10.index:
-                # 해당 날짜 이전의 CPI 값 찾기
-                prev_cpi_values = cpi_daily[cpi_daily.index <= date_idx]
-                if len(prev_cpi_values) >= 2:
-                    # 최신 CPI와 그 전 CPI를 사용하여 인플레이션율 계산
-                    # 월별 데이터이므로 최소 30일 이상 차이가 나는 값 사용
-                    latest_cpi = prev_cpi_values.iloc[-1]
-                    # 30일 이상 이전의 CPI 값 찾기
-                    prev_cpi_candidates = prev_cpi_values[prev_cpi_values.index <= date_idx - pd.Timedelta(days=30)]
-                    if len(prev_cpi_candidates) > 0:
-                        prev_cpi = prev_cpi_candidates.iloc[-1]
-                        # 월간 증가율을 연율화 (12배)
-                        # 실제로는 약 1개월 차이이므로 30일 기준으로 연율화
-                        days_diff = (date_idx - prev_cpi_candidates.index[-1]).days
-                        if days_diff > 0:
-                            cpi_inflation_rate = ((latest_cpi / prev_cpi) - 1) * (365.25 / days_diff) * 100
-                        else:
-                            cpi_inflation_rate = 0
-                    else:
-                        # 30일 이전 데이터가 없으면 인플레이션율을 0으로 가정
-                        cpi_inflation_rate = 0
-                    
-                    # 실질 금리 = 명목 금리 - 인플레이션율
-                    real_rate = dgs10[date_idx] - cpi_inflation_rate
-                    real_rate_series[date_idx] = real_rate
-                elif len(prev_cpi_values) == 1:
-                    # CPI 데이터가 1개만 있는 경우 (초기 데이터) - 인플레이션율을 0으로 가정
-                    real_rate_series[date_idx] = dgs10[date_idx]
-                else:
-                    # CPI 데이터가 없는 경우 NaN
-                    real_rate_series[date_idx] = np.nan
-            
-            # NaN 값 제거
-            real_rate_series = real_rate_series.dropna()
-            
-            if len(real_rate_series) == 0:
-                logger.warning("실질 금리 시계열 데이터 계산 실패")
-                return None
-            
-            logger.info(f"실질 금리 시계열 데이터 계산 완료: {len(real_rate_series)}개 데이터 포인트")
-            return real_rate_series
+            logger.info(f"실질 금리 시계열 데이터 조회 완료: {len(dfii10)}개 데이터 포인트")
+            return dfii10
             
         except Exception as e:
-            logger.error(f"실질 금리 시계열 데이터 계산 실패: {e}", exc_info=True)
+            logger.error(f"실질 금리 시계열 데이터 조회 실패: {e}", exc_info=True)
             return None
     
     def get_net_liquidity_series(self, days: int = 365) -> Optional[pd.Series]:

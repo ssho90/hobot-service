@@ -113,6 +113,12 @@ FRED_INDICATORS = {
         "name": "ICE BofA US High Yield Index Option-Adjusted Spread",
         "unit": "%",
         "frequency": "daily"
+    },
+    "DFII10": {
+        "code": "DFII10",
+        "name": "10-Year Treasury Inflation-Indexed Security, Constant Maturity",
+        "unit": "%",
+        "frequency": "daily"
     }
 }
 

@@ -555,19 +555,19 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
         
         real_rate = fred_signals.get('real_interest_rate')
         if real_rate is not None:
-            fred_summary += f"실질 금리: {real_rate:.2f}%\n"
+            fred_summary += f"실질 금리 (DFII10): {real_rate:.2f}%\n"
         
-        # 실질 금리 지난 12개월 데이터 추가
+        # 실질 금리 지난 12개월 데이터 추가 (DFII10 직접 조회)
         try:
-            from service.macro_trading.signals.quant_signals import QuantSignalCalculator
-            calculator = QuantSignalCalculator()
-            real_rate_series = calculator.get_real_interest_rate_series(days=365)
-            if real_rate_series is not None and len(real_rate_series) > 0:
+            from service.macro_trading.collectors.fred_collector import get_fred_collector
+            collector = get_fred_collector()
+            dfii10_data = collector.get_latest_data("DFII10", days=365)
+            if dfii10_data is not None and len(dfii10_data) > 0:
                 # 최근 12개월 데이터 추출 (월별로 샘플링)
                 import pandas as pd
-                real_rate_monthly = real_rate_series.resample('M').last().tail(12)
+                real_rate_monthly = dfii10_data.resample('M').last().tail(12)
                 if len(real_rate_monthly) > 0:
-                    fred_summary += "\n=== 실질 금리 지난 12개월 데이터 ===\n"
+                    fred_summary += "\n=== 실질 금리 지난 12개월 데이터 (DFII10) ===\n"
                     for date_idx, value in real_rate_monthly.items():
                         if pd.notna(value):
                             date_str = date_idx.strftime("%Y-%m") if hasattr(date_idx, 'strftime') else str(date_idx)

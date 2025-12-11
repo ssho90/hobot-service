@@ -208,7 +208,7 @@ async def get_current_strategy_platform(platform: str):
 # Macro Trading API
 @api_router.get("/macro-trading/fred-data")
 async def get_fred_data(
-    indicator_code: str = Query(..., description="지표 코드 (DGS10, DGS2, FEDFUNDS, CPIAUCSL, PCEPI, GDP, UNRATE, PAYEMS, WALCL, WTREGEN, RRPONTSYD, BAMLH0A0HYM2)"),
+    indicator_code: str = Query(..., description="지표 코드 (DGS10, DGS2, FEDFUNDS, CPIAUCSL, PCEPI, GDP, UNRATE, PAYEMS, WALCL, WTREGEN, RRPONTSYD, BAMLH0A0HYM2, DFII10)"),
     days: int = Query(default=365, description="조회할 일수 (기본값: 365일)")
 ):
     """FRED 데이터 조회 API"""
@@ -445,18 +445,32 @@ async def get_yield_curve_spread_data(
 async def get_real_interest_rate_data(
     days: int = Query(default=365, description="조회할 일수 (기본값: 365일)")
 ):
-    """실질 금리 시계열 데이터 조회 API"""
+    """실질 금리 시계열 데이터 조회 API (DFII10)"""
     try:
-        from service.macro_trading.signals.quant_signals import QuantSignalCalculator
+        from service.macro_trading.collectors.fred_collector import (
+            get_fred_collector, RateLimitError, FREDAPIError, DataInsufficientError
+        )
         from datetime import date, timedelta
         import pandas as pd
         
-        calculator = QuantSignalCalculator()
+        collector = get_fred_collector()
         
-        # 실질 금리 시계열 데이터 계산
-        real_rate_series = calculator.get_real_interest_rate_series(days=days)
+        # DFII10 데이터 직접 조회
+        try:
+            dfii10_data = collector.get_latest_data("DFII10", days=days)
+        except (RateLimitError, FREDAPIError, DataInsufficientError) as e:
+            logging.warning(f"DFII10 데이터 조회 실패: {e}")
+            return {
+                "data": [],
+                "error": {
+                    "type": "api_error",
+                    "message": str(e),
+                    "severity": "warning"
+                },
+                "message": "데이터 조회에 실패했습니다."
+            }
         
-        if real_rate_series is None or len(real_rate_series) == 0:
+        if len(dfii10_data) == 0:
             return {
                 "data": [],
                 "error": {
@@ -473,14 +487,14 @@ async def get_real_interest_rate_data(
                 "date": date_idx.strftime("%Y-%m-%d") if hasattr(date_idx, 'strftime') else str(date_idx),
                 "value": float(value)
             }
-            for date_idx, value in real_rate_series.items()
+            for date_idx, value in dfii10_data.items()
         ]
         
         return {
             "data": result_data,
             "count": len(result_data),
             "unit": "%",
-            "description": "실질 금리 (명목 금리 - CPI 증가율)"
+            "description": "실질 금리 (DFII10 - 10-Year Treasury Inflation-Indexed Security)"
         }
         
     except Exception as e:
@@ -1163,7 +1177,7 @@ async def get_quantitative_signals(
     
     모든 정량 시그널을 계산하여 반환합니다:
     - yield_curve_spread_trend: 장단기 금리차 추세 추종 전략
-    - real_interest_rate: 실질 금리
+    - real_interest_rate: 실질 금리 (DFII10)
     - taylor_rule_signal: 테일러 준칙 신호
     - net_liquidity: 연준 순유동성
     - high_yield_spread: 하이일드 스프레드
