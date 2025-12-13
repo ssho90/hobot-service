@@ -231,24 +231,6 @@
   width: 100%;
 }
 
-.overview-placeholder {
-  padding: 40px;
-  text-align: center;
-  color: #666;
-}
-
-.overview-placeholder h2 {
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.overview-placeholder .note {
-  margin-top: 20px;
-  font-size: 14px;
-  color: #999;
-  font-style: italic;
-}
-
 .overview-content {
   padding: 20px;
 }
@@ -1077,3 +1059,25 @@
   font-size: 14px;
 }
 
+/* 경제 뉴스 요약 모달 스타일 */
+.news-summary-modal {
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  margin: 60px auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.news-summary-modal .modal-body {
+  flex: 1;
+  padding: 20px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.btn-news-summary:hover {
+  background-color: #5a6268 !important;
+}

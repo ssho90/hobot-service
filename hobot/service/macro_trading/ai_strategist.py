@@ -216,6 +216,7 @@ class AIStrategyDecision(BaseModel):
     sub_models: SubModelSelection = Field(..., description="자산군별 선택된 세부 전략 모델")
     reasoning: str = Field(..., description="판단 근거")
     sub_reasoning: Optional[str] = Field(default=None, description="세부 전략 판단 근거")
+    news_summary: Optional[str] = Field(default=None, description="경제 뉴스 요약")
     recommended_stocks: Optional[Dict[str, Any]] = Field(default=None, description="최종 계산된 포트폴리오 (자동 계산됨)")
     
     def get_target_allocation(self) -> TargetAllocation:
@@ -342,7 +343,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
 - 경제 흐름 및 트렌드: (전반적인 경제 동향 설명)
 - 주요 이벤트: (시장에 영향을 미칠 수 있는 중요한 사건들)
 
-한국어로 간결하게 요약해주세요 (500-800자 정도).
+한국어로 요약해주세요. (1500자 정도)
 """
         
         # gemini-3.0-pro-preview 사용
@@ -628,9 +629,9 @@ def create_mp_analysis_prompt(fred_summary: str, news_summary: str, prev_mp_id: 
     
     다음 형식의 JSON으로만 응답하세요:
     {{
-        "analysis_summary": "분석 요약 (한국어, 200자 내외)",
+        "analysis_summary": "분석 요약 (한국어, 500자 내외)",
         "mp_id": "MP-3",
-        "reasoning": "판단 근거 (변경 시 변경 이유 강조, 500자 내외)"
+        "reasoning": "판단 근거 (변경 시 변경 이유 강조, 1000자 내외)"
     }}
     """
 
@@ -685,7 +686,7 @@ def create_sub_model_analysis_prompt(fred_summary: str, selected_mp_id: str, pre
         "Stocks": "Eq-N",
         "Bonds": "Bnd-N",
         "Alternatives": "Alt-I",
-        "reasoning_details": "세부 모델 선택 이유 요약"
+        "reasoning_details": "세부 모델 선택 이유 (1000자 내외)"
     }}
     """
 
@@ -875,12 +876,18 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         if sub_reasoning:
             final_portfolio["reasoning"] = sub_reasoning
 
+        # 뉴스 요약 가져오기
+        news_summary_text = None
+        if economic_news and economic_news.get('news_summary'):
+            news_summary_text = economic_news['news_summary']
+
         decision = AIStrategyDecision(
             analysis_summary=result_step1.get('analysis_summary'),
             mp_id=mp_id,
             sub_models=SubModelSelection(**sub_models_data),
             reasoning=mp_reasoning,
             sub_reasoning=sub_reasoning,
+            news_summary=news_summary_text,
             recommended_stocks=final_portfolio
         )
         
@@ -1108,7 +1115,11 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             # analysis_summary에 reasoning 포함
             analysis_summary_with_reasoning = decision.analysis_summary
             if decision.reasoning:
-                analysis_summary_with_reasoning += f"\n\n판단 근거:\n{decision.reasoning}"
+                analysis_summary_with_reasoning += f"\n\n**[판단 근거]**\n{decision.reasoning}"
+            
+            # news_summary는 별도 팝업으로 표시하기 위해 analysis_summary에 포함하지 않음
+            # if decision.news_summary:
+            #    analysis_summary_with_reasoning += f"\n\n**[주요 경제 뉴스 요약]**\n{decision.news_summary}"
             
             # MP ID로 자산 배분 비율 계산
             target_allocation = decision.get_target_allocation()

@@ -41,6 +41,7 @@ const MacroDashboard = () => {
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showNewsSummaryModal, setShowNewsSummaryModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -184,6 +185,29 @@ const MacroDashboard = () => {
             )}
           </div>
           <div className="overview-buttons">
+            {overviewData?.qual_sentiment?.news_summary && (
+              <button
+                className="btn-news-summary"
+                onClick={() => setShowNewsSummaryModal(true)}
+                title="경제 뉴스 요약 보기"
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  marginRight: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                📰 경제 뉴스 요약
+              </button>
+            )}
             <button
               className="btn-history"
               onClick={() => setShowHistoryModal(true)}
@@ -479,6 +503,23 @@ const MacroDashboard = () => {
                     <li>시장 상황은 빠르게 변할 수 있으므로, 분석 결과를 맹신하지 마세요.</li>
                   </ul>
                 </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 경제 뉴스 요약 모달 */}
+      {showNewsSummaryModal && overviewData?.qual_sentiment?.news_summary && (
+        <div className="modal-overlay" onClick={() => setShowNewsSummaryModal(false)}>
+          <div className="modal-content news-summary-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>분석에 사용된 경제 뉴스 요약</h2>
+              <button className="modal-close" onClick={() => setShowNewsSummaryModal(false)}>×</button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '20px' }}>
+              <div className="markdown-content">
+                {renderMarkdown(overviewData.qual_sentiment.news_summary)}
               </div>
             </div>
           </div>
