@@ -1134,10 +1134,10 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             """, (
                 datetime.now(),
                 analysis_summary_with_reasoning,
-                json.dumps(save_data),  # mp_id와 target_allocation을 함께 저장
-                json.dumps(decision.recommended_stocks) if decision.recommended_stocks else None,
-                json.dumps(fred_signals) if fred_signals else None,
-                json.dumps(economic_news) if economic_news else None,
+                json.dumps(save_data, default=str),  # mp_id와 target_allocation을 함께 저장
+                json.dumps(decision.recommended_stocks, default=str) if decision.recommended_stocks else None,
+                json.dumps(fred_signals, default=str) if fred_signals else None,
+                json.dumps(economic_news, default=str) if economic_news else None,
                 None  # account_pnl은 더 이상 사용하지 않음
             ))
             
