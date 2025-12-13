@@ -5,6 +5,35 @@ import { useAuth } from '../context/AuthContext';
 import './MacroDashboard.css';
 import './MacroMonitoring.css';
 
+// 간단한 마크다운 파서 (볼드체, 줄바꿈 처리)
+const renderMarkdown = (text) => {
+  if (!text) return null;
+  
+  // 1. 줄바꿈 처리
+  const lines = text.split('\n');
+  
+  return lines.map((line, index) => {
+    // 빈 줄은 br 태그로 처리하되, 약간의 높이를 줌
+    if (!line.trim()) {
+      return <br key={index} />;
+    }
+
+    // 2. 볼드체 처리 (**text**)
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+    
+    return (
+      <div key={index} style={{ minHeight: '1.5em', marginBottom: '4px' }}>
+        {parts.map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i}>{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        })}
+      </div>
+    );
+  });
+};
+
 const MacroDashboard = () => {
   const [subTab, setSubTab] = useState('fred'); // 'fred' or 'news'
   const [overviewData, setOverviewData] = useState(null);
@@ -210,13 +239,13 @@ const MacroDashboard = () => {
                   </span>
                   분석 요약
                 </h3>
-                <p>{overviewData.analysis_summary}</p>
+                <div className="markdown-content">{renderMarkdown(overviewData.analysis_summary)}</div>
               </div>
               
               {overviewData.reasoning && (
                 <div className="analysis-reasoning">
                   <h3>판단 근거</h3>
-                  <p>{overviewData.reasoning}</p>
+                  <div className="markdown-content">{renderMarkdown(overviewData.reasoning)}</div>
                 </div>
               )}
               
@@ -259,7 +288,7 @@ const MacroDashboard = () => {
               {overviewData.recommended_stocks.reasoning && (
                 <div className="sub-reasoning-box">
                   <h4>💡 세부 전략 근거</h4>
-                  <p>{overviewData.recommended_stocks.reasoning}</p>
+                  <div className="markdown-content">{renderMarkdown(overviewData.recommended_stocks.reasoning)}</div>
                 </div>
               )}
               
@@ -485,13 +514,13 @@ const MacroDashboard = () => {
                       
                       <div className="history-section">
                         <h3>분석 요약</h3>
-                        <p>{item.analysis_summary}</p>
+                        <div className="markdown-content">{renderMarkdown(item.analysis_summary)}</div>
                       </div>
                       
                       {item.reasoning && (
                         <div className="history-section">
                           <h3>판단 근거</h3>
-                          <p>{item.reasoning}</p>
+                          <div className="markdown-content">{renderMarkdown(item.reasoning)}</div>
                         </div>
                       )}
                       
@@ -527,7 +556,7 @@ const MacroDashboard = () => {
                           {item.recommended_stocks.reasoning && (
                             <div className="sub-reasoning-box history-sub-reasoning">
                               <h4>💡 세부 전략 근거</h4>
-                              <p>{item.recommended_stocks.reasoning}</p>
+                              <div className="markdown-content">{renderMarkdown(item.recommended_stocks.reasoning)}</div>
                             </div>
                           )}
                           
