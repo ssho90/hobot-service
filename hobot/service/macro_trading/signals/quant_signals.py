@@ -524,6 +524,48 @@ class QuantSignalCalculator:
         
         return indicators
     
+    def get_yield_curve_spread_series(self, days: int = 365) -> Optional[pd.Series]:
+        """
+        장단기 금리차 (DGS10 - DGS2) 시계열 데이터 조회
+        
+        Args:
+            days: 조회할 일수
+            
+        Returns:
+            pd.Series: 날짜를 인덱스로 하는 금리차 시계열 데이터 (%) 또는 None
+        """
+        try:
+            dgs10 = self.fred_collector.get_latest_data("DGS10", days=days)
+            dgs2 = self.fred_collector.get_latest_data("DGS2", days=days)
+            
+            if len(dgs10) == 0 or len(dgs2) == 0:
+                logger.warning("장단기 금리 데이터가 부족합니다")
+                return None
+            
+            # 날짜 기준으로 정렬 및 병합
+            df = pd.DataFrame({
+                "DGS10": dgs10,
+                "DGS2": dgs2
+            })
+            df = df.sort_index()
+            
+            # 결측치 처리 (forward fill)
+            df = df.ffill().dropna()
+            
+            if len(df) == 0:
+                logger.warning("장단기 금리차 데이터 병합 실패")
+                return None
+            
+            # Spread 계산: DGS10 - DGS2
+            spread = df["DGS10"] - df["DGS2"]
+            
+            logger.info(f"장단기 금리차 시계열 데이터 조회 완료: {len(spread)}개 데이터 포인트")
+            return spread
+            
+        except Exception as e:
+            logger.error(f"장단기 금리차 시계열 조회 실패: {e}", exc_info=True)
+            return None
+
     def get_real_interest_rate_series(self, days: int = 365) -> Optional[pd.Series]:
         """
         실질 금리 시계열 데이터 조회 (DFII10 - FRED에서 직접 조회)

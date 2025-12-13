@@ -7,6 +7,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any, List, TypedDict
+import pandas as pd
 from pydantic import BaseModel, Field, model_validator
 
 from langgraph.graph import StateGraph, START, END
@@ -235,62 +236,56 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
         signals = calculator.calculate_all_signals()
         additional_indicators = calculator.get_additional_indicators()
         
-        # 추가 지표: Core PCE, CPI, 실업률, 비농업 고용의 지난 10개 데이터
         fred_collector = get_fred_collector()
-        inflation_employment_data = {}
+        historical_data = {}
         
-        # Core PCE (PCEPILFE - Personal Consumption Expenditures Price Index, Less Food and Energy)
-        try:
-            pcepilfe_data = fred_collector.get_latest_data("PCEPILFE", days=365)
-            if len(pcepilfe_data) > 0:
-                # 최근 10개 데이터 (날짜와 값)
-                latest_10 = pcepilfe_data.tail(10)
-                inflation_employment_data["core_pce"] = [
-                    {"date": str(date), "value": float(value)}
-                    for date, value in zip(latest_10.index, latest_10.values)
+        def process_series(series, is_daily=False):
+            if series is None or series.empty:
+                return []
+            try:
+                # Ensure DatetimeIndex
+                if not isinstance(series.index, pd.DatetimeIndex):
+                    series.index = pd.to_datetime(series.index)
+                
+                if is_daily:
+                    # Resample daily to monthly (Month End)
+                    monthly = series.resample('M').last()
+                else:
+                    monthly = series
+                
+                # Take last 12 months
+                last_12 = monthly.tail(12)
+                return [
+                    {"date": date.strftime("%Y-%m-%d"), "value": float(value)}
+                    for date, value in zip(last_12.index, last_12.values)
                 ]
-        except Exception as e:
-            logger.warning(f"Core PCE 데이터 수집 실패: {e}")
-            inflation_employment_data["core_pce"] = []
+            except Exception as e:
+                logger.warning(f"데이터 처리 중 오류: {e}")
+                return []
+
+        # 1. Yield Curve Spread (Daily -> Monthly)
+        yield_curve_series = calculator.get_yield_curve_spread_series(days=400)
+        historical_data["yield_curve"] = process_series(yield_curve_series, is_daily=True)
         
-        # CPI (CPIAUCSL)
-        try:
-            cpi_data = fred_collector.get_latest_data("CPIAUCSL", days=365)
-            if len(cpi_data) > 0:
-                latest_10 = cpi_data.tail(10)
-                inflation_employment_data["cpi"] = [
-                    {"date": str(date), "value": float(value)}
-                    for date, value in zip(latest_10.index, latest_10.values)
-                ]
-        except Exception as e:
-            logger.warning(f"CPI 데이터 수집 실패: {e}")
-            inflation_employment_data["cpi"] = []
+        # 2. Real Interest Rate (Daily -> Monthly)
+        real_rate_series = calculator.get_real_interest_rate_series(days=400)
+        historical_data["real_interest_rate"] = process_series(real_rate_series, is_daily=True)
         
-        # 실업률 (UNRATE)
-        try:
-            unrate_data = fred_collector.get_latest_data("UNRATE", days=365)
-            if len(unrate_data) > 0:
-                latest_10 = unrate_data.tail(10)
-                inflation_employment_data["unemployment_rate"] = [
-                    {"date": str(date), "value": float(value)}
-                    for date, value in zip(latest_10.index, latest_10.values)
-                ]
-        except Exception as e:
-            logger.warning(f"실업률 데이터 수집 실패: {e}")
-            inflation_employment_data["unemployment_rate"] = []
+        # 3. Net Liquidity (Daily -> Monthly)
+        net_liq_series = calculator.get_net_liquidity_series(days=400)
+        historical_data["net_liquidity"] = process_series(net_liq_series, is_daily=True)
         
-        # 비농업 고용 (PAYEMS)
-        try:
-            payems_data = fred_collector.get_latest_data("PAYEMS", days=365)
-            if len(payems_data) > 0:
-                latest_10 = payems_data.tail(10)
-                inflation_employment_data["nonfarm_payroll"] = [
-                    {"date": str(date), "value": float(value)}
-                    for date, value in zip(latest_10.index, latest_10.values)
-                ]
-        except Exception as e:
-            logger.warning(f"비농업 고용 데이터 수집 실패: {e}")
-            inflation_employment_data["nonfarm_payroll"] = []
+        # 4. PCEPI (Monthly)
+        pcepi_series = fred_collector.get_latest_data("PCEPI", days=400)
+        historical_data["pcepi"] = process_series(pcepi_series, is_daily=False)
+
+        # 5. CPI (Monthly)
+        cpi_series = fred_collector.get_latest_data("CPIAUCSL", days=400)
+        historical_data["cpi"] = process_series(cpi_series, is_daily=False)
+        
+        # 6. Nonfarm Payroll (Monthly)
+        payems_series = fred_collector.get_latest_data("PAYEMS", days=400)
+        historical_data["nonfarm_payroll"] = process_series(payems_series, is_daily=False)
         
         return {
             "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
@@ -299,7 +294,7 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
             "net_liquidity": signals.get("net_liquidity"),
             "high_yield_spread": signals.get("high_yield_spread"),
             "additional_indicators": additional_indicators,
-            "inflation_employment_data": inflation_employment_data
+            "historical_data": historical_data
         }
     except Exception as e:
         logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
@@ -569,35 +564,30 @@ def summarize_fred_signals(fred_signals: Dict) -> str:
         spread_val = hy_spread.get('spread', 'N/A')
         fred_summary += f"하이일드 스프레드: {signal_name} ({spread_val}%)\n"
     
-    # 물가 및 고용 지표 (지난 10개 데이터 중 최근값)
-    inflation_employment = fred_signals.get('inflation_employment_data', {})
-    if inflation_employment:
-        fred_summary += "\n[주요 지표 최근 동향]\n"
+    # 주요 지표 12개월 추이
+    historical_data = fred_signals.get('historical_data', {})
+    if historical_data:
+        fred_summary += "\n=== 주요 경제 지표 추이 (지난 12개월, 월별) ===\n"
         
-        # Core PCE
-        core_pce = inflation_employment.get('core_pce', [])
-        if core_pce:
-            latest = core_pce[-1]
-            fred_summary += f"Core PCE: {latest['value']:.2f} ({latest['date']})\n"
-        
-        # CPI
-        cpi = inflation_employment.get('cpi', [])
-        if cpi:
-            latest = cpi[-1]
-            fred_summary += f"CPI: {latest['value']:.2f} ({latest['date']})\n"
-        
-        # 실업률
-        unrate = inflation_employment.get('unemployment_rate', [])
-        if unrate:
-            latest = unrate[-1]
-            fred_summary += f"실업률: {latest['value']:.2f}% ({latest['date']})\n"
-            
-        # 비농업 고용
-        payroll = inflation_employment.get('nonfarm_payroll', [])
-        if payroll:
-            latest = payroll[-1]
-            fred_summary += f"비농업 고용: {latest['value']:,.0f} ({latest['date']})\n"
+        def format_series(name, data, unit=""):
+            if not data:
+                return f"- {name}: 데이터 없음\n"
+            # 날짜: 값 형식으로 나열
+            series_str = ", ".join([f"{item['date']}: {item['value']:.2f}" for item in data])
+            return f"- {name} ({unit}): {series_str}\n"
 
+        fred_summary += format_series("장단기 금리차 (10Y-2Y)", historical_data.get('yield_curve'), "%p")
+        fred_summary += format_series("실질 금리 (10Y TIPS)", historical_data.get('real_interest_rate'), "%")
+        fred_summary += format_series("연준 순 유동성", historical_data.get('net_liquidity'), "M$")
+        fred_summary += format_series("PCEPI (Headline PCE)", historical_data.get('pcepi'), "Index")
+        fred_summary += format_series("CPI (Headline CPI)", historical_data.get('cpi'), "Index")
+        fred_summary += format_series("비농업 고용 (Nonfarm Payroll)", historical_data.get('nonfarm_payroll'), "Thousands")
+
+    # 기존 inflation_employment_data 호환 (혹시 모를 에러 방지 및 추가 정보)
+    # 하지만 historical_data가 있으면 위에서 이미 다 보여줬으므로 생략하거나 보완.
+    # 기존 코드의 inflation_employment_data는 더 이상 collect_fred_signals에서 반환되지 않으므로 (None or empty in previous steps if I removed it completely),
+    # I removed it in collect_fred_signals, so I should remove the usage here too.
+    
     return fred_summary
 
 
@@ -647,6 +637,16 @@ def create_mp_analysis_prompt(fred_summary: str, news_summary: str, prev_mp_id: 
 
 def create_sub_model_analysis_prompt(fred_summary: str, selected_mp_id: str, prev_sub_models: Dict) -> str:
     """2단계: Sub-Models 결정을 위한 프롬프트 생성"""
+    
+    # 선택된 MP 정보 상세 추가
+    mp_details = MODEL_PORTFOLIOS.get(selected_mp_id, {})
+    mp_context = f"""
+    [선택된 Main MP 정보]
+    - 모델명: {mp_details.get('name', 'N/A')}
+    - 설명: {mp_details.get('description', 'N/A')}
+    - 핵심 전략: {mp_details.get('strategy', 'N/A')}
+    """
+
     sub_model_info = "\n=== 자산군별 세부 모델 (Sub-Models) ===\n"
     for asset, models in SUB_PORTFOLIO_MODELS.items():
         if asset == 'Cash': continue
@@ -669,6 +669,8 @@ def create_sub_model_analysis_prompt(fred_summary: str, selected_mp_id: str, pre
         """
 
     return f"""선택된 자산배분 모델(MP)인 "{selected_mp_id}" 내에서 실행할 세부 전술(Sub-Model)을 결정하세요.
+
+    {mp_context}
 
     [입력 데이터]
     {fred_summary}
