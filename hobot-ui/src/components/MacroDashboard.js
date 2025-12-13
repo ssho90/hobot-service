@@ -168,13 +168,7 @@ const MacroDashboard = () => {
         <div className="overview-header-section">
           <div className="overview-title-wrapper">
             <h2>
-              <span className="ai-badge">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
-                </svg>
-                <span className="ai-badge-text">AI 분석</span>
-              </span>
-              overview
+              AI 투자 전략 리포트
             </h2>
             {overviewData && (
               <button
@@ -213,7 +207,7 @@ const MacroDashboard = () => {
           {error && <div className="error">오류: {error}</div>}
           {!loading && !error && !overviewData && (
             <div className="overview-placeholder">
-              <p>Overview 관련 내용 출력</p>
+              <p>AI 투자 전략 리포트를 불러오는 중...</p>
             </div>
           )}
           {overviewData && (
