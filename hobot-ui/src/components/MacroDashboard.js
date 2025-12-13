@@ -42,6 +42,8 @@ const MacroDashboard = () => {
   const [updating, setUpdating] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewsSummaryModal, setShowNewsSummaryModal] = useState(false);
+  const [latestNewsSummary, setLatestNewsSummary] = useState(null);
+  const [newsSummaryLoading, setNewsSummaryLoading] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -121,6 +123,28 @@ const MacroDashboard = () => {
     }
   }, [showHistoryModal]);
 
+  // 최신 경제 뉴스 요약 조회 및 모달 열기
+  const handleOpenNewsSummary = async () => {
+    setNewsSummaryLoading(true);
+    setShowNewsSummaryModal(true);
+    setLatestNewsSummary(null); // 초기화
+    
+    try {
+      const response = await fetch('/api/macro/latest-news-summary');
+      if (response.ok) {
+        const result = await response.json();
+        setLatestNewsSummary(result.summary);
+      } else {
+        setLatestNewsSummary('뉴스 요약을 불러오는데 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('Error fetching news summary:', err);
+      setLatestNewsSummary(`오류가 발생했습니다: ${err.message}`);
+    } finally {
+      setNewsSummaryLoading(false);
+    }
+  };
+
   // 수동 AI 분석 실행
   const handleManualUpdate = async () => {
     if (!isAdmin()) {
@@ -185,11 +209,10 @@ const MacroDashboard = () => {
             )}
           </div>
           <div className="overview-buttons">
-            {overviewData?.qual_sentiment?.news_summary && (
               <button
                 className="btn-news-summary"
-                onClick={() => setShowNewsSummaryModal(true)}
-                title="경제 뉴스 요약 보기"
+                onClick={handleOpenNewsSummary}
+                title="최신 경제 뉴스 요약 보기"
                 style={{
                   padding: '8px 16px',
                   backgroundColor: '#6c757d',
@@ -207,7 +230,6 @@ const MacroDashboard = () => {
               >
                 📰 경제 뉴스 요약
               </button>
-            )}
             <button
               className="btn-history"
               onClick={() => setShowHistoryModal(true)}
@@ -510,17 +532,23 @@ const MacroDashboard = () => {
       )}
 
       {/* 경제 뉴스 요약 모달 */}
-      {showNewsSummaryModal && overviewData?.qual_sentiment?.news_summary && (
+      {showNewsSummaryModal && (
         <div className="modal-overlay" onClick={() => setShowNewsSummaryModal(false)}>
           <div className="modal-content news-summary-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>분석에 사용된 경제 뉴스 요약</h2>
+              <h2>최신 경제 뉴스 요약</h2>
               <button className="modal-close" onClick={() => setShowNewsSummaryModal(false)}>×</button>
             </div>
             <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '20px' }}>
-              <div className="markdown-content">
-                {renderMarkdown(overviewData.qual_sentiment.news_summary)}
-              </div>
+              {newsSummaryLoading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                  <div className="loading">로딩 중...</div>
+                </div>
+              ) : (
+                <div className="markdown-content">
+                  {renderMarkdown(latestNewsSummary || "요약 내용이 없습니다.")}
+                </div>
+              )}
             </div>
           </div>
         </div>
