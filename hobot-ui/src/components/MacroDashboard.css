@@ -345,6 +345,35 @@
   border-bottom: 2px solid #e3f2fd;
 }
 
+.sub-reasoning-box {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.sub-reasoning-box h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #2e7d32;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sub-reasoning-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.history-sub-reasoning {
+  margin-top: 15px;
+}
+
 .recommended-stocks-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

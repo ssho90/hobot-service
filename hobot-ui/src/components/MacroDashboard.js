@@ -244,17 +244,26 @@ const MacroDashboard = () => {
                 </div>
               )}
 
-              {overviewData.recommended_stocks && (
-                <div className="recommended-stocks">
-                  <h3>
-                    <span className="ai-icon-inline">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
-                      </svg>
-                    </span>
-                    AI 추천 섹터/그룹
-                  </h3>
-                  <div className="recommended-stocks-content">
+          {overviewData.recommended_stocks && (
+            <div className="recommended-stocks">
+              <h3>
+                <span className="ai-icon-inline">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                  </svg>
+                </span>
+                AI 추천 섹터/그룹
+              </h3>
+              
+              {/* 세부 전략 근거 표시 */}
+              {overviewData.recommended_stocks.reasoning && (
+                <div className="sub-reasoning-box">
+                  <h4>💡 세부 전략 근거</h4>
+                  <p>{overviewData.recommended_stocks.reasoning}</p>
+                </div>
+              )}
+              
+              <div className="recommended-stocks-content">
                     {overviewData.recommended_stocks.Stocks && Array.isArray(overviewData.recommended_stocks.Stocks) && overviewData.recommended_stocks.Stocks.length > 0 && (
                       <div className="recommended-category">
                         <h4>
@@ -513,6 +522,15 @@ const MacroDashboard = () => {
                       {item.recommended_stocks && (
                         <div className="history-section">
                           <h3>AI 추천 섹터/그룹</h3>
+                          
+                          {/* 세부 전략 근거 표시 (이전 분석 내역) */}
+                          {item.recommended_stocks.reasoning && (
+                            <div className="sub-reasoning-box history-sub-reasoning">
+                              <h4>💡 세부 전략 근거</h4>
+                              <p>{item.recommended_stocks.reasoning}</p>
+                            </div>
+                          )}
+                          
                           <div className="recommended-stocks-content">
                             {item.recommended_stocks.Stocks && Array.isArray(item.recommended_stocks.Stocks) && item.recommended_stocks.Stocks.length > 0 && (
                               <div className="recommended-category">

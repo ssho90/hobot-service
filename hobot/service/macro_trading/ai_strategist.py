@@ -214,7 +214,8 @@ class AIStrategyDecision(BaseModel):
     mp_id: str = Field(..., description="선택된 모델 포트폴리오 ID (MP-1 ~ MP-5)")
     sub_models: SubModelSelection = Field(..., description="자산군별 선택된 세부 전략 모델")
     reasoning: str = Field(..., description="판단 근거")
-    recommended_stocks: Optional[Dict[str, List[Dict]]] = Field(default=None, description="최종 계산된 포트폴리오 (자동 계산됨)")
+    sub_reasoning: Optional[str] = Field(default=None, description="세부 전략 판단 근거")
+    recommended_stocks: Optional[Dict[str, Any]] = Field(default=None, description="최종 계산된 포트폴리오 (자동 계산됨)")
     
     def get_target_allocation(self) -> TargetAllocation:
         """MP ID에 해당하는 자산 배분 비율 반환"""
@@ -863,16 +864,21 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
                     "ticker": item['ticker'],
                     "name": item['name'],
                     "weight": item['weight'], # 서브모델 내 비중
-                    "category": model_info['name'] # 카테고리 정보로 모델명 사용
+                    "category": item['name'] # 카테고리 정보로 종목명 사용 (UI 표시용)
                 })
             
             final_portfolio[asset_class] = asset_portfolio
+
+        # 세부 전략 근거를 포트폴리오 데이터에 포함 (UI 표시용)
+        if sub_reasoning:
+            final_portfolio["reasoning"] = sub_reasoning
 
         decision = AIStrategyDecision(
             analysis_summary=result_step1.get('analysis_summary'),
             mp_id=mp_id,
             sub_models=SubModelSelection(**sub_models_data),
-            reasoning=f"{mp_reasoning}\n\n[세부 전략 근거]\n{sub_reasoning}",
+            reasoning=mp_reasoning,
+            sub_reasoning=sub_reasoning,
             recommended_stocks=final_portfolio
         )
         
