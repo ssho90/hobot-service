@@ -1193,16 +1193,22 @@ def _parse_json_response(response_text: str) -> Dict:
         return json.loads(response_text)
     except json.JSONDecodeError as e:
         logger.warning(f"JSON 파싱 실패, 재시도 중... (오류: {e})")
+        logger.warning(f"응답 텍스트 (처음 500자): {response_text[:500]}")
+        logger.warning(f"응답 텍스트 (마지막 500자): {response_text[-500:]}")
         import re
         json_match = re.search(r'\{[\s\S]*\}', response_text, re.MULTILINE)
         if json_match:
             try:
-                return json.loads(json_match.group())
+                extracted_json = json_match.group()
+                logger.info(f"정규식으로 JSON 추출 성공 (길이: {len(extracted_json)}자)")
+                return json.loads(extracted_json)
             except json.JSONDecodeError as e2:
                 logger.error(f"정규식 추출 후 JSON 파싱 실패: {e2}")
+                logger.error(f"추출된 JSON (처음 500자): {extracted_json[:500]}")
                 raise ValueError(f"JSON 형식이 올바르지 않습니다. 원본 오류: {e}, 추출 오류: {e2}")
         else:
-            logger.error(f"JSON 객체를 찾을 수 없습니다. 응답: {response_text[:200]}")
+            logger.error(f"JSON 객체를 찾을 수 없습니다. 전체 응답 길이: {len(response_text)}자")
+            logger.error(f"응답 텍스트 (처음 1000자): {response_text[:1000]}")
             raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
 
 
@@ -1263,19 +1269,33 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         
         # ===== 2단계: Sub-MP 분석 =====
         logger.info("2단계: Sub-MP 분석 중...")
-        sub_mp_prompt = create_sub_mp_analysis_prompt(fred_signals, economic_news, mp_id, previous_sub_mp)
-        
-        with track_llm_call(
-            model_name=model_name,
-            provider="Google",
-            service_name="ai_strategist_sub_mp",
-            request_prompt=sub_mp_prompt
-        ) as tracker:
-            sub_mp_response = llm.invoke(sub_mp_prompt)
-            tracker.set_response(sub_mp_response)
-        
-        sub_mp_response_text = _parse_llm_response(sub_mp_response)
-        sub_mp_decision_data = _parse_json_response(sub_mp_response_text)
+        try:
+            sub_mp_prompt = create_sub_mp_analysis_prompt(fred_signals, economic_news, mp_id, previous_sub_mp)
+            logger.info(f"Sub-MP 프롬프트 생성 완료 (길이: {len(sub_mp_prompt)}자)")
+            
+            with track_llm_call(
+                model_name=model_name,
+                provider="Google",
+                service_name="ai_strategist_sub_mp",
+                request_prompt=sub_mp_prompt
+            ) as tracker:
+                logger.info("Sub-MP LLM 호출 시작...")
+                sub_mp_response = llm.invoke(sub_mp_prompt)
+                tracker.set_response(sub_mp_response)
+                logger.info("Sub-MP LLM 응답 수신 완료")
+            
+            logger.info("Sub-MP 응답 파싱 시작...")
+            sub_mp_response_text = _parse_llm_response(sub_mp_response)
+            logger.info(f"Sub-MP 응답 텍스트 추출 완료 (길이: {len(sub_mp_response_text)}자)")
+            
+            sub_mp_decision_data = _parse_json_response(sub_mp_response_text)
+            logger.info(f"Sub-MP JSON 파싱 완료: {sub_mp_decision_data}")
+        except Exception as e:
+            logger.error(f"Sub-MP 분석 중 오류 발생: {e}", exc_info=True)
+            logger.error(f"Sub-MP 분석 오류 타입: {type(e).__name__}")
+            import traceback
+            logger.error(f"Sub-MP 분석 전체 traceback:\n{traceback.format_exc()}")
+            raise
         
         # Sub-MP 검증
         stocks_sub_mp = sub_mp_decision_data.get('stocks_sub_mp')
@@ -1444,6 +1464,9 @@ def analyze_node(state: AIAnalysisState) -> AIAnalysisState:
         fred_signals = state.get("fred_signals")
         economic_news = state.get("economic_news")
         
+        logger.info(f"FRED 시그널 상태: {'있음' if fred_signals else '없음'}")
+        logger.info(f"경제 뉴스 상태: {'있음' if economic_news else '없음'}")
+        
         decision = analyze_and_decide(fred_signals=fred_signals, economic_news=economic_news)
         
         if not decision:
@@ -1454,12 +1477,16 @@ def analyze_node(state: AIAnalysisState) -> AIAnalysisState:
                 "error": "AI 분석 실패: analyze_and_decide()가 None 반환"
             }
         
+        logger.info(f"AI 분석 완료: decision 객체 생성 성공, MP={decision.mp_id if decision else 'None'}")
         return {
             **state,
             "decision": decision
         }
     except Exception as e:
         logger.error(f"AI 분석 실패: {e}", exc_info=True)
+        logger.error(f"AI 분석 실패 타입: {type(e).__name__}")
+        import traceback
+        logger.error(f"AI 분석 전체 traceback:\n{traceback.format_exc()}")
         return {
             **state,
             "decision": None,
