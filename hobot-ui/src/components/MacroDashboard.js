@@ -354,7 +354,6 @@ const MacroDashboard = () => {
                             <thead>
                               <tr>
                                 <th>종목명</th>
-                                <th>종목번호</th>
                                 <th>비중</th>
                               </tr>
                             </thead>
@@ -362,7 +361,6 @@ const MacroDashboard = () => {
                               {overviewData.sub_mp.stocks.etf_details && overviewData.sub_mp.stocks.etf_details.map((etf, idx) => (
                                 <tr key={idx}>
                                   <td>{etf.name}</td>
-                                  <td className="ticker-code">{etf.ticker}</td>
                                   <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
                                 </tr>
                               ))}
@@ -383,7 +381,6 @@ const MacroDashboard = () => {
                             <thead>
                               <tr>
                                 <th>종목명</th>
-                                <th>종목번호</th>
                                 <th>비중</th>
                               </tr>
                             </thead>
@@ -391,7 +388,6 @@ const MacroDashboard = () => {
                               {overviewData.sub_mp.bonds.etf_details && overviewData.sub_mp.bonds.etf_details.map((etf, idx) => (
                                 <tr key={idx}>
                                   <td>{etf.name}</td>
-                                  <td className="ticker-code">{etf.ticker}</td>
                                   <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
                                 </tr>
                               ))}
@@ -412,7 +408,6 @@ const MacroDashboard = () => {
                             <thead>
                               <tr>
                                 <th>종목명</th>
-                                <th>종목번호</th>
                                 <th>비중</th>
                               </tr>
                             </thead>
@@ -420,7 +415,6 @@ const MacroDashboard = () => {
                               {overviewData.sub_mp.alternatives.etf_details && overviewData.sub_mp.alternatives.etf_details.map((etf, idx) => (
                                 <tr key={idx}>
                                   <td>{etf.name}</td>
-                                  <td className="ticker-code">{etf.ticker}</td>
                                   <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
                                 </tr>
                               ))}
@@ -704,7 +698,6 @@ const MacroDashboard = () => {
                                     <thead>
                                       <tr>
                                         <th>종목명</th>
-                                        <th>종목번호</th>
                                         <th>비중</th>
                                       </tr>
                                     </thead>
@@ -712,7 +705,6 @@ const MacroDashboard = () => {
                                       {item.sub_mp.stocks.etf_details && item.sub_mp.stocks.etf_details.map((etf, idx) => (
                                         <tr key={idx}>
                                           <td>{etf.name}</td>
-                                          <td className="ticker-code">{etf.ticker}</td>
                                           <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
                                         </tr>
                                       ))}
@@ -733,7 +725,6 @@ const MacroDashboard = () => {
                                     <thead>
                                       <tr>
                                         <th>종목명</th>
-                                        <th>종목번호</th>
                                         <th>비중</th>
                                       </tr>
                                     </thead>
@@ -741,7 +732,6 @@ const MacroDashboard = () => {
                                       {item.sub_mp.bonds.etf_details && item.sub_mp.bonds.etf_details.map((etf, idx) => (
                                         <tr key={idx}>
                                           <td>{etf.name}</td>
-                                          <td className="ticker-code">{etf.ticker}</td>
                                           <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
                                         </tr>
                                       ))}
@@ -762,7 +752,6 @@ const MacroDashboard = () => {
                                     <thead>
                                       <tr>
                                         <th>종목명</th>
-                                        <th>종목번호</th>
                                         <th>비중</th>
                                       </tr>
                                     </thead>
@@ -770,7 +759,6 @@ const MacroDashboard = () => {
                                       {item.sub_mp.alternatives.etf_details && item.sub_mp.alternatives.etf_details.map((etf, idx) => (
                                         <tr key={idx}>
                                           <td>{etf.name}</td>
-                                          <td className="ticker-code">{etf.ticker}</td>
                                           <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
                                         </tr>
                                       ))}

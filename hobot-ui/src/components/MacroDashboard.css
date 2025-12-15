@@ -427,36 +427,36 @@
 .sub-mp-details {
   margin-top: 30px;
   padding: 25px;
-  background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   border-radius: 12px;
-  border: 2px solid #ffe0b2;
+  border: 2px solid #e3f2fd;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .sub-mp-details h3 {
   margin: 0 0 25px 0;
   font-size: 22px;
-  color: #e65100;
+  color: #1976d2;
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 700;
   padding-bottom: 15px;
-  border-bottom: 2px solid #ffe0b2;
+  border-bottom: 2px solid #e3f2fd;
 }
 
 .sub-mp-reasoning {
   margin-bottom: 25px;
   padding: 15px;
-  background: #fff8e1;
+  background: #e3f2fd;
   border-radius: 8px;
-  border-left: 4px solid #ff9800;
+  border-left: 4px solid #2196F3;
 }
 
 .sub-mp-reasoning h4 {
   margin: 0 0 10px 0;
   font-size: 16px;
-  color: #e65100;
+  color: #1976d2;
   font-weight: 600;
 }
 
@@ -468,9 +468,9 @@
 }
 
 .sub-mp-content {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
 .sub-mp-category {
@@ -490,10 +490,10 @@
 .sub-mp-category h4 {
   margin: 0 0 15px 0;
   font-size: 17px;
-  color: #e65100;
+  color: #1976d2;
   font-weight: 700;
   padding-bottom: 12px;
-  border-bottom: 2px solid #ffe0b2;
+  border-bottom: 2px solid #e3f2fd;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -510,15 +510,15 @@
 }
 
 .etf-details-table thead {
-  background: #fff3e0;
+  background: #e3f2fd;
 }
 
 .etf-details-table th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: #e65100;
-  border-bottom: 2px solid #ffe0b2;
+  color: #1976d2;
+  border-bottom: 2px solid #e3f2fd;
   font-size: 14px;
 }
 
@@ -530,19 +530,20 @@
 }
 
 .etf-details-table tbody tr:hover {
-  background: #fff8e1;
-}
-
-.etf-details-table .ticker-code {
-  font-family: 'Courier New', monospace;
-  font-weight: 600;
-  color: #1976d2;
+  background: #f5f5f5;
 }
 
 .etf-details-table .weight-value {
   font-weight: 700;
-  color: #e65100;
+  color: #1976d2;
   text-align: right;
+}
+
+/* Sub-MP 반응형 스타일 */
+@media (max-width: 768px) {
+  .sub-mp-content {
+    grid-template-columns: 1fr;
+  }
 }
 
 .info-note {
