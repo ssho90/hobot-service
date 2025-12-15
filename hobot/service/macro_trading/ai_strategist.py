@@ -1580,7 +1580,8 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                 save_data["sub_mp"] = {
                     "stocks": decision.sub_mp.stocks_sub_mp,
                     "bonds": decision.sub_mp.bonds_sub_mp,
-                    "alternatives": decision.sub_mp.alternatives_sub_mp
+                    "alternatives": decision.sub_mp.alternatives_sub_mp,
+                    "reasoning": decision.sub_mp.reasoning
                 }
             
             cursor.execute("""
