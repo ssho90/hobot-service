@@ -62,7 +62,32 @@ update_repository() {
   }
   
   if [ -d ".git" ]; then
-    git pull "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" main || true
+    log_info "Git repository found. Updating from remote..."
+    
+    # 원격 저장소 URL 설정/업데이트
+    REMOTE_URL="https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git"
+    if git remote get-url origin &>/dev/null; then
+      git remote set-url origin "${REMOTE_URL}"
+    else
+      git remote add origin "${REMOTE_URL}"
+    fi
+    
+    # 현재 브랜치 확인 및 main으로 체크아웃
+    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+    if [ -z "${CURRENT_BRANCH}" ] || [ "${CURRENT_BRANCH}" != "main" ]; then
+      log_info "Checking out main branch..."
+      git fetch origin main:main 2>&1 || log_error "Failed to fetch main branch"
+      git checkout -B main origin/main 2>&1 || log_error "Failed to checkout main branch"
+    fi
+    
+    # 최신 코드 가져오기
+    log_info "Pulling latest changes from main branch..."
+    git fetch origin main 2>&1 || log_error "Failed to fetch from origin"
+    git reset --hard origin/main 2>&1 || log_error "Failed to reset to origin/main"
+    
+    # 최신 커밋 정보 확인
+    LATEST_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+    log_info "Repository updated to commit: ${LATEST_COMMIT:0:7}"
   else
     if [ "$(ls -A . 2>/dev/null)" ]; then
       log_warn "Directory is not empty, backing up..."
@@ -72,7 +97,14 @@ update_repository() {
       mkdir -p "${DEPLOY_PATH}"
       cd "${DEPLOY_PATH}"
     fi
-    git clone "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" .
+    log_info "Cloning repository..."
+    git clone -b main "https://${GH_TOKEN}@github.com/${GITHUB_REPO}.git" . || log_error "Failed to clone repository"
+    
+    # clone 후 main 브랜치 확인
+    git checkout main 2>&1 || log_error "Failed to checkout main branch after clone"
+    
+    LATEST_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+    log_info "Repository cloned to commit: ${LATEST_COMMIT:0:7}"
   fi
   log_success "Repository updated"
 }
