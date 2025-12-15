@@ -13,9 +13,13 @@ const Header = () => {
   const [showTradingSubmenu, setShowTradingSubmenu] = useState(false);
   const [dashboardActiveTab, setDashboardActiveTab] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mobileShowAdminSubmenu, setMobileShowAdminSubmenu] = useState(false);
+  const [mobileShowTradingSubmenu, setMobileShowTradingSubmenu] = useState(false);
   const menuRef = useRef(null);
   const adminMenuRef = useRef(null);
   const tradingMenuRef = useRef(null);
+  const sidebarRef = useRef(null);
   
   // Dashboard의 activeTab 변경 추적
   useEffect(() => {
@@ -88,16 +92,33 @@ const Header = () => {
       if (tradingMenuRef.current && !tradingMenuRef.current.contains(event.target)) {
         setShowTradingSubmenu(false);
       }
+      // 사이드바 외부 클릭 시 닫기
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && 
+          !event.target.closest('.mobile-menu-btn')) {
+        setIsSidebarOpen(false);
+      }
     };
 
-    if (showMenu || showAdminSubmenu || showTradingSubmenu) {
+    if (showMenu || showAdminSubmenu || showTradingSubmenu || isSidebarOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMenu, showAdminSubmenu, showTradingSubmenu]);
+  }, [showMenu, showAdminSubmenu, showTradingSubmenu, isSidebarOpen]);
+
+  // 사이드바 열릴 때 body 스크롤 방지
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSidebarOpen]);
 
   const handleLogout = () => {
     logout();
@@ -120,19 +141,62 @@ const Header = () => {
     return username.substring(0, 2).toUpperCase();
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleMobileTabClick = (tab) => {
+    if (tab === 'trading') {
+      setMobileShowTradingSubmenu(!mobileShowTradingSubmenu);
+    } else if (tab === 'admin') {
+      setMobileShowAdminSubmenu(!mobileShowAdminSubmenu);
+    }
+  };
+
+  const handleMobileNavClick = (path, tab) => {
+    navigate(path);
+    setIsSidebarOpen(false);
+    setMobileShowAdminSubmenu(false);
+    setMobileShowTradingSubmenu(false);
+    setTimeout(() => {
+      if (tab) {
+        const event = new CustomEvent('switchToTab', { detail: { tab } });
+        window.dispatchEvent(event);
+      }
+    }, 100);
+  };
+
+  const handleMobileAdminSubmenuClick = (subTab) => {
+    navigate('/dashboard?tab=admin');
+    setIsSidebarOpen(false);
+    setMobileShowAdminSubmenu(false);
+    setTimeout(() => {
+      const event = new CustomEvent('switchToAdmin', { detail: { tab: subTab } });
+      window.dispatchEvent(event);
+    }, 100);
+  };
+
   const activeTab = getActiveTab();
   
   return (
-    <header className="top-header">
-      <div className="header-left">
-        <div 
-          className="header-logo" 
-          onClick={() => navigate('/')}
-          style={{ cursor: 'pointer' }}
-        >
-          <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
-        </div>
-        <nav className="header-tabs">
+    <>
+      <header className="top-header">
+        <div className="header-left">
+          <button 
+            className="mobile-menu-btn"
+            onClick={toggleSidebar}
+            aria-label="메뉴 열기"
+          >
+            <span>☰</span>
+          </button>
+          <div 
+            className="header-logo" 
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
+          >
+            <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
+          </div>
+          <nav className="header-tabs">
           <button
             className={`header-tab ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
             onClick={() => {
@@ -295,7 +359,191 @@ const Header = () => {
         isOpen={showLoginModal} 
         onClose={() => setShowLoginModal(false)} 
       />
-    </header>
+      </header>
+
+      {/* 모바일 사이드바 오버레이 */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'show' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* 모바일 사이드바 */}
+      <aside 
+        ref={sidebarRef}
+        className={`mobile-sidebar ${isSidebarOpen ? 'open' : ''}`}
+      >
+        <div className="mobile-sidebar-header">
+          <div 
+            className="mobile-sidebar-logo" 
+            onClick={() => {
+              navigate('/');
+              setIsSidebarOpen(false);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
+          </div>
+          <button 
+            className="mobile-sidebar-close"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label="메뉴 닫기"
+          >
+            ✕
+          </button>
+        </div>
+
+        <nav className="mobile-sidebar-nav">
+          <button
+            className={`mobile-nav-item ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
+            onClick={() => handleMobileNavClick('/dashboard?tab=macro-dashboard', 'macro-dashboard')}
+          >
+            <span className="mobile-nav-icon">📊</span>
+            <span>Macro Dashboard</span>
+          </button>
+
+          {isSystemAdmin() && (
+            <>
+              <div className="mobile-nav-group">
+                <button
+                  className={`mobile-nav-item ${activeTab === 'trading' ? 'active' : ''}`}
+                  onClick={() => handleMobileTabClick('trading')}
+                >
+                  <span className="mobile-nav-icon">💹</span>
+                  <span>Trading</span>
+                  <span className="mobile-nav-arrow" style={{
+                    marginLeft: 'auto',
+                    transform: mobileShowTradingSubmenu ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease'
+                  }}>
+                    ▶
+                  </span>
+                </button>
+                {mobileShowTradingSubmenu && (
+                  <div className="mobile-nav-submenu">
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
+                      onClick={() => handleMobileNavClick('/dashboard?tab=trading-macro', 'trading-macro')}
+                    >
+                      <span className="mobile-nav-icon">📈</span>
+                      <span>Macro Quant</span>
+                    </button>
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
+                      onClick={() => handleMobileNavClick('/dashboard?tab=trading-crypto', 'trading-crypto')}
+                    >
+                      <span className="mobile-nav-icon">₿</span>
+                      <span>Crypto</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="mobile-nav-group">
+                <button
+                  className={`mobile-nav-item ${activeTab === 'admin' ? 'active' : ''}`}
+                  onClick={() => handleMobileTabClick('admin')}
+                >
+                  <span className="mobile-nav-icon">⚙️</span>
+                  <span>Admin</span>
+                  <span className="mobile-nav-arrow" style={{
+                    marginLeft: 'auto',
+                    transform: mobileShowAdminSubmenu ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease'
+                  }}>
+                    ▶
+                  </span>
+                </button>
+                {mobileShowAdminSubmenu && (
+                  <div className="mobile-nav-submenu">
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-users' ? 'active' : ''}`}
+                      onClick={() => handleMobileAdminSubmenuClick('admin-users')}
+                    >
+                      <span className="mobile-nav-icon">👥</span>
+                      <span>사용자 관리</span>
+                    </button>
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-logs' ? 'active' : ''}`}
+                      onClick={() => handleMobileAdminSubmenuClick('admin-logs')}
+                    >
+                      <span className="mobile-nav-icon">📋</span>
+                      <span>로그 관리</span>
+                    </button>
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-llm-monitoring' ? 'active' : ''}`}
+                      onClick={() => handleMobileAdminSubmenuClick('admin-llm-monitoring')}
+                    >
+                      <span className="mobile-nav-icon">🤖</span>
+                      <span>LLM 모니터링</span>
+                    </button>
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-sector-management' ? 'active' : ''}`}
+                      onClick={() => handleMobileAdminSubmenuClick('admin-sector-management')}
+                    >
+                      <span className="mobile-nav-icon">📊</span>
+                      <span>종목 관리</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {user && (
+            <div className="mobile-sidebar-user">
+              <div className="mobile-user-avatar">
+                <span>{getInitials(user?.username)}</span>
+              </div>
+              <div className="mobile-user-info">
+                <span className="mobile-user-name">{user?.username}</span>
+                {user?.role === 'admin' && (
+                  <span className="mobile-user-role">Admin</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {user && (
+            <div className="mobile-sidebar-actions">
+              {isAdmin() && (
+                <button 
+                  className="mobile-action-btn"
+                  onClick={() => {
+                    handleUserManagement();
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  <span className="mobile-action-icon">👥</span>
+                  <span>사용자 관리</span>
+                </button>
+              )}
+              <button 
+                className="mobile-action-btn"
+                onClick={() => {
+                  handleLogout();
+                  setIsSidebarOpen(false);
+                }}
+              >
+                <span className="mobile-action-icon">🚪</span>
+                <span>로그아웃</span>
+              </button>
+            </div>
+          )}
+
+          {!user && (
+            <button 
+              className="mobile-login-btn"
+              onClick={() => {
+                handleLogin();
+                setIsSidebarOpen(false);
+              }}
+            >
+              로그인
+            </button>
+          )}
+        </nav>
+      </aside>
+    </>
   );
 };
 
