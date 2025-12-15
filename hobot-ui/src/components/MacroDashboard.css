@@ -446,6 +446,7 @@
 }
 
 .sub-mp-reasoning {
+  margin-top: 15px;
   margin-bottom: 25px;
   padding: 15px;
   background: #e3f2fd;
@@ -453,18 +454,12 @@
   border-left: 4px solid #2196F3;
 }
 
-.sub-mp-reasoning h4 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: #1976d2;
-  font-weight: 600;
-}
-
 .sub-mp-reasoning p {
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.8;
   color: #555;
-  white-space: pre-wrap;
+  white-space: pre-line;
+  font-size: 14px;
 }
 
 .sub-mp-content {

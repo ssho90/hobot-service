@@ -337,8 +337,12 @@ const MacroDashboard = () => {
                   
                   {overviewData.sub_mp_reasoning && (
                     <div className="sub-mp-reasoning">
-                      <h4>Sub-MP 선택 근거</h4>
-                      <p>{overviewData.sub_mp_reasoning}</p>
+                      <p>{overviewData.sub_mp_reasoning.split('\n').map((line, idx) => (
+                        <span key={idx}>
+                          {line}
+                          {idx < overviewData.sub_mp_reasoning.split('\n').length - 1 && <br />}
+                        </span>
+                      ))}</p>
                     </div>
                   )}
 
@@ -681,8 +685,12 @@ const MacroDashboard = () => {
                           
                           {item.sub_mp_reasoning && (
                             <div className="sub-mp-reasoning">
-                              <h4>Sub-MP 선택 근거</h4>
-                              <p>{item.sub_mp_reasoning}</p>
+                              <p>{item.sub_mp_reasoning.split('\n').map((line, idx) => (
+                                <span key={idx}>
+                                  {line}
+                                  {idx < item.sub_mp_reasoning.split('\n').length - 1 && <br />}
+                                </span>
+                              ))}</p>
                             </div>
                           )}
 
