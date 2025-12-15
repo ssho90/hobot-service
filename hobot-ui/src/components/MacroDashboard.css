@@ -423,6 +423,128 @@
   text-align: center;
 }
 
+/* Sub-MP 세부종목 스타일 */
+.sub-mp-details {
+  margin-top: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 2px solid #ffe0b2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sub-mp-details h3 {
+  margin: 0 0 25px 0;
+  font-size: 22px;
+  color: #e65100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #ffe0b2;
+}
+
+.sub-mp-reasoning {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #fff8e1;
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+}
+
+.sub-mp-reasoning h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #e65100;
+  font-weight: 600;
+}
+
+.sub-mp-reasoning p {
+  margin: 0;
+  line-height: 1.6;
+  color: #555;
+  white-space: pre-wrap;
+}
+
+.sub-mp-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.sub-mp-category {
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sub-mp-category:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sub-mp-category h4 {
+  margin: 0 0 15px 0;
+  font-size: 17px;
+  color: #e65100;
+  font-weight: 700;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #ffe0b2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.etf-details-table {
+  overflow-x: auto;
+}
+
+.etf-details-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.etf-details-table thead {
+  background: #fff3e0;
+}
+
+.etf-details-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #e65100;
+  border-bottom: 2px solid #ffe0b2;
+  font-size: 14px;
+}
+
+.etf-details-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  font-size: 14px;
+}
+
+.etf-details-table tbody tr:hover {
+  background: #fff8e1;
+}
+
+.etf-details-table .ticker-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.etf-details-table .weight-value {
+  font-weight: 700;
+  color: #e65100;
+  text-align: right;
+}
+
 .info-note {
   padding: 20px;
   background: #e3f2fd;

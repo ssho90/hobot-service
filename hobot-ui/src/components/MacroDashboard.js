@@ -322,6 +322,116 @@ const MacroDashboard = () => {
                   </div>
                 </div>
               )}
+
+              {/* Sub-MP 세부종목 섹션 */}
+              {overviewData.sub_mp && (
+                <div className="sub-mp-details">
+                  <h3>
+                    <span className="ai-icon-inline">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    Sub-MP 세부종목
+                  </h3>
+                  
+                  {overviewData.sub_mp_reasoning && (
+                    <div className="sub-mp-reasoning">
+                      <h4>Sub-MP 선택 근거</h4>
+                      <p>{overviewData.sub_mp_reasoning}</p>
+                    </div>
+                  )}
+
+                  <div className="sub-mp-content">
+                    {overviewData.sub_mp.stocks && (
+                      <div className="sub-mp-category">
+                        <h4>
+                          <span className="category-icon">📈</span>
+                          주식 Sub-MP: {overviewData.sub_mp.stocks.sub_mp_id} - {overviewData.sub_mp.stocks.sub_mp_name}
+                        </h4>
+                        <div className="etf-details-table">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>종목명</th>
+                                <th>종목번호</th>
+                                <th>비중</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {overviewData.sub_mp.stocks.etf_details && overviewData.sub_mp.stocks.etf_details.map((etf, idx) => (
+                                <tr key={idx}>
+                                  <td>{etf.name}</td>
+                                  <td className="ticker-code">{etf.ticker}</td>
+                                  <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {overviewData.sub_mp.bonds && (
+                      <div className="sub-mp-category">
+                        <h4>
+                          <span className="category-icon">📊</span>
+                          채권 Sub-MP: {overviewData.sub_mp.bonds.sub_mp_id} - {overviewData.sub_mp.bonds.sub_mp_name}
+                        </h4>
+                        <div className="etf-details-table">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>종목명</th>
+                                <th>종목번호</th>
+                                <th>비중</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {overviewData.sub_mp.bonds.etf_details && overviewData.sub_mp.bonds.etf_details.map((etf, idx) => (
+                                <tr key={idx}>
+                                  <td>{etf.name}</td>
+                                  <td className="ticker-code">{etf.ticker}</td>
+                                  <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {overviewData.sub_mp.alternatives && (
+                      <div className="sub-mp-category">
+                        <h4>
+                          <span className="category-icon">💎</span>
+                          대체자산 Sub-MP: {overviewData.sub_mp.alternatives.sub_mp_id} - {overviewData.sub_mp.alternatives.sub_mp_name}
+                        </h4>
+                        <div className="etf-details-table">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>종목명</th>
+                                <th>종목번호</th>
+                                <th>비중</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {overviewData.sub_mp.alternatives.etf_details && overviewData.sub_mp.alternatives.etf_details.map((etf, idx) => (
+                                <tr key={idx}>
+                                  <td>{etf.name}</td>
+                                  <td className="ticker-code">{etf.ticker}</td>
+                                  <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -564,6 +674,109 @@ const MacroDashboard = () => {
                                     </li>
                                   ))}
                                 </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Sub-MP 세부종목 (이전 분석) */}
+                      {item.sub_mp && (
+                        <div className="history-section sub-mp-details">
+                          <h3>Sub-MP 세부종목</h3>
+                          
+                          {item.sub_mp_reasoning && (
+                            <div className="sub-mp-reasoning">
+                              <h4>Sub-MP 선택 근거</h4>
+                              <p>{item.sub_mp_reasoning}</p>
+                            </div>
+                          )}
+
+                          <div className="sub-mp-content">
+                            {item.sub_mp.stocks && (
+                              <div className="sub-mp-category">
+                                <h4>
+                                  <span className="category-icon">📈</span>
+                                  주식 Sub-MP: {item.sub_mp.stocks.sub_mp_id} - {item.sub_mp.stocks.sub_mp_name}
+                                </h4>
+                                <div className="etf-details-table">
+                                  <table>
+                                    <thead>
+                                      <tr>
+                                        <th>종목명</th>
+                                        <th>종목번호</th>
+                                        <th>비중</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {item.sub_mp.stocks.etf_details && item.sub_mp.stocks.etf_details.map((etf, idx) => (
+                                        <tr key={idx}>
+                                          <td>{etf.name}</td>
+                                          <td className="ticker-code">{etf.ticker}</td>
+                                          <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+
+                            {item.sub_mp.bonds && (
+                              <div className="sub-mp-category">
+                                <h4>
+                                  <span className="category-icon">📊</span>
+                                  채권 Sub-MP: {item.sub_mp.bonds.sub_mp_id} - {item.sub_mp.bonds.sub_mp_name}
+                                </h4>
+                                <div className="etf-details-table">
+                                  <table>
+                                    <thead>
+                                      <tr>
+                                        <th>종목명</th>
+                                        <th>종목번호</th>
+                                        <th>비중</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {item.sub_mp.bonds.etf_details && item.sub_mp.bonds.etf_details.map((etf, idx) => (
+                                        <tr key={idx}>
+                                          <td>{etf.name}</td>
+                                          <td className="ticker-code">{etf.ticker}</td>
+                                          <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+
+                            {item.sub_mp.alternatives && (
+                              <div className="sub-mp-category">
+                                <h4>
+                                  <span className="category-icon">💎</span>
+                                  대체자산 Sub-MP: {item.sub_mp.alternatives.sub_mp_id} - {item.sub_mp.alternatives.sub_mp_name}
+                                </h4>
+                                <div className="etf-details-table">
+                                  <table>
+                                    <thead>
+                                      <tr>
+                                        <th>종목명</th>
+                                        <th>종목번호</th>
+                                        <th>비중</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {item.sub_mp.alternatives.etf_details && item.sub_mp.alternatives.etf_details.map((etf, idx) => (
+                                        <tr key={idx}>
+                                          <td>{etf.name}</td>
+                                          <td className="ticker-code">{etf.ticker}</td>
+                                          <td className="weight-value">{(etf.weight * 100).toFixed(0)}%</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
                               </div>
                             )}
                           </div>

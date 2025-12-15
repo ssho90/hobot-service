@@ -94,6 +94,160 @@ def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
     return None
 
 
+# ============================================================================
+# Sub-MP (자산군별 세부 모델) 정의
+# ============================================================================
+
+SUB_MODEL_PORTFOLIOS = {
+    # 주식 (Equity) Sub-Models
+    "Eq-A": {
+        "id": "Eq-A",
+        "name": "Aggressive (성장 공격형)",
+        "description": "금리 인하기, 유동성 풍부, Risk-On. 기술주가 주도하는 상황.",
+        "asset_class": "Stocks",
+        "allocation": {
+            "나스닥": 0.5,
+            "S&P500": 0.3,
+            "배당주": 0.2
+        },
+        "etf_details": [
+            {"category": "나스닥", "ticker": "411420", "name": "KODEX 미국나스닥AI테크액티브", "weight": 0.5},
+            {"category": "S&P500", "ticker": "360750", "name": "TIGER 미국S&P500", "weight": 0.3},
+            {"category": "배당주", "ticker": "458730", "name": "TIGER 미국배당다우존스", "weight": 0.2}
+        ]
+    },
+    "Eq-N": {
+        "id": "Eq-N",
+        "name": "Neutral (시장 중립형)",
+        "description": "방향성 불확실, 일반적인 상승장.",
+        "asset_class": "Stocks",
+        "allocation": {
+            "S&P500": 0.5,
+            "나스닥": 0.3,
+            "배당주": 0.2
+        },
+        "etf_details": [
+            {"category": "S&P500", "ticker": "360750", "name": "TIGER 미국S&P500", "weight": 0.5},
+            {"category": "나스닥", "ticker": "411420", "name": "KODEX 미국나스닥AI테크액티브", "weight": 0.3},
+            {"category": "배당주", "ticker": "458730", "name": "TIGER 미국배당다우존스", "weight": 0.2}
+        ]
+    },
+    "Eq-D": {
+        "id": "Eq-D",
+        "name": "Defensive (방어형)",
+        "description": "고금리 장기화, 경기 침체 우려, 변동성 확대. 현금흐름이 좋은 배당주 선호.",
+        "asset_class": "Stocks",
+        "allocation": {
+            "배당주": 0.5,
+            "S&P500": 0.3,
+            "나스닥": 0.2
+        },
+        "etf_details": [
+            {"category": "배당주", "ticker": "458730", "name": "TIGER 미국배당다우존스", "weight": 0.5},
+            {"category": "S&P500", "ticker": "360750", "name": "TIGER 미국S&P500", "weight": 0.3},
+            {"category": "나스닥", "ticker": "411420", "name": "KODEX 미국나스닥AI테크액티브", "weight": 0.2}
+        ]
+    },
+    # 채권 (Bond) Sub-Models
+    "Bnd-L": {
+        "id": "Bnd-L",
+        "name": "Long Duration (장기채 베팅)",
+        "description": "금리 인하가 확실시될 때. 금리가 1% 떨어지면 장기채는 15% 폭등.",
+        "asset_class": "Bonds",
+        "allocation": {
+            "미국 장기채": 0.8,
+            "한국 단기채": 0.2
+        },
+        "etf_details": [
+            {"category": "미국 장기채", "ticker": "453850", "name": "ACE 미국30년국채액티브(H)", "weight": 0.8},
+            {"category": "한국 단기채", "ticker": "357870", "name": "TIGER CD금리투자KIS", "weight": 0.2}
+        ]
+    },
+    "Bnd-N": {
+        "id": "Bnd-N",
+        "name": "Balanced (균형)",
+        "description": "금리 동결 또는 완만한 인하.",
+        "asset_class": "Bonds",
+        "allocation": {
+            "미국 장기채": 0.5,
+            "한국 단기채": 0.5
+        },
+        "etf_details": [
+            {"category": "미국 장기채", "ticker": "453850", "name": "ACE 미국30년국채액티브(H)", "weight": 0.5},
+            {"category": "한국 단기채", "ticker": "357870", "name": "TIGER CD금리투자KIS", "weight": 0.5}
+        ]
+    },
+    "Bnd-S": {
+        "id": "Bnd-S",
+        "name": "Short Duration (단기채 방어)",
+        "description": "금리 인상기, 인플레이션 쇼크. 장기채 가격 폭락 방어.",
+        "asset_class": "Bonds",
+        "allocation": {
+            "한국 단기채": 0.8,
+            "미국 장기채": 0.2
+        },
+        "etf_details": [
+            {"category": "한국 단기채", "ticker": "357870", "name": "TIGER CD금리투자KIS", "weight": 0.8},
+            {"category": "미국 장기채", "ticker": "453850", "name": "ACE 미국30년국채액티브(H)", "weight": 0.2}
+        ]
+    },
+    # 대체자산 (Alternatives) Sub-Models
+    "Alt-I": {
+        "id": "Alt-I",
+        "name": "Inflation Fighter (인플레 방어)",
+        "description": "스태그플레이션, 물가 급등, 달러 약세.",
+        "asset_class": "Alternatives",
+        "allocation": {
+            "금": 0.8,
+            "달러": 0.2
+        },
+        "etf_details": [
+            {"category": "금", "ticker": "132030", "name": "KODEX 골드선물(H)", "weight": 0.8},
+            {"category": "달러", "ticker": "261240", "name": "KODEX 미국달러선물", "weight": 0.2}
+        ]
+    },
+    "Alt-C": {
+        "id": "Alt-C",
+        "name": "Crisis Hedge (위기 방어)",
+        "description": "금융 위기, 시스템 리스크, 주식 폭락(달러 강세).",
+        "asset_class": "Alternatives",
+        "allocation": {
+            "달러": 0.7,
+            "금": 0.3
+        },
+        "etf_details": [
+            {"category": "달러", "ticker": "261240", "name": "KODEX 미국달러선물", "weight": 0.7},
+            {"category": "금", "ticker": "132030", "name": "KODEX 골드선물(H)", "weight": 0.3}
+        ]
+    }
+}
+
+
+def get_sub_model_portfolio_allocation(sub_mp_id: str) -> Optional[Dict[str, float]]:
+    """Sub-MP ID에 해당하는 자산군 내 배분 비율 반환"""
+    sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id)
+    if sub_mp:
+        return sub_mp["allocation"].copy()
+    return None
+
+
+def get_sub_models_by_asset_class(asset_class: str) -> Dict[str, Dict]:
+    """자산군별 Sub-MP 목록 반환"""
+    result = {}
+    for sub_mp_id, sub_mp in SUB_MODEL_PORTFOLIOS.items():
+        if sub_mp.get("asset_class") == asset_class:
+            result[sub_mp_id] = sub_mp
+    return result
+
+
+def get_sub_mp_etf_details(sub_mp_id: str) -> Optional[List[Dict]]:
+    """Sub-MP ID에 해당하는 ETF 세부 정보 반환"""
+    sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id)
+    if sub_mp:
+        return sub_mp.get("etf_details", []).copy()
+    return None
+
+
 class TargetAllocation(BaseModel):
     """목표 자산 배분 모델"""
     Stocks: float = Field(..., ge=0, le=100, description="주식 비중 (%)")
@@ -124,11 +278,20 @@ class RecommendedStocks(BaseModel):
     Alternatives: Optional[List[RecommendedStock]] = Field(default=None, description="대체투자 추천 종목")
     Cash: Optional[List[RecommendedStock]] = Field(default=None, description="현금 추천 종목")
 
+class SubMPDecision(BaseModel):
+    """Sub-MP 결정 모델"""
+    stocks_sub_mp: Optional[str] = Field(default=None, description="주식 Sub-MP ID (Eq-A, Eq-N, Eq-D)")
+    bonds_sub_mp: Optional[str] = Field(default=None, description="채권 Sub-MP ID (Bnd-L, Bnd-N, Bnd-S)")
+    alternatives_sub_mp: Optional[str] = Field(default=None, description="대체자산 Sub-MP ID (Alt-I, Alt-C)")
+    reasoning: str = Field(..., description="Sub-MP 선택 근거")
+
+
 class AIStrategyDecision(BaseModel):
     """AI 전략 결정 결과 모델"""
     analysis_summary: str = Field(..., description="AI 분석 요약")
     mp_id: str = Field(..., description="선택된 모델 포트폴리오 ID (MP-1 ~ MP-5)")
     reasoning: str = Field(..., description="판단 근거")
+    sub_mp: Optional[SubMPDecision] = Field(default=None, description="자산군별 Sub-MP 결정")
     recommended_stocks: Optional[RecommendedStocks] = Field(default=None, description="자산군별 추천 종목")
     
     def get_target_allocation(self) -> TargetAllocation:
@@ -455,6 +618,103 @@ def get_overview_recommended_sectors() -> Dict[str, Dict[str, List[Dict]]]:
         }
 
 
+def get_previous_decision() -> Optional[Dict[str, Any]]:
+    """이전 전략 결정 결과 조회 (가장 최근 것)"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    decision_date,
+                    analysis_summary,
+                    target_allocation,
+                    recommended_stocks
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT 1
+            """)
+            
+            row = cursor.fetchone()
+            if not row:
+                return None
+            
+            # target_allocation에서 mp_id 추출
+            target_allocation_data = None
+            mp_id = None
+            if row.get('target_allocation'):
+                try:
+                    target_allocation_data = json.loads(row['target_allocation'])
+                    mp_id = target_allocation_data.get('mp_id')
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            
+            # recommended_stocks에서 sub_mp 추출
+            sub_mp_data = None
+            if row.get('recommended_stocks'):
+                try:
+                    recommended_stocks_data = json.loads(row['recommended_stocks'])
+                    # Sub-MP 정보는 별도로 저장하지 않았을 수 있으므로 None일 수 있음
+                    sub_mp_data = None
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            
+            return {
+                "decision_date": row.get('decision_date'),
+                "mp_id": mp_id,
+                "sub_mp": sub_mp_data,
+                "analysis_summary": row.get('analysis_summary')
+            }
+    except Exception as e:
+        logger.warning(f"이전 결정 조회 실패: {e}")
+        return None
+
+
+def get_previous_decision_with_sub_mp() -> Optional[Dict[str, Any]]:
+    """이전 전략 결정 결과 조회 (Sub-MP 포함)"""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    decision_date,
+                    analysis_summary,
+                    target_allocation,
+                    recommended_stocks
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT 1
+            """)
+            
+            row = cursor.fetchone()
+            if not row:
+                return None
+            
+            # target_allocation에서 mp_id 추출
+            target_allocation_data = None
+            mp_id = None
+            if row.get('target_allocation'):
+                try:
+                    target_allocation_data = json.loads(row['target_allocation'])
+                    mp_id = target_allocation_data.get('mp_id')
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            
+            # target_allocation에서 sub_mp 추출
+            sub_mp_data = None
+            if target_allocation_data:
+                sub_mp_data = target_allocation_data.get('sub_mp')
+            
+            return {
+                "decision_date": row.get('decision_date'),
+                "mp_id": mp_id,
+                "sub_mp": sub_mp_data,
+                "analysis_summary": row.get('analysis_summary')
+            }
+    except Exception as e:
+        logger.warning(f"이전 결정 조회 실패: {e}")
+        return None
+
+
 def get_available_etf_list() -> Dict[str, List[Dict]]:
     """사용 가능한 ETF 목록 조회 (DB 우선, 없으면 설정 파일)"""
     try:
@@ -523,26 +783,8 @@ def get_available_etf_list() -> Dict[str, List[Dict]]:
         }
 
 
-def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
-    """AI 분석용 프롬프트 생성"""
-    
-    # 추천 가능한 섹터/그룹 리스트 조회
-    recommended_sectors = get_overview_recommended_sectors()
-    
-    # 섹터 리스트를 프롬프트에 포함
-    sectors_info = "\n=== 추천 가능한 섹터/그룹 리스트 ===\n"
-    for asset_class, sectors in recommended_sectors.items():
-        if sectors:
-            asset_class_kr = {
-                "stocks": "주식",
-                "bonds": "채권",
-                "alternatives": "대체투자",
-                "cash": "현금"
-            }.get(asset_class, asset_class)
-            sectors_info += f"\n{asset_class_kr}:\n"
-            for sector_group, etfs in sectors.items():
-                etf_names = [etf['name'] for etf in etfs]
-                sectors_info += f"  - {sector_group}: {', '.join(etf_names)}\n"
+def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_mp_id: Optional[str] = None) -> str:
+    """MP 분석용 프롬프트 생성"""
     
     # FRED 시그널 요약
     fred_summary = "=== FRED 정량 시그널 (가장 신뢰도 높음) ===\n"
@@ -683,6 +925,17 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     else:
         news_summary += "최근 뉴스 없음\n"
     
+    # 이전 MP 정보
+    previous_mp_info = ""
+    if previous_mp_id:
+        previous_mp = MODEL_PORTFOLIOS.get(previous_mp_id)
+        if previous_mp:
+            previous_mp_info = f"\n=== 이전 MP 정보 ===\n"
+            previous_mp_info += f"이전에 선택된 MP: {previous_mp_id} - {previous_mp['name']}\n"
+            previous_mp_info += f"이전 MP 특징: {previous_mp['description']}\n\n"
+            previous_mp_info += "**중요:** 경제 상황이 크게 달라지지 않은 경우, 이전 MP를 유지하는 것이 좋습니다.\n"
+            previous_mp_info += "경제 지표의 변화가 명확하고 지속적인 경우에만 MP를 변경하세요.\n\n"
+    
     # MP 시나리오 정보를 프롬프트에 포함
     mp_info = "\n=== 모델 포트폴리오 (MP) 시나리오 ===\n"
     mp_info += "현재 거시경제 국면을 분석하여 다음 5가지 모델 포트폴리오 중 하나를 선택하세요:\n\n"
@@ -694,11 +947,11 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
     
     prompt = f"""당신은 거시경제 전문가입니다. 다음 데이터를 분석하여 현재 거시경제 국면에 가장 적합한 모델 포트폴리오(MP)를 선택하세요.
 
+{previous_mp_info}
+
 {fred_summary}
 
 {news_summary}
-
-{sectors_info}
 
 {mp_info}
 
@@ -706,7 +959,10 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
 1. **FRED 지표를 가장 신뢰도 높게** 사용하세요. FRED 지표는 객관적이고 정량적입니다.
 2. **경제 뉴스는 보조 수단입니다.** FRED 지표 기반 분석한 내용을 한번 더 검토하는 수단입니다.
 3. **현재 거시경제 국면을 정확히 파악**하여 위의 5가지 MP 시나리오 중 하나를 선택하세요.
-4. MP 선택 시 고려사항:
+4. **이전 MP 고려사항:**
+   - 경제 상황이 크게 달라지지 않은 경우 이전 MP를 유지하세요.
+   - 경제 지표의 변화가 명확하고 지속적인 경우에만 MP를 변경하세요.
+5. MP 선택 시 고려사항:
    - 성장률 추세 (상승/하락/중립)
    - 물가 추세 (상승/안정/하락)
    - 금리 정책 방향 (인상/안정/인하)
@@ -718,35 +974,13 @@ def create_analysis_prompt(fred_signals: Dict, economic_news: Dict) -> str:
 {{
     "analysis_summary": "분석 요약 (한국어, 200-300자)",
     "mp_id": "MP-4",
-    "reasoning": "판단 근거 (한국어, 300-500자) - 왜 이 MP를 선택했는지 설명",
-    "recommended_stocks": {{
-        "Stocks": [
-            {{"category": "미국 대형주", "weight": 0.4}},
-            {{"category": "테크 섹터", "weight": 0.3}},
-            {{"category": "한국 주식", "weight": 0.3}}
-        ],
-        "Bonds": [
-            {{"category": "미국 장기채권", "weight": 0.6}},
-            {{"category": "한국 단기채권", "weight": 0.4}}
-        ],
-        "Alternatives": [
-            {{"category": "금", "weight": 0.7}},
-            {{"category": "달러", "weight": 0.3}}
-        ],
-        "Cash": [
-            {{"category": "현금성 자산", "weight": 1.0}}
-        ]
-    }}
+    "reasoning": "판단 근거 (한국어, 500-700자) - 왜 이 MP를 선택했는지 설명 (이전 MP와 비교하여 변경 이유 포함)"
 }}
 
 **중요:**
 - mp_id는 반드시 "MP-1", "MP-2", "MP-3", "MP-4", "MP-5" 중 하나여야 합니다.
-- 자산 배분 비율은 선택한 MP에 따라 자동으로 결정되므로, target_allocation을 출력하지 마세요.
-- 추천 종목/섹터 규칙:
-  - 각 자산군별로 투자할 만한 **카테고리/섹터**를 추천하세요. 개별 종목은 추천하지 마세요.
-  - 추천 가능한 섹터/그룹은 위의 "추천 가능한 섹터/그룹 리스트"에 명시된 것만 사용하세요.
-  - 각 자산군 내 추천 카테고리의 weight 합계는 1.0이어야 합니다.
-  - 자산군 비중이 0%인 경우 해당 자산군의 recommended_stocks는 null 또는 빈 배열로 설정하세요.
+- 경제 상황이 크게 달라지지 않은 경우 이전 MP를 유지하세요.
+- MP 변경 시에는 명확한 근거를 제시하세요.
 
 JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
 """
@@ -754,15 +988,233 @@ JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
     return prompt
 
 
+def create_sub_mp_analysis_prompt(
+    fred_signals: Dict, 
+    economic_news: Dict, 
+    mp_id: str,
+    previous_sub_mp: Optional[Dict[str, str]] = None
+) -> str:
+    """Sub-MP 분석용 프롬프트 생성
+    
+    Args:
+        fred_signals: FRED 시그널 데이터
+        economic_news: 경제 뉴스 데이터
+        mp_id: 선택된 MP ID
+        previous_sub_mp: 이전 Sub-MP 정보 ({"stocks": "Eq-A", "bonds": "Bnd-L", "alternatives": "Alt-I"} 형태)
+    """
+    
+    # FRED 시그널 요약 (간단히)
+    fred_summary = "=== FRED 정량 시그널 요약 ===\n"
+    if fred_signals:
+        yield_curve = fred_signals.get('yield_curve_spread_trend', {})
+        if yield_curve:
+            fred_summary += f"금리 곡선 국면: {yield_curve.get('regime_kr', 'N/A')}\n"
+            fred_summary += f"금리 대세: {yield_curve.get('yield_regime_kr', 'N/A')}\n"
+        
+        real_rate = fred_signals.get('real_interest_rate')
+        if real_rate is not None:
+            fred_summary += f"실질 금리: {real_rate:.2f}%\n"
+        
+        hy_spread = fred_signals.get('high_yield_spread', {})
+        if hy_spread:
+            signal_name = hy_spread.get('signal_name', 'N/A')
+            fred_summary += f"하이일드 스프레드: {signal_name}\n"
+    
+    # 선택된 MP 정보
+    selected_mp = MODEL_PORTFOLIOS.get(mp_id, {})
+    mp_info = f"\n=== 선택된 MP 정보 ===\n"
+    mp_info += f"MP: {mp_id} - {selected_mp.get('name', 'N/A')}\n"
+    mp_info += f"자산 배분: 주식 {selected_mp.get('allocation', {}).get('Stocks', 0)}% / "
+    mp_info += f"채권 {selected_mp.get('allocation', {}).get('Bonds', 0)}% / "
+    mp_info += f"대체투자 {selected_mp.get('allocation', {}).get('Alternatives', 0)}% / "
+    mp_info += f"현금 {selected_mp.get('allocation', {}).get('Cash', 0)}%\n\n"
+    
+    # 이전 Sub-MP 정보
+    previous_sub_mp_info = ""
+    if previous_sub_mp:
+        previous_sub_mp_info = "\n=== 이전 Sub-MP 정보 ===\n"
+        if previous_sub_mp.get('stocks'):
+            prev_stocks = SUB_MODEL_PORTFOLIOS.get(previous_sub_mp['stocks'], {})
+            previous_sub_mp_info += f"이전 주식 Sub-MP: {previous_sub_mp['stocks']} - {prev_stocks.get('name', 'N/A')}\n"
+        if previous_sub_mp.get('bonds'):
+            prev_bonds = SUB_MODEL_PORTFOLIOS.get(previous_sub_mp['bonds'], {})
+            previous_sub_mp_info += f"이전 채권 Sub-MP: {previous_sub_mp['bonds']} - {prev_bonds.get('name', 'N/A')}\n"
+        if previous_sub_mp.get('alternatives'):
+            prev_alt = SUB_MODEL_PORTFOLIOS.get(previous_sub_mp['alternatives'], {})
+            previous_sub_mp_info += f"이전 대체자산 Sub-MP: {previous_sub_mp['alternatives']} - {prev_alt.get('name', 'N/A')}\n"
+        previous_sub_mp_info += "\n**중요:** 경제 상황이 크게 달라지지 않은 경우, 이전 Sub-MP를 유지하는 것이 좋습니다.\n"
+        previous_sub_mp_info += "경제 지표의 변화가 명확하고 지속적인 경우에만 Sub-MP를 변경하세요.\n\n"
+    
+    # Sub-MP 시나리오 정보
+    sub_mp_info = "\n=== Sub-MP (자산군별 세부 모델) 시나리오 ===\n"
+    
+    # 주식 Sub-MP
+    sub_mp_info += "\n### 주식 (Equity) Sub-Models:\n"
+    for sub_mp_id in ["Eq-A", "Eq-N", "Eq-D"]:
+        sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id, {})
+        if sub_mp:
+            sub_mp_info += f"{sub_mp_id}: {sub_mp.get('name', 'N/A')}\n"
+            sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
+            etf_details = sub_mp.get('etf_details', [])
+            if etf_details:
+                sub_mp_info += f"  - 세부 종목:\n"
+                for etf in etf_details:
+                    sub_mp_info += f"    * {etf.get('ticker', 'N/A')} ({etf.get('name', 'N/A')}): {etf.get('weight', 0)*100:.0f}%\n"
+            sub_mp_info += "\n"
+    
+    # 채권 Sub-MP
+    sub_mp_info += "\n### 채권 (Bond) Sub-Models:\n"
+    for sub_mp_id in ["Bnd-L", "Bnd-N", "Bnd-S"]:
+        sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id, {})
+        if sub_mp:
+            sub_mp_info += f"{sub_mp_id}: {sub_mp.get('name', 'N/A')}\n"
+            sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
+            etf_details = sub_mp.get('etf_details', [])
+            if etf_details:
+                sub_mp_info += f"  - 세부 종목:\n"
+                for etf in etf_details:
+                    sub_mp_info += f"    * {etf.get('ticker', 'N/A')} ({etf.get('name', 'N/A')}): {etf.get('weight', 0)*100:.0f}%\n"
+            sub_mp_info += "\n"
+    
+    # 대체자산 Sub-MP
+    sub_mp_info += "\n### 대체자산 (Alternatives) Sub-Models:\n"
+    for sub_mp_id in ["Alt-I", "Alt-C"]:
+        sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id, {})
+        if sub_mp:
+            sub_mp_info += f"{sub_mp_id}: {sub_mp.get('name', 'N/A')}\n"
+            sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
+            etf_details = sub_mp.get('etf_details', [])
+            if etf_details:
+                sub_mp_info += f"  - 세부 종목:\n"
+                for etf in etf_details:
+                    sub_mp_info += f"    * {etf.get('ticker', 'N/A')} ({etf.get('name', 'N/A')}): {etf.get('weight', 0)*100:.0f}%\n"
+            sub_mp_info += "\n"
+    
+    prompt = f"""당신은 거시경제 전문가입니다. 선택된 MP({mp_id})에 기반하여 각 자산군별 Sub-MP를 선택하세요.
+
+{previous_sub_mp_info}
+
+{mp_info}
+
+{fred_summary}
+
+{sub_mp_info}
+
+## 분석 지침:
+1. **선택된 MP를 고려**하여 각 자산군별로 적합한 Sub-MP를 선택하세요.
+2. **주식 Sub-MP 선택 기준:**
+   - 금리 인하기, 유동성 풍부, Risk-On → Eq-A (성장 공격형)
+   - 방향성 불확실, 일반적인 상승장 → Eq-N (시장 중립형)
+   - 고금리 장기화, 경기 침체 우려 → Eq-D (방어형)
+3. **채권 Sub-MP 선택 기준:**
+   - 금리 인하 확실시 → Bnd-L (장기채 베팅)
+   - 금리 동결 또는 완만한 인하 → Bnd-N (균형)
+   - 금리 인상기, 인플레이션 쇼크 → Bnd-S (단기채 방어)
+4. **대체자산 Sub-MP 선택 기준:**
+   - 스태그플레이션, 물가 급등, 달러 약세 → Alt-I (인플레 방어)
+   - 금융 위기, 시스템 리스크, 주식 폭락 → Alt-C (위기 방어)
+5. **이전 Sub-MP 고려사항:**
+   - 경제 상황이 크게 달라지지 않은 경우 이전 Sub-MP를 유지하세요.
+   - 경제 지표의 변화가 명확하고 지속적인 경우에만 Sub-MP를 변경하세요.
+6. **자산군 비중이 0%인 경우:**
+   - 해당 자산군의 Sub-MP는 null로 설정하세요.
+
+## 출력 형식 (JSON):
+{{
+    "stocks_sub_mp": "Eq-A" 또는 "Eq-N" 또는 "Eq-D" 또는 null,
+    "bonds_sub_mp": "Bnd-L" 또는 "Bnd-N" 또는 "Bnd-S" 또는 null,
+    "alternatives_sub_mp": "Alt-I" 또는 "Alt-C" 또는 null,
+    "reasoning": "Sub-MP 선택 근거 (한국어, 300-500자) - 각 자산군별 선택 이유 및 이전 Sub-MP와 비교"
+}}
+
+**중요:**
+- 각 자산군의 Sub-MP ID는 위에 명시된 것만 사용하세요.
+- 자산군 비중이 0%인 경우 해당 Sub-MP는 null로 설정하세요.
+- 경제 상황이 크게 달라지지 않은 경우 이전 Sub-MP를 유지하세요.
+
+JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
+"""
+    
+    return prompt
+
+
+def _parse_llm_response(response) -> str:
+    """LLM 응답을 텍스트로 파싱"""
+    response_text = None
+    if hasattr(response, 'content'):
+        if isinstance(response.content, list) and len(response.content) > 0:
+            first_item = response.content[0]
+            if isinstance(first_item, dict) and 'text' in first_item:
+                response_text = first_item['text']
+            elif isinstance(first_item, dict) and 'type' in first_item and first_item.get('type') == 'text':
+                response_text = str(first_item.get('text', ''))
+            else:
+                response_text = str(first_item)
+        elif isinstance(response.content, str):
+            response_text = response.content
+        else:
+            response_text = str(response.content)
+    elif hasattr(response, 'text'):
+        response_text = response.text
+    elif isinstance(response, str):
+        response_text = response
+    else:
+        response_text = str(response)
+    
+    if isinstance(response_text, list):
+        if len(response_text) > 0:
+            first_item = response_text[0]
+            if isinstance(first_item, dict) and 'text' in first_item:
+                response_text = first_item['text']
+            else:
+                response_text = str(first_item)
+        else:
+            response_text = ""
+    
+    if not isinstance(response_text, str):
+        response_text = str(response_text)
+    
+    # 마크다운 코드 블록 제거
+    response_text = response_text.strip()
+    if response_text.startswith('```'):
+        lines = response_text.split('\n')
+        if len(lines) > 1:
+            if lines[-1].strip() == '```' or lines[-1].strip().startswith('```'):
+                response_text = '\n'.join(lines[1:-1])
+            else:
+                response_text = '\n'.join(lines[1:])
+    
+    return response_text
+
+
+def _parse_json_response(response_text: str) -> Dict:
+    """JSON 응답 파싱"""
+    try:
+        return json.loads(response_text)
+    except json.JSONDecodeError as e:
+        logger.warning(f"JSON 파싱 실패, 재시도 중... (오류: {e})")
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', response_text, re.MULTILINE)
+        if json_match:
+            try:
+                return json.loads(json_match.group())
+            except json.JSONDecodeError as e2:
+                logger.error(f"정규식 추출 후 JSON 파싱 실패: {e2}")
+                raise ValueError(f"JSON 형식이 올바르지 않습니다. 원본 오류: {e}, 추출 오류: {e2}")
+        else:
+            logger.error(f"JSON 객체를 찾을 수 없습니다. 응답: {response_text[:200]}")
+            raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
+
+
 def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optional[Dict] = None) -> Optional[AIStrategyDecision]:
-    """AI 분석 및 전략 결정
+    """AI 분석 및 전략 결정 (MP 분석 + Sub-MP 분석 분리)
     
     Args:
         fred_signals: FRED 시그널 데이터 (None이면 수집)
         economic_news: 경제 뉴스 데이터 (None이면 수집)
     """
     try:
-        logger.info("AI 전략 분석 시작")
+        logger.info("AI 전략 분석 시작 (MP + Sub-MP 분리 분석)")
         
         # 데이터 수집 (파라미터로 전달되지 않은 경우에만)
         if fred_signals is None:
@@ -771,146 +1223,127 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         
         if economic_news is None:
             logger.info("경제 뉴스 수집 중... (지난 20일, 특정 국가 필터)")
-            economic_news = collect_economic_news(days=20)  # 지난 20일치 수집 및 LLM 요약
+            economic_news = collect_economic_news(days=20)
         
-        # 프롬프트 생성
-        prompt = create_analysis_prompt(fred_signals, economic_news)
+        # 이전 결정 조회
+        previous_decision = get_previous_decision_with_sub_mp()
+        previous_mp_id = previous_decision.get('mp_id') if previous_decision else None
+        previous_sub_mp = previous_decision.get('sub_mp') if previous_decision else None
         
         # 설정에서 모델명 가져오기
         from service.macro_trading.config.config_loader import get_config
         config = get_config()
         model_name = config.llm.model
-        
-        # LLM 호출
-        logger.info(f"Gemini {model_name} 분석 중...")
         llm = llm_gemini_pro(model=model_name)
         
-        # LLM 호출 추적
+        # ===== 1단계: MP 분석 =====
+        logger.info("1단계: MP 분석 중...")
+        mp_prompt = create_mp_analysis_prompt(fred_signals, economic_news, previous_mp_id)
+        
         with track_llm_call(
             model_name=model_name,
             provider="Google",
-            service_name="ai_strategist",
-            request_prompt=prompt
+            service_name="ai_strategist_mp",
+            request_prompt=mp_prompt
         ) as tracker:
-            # JSON 응답 강제
-            response = llm.invoke(prompt)
-            tracker.set_response(response)
+            mp_response = llm.invoke(mp_prompt)
+            tracker.set_response(mp_response)
         
-        # 응답 파싱
-        # response.content가 리스트인 경우 (예: [{'type': 'text', 'text': '...'}])
-        response_text = None
-        if hasattr(response, 'content'):
-            if isinstance(response.content, list) and len(response.content) > 0:
-                # 첫 번째 텍스트 항목 추출
-                first_item = response.content[0]
-                if isinstance(first_item, dict) and 'text' in first_item:
-                    response_text = first_item['text']
-                elif isinstance(first_item, dict) and 'type' in first_item and first_item.get('type') == 'text':
-                    # 'text' 키가 없지만 'type'이 'text'인 경우
-                    response_text = str(first_item.get('text', ''))
-                else:
-                    response_text = str(first_item)
-            elif isinstance(response.content, str):
-                response_text = response.content
-            else:
-                response_text = str(response.content)
-        elif hasattr(response, 'text'):
-            response_text = response.text
-        elif isinstance(response, str):
-            response_text = response
-        else:
-            response_text = str(response)
-        
-        # response_text가 여전히 리스트인 경우 처리
-        if isinstance(response_text, list):
-            if len(response_text) > 0:
-                first_item = response_text[0]
-                if isinstance(first_item, dict) and 'text' in first_item:
-                    response_text = first_item['text']
-                else:
-                    response_text = str(first_item)
-            else:
-                response_text = ""
-        
-        # 문자열이 아닌 경우 문자열로 변환
-        if not isinstance(response_text, str):
-            response_text = str(response_text)
-        
-        # JSON 추출 (마크다운 코드 블록 제거)
-        response_text = response_text.strip()
-        
-        logger.debug(f"응답 텍스트 길이: {len(response_text)} 문자")
-        logger.debug(f"응답 텍스트 시작 부분: {response_text[:200]}...")
-        
-        # ```json 또는 ```로 시작하는 코드 블록 제거
-        if response_text.startswith('```'):
-            lines = response_text.split('\n')
-            # 첫 번째 줄이 ```json 또는 ```로 시작하면 제거
-            if len(lines) > 1:
-                # 마지막 줄이 ```로 끝나는지 확인
-                if lines[-1].strip() == '```' or lines[-1].strip().startswith('```'):
-                    # 첫 줄과 마지막 줄 제거
-                    response_text = '\n'.join(lines[1:-1])
-                else:
-                    # 마지막 줄이 없으면 첫 줄만 제거
-                    response_text = '\n'.join(lines[1:])
-        
-        # JSON 파싱
-        try:
-            decision_data = json.loads(response_text)
-        except json.JSONDecodeError as e:
-            # JSON 파싱 실패 시 재시도
-            logger.warning(f"JSON 파싱 실패, 재시도 중... (오류: {e})")
-            logger.debug(f"응답 텍스트: {response_text[:500]}...")
-            
-            # 정규식으로 JSON 객체 추출 시도
-            import re
-            # 중괄호로 시작하고 끝나는 JSON 객체 찾기
-            json_match = re.search(r'\{[\s\S]*\}', response_text, re.MULTILINE)
-            if json_match:
-                try:
-                    decision_data = json.loads(json_match.group())
-                    logger.info("정규식으로 JSON 추출 성공")
-                except json.JSONDecodeError as e2:
-                    logger.error(f"정규식 추출 후 JSON 파싱 실패: {e2}")
-                    raise ValueError(f"JSON 형식이 올바르지 않습니다. 원본 오류: {e}, 추출 오류: {e2}")
-            else:
-                logger.error(f"JSON 객체를 찾을 수 없습니다. 응답: {response_text[:200]}")
-                raise ValueError(f"JSON 형식이 올바르지 않습니다. JSON 객체를 찾을 수 없습니다.")
+        mp_response_text = _parse_llm_response(mp_response)
+        mp_decision_data = _parse_json_response(mp_response_text)
         
         # MP ID 검증
-        mp_id = decision_data.get('mp_id')
+        mp_id = mp_decision_data.get('mp_id')
         if not mp_id or mp_id not in MODEL_PORTFOLIOS:
             valid_mp_ids = ', '.join(MODEL_PORTFOLIOS.keys())
             logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
             raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
         
-        # Pydantic 모델로 검증
-        try:
-            decision = AIStrategyDecision(**decision_data)
-            # MP ID로 자산 배분 비율 확인
-            target_allocation = decision.get_target_allocation()
-            logger.info(f"AI 분석 완료: MP={decision.mp_id}, {decision.analysis_summary[:50]}...")
-            logger.info(f"자산 배분: Stocks={target_allocation.Stocks}%, Bonds={target_allocation.Bonds}%, "
-                       f"Alternatives={target_allocation.Alternatives}%, Cash={target_allocation.Cash}%")
-            return decision
-        except Exception as validation_error:
-            logger.error(f"Pydantic 모델 검증 실패: {validation_error}")
-            logger.error(f"검증 실패한 데이터: {json.dumps(decision_data, indent=2, ensure_ascii=False)}")
-            raise ValueError(f"AI 응답 데이터 검증 실패: {validation_error}")
+        logger.info(f"MP 분석 완료: {mp_id}")
+        
+        # ===== 2단계: Sub-MP 분석 =====
+        logger.info("2단계: Sub-MP 분석 중...")
+        sub_mp_prompt = create_sub_mp_analysis_prompt(fred_signals, economic_news, mp_id, previous_sub_mp)
+        
+        with track_llm_call(
+            model_name=model_name,
+            provider="Google",
+            service_name="ai_strategist_sub_mp",
+            request_prompt=sub_mp_prompt
+        ) as tracker:
+            sub_mp_response = llm.invoke(sub_mp_prompt)
+            tracker.set_response(sub_mp_response)
+        
+        sub_mp_response_text = _parse_llm_response(sub_mp_response)
+        sub_mp_decision_data = _parse_json_response(sub_mp_response_text)
+        
+        # Sub-MP 검증
+        stocks_sub_mp = sub_mp_decision_data.get('stocks_sub_mp')
+        bonds_sub_mp = sub_mp_decision_data.get('bonds_sub_mp')
+        alternatives_sub_mp = sub_mp_decision_data.get('alternatives_sub_mp')
+        
+        # 자산군 비중 확인
+        target_allocation = get_model_portfolio_allocation(mp_id)
+        if target_allocation:
+            if target_allocation.get('Stocks', 0) == 0:
+                stocks_sub_mp = None
+            if target_allocation.get('Bonds', 0) == 0:
+                bonds_sub_mp = None
+            if target_allocation.get('Alternatives', 0) == 0:
+                alternatives_sub_mp = None
+        
+        # Sub-MP 유효성 검증
+        valid_stocks_sub_mp = ["Eq-A", "Eq-N", "Eq-D"]
+        valid_bonds_sub_mp = ["Bnd-L", "Bnd-N", "Bnd-S"]
+        valid_alternatives_sub_mp = ["Alt-I", "Alt-C"]
+        
+        if stocks_sub_mp and stocks_sub_mp not in valid_stocks_sub_mp:
+            logger.warning(f"유효하지 않은 주식 Sub-MP: {stocks_sub_mp}, None으로 설정")
+            stocks_sub_mp = None
+        if bonds_sub_mp and bonds_sub_mp not in valid_bonds_sub_mp:
+            logger.warning(f"유효하지 않은 채권 Sub-MP: {bonds_sub_mp}, None으로 설정")
+            bonds_sub_mp = None
+        if alternatives_sub_mp and alternatives_sub_mp not in valid_alternatives_sub_mp:
+            logger.warning(f"유효하지 않은 대체자산 Sub-MP: {alternatives_sub_mp}, None으로 설정")
+            alternatives_sub_mp = None
+        
+        logger.info(f"Sub-MP 분석 완료: Stocks={stocks_sub_mp}, Bonds={bonds_sub_mp}, Alternatives={alternatives_sub_mp}")
+        
+        # ===== 최종 결정 생성 =====
+        sub_mp_decision = SubMPDecision(
+            stocks_sub_mp=stocks_sub_mp,
+            bonds_sub_mp=bonds_sub_mp,
+            alternatives_sub_mp=alternatives_sub_mp,
+            reasoning=sub_mp_decision_data.get('reasoning', '')
+        )
+        
+        decision = AIStrategyDecision(
+            analysis_summary=mp_decision_data.get('analysis_summary', ''),
+            mp_id=mp_id,
+            reasoning=mp_decision_data.get('reasoning', ''),
+            sub_mp=sub_mp_decision,
+            recommended_stocks=None  # 추천 종목은 Sub-MP 기반으로 나중에 생성 가능
+        )
+        
+        target_allocation = decision.get_target_allocation()
+        logger.info(f"AI 분석 완료: MP={decision.mp_id}, {decision.analysis_summary[:50]}...")
+        logger.info(f"자산 배분: Stocks={target_allocation.Stocks}%, Bonds={target_allocation.Bonds}%, "
+                   f"Alternatives={target_allocation.Alternatives}%, Cash={target_allocation.Cash}%")
+        if decision.sub_mp:
+            logger.info(f"Sub-MP: Stocks={decision.sub_mp.stocks_sub_mp}, "
+                       f"Bonds={decision.sub_mp.bonds_sub_mp}, "
+                       f"Alternatives={decision.sub_mp.alternatives_sub_mp}")
+        
+        return decision
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON 파싱 실패: {e}")
-        logger.error(f"파싱 실패한 응답 텍스트: {response_text[:1000] if 'response_text' in locals() else 'N/A'}")
         raise
     except ValueError as e:
         logger.error(f"데이터 검증 실패: {e}")
         raise
     except Exception as e:
         logger.error(f"AI 분석 실패: {e}", exc_info=True)
-        logger.error(f"에러 타입: {type(e).__name__}")
-        if 'response_text' in locals():
-            logger.error(f"응답 텍스트 (처음 500자): {response_text[:500]}")
         raise
 
 
@@ -1136,12 +1569,19 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
             # MP ID로 자산 배분 비율 계산
             target_allocation = decision.get_target_allocation()
             
-            # mp_id를 포함한 저장 데이터 준비
-            # DB에 mp_id 컬럼이 있으면 저장, 없으면 target_allocation에 포함
+            # mp_id와 sub_mp를 포함한 저장 데이터 준비
             save_data = {
                 "mp_id": decision.mp_id,
                 "target_allocation": target_allocation.model_dump()
             }
+            
+            # Sub-MP 정보 추가
+            if decision.sub_mp:
+                save_data["sub_mp"] = {
+                    "stocks": decision.sub_mp.stocks_sub_mp,
+                    "bonds": decision.sub_mp.bonds_sub_mp,
+                    "alternatives": decision.sub_mp.alternatives_sub_mp
+                }
             
             cursor.execute("""
                 INSERT INTO ai_strategy_decisions (

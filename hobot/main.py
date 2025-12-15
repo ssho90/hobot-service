@@ -816,8 +816,9 @@ async def get_ai_overview():
             # MP 기반 저장 형식 처리 (mp_id와 target_allocation이 함께 저장됨)
             mp_id = None
             target_allocation = None
+            sub_mp_data = None
             if isinstance(target_allocation_raw, dict):
-                # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}}
+                # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}, "sub_mp": {...}}
                 if "mp_id" in target_allocation_raw:
                     mp_id = target_allocation_raw["mp_id"]
                     # mp_id가 있으면 get_model_portfolio_allocation을 사용하여 실제 allocation 가져오기
@@ -828,11 +829,54 @@ async def get_ai_overview():
                     else:
                         # MP ID가 유효하지 않으면 저장된 target_allocation 사용
                         target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
+                    
+                    # Sub-MP 정보 추출
+                    sub_mp_data = target_allocation_raw.get("sub_mp")
                 else:
                     # 기존 형식: 직접 target_allocation만 있음
                     target_allocation = target_allocation_raw
             else:
                 target_allocation = target_allocation_raw
+            
+            # Sub-MP 세부 종목 정보 가져오기
+            sub_mp_details = None
+            if sub_mp_data and mp_id:
+                from service.macro_trading.ai_strategist import (
+                    SUB_MODEL_PORTFOLIOS,
+                    get_sub_mp_etf_details
+                )
+                
+                sub_mp_details = {}
+                # 각 자산군별 Sub-MP 세부 종목 정보
+                if sub_mp_data.get('stocks'):
+                    stocks_sub_mp_id = sub_mp_data['stocks']
+                    stocks_etf_details = get_sub_mp_etf_details(stocks_sub_mp_id)
+                    if stocks_etf_details:
+                        sub_mp_details['stocks'] = {
+                            'sub_mp_id': stocks_sub_mp_id,
+                            'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(stocks_sub_mp_id, {}).get('name', ''),
+                            'etf_details': stocks_etf_details
+                        }
+                
+                if sub_mp_data.get('bonds'):
+                    bonds_sub_mp_id = sub_mp_data['bonds']
+                    bonds_etf_details = get_sub_mp_etf_details(bonds_sub_mp_id)
+                    if bonds_etf_details:
+                        sub_mp_details['bonds'] = {
+                            'sub_mp_id': bonds_sub_mp_id,
+                            'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(bonds_sub_mp_id, {}).get('name', ''),
+                            'etf_details': bonds_etf_details
+                        }
+                
+                if sub_mp_data.get('alternatives'):
+                    alternatives_sub_mp_id = sub_mp_data['alternatives']
+                    alternatives_etf_details = get_sub_mp_etf_details(alternatives_sub_mp_id)
+                    if alternatives_etf_details:
+                        sub_mp_details['alternatives'] = {
+                            'sub_mp_id': alternatives_sub_mp_id,
+                            'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(alternatives_sub_mp_id, {}).get('name', ''),
+                            'etf_details': alternatives_etf_details
+                        }
             
             recommended_stocks = row.get('recommended_stocks')
             if recommended_stocks:
@@ -850,6 +894,11 @@ async def get_ai_overview():
                     reasoning = parts[1].strip()
                     analysis_summary = parts[0].strip()
             
+            # Sub-MP reasoning 추출 (recommended_stocks에서 sub_mp reasoning이 있을 수 있음)
+            sub_mp_reasoning = None
+            if sub_mp_data and isinstance(sub_mp_data, dict):
+                sub_mp_reasoning = sub_mp_data.get('reasoning')
+            
             return {
                 "status": "success",
                 "data": {
@@ -858,6 +907,8 @@ async def get_ai_overview():
                     "reasoning": reasoning,
                     "mp_id": mp_id,
                     "target_allocation": target_allocation,
+                    "sub_mp": sub_mp_details,
+                    "sub_mp_reasoning": sub_mp_reasoning,
                     "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
                 }
@@ -1026,8 +1077,9 @@ async def get_strategy_decisions_history(
                 # MP 기반 저장 형식 처리 (mp_id와 target_allocation이 함께 저장됨)
                 mp_id = None
                 target_allocation = None
+                sub_mp_data = None
                 if isinstance(target_allocation_raw, dict):
-                    # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}}
+                    # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}, "sub_mp": {...}}
                     if "mp_id" in target_allocation_raw:
                         mp_id = target_allocation_raw["mp_id"]
                         # mp_id가 있으면 get_model_portfolio_allocation을 사용하여 실제 allocation 가져오기
@@ -1038,11 +1090,53 @@ async def get_strategy_decisions_history(
                         else:
                             # MP ID가 유효하지 않으면 저장된 target_allocation 사용
                             target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
+                        
+                        # Sub-MP 정보 추출
+                        sub_mp_data = target_allocation_raw.get("sub_mp")
                     else:
                         # 기존 형식: 직접 target_allocation만 있음
                         target_allocation = target_allocation_raw
                 else:
                     target_allocation = target_allocation_raw
+                
+                # Sub-MP 세부 종목 정보 가져오기
+                sub_mp_details = None
+                if sub_mp_data and mp_id:
+                    from service.macro_trading.ai_strategist import (
+                        SUB_MODEL_PORTFOLIOS,
+                        get_sub_mp_etf_details
+                    )
+                    
+                    sub_mp_details = {}
+                    if sub_mp_data.get('stocks'):
+                        stocks_sub_mp_id = sub_mp_data['stocks']
+                        stocks_etf_details = get_sub_mp_etf_details(stocks_sub_mp_id)
+                        if stocks_etf_details:
+                            sub_mp_details['stocks'] = {
+                                'sub_mp_id': stocks_sub_mp_id,
+                                'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(stocks_sub_mp_id, {}).get('name', ''),
+                                'etf_details': stocks_etf_details
+                            }
+                    
+                    if sub_mp_data.get('bonds'):
+                        bonds_sub_mp_id = sub_mp_data['bonds']
+                        bonds_etf_details = get_sub_mp_etf_details(bonds_sub_mp_id)
+                        if bonds_etf_details:
+                            sub_mp_details['bonds'] = {
+                                'sub_mp_id': bonds_sub_mp_id,
+                                'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(bonds_sub_mp_id, {}).get('name', ''),
+                                'etf_details': bonds_etf_details
+                            }
+                    
+                    if sub_mp_data.get('alternatives'):
+                        alternatives_sub_mp_id = sub_mp_data['alternatives']
+                        alternatives_etf_details = get_sub_mp_etf_details(alternatives_sub_mp_id)
+                        if alternatives_etf_details:
+                            sub_mp_details['alternatives'] = {
+                                'sub_mp_id': alternatives_sub_mp_id,
+                                'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(alternatives_sub_mp_id, {}).get('name', ''),
+                                'etf_details': alternatives_etf_details
+                            }
                 
                 recommended_stocks = row.get('recommended_stocks')
                 if recommended_stocks:
@@ -1060,6 +1154,11 @@ async def get_strategy_decisions_history(
                         reasoning = parts[1].strip()
                         analysis_summary = parts[0].strip()
                 
+                # Sub-MP reasoning 추출
+                sub_mp_reasoning = None
+                if sub_mp_data and isinstance(sub_mp_data, dict):
+                    sub_mp_reasoning = sub_mp_data.get('reasoning')
+                
                 result.append({
                     "id": row['id'],
                     "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
@@ -1067,6 +1166,8 @@ async def get_strategy_decisions_history(
                     "reasoning": reasoning,
                     "mp_id": mp_id,
                     "target_allocation": target_allocation,
+                    "sub_mp": sub_mp_details,
+                    "sub_mp_reasoning": sub_mp_reasoning,
                     "recommended_stocks": recommended_stocks,
                     "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
                 })
