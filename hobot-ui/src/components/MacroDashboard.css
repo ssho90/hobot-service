@@ -611,6 +611,15 @@
     padding: 16px;
     margin-bottom: 16px;
   }
+
+  .overview-content {
+    padding: 12px;
+  }
+
+  .analysis-summary,
+  .analysis-reasoning {
+    margin-bottom: 20px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -688,6 +697,15 @@
   .card {
     padding: 12px;
     margin-bottom: 12px;
+  }
+
+  .overview-content {
+    padding: 8px;
+  }
+
+  .analysis-summary,
+  .analysis-reasoning {
+    margin-bottom: 16px;
   }
 }
 
