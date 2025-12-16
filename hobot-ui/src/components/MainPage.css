@@ -23,8 +23,19 @@
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 16px;
-    margin-top: 70px;
+    padding: 12px;
+    margin-top: 60px;
+  }
+
+  .content-area {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 8px;
+    margin-top: 60px;
   }
 }
 

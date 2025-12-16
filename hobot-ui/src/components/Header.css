@@ -584,11 +584,24 @@
 @media (max-width: 768px) {
   .top-header {
     left: 0;
-    padding: 0 16px;
+    padding: 0 12px;
+    height: 60px;
   }
 
   .mobile-menu-btn {
     display: flex;
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+    font-size: 20px;
+  }
+
+  .header-logo {
+    gap: 4px;
+  }
+
+  .logo-image {
+    height: 32px;
   }
 
   .header-tabs {
@@ -596,7 +609,7 @@
   }
 
   .header-actions {
-    gap: 8px;
+    gap: 4px;
   }
 
   .header-icon-btn {
@@ -613,6 +626,11 @@
     padding: 4px;
   }
 
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 480px) {

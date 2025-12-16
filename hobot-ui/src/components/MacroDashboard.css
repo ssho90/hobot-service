@@ -536,8 +536,87 @@
 
 /* Sub-MP 반응형 스타일 */
 @media (max-width: 768px) {
+  .macro-dashboard {
+    padding: 12px;
+  }
+
+  .macro-dashboard h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .overview-section {
+    margin-bottom: 20px;
+  }
+
+  .overview-header-section {
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .overview-title-wrapper h2 {
+    font-size: 20px;
+  }
+
+  .overview-buttons {
+    gap: 8px;
+  }
+
+  .btn-history,
+  .btn-update {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
   .sub-mp-content {
     grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .macro-dashboard {
+    padding: 8px;
+  }
+
+  .macro-dashboard h1 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .overview-section {
+    margin-bottom: 16px;
+  }
+
+  .overview-header-section {
+    margin-bottom: 10px;
+  }
+
+  .overview-title-wrapper h2 {
+    font-size: 18px;
+  }
+
+  .overview-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .btn-history,
+  .btn-update {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 12px;
   }
 }
 

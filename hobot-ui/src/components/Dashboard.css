@@ -13,6 +13,37 @@
   min-height: calc(100vh - 70px);
 }
 
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 12px;
+    margin-top: 60px;
+    min-height: calc(100vh - 60px);
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 8px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 16px;
+  }
+}
+
 .dashboard-header {
   margin-bottom: 32px;
 }
@@ -34,16 +65,5 @@
 .content-area {
   position: relative;
   z-index: 1;
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-    padding: 20px;
-  }
-
-  .dashboard-header h1 {
-    font-size: 1.5rem;
-  }
 }
 
