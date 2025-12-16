@@ -569,8 +569,42 @@
     font-size: 13px;
   }
 
+  .sub-mp-details {
+    padding: 12px;
+    margin-top: 20px;
+  }
+
+  .sub-mp-details h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .sub-mp-reasoning {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+
   .sub-mp-content {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .sub-mp-category {
+    padding: 12px;
+  }
+
+  .sub-mp-category h4 {
+    font-size: 15px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .etf-details-table th,
+  .etf-details-table td {
+    padding: 8px;
+    font-size: 13px;
   }
 
   .card {
@@ -611,6 +645,43 @@
   .btn-update {
     width: 100%;
     padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .sub-mp-details {
+    padding: 8px;
+    margin-top: 16px;
+  }
+
+  .sub-mp-details h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .sub-mp-reasoning {
+    margin-top: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+
+  .sub-mp-content {
+    gap: 6px;
+  }
+
+  .sub-mp-category {
+    padding: 10px;
+  }
+
+  .sub-mp-category h4 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+  }
+
+  .etf-details-table th,
+  .etf-details-table td {
+    padding: 6px;
     font-size: 12px;
   }
 
