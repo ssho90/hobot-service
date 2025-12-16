@@ -294,16 +294,6 @@ const Header = () => {
       <div className="header-actions">
         {user ? (
           <>
-            <button className="header-icon-btn">
-              <span>🌐</span>
-            </button>
-            <button className="header-icon-btn">
-              <span>🌙</span>
-            </button>
-            <button className="header-icon-btn notification-btn">
-              <span>🔔</span>
-              <span className="notification-badge">3</span>
-            </button>
             <div className="user-menu-container" ref={menuRef}>
               <div 
                 className="user-menu" 
