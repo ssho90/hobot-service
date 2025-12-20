@@ -370,6 +370,37 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='모델 포트폴리오 (MP) 설정'
         """)
         
+        # 기존 테이블에 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE model_portfolios ADD COLUMN allocation_stocks DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '주식 비중 (%)'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
+        
+        try:
+            cursor.execute("ALTER TABLE model_portfolios ADD COLUMN allocation_bonds DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '채권 비중 (%)'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE model_portfolios ADD COLUMN allocation_alternatives DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '대체투자 비중 (%)'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE model_portfolios ADD COLUMN allocation_cash DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '현금 비중 (%)'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE model_portfolios ADD COLUMN display_order INT DEFAULT 0 COMMENT '표시 순서'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE model_portfolios ADD COLUMN is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부'")
+        except Exception:
+            pass
+        
         # Sub-MP (자산군별 세부 모델) 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sub_model_portfolios (
@@ -386,6 +417,17 @@ def init_database():
                 INDEX idx_is_active (is_active)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP (자산군별 세부 모델) 설정'
         """)
+        
+        # 기존 테이블에 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE sub_model_portfolios ADD COLUMN display_order INT DEFAULT 0 COMMENT '표시 순서'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE sub_model_portfolios ADD COLUMN is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부'")
+        except Exception:
+            pass
         
         # Sub-MP ETF 상세 테이블
         cursor.execute("""
