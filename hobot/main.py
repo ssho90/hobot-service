@@ -1891,10 +1891,11 @@ async def get_model_portfolios(admin_user: dict = Depends(require_admin)):
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            # stocks_allocation, bonds_allocation, alternatives_allocation, cash_allocation 컬럼 사용
             cursor.execute("""
                 SELECT id, name, description, strategy, 
-                       allocation_stocks, allocation_bonds, 
-                       allocation_alternatives, allocation_cash,
+                       stocks_allocation, bonds_allocation, 
+                       alternatives_allocation, cash_allocation,
                        display_order, is_active, created_at, updated_at
                 FROM model_portfolios
                 ORDER BY display_order, id
@@ -1904,10 +1905,10 @@ async def get_model_portfolios(admin_user: dict = Depends(require_admin)):
             portfolios = []
             for row in rows:
                 # NULL 값 처리 및 타입 변환
-                allocation_stocks = row.get("allocation_stocks") or 0
-                allocation_bonds = row.get("allocation_bonds") or 0
-                allocation_alternatives = row.get("allocation_alternatives") or 0
-                allocation_cash = row.get("allocation_cash") or 0
+                allocation_stocks = row.get("stocks_allocation") or 0
+                allocation_bonds = row.get("bonds_allocation") or 0
+                allocation_alternatives = row.get("alternatives_allocation") or 0
+                allocation_cash = row.get("cash_allocation") or 0
                 
                 portfolios.append({
                     "id": row["id"],
@@ -1946,11 +1947,12 @@ async def update_model_portfolio(
             cursor = conn.cursor()
             
             allocation = request.get("allocation", {})
+            # stocks_allocation, bonds_allocation, alternatives_allocation, cash_allocation 컬럼 사용
             cursor.execute("""
                 UPDATE model_portfolios
                 SET name = %s, description = %s, strategy = %s,
-                    allocation_stocks = %s, allocation_bonds = %s,
-                    allocation_alternatives = %s, allocation_cash = %s,
+                    stocks_allocation = %s, bonds_allocation = %s,
+                    alternatives_allocation = %s, cash_allocation = %s,
                     display_order = %s, is_active = %s,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
