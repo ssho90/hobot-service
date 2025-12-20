@@ -1882,6 +1882,223 @@ async def delete_user(user_id: int, admin_user: dict = Depends(require_admin)):
         logging.error(f"Error deleting user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# 포트폴리오 관리 API (admin 전용)
+@api_router.get("/admin/portfolios/model-portfolios")
+async def get_model_portfolios(admin_user: dict = Depends(require_admin)):
+    """모델 포트폴리오 목록 조회 (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, name, description, strategy, 
+                       allocation_stocks, allocation_bonds, 
+                       allocation_alternatives, allocation_cash,
+                       display_order, is_active, created_at, updated_at
+                FROM model_portfolios
+                ORDER BY display_order, id
+            """)
+            rows = cursor.fetchall()
+            
+            portfolios = []
+            for row in rows:
+                portfolios.append({
+                    "id": row["id"],
+                    "name": row["name"],
+                    "description": row["description"],
+                    "strategy": row["strategy"],
+                    "allocation": {
+                        "Stocks": float(row["allocation_stocks"]),
+                        "Bonds": float(row["allocation_bonds"]),
+                        "Alternatives": float(row["allocation_alternatives"]),
+                        "Cash": float(row["allocation_cash"])
+                    },
+                    "display_order": row["display_order"],
+                    "is_active": bool(row["is_active"]),
+                    "created_at": row["created_at"].isoformat() if row["created_at"] else None,
+                    "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None
+                })
+            
+            return {"status": "success", "portfolios": portfolios}
+    except Exception as e:
+        logging.error(f"Error getting model portfolios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.put("/admin/portfolios/model-portfolios/{mp_id}")
+async def update_model_portfolio(
+    mp_id: str,
+    request: dict,
+    admin_user: dict = Depends(require_admin)
+):
+    """모델 포트폴리오 업데이트 (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            allocation = request.get("allocation", {})
+            cursor.execute("""
+                UPDATE model_portfolios
+                SET name = %s, description = %s, strategy = %s,
+                    allocation_stocks = %s, allocation_bonds = %s,
+                    allocation_alternatives = %s, allocation_cash = %s,
+                    display_order = %s, is_active = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (
+                request.get("name"),
+                request.get("description"),
+                request.get("strategy"),
+                allocation.get("Stocks", 0),
+                allocation.get("Bonds", 0),
+                allocation.get("Alternatives", 0),
+                allocation.get("Cash", 0),
+                request.get("display_order", 0),
+                request.get("is_active", True),
+                mp_id
+            ))
+            
+            if cursor.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Model portfolio not found")
+            
+            conn.commit()
+            
+            # 캐시 갱신
+            from service.macro_trading.ai_strategist import refresh_portfolio_cache
+            refresh_portfolio_cache()
+            
+            return {"status": "success", "message": "Model portfolio updated"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating model portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/portfolios/sub-model-portfolios")
+async def get_sub_model_portfolios(admin_user: dict = Depends(require_admin)):
+    """Sub-MP 포트폴리오 목록 조회 (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, name, description, asset_class,
+                       display_order, is_active, created_at, updated_at
+                FROM sub_model_portfolios
+                ORDER BY asset_class, display_order, id
+            """)
+            rows = cursor.fetchall()
+            
+            portfolios = []
+            for row in rows:
+                # ETF 상세 정보 조회
+                cursor.execute("""
+                    SELECT category, ticker, name, weight, display_order
+                    FROM sub_mp_etf_details
+                    WHERE sub_mp_id = %s
+                    ORDER BY display_order
+                """, (row["id"],))
+                etf_rows = cursor.fetchall()
+                
+                etf_details = []
+                allocation = {}
+                for etf_row in etf_rows:
+                    etf_details.append({
+                        "category": etf_row["category"],
+                        "ticker": etf_row["ticker"],
+                        "name": etf_row["name"],
+                        "weight": float(etf_row["weight"])
+                    })
+                    allocation[etf_row["category"]] = float(etf_row["weight"])
+                
+                portfolios.append({
+                    "id": row["id"],
+                    "name": row["name"],
+                    "description": row["description"],
+                    "asset_class": row["asset_class"],
+                    "allocation": allocation,
+                    "etf_details": etf_details,
+                    "display_order": row["display_order"],
+                    "is_active": bool(row["is_active"]),
+                    "created_at": row["created_at"].isoformat() if row["created_at"] else None,
+                    "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None
+                })
+            
+            return {"status": "success", "portfolios": portfolios}
+    except Exception as e:
+        logging.error(f"Error getting sub-model portfolios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.put("/admin/portfolios/sub-model-portfolios/{sub_mp_id}")
+async def update_sub_model_portfolio(
+    sub_mp_id: str,
+    request: dict,
+    admin_user: dict = Depends(require_admin)
+):
+    """Sub-MP 포트폴리오 업데이트 (admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Sub-MP 정보 업데이트
+            cursor.execute("""
+                UPDATE sub_model_portfolios
+                SET name = %s, description = %s, asset_class = %s,
+                    display_order = %s, is_active = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (
+                request.get("name"),
+                request.get("description"),
+                request.get("asset_class"),
+                request.get("display_order", 0),
+                request.get("is_active", True),
+                sub_mp_id
+            ))
+            
+            if cursor.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Sub-model portfolio not found")
+            
+            # ETF 상세 정보 업데이트 (기존 삭제 후 재생성)
+            cursor.execute("DELETE FROM sub_mp_etf_details WHERE sub_mp_id = %s", (sub_mp_id,))
+            
+            etf_details = request.get("etf_details", [])
+            for idx, etf in enumerate(etf_details):
+                cursor.execute("""
+                    INSERT INTO sub_mp_etf_details 
+                    (sub_mp_id, category, ticker, name, weight, display_order)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    sub_mp_id,
+                    etf.get("category", ""),
+                    etf.get("ticker", ""),
+                    etf.get("name", ""),
+                    etf.get("weight", 0),
+                    idx
+                ))
+            
+            conn.commit()
+            
+            # 캐시 갱신
+            from service.macro_trading.ai_strategist import refresh_portfolio_cache
+            refresh_portfolio_cache()
+            
+            return {"status": "success", "message": "Sub-model portfolio updated"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating sub-model portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # 로그 조회 API (admin 전용)
 @api_router.get("/admin/logs")
 async def get_logs(

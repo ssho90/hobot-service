@@ -7,6 +7,7 @@ import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
 import LLMMonitoringPage from './LLMMonitoringPage';
 import SectorManagementPage from './SectorManagementPage';
+import PortfolioManagementPage from './PortfolioManagementPage';
 import MacroDashboard from './MacroDashboard';
 import TradingDashboard from './TradingDashboard';
 import Header from './Header';
@@ -28,7 +29,7 @@ const Dashboard = () => {
   
   // 시스템 어드민이 아니면 admin 탭 접근 불가
   useEffect(() => {
-    if ((activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-sector-management') && !isSystemAdmin()) {
+    if ((activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-sector-management' || activeTab === 'admin-portfolio-management') && !isSystemAdmin()) {
       setActiveTab('news');
     }
   }, [activeTab, isSystemAdmin]);
@@ -179,6 +180,10 @@ const Dashboard = () => {
 
           {activeTab === 'admin-sector-management' && (
             <SectorManagementPage />
+          )}
+
+          {activeTab === 'admin-portfolio-management' && (
+            <PortfolioManagementPage />
           )}
 
         </div>

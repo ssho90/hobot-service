@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 # 모델 포트폴리오 (MP) 시나리오 정의
 # ============================================================================
 
-MODEL_PORTFOLIOS = {
+# 하위 호환성을 위한 기본값 (DB에서 로드 실패 시 사용)
+_DEFAULT_MODEL_PORTFOLIOS = {
     "MP-1": {
         "id": "MP-1",
         "name": "Risk On (골디락스)",
@@ -33,6 +34,8 @@ MODEL_PORTFOLIOS = {
             "Bonds": 10.0,
             "Alternatives": 5.0,
             "Cash": 5.0
+
+            
         }
     },
     "MP-2": {
@@ -85,10 +88,179 @@ MODEL_PORTFOLIOS = {
     }
 }
 
+# DB에서 로드된 포트폴리오 캐시
+_MODEL_PORTFOLIOS_CACHE = None
+_SUB_MODEL_PORTFOLIOS_CACHE = None
+
+
+def _load_model_portfolios_from_db() -> Dict[str, Dict]:
+    """DB에서 모델 포트폴리오 로드
+    
+    Returns:
+        Dict[str, Dict]: 모델 포트폴리오 딕셔너리
+        
+    Raises:
+        ValueError: DB에서 포트폴리오를 로드할 수 없거나 데이터가 없는 경우
+    """
+    global _MODEL_PORTFOLIOS_CACHE
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, name, description, strategy, 
+                       allocation_stocks, allocation_bonds, 
+                       allocation_alternatives, allocation_cash,
+                       display_order, is_active
+                FROM model_portfolios
+                WHERE is_active = TRUE
+                ORDER BY display_order, id
+            """)
+            rows = cursor.fetchall()
+            
+            result = {}
+            for row in rows:
+                result[row['id']] = {
+                    'id': row['id'],
+                    'name': row['name'],
+                    'description': row['description'],
+                    'strategy': row['strategy'],
+                    'allocation': {
+                        'Stocks': float(row['allocation_stocks']),
+                        'Bonds': float(row['allocation_bonds']),
+                        'Alternatives': float(row['allocation_alternatives']),
+                        'Cash': float(row['allocation_cash'])
+                    }
+                }
+            
+            if not result:
+                error_msg = "DB에서 활성화된 모델 포트폴리오를 찾을 수 없습니다. 포트폴리오 데이터가 필요합니다."
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+            
+            _MODEL_PORTFOLIOS_CACHE = result
+            return result
+    except ValueError:
+        raise  # ValueError는 그대로 전파
+    except Exception as e:
+        error_msg = f"DB에서 모델 포트폴리오 로드 실패: {e}. 포트폴리오 데이터가 없으면 LLM 분석을 수행할 수 없습니다."
+        logger.error(error_msg, exc_info=True)
+        raise ValueError(error_msg) from e
+
+
+def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
+    """DB에서 Sub-MP 포트폴리오 로드
+    
+    Returns:
+        Dict[str, Dict]: Sub-MP 포트폴리오 딕셔너리
+        
+    Raises:
+        ValueError: DB에서 포트폴리오를 로드할 수 없거나 데이터가 없는 경우
+    """
+    global _SUB_MODEL_PORTFOLIOS_CACHE
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, name, description, asset_class, display_order, is_active
+                FROM sub_model_portfolios
+                WHERE is_active = TRUE
+                ORDER BY asset_class, display_order, id
+            """)
+            rows = cursor.fetchall()
+            
+            result = {}
+            for row in rows:
+                # ETF 상세 정보 로드
+                cursor.execute("""
+                    SELECT category, ticker, name, weight, display_order
+                    FROM sub_mp_etf_details
+                    WHERE sub_mp_id = %s
+                    ORDER BY display_order
+                """, (row['id'],))
+                etf_rows = cursor.fetchall()
+                
+                etf_details = []
+                allocation = {}
+                for etf_row in etf_rows:
+                    etf_details.append({
+                        'category': etf_row['category'],
+                        'ticker': etf_row['ticker'],
+                        'name': etf_row['name'],
+                        'weight': float(etf_row['weight'])
+                    })
+                    allocation[etf_row['category']] = float(etf_row['weight'])
+                
+                result[row['id']] = {
+                    'id': row['id'],
+                    'name': row['name'],
+                    'description': row['description'],
+                    'asset_class': row['asset_class'],
+                    'allocation': allocation,
+                    'etf_details': etf_details
+                }
+            
+            if not result:
+                error_msg = "DB에서 활성화된 Sub-MP 포트폴리오를 찾을 수 없습니다. 포트폴리오 데이터가 필요합니다."
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+            
+            _SUB_MODEL_PORTFOLIOS_CACHE = result
+            return result
+    except ValueError:
+        raise  # ValueError는 그대로 전파
+    except Exception as e:
+        error_msg = f"DB에서 Sub-MP 포트폴리오 로드 실패: {e}. 포트폴리오 데이터가 없으면 LLM 분석을 수행할 수 없습니다."
+        logger.error(error_msg, exc_info=True)
+        raise ValueError(error_msg) from e
+
+
+def get_model_portfolios() -> Dict[str, Dict]:
+    """모델 포트폴리오 조회 (DB에서 로드, 캐시 사용)
+    
+    Returns:
+        Dict[str, Dict]: 모델 포트폴리오 딕셔너리
+        
+    Raises:
+        ValueError: DB에서 포트폴리오를 로드할 수 없거나 데이터가 없는 경우
+    """
+    if _MODEL_PORTFOLIOS_CACHE is None:
+        return _load_model_portfolios_from_db()
+    return _MODEL_PORTFOLIOS_CACHE
+
+
+def get_sub_model_portfolios() -> Dict[str, Dict]:
+    """Sub-MP 포트폴리오 조회 (DB에서 로드, 캐시 사용)
+    
+    Returns:
+        Dict[str, Dict]: Sub-MP 포트폴리오 딕셔너리
+        
+    Raises:
+        ValueError: DB에서 포트폴리오를 로드할 수 없거나 데이터가 없는 경우
+    """
+    if _SUB_MODEL_PORTFOLIOS_CACHE is None:
+        return _load_sub_model_portfolios_from_db()
+    return _SUB_MODEL_PORTFOLIOS_CACHE
+
+
+def refresh_portfolio_cache():
+    """포트폴리오 캐시 갱신"""
+    global _MODEL_PORTFOLIOS_CACHE, _SUB_MODEL_PORTFOLIOS_CACHE
+    _MODEL_PORTFOLIOS_CACHE = None
+    _SUB_MODEL_PORTFOLIOS_CACHE = None
+    get_model_portfolios()
+    get_sub_model_portfolios()
+
+
+# 하위 호환성을 위한 변수 (함수 호출로 동적 로드)
+# 주의: 직접 접근 대신 get_model_portfolios() 함수 사용 권장
+MODEL_PORTFOLIOS = None  # 동적으로 로드됨
+SUB_MODEL_PORTFOLIOS = None  # 동적으로 로드됨
+
 
 def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
     """MP ID에 해당하는 자산 배분 비율 반환"""
-    mp = MODEL_PORTFOLIOS.get(mp_id)
+    portfolios = get_model_portfolios()
+    mp = portfolios.get(mp_id)
     if mp:
         return mp["allocation"].copy()
     return None
@@ -98,7 +270,8 @@ def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
 # Sub-MP (자산군별 세부 모델) 정의
 # ============================================================================
 
-SUB_MODEL_PORTFOLIOS = {
+# 하위 호환성을 위한 기본값 (DB에서 로드 실패 시 사용)
+_DEFAULT_SUB_MODEL_PORTFOLIOS = {
     # 주식 (Equity) Sub-Models
     "Eq-A": {
         "id": "Eq-A",
@@ -222,10 +395,14 @@ SUB_MODEL_PORTFOLIOS = {
     }
 }
 
+# 하위 호환성을 위한 속성 접근
+SUB_MODEL_PORTFOLIOS = _DEFAULT_SUB_MODEL_PORTFOLIOS
+
 
 def get_sub_model_portfolio_allocation(sub_mp_id: str) -> Optional[Dict[str, float]]:
     """Sub-MP ID에 해당하는 자산군 내 배분 비율 반환"""
-    sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id)
+    portfolios = get_sub_model_portfolios()
+    sub_mp = portfolios.get(sub_mp_id)
     if sub_mp:
         return sub_mp["allocation"].copy()
     return None
@@ -233,8 +410,9 @@ def get_sub_model_portfolio_allocation(sub_mp_id: str) -> Optional[Dict[str, flo
 
 def get_sub_models_by_asset_class(asset_class: str) -> Dict[str, Dict]:
     """자산군별 Sub-MP 목록 반환"""
+    portfolios = get_sub_model_portfolios()
     result = {}
-    for sub_mp_id, sub_mp in SUB_MODEL_PORTFOLIOS.items():
+    for sub_mp_id, sub_mp in portfolios.items():
         if sub_mp.get("asset_class") == asset_class:
             result[sub_mp_id] = sub_mp
     return result
@@ -242,7 +420,8 @@ def get_sub_models_by_asset_class(asset_class: str) -> Dict[str, Dict]:
 
 def get_sub_mp_etf_details(sub_mp_id: str) -> Optional[List[Dict]]:
     """Sub-MP ID에 해당하는 ETF 세부 정보 반환"""
-    sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id)
+    portfolios = get_sub_model_portfolios()
+    sub_mp = portfolios.get(sub_mp_id)
     if sub_mp:
         return sub_mp.get("etf_details", []).copy()
     return None
@@ -928,7 +1107,8 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
     # 이전 MP 정보
     previous_mp_info = ""
     if previous_mp_id:
-        previous_mp = MODEL_PORTFOLIOS.get(previous_mp_id)
+        portfolios = get_model_portfolios()
+        previous_mp = portfolios.get(previous_mp_id)
         if previous_mp:
             previous_mp_info = f"\n=== 이전 MP 정보 ===\n"
             previous_mp_info += f"이전에 선택된 MP: {previous_mp_id} - {previous_mp['name']}\n"
@@ -939,7 +1119,8 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
     # MP 시나리오 정보를 프롬프트에 포함
     mp_info = "\n=== 모델 포트폴리오 (MP) 시나리오 ===\n"
     mp_info += "현재 거시경제 국면을 분석하여 다음 5가지 모델 포트폴리오 중 하나를 선택하세요:\n\n"
-    for mp_id, mp in MODEL_PORTFOLIOS.items():
+    portfolios = get_model_portfolios()
+    for mp_id, mp in portfolios.items():
         mp_info += f"{mp_id}: {mp['name']}\n"
         mp_info += f"  - 특징: {mp['description']}\n"
         mp_info += f"  - 핵심 전략: {mp['strategy']}\n"
@@ -1021,7 +1202,8 @@ def create_sub_mp_analysis_prompt(
             fred_summary += f"하이일드 스프레드: {signal_name}\n"
     
     # 선택된 MP 정보
-    selected_mp = MODEL_PORTFOLIOS.get(mp_id, {})
+    portfolios = get_model_portfolios()
+    selected_mp = portfolios.get(mp_id, {})
     mp_info = f"\n=== 선택된 MP 정보 ===\n"
     mp_info += f"MP: {mp_id} - {selected_mp.get('name', 'N/A')}\n"
     mp_info += f"자산 배분: 주식 {selected_mp.get('allocation', {}).get('Stocks', 0)}% / "
@@ -1033,14 +1215,15 @@ def create_sub_mp_analysis_prompt(
     previous_sub_mp_info = ""
     if previous_sub_mp:
         previous_sub_mp_info = "\n=== 이전 Sub-MP 정보 ===\n"
+        sub_portfolios = get_sub_model_portfolios()
         if previous_sub_mp.get('stocks'):
-            prev_stocks = SUB_MODEL_PORTFOLIOS.get(previous_sub_mp['stocks'], {})
+            prev_stocks = sub_portfolios.get(previous_sub_mp['stocks'], {})
             previous_sub_mp_info += f"이전 주식 Sub-MP: {previous_sub_mp['stocks']} - {prev_stocks.get('name', 'N/A')}\n"
         if previous_sub_mp.get('bonds'):
-            prev_bonds = SUB_MODEL_PORTFOLIOS.get(previous_sub_mp['bonds'], {})
+            prev_bonds = sub_portfolios.get(previous_sub_mp['bonds'], {})
             previous_sub_mp_info += f"이전 채권 Sub-MP: {previous_sub_mp['bonds']} - {prev_bonds.get('name', 'N/A')}\n"
         if previous_sub_mp.get('alternatives'):
-            prev_alt = SUB_MODEL_PORTFOLIOS.get(previous_sub_mp['alternatives'], {})
+            prev_alt = sub_portfolios.get(previous_sub_mp['alternatives'], {})
             previous_sub_mp_info += f"이전 대체자산 Sub-MP: {previous_sub_mp['alternatives']} - {prev_alt.get('name', 'N/A')}\n"
         previous_sub_mp_info += "\n**중요:** 경제 상황이 크게 달라지지 않은 경우, 이전 Sub-MP를 유지하는 것이 좋습니다.\n"
         previous_sub_mp_info += "경제 지표의 변화가 명확하고 지속적인 경우에만 Sub-MP를 변경하세요.\n\n"
@@ -1050,8 +1233,9 @@ def create_sub_mp_analysis_prompt(
     
     # 주식 Sub-MP
     sub_mp_info += "\n### 주식 (Equity) Sub-Models:\n"
+    sub_portfolios = get_sub_model_portfolios()
     for sub_mp_id in ["Eq-A", "Eq-N", "Eq-D"]:
-        sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id, {})
+        sub_mp = sub_portfolios.get(sub_mp_id, {})
         if sub_mp:
             sub_mp_info += f"{sub_mp_id}: {sub_mp.get('name', 'N/A')}\n"
             sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
@@ -1065,7 +1249,7 @@ def create_sub_mp_analysis_prompt(
     # 채권 Sub-MP
     sub_mp_info += "\n### 채권 (Bond) Sub-Models:\n"
     for sub_mp_id in ["Bnd-L", "Bnd-N", "Bnd-S"]:
-        sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id, {})
+        sub_mp = sub_portfolios.get(sub_mp_id, {})
         if sub_mp:
             sub_mp_info += f"{sub_mp_id}: {sub_mp.get('name', 'N/A')}\n"
             sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
@@ -1079,7 +1263,7 @@ def create_sub_mp_analysis_prompt(
     # 대체자산 Sub-MP
     sub_mp_info += "\n### 대체자산 (Alternatives) Sub-Models:\n"
     for sub_mp_id in ["Alt-I", "Alt-C"]:
-        sub_mp = SUB_MODEL_PORTFOLIOS.get(sub_mp_id, {})
+        sub_mp = sub_portfolios.get(sub_mp_id, {})
         if sub_mp:
             sub_mp_info += f"{sub_mp_id}: {sub_mp.get('name', 'N/A')}\n"
             sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
@@ -1218,9 +1402,34 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
     Args:
         fred_signals: FRED 시그널 데이터 (None이면 수집)
         economic_news: 경제 뉴스 데이터 (None이면 수집)
+        
+    Returns:
+        Optional[AIStrategyDecision]: AI 전략 결정 결과
+        
+    Raises:
+        ValueError: 포트폴리오 데이터를 로드할 수 없는 경우 (LLM 분석 중단)
     """
     try:
         logger.info("AI 전략 분석 시작 (MP + Sub-MP 분리 분석)")
+        
+        # 포트폴리오 데이터 검증 (분석 전에 필수)
+        try:
+            portfolios = get_model_portfolios()
+            if not portfolios:
+                raise ValueError("모델 포트폴리오 데이터가 없습니다. LLM 분석을 수행할 수 없습니다.")
+            logger.info(f"모델 포트폴리오 로드 완료: {len(portfolios)}개")
+            
+            sub_portfolios = get_sub_model_portfolios()
+            if not sub_portfolios:
+                raise ValueError("Sub-MP 포트폴리오 데이터가 없습니다. LLM 분석을 수행할 수 없습니다.")
+            logger.info(f"Sub-MP 포트폴리오 로드 완료: {len(sub_portfolios)}개")
+        except ValueError as e:
+            logger.error(f"포트폴리오 데이터 로드 실패: {e}")
+            raise  # ValueError는 그대로 전파하여 분석 중단
+        except Exception as e:
+            error_msg = f"포트폴리오 데이터 로드 중 예상치 못한 오류 발생: {e}"
+            logger.error(error_msg, exc_info=True)
+            raise ValueError(error_msg) from e
         
         # 데이터 수집 (파라미터로 전달되지 않은 경우에만)
         if fred_signals is None:
@@ -1260,8 +1469,9 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         
         # MP ID 검증
         mp_id = mp_decision_data.get('mp_id')
-        if not mp_id or mp_id not in MODEL_PORTFOLIOS:
-            valid_mp_ids = ', '.join(MODEL_PORTFOLIOS.keys())
+        portfolios = get_model_portfolios()
+        if not mp_id or mp_id not in portfolios:
+            valid_mp_ids = ', '.join(portfolios.keys())
             logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
             raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
         
@@ -1482,6 +1692,16 @@ def analyze_node(state: AIAnalysisState) -> AIAnalysisState:
             **state,
             "decision": decision
         }
+    except ValueError as e:
+        # 포트폴리오 데이터 로드 실패는 심각한 오류로 처리
+        error_msg = f"포트폴리오 데이터 부재로 인한 AI 분석 중단: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            **state,
+            "decision": None,
+            "error": error_msg,
+            "success": False
+        }
     except Exception as e:
         logger.error(f"AI 분석 실패: {e}", exc_info=True)
         logger.error(f"AI 분석 실패 타입: {type(e).__name__}")
@@ -1501,20 +1721,31 @@ def save_decision_node(state: AIAnalysisState) -> AIAnalysisState:
         decision = state.get("decision")
         fred_signals = state.get("fred_signals")
         economic_news = state.get("economic_news")
+        error = state.get("error")
+        
+        # 포트폴리오 데이터 부재로 인한 오류인 경우 저장하지 않음
+        if error and "포트폴리오 데이터" in error:
+            logger.error(f"포트폴리오 데이터 부재로 인해 결과를 저장하지 않습니다: {error}")
+            return {
+                **state,
+                "success": False,
+                "error": error
+            }
         
         if not decision:
             logger.error("저장할 결정이 없습니다.")
             return {
                 **state,
                 "success": False,
-                "error": "저장할 결정이 없습니다."
+                "error": error or "저장할 결정이 없습니다."
             }
         
         success = save_strategy_decision(decision, fred_signals, economic_news)
         
         if success:
             target_allocation = decision.get_target_allocation()
-            mp_info = MODEL_PORTFOLIOS.get(decision.mp_id, {})
+            portfolios = get_model_portfolios()
+            mp_info = portfolios.get(decision.mp_id, {})
             logger.info("=" * 60)
             logger.info("AI 전략 분석 완료")
             logger.info(f"선택된 MP: {decision.mp_id} - {mp_info.get('name', 'N/A')}")

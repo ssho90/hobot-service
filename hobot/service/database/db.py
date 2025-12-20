@@ -350,7 +350,71 @@ def init_database():
         except Exception:
             pass  # 이미 존재하는 경우 무시
         
+        # 모델 포트폴리오 (MP) 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS model_portfolios (
+                id VARCHAR(20) PRIMARY KEY COMMENT 'MP ID (MP-1 ~ MP-5)',
+                name VARCHAR(255) NOT NULL COMMENT 'MP 이름',
+                description TEXT NOT NULL COMMENT 'MP 설명',
+                strategy VARCHAR(255) NOT NULL COMMENT '핵심 전략',
+                allocation_stocks DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '주식 비중 (%)',
+                allocation_bonds DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '채권 비중 (%)',
+                allocation_alternatives DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '대체투자 비중 (%)',
+                allocation_cash DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '현금 비중 (%)',
+                display_order INT DEFAULT 0 COMMENT '표시 순서',
+                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                INDEX idx_display_order (display_order),
+                INDEX idx_is_active (is_active)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='모델 포트폴리오 (MP) 설정'
+        """)
+        
+        # Sub-MP (자산군별 세부 모델) 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sub_model_portfolios (
+                id VARCHAR(20) PRIMARY KEY COMMENT 'Sub-MP ID (Eq-A, Eq-N, Eq-D, Bnd-L, Bnd-N, Bnd-S, Alt-I, Alt-C)',
+                name VARCHAR(255) NOT NULL COMMENT 'Sub-MP 이름',
+                description TEXT NOT NULL COMMENT 'Sub-MP 설명',
+                asset_class VARCHAR(50) NOT NULL COMMENT '자산군 (Stocks, Bonds, Alternatives)',
+                display_order INT DEFAULT 0 COMMENT '표시 순서',
+                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                INDEX idx_asset_class (asset_class),
+                INDEX idx_display_order (display_order),
+                INDEX idx_is_active (is_active)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP (자산군별 세부 모델) 설정'
+        """)
+        
+        # Sub-MP ETF 상세 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sub_mp_etf_details (
+                id INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 ID',
+                sub_mp_id VARCHAR(20) NOT NULL COMMENT 'Sub-MP ID',
+                category VARCHAR(100) NOT NULL COMMENT '카테고리 (예: 나스닥, S&P500, 배당주, 미국 장기채 등)',
+                ticker VARCHAR(20) NOT NULL COMMENT 'ETF 티커',
+                name VARCHAR(255) NOT NULL COMMENT 'ETF 이름',
+                weight DECIMAL(5,4) NOT NULL COMMENT '자산군 내 비중 (0-1)',
+                display_order INT DEFAULT 0 COMMENT '표시 순서',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                FOREIGN KEY (sub_mp_id) REFERENCES sub_model_portfolios(id) ON DELETE CASCADE,
+                INDEX idx_sub_mp_id (sub_mp_id),
+                INDEX idx_display_order (display_order)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP별 ETF 상세 정보'
+        """)
+        
         conn.commit()
+        
+        # 포트폴리오 마이그레이션 (코드에서 DB로) - 데이터가 없을 때만
+        try:
+            cursor.execute("SELECT COUNT(*) as count FROM model_portfolios")
+            mp_count = cursor.fetchone().get('count', 0)
+            if mp_count == 0:
+                migrate_portfolios_from_code()
+        except Exception as e:
+            print(f"⚠️  포트폴리오 마이그레이션 실패 (무시하고 계속): {e}")
 
 
 def is_migration_completed():
@@ -470,6 +534,97 @@ def migrate_from_json():
     # 마이그레이션 완료 표시
     mark_migration_completed()
     print("✅ JSON to MySQL migration completed")
+
+
+def migrate_portfolios_from_code():
+    """코드에 하드코딩된 포트폴리오 데이터를 DB로 마이그레이션"""
+    try:
+        # 순환 참조 방지를 위해 직접 기본값 사용
+        # ai_strategist.py의 _DEFAULT_MODEL_PORTFOLIOS와 _DEFAULT_SUB_MODEL_PORTFOLIOS 사용
+        from service.macro_trading.ai_strategist import _DEFAULT_MODEL_PORTFOLIOS, _DEFAULT_SUB_MODEL_PORTFOLIOS
+        MODEL_PORTFOLIOS = _DEFAULT_MODEL_PORTFOLIOS
+        SUB_MODEL_PORTFOLIOS = _DEFAULT_SUB_MODEL_PORTFOLIOS
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # MODEL_PORTFOLIOS 마이그레이션
+            for mp_id, mp_data in MODEL_PORTFOLIOS.items():
+                allocation = mp_data.get('allocation', {})
+                cursor.execute("""
+                    INSERT INTO model_portfolios 
+                    (id, name, description, strategy, allocation_stocks, allocation_bonds, 
+                     allocation_alternatives, allocation_cash, display_order, is_active)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        name = VALUES(name),
+                        description = VALUES(description),
+                        strategy = VALUES(strategy),
+                        allocation_stocks = VALUES(allocation_stocks),
+                        allocation_bonds = VALUES(allocation_bonds),
+                        allocation_alternatives = VALUES(allocation_alternatives),
+                        allocation_cash = VALUES(allocation_cash),
+                        display_order = VALUES(display_order),
+                        updated_at = CURRENT_TIMESTAMP
+                """, (
+                    mp_id,
+                    mp_data.get('name', ''),
+                    mp_data.get('description', ''),
+                    mp_data.get('strategy', ''),
+                    allocation.get('Stocks', 0),
+                    allocation.get('Bonds', 0),
+                    allocation.get('Alternatives', 0),
+                    allocation.get('Cash', 0),
+                    int(mp_id.split('-')[1]) if '-' in mp_id else 0,  # MP-1 -> 1
+                    True
+                ))
+            
+            # SUB_MODEL_PORTFOLIOS 마이그레이션
+            for sub_mp_id, sub_mp_data in SUB_MODEL_PORTFOLIOS.items():
+                cursor.execute("""
+                    INSERT INTO sub_model_portfolios 
+                    (id, name, description, asset_class, display_order, is_active)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        name = VALUES(name),
+                        description = VALUES(description),
+                        asset_class = VALUES(asset_class),
+                        display_order = VALUES(display_order),
+                        updated_at = CURRENT_TIMESTAMP
+                """, (
+                    sub_mp_id,
+                    sub_mp_data.get('name', ''),
+                    sub_mp_data.get('description', ''),
+                    sub_mp_data.get('asset_class', ''),
+                    0,  # display_order는 나중에 설정 가능
+                    True
+                ))
+                
+                # ETF 상세 정보 마이그레이션
+                etf_details = sub_mp_data.get('etf_details', [])
+                # 기존 ETF 상세 정보 삭제 (재생성을 위해)
+                cursor.execute("DELETE FROM sub_mp_etf_details WHERE sub_mp_id = %s", (sub_mp_id,))
+                
+                for idx, etf in enumerate(etf_details):
+                    cursor.execute("""
+                        INSERT INTO sub_mp_etf_details 
+                        (sub_mp_id, category, ticker, name, weight, display_order)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    """, (
+                        sub_mp_id,
+                        etf.get('category', ''),
+                        etf.get('ticker', ''),
+                        etf.get('name', ''),
+                        etf.get('weight', 0),
+                        idx
+                    ))
+            
+            conn.commit()
+            print("✅ Portfolios migrated from code to MySQL")
+    except Exception as e:
+        print(f"⚠️  Error migrating portfolios: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def backup_database():
