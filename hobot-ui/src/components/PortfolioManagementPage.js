@@ -317,8 +317,8 @@ const PortfolioManagementPage = () => {
                       </div>
                     ) : (
                       <div className="allocation-display">
-                        주식: {mp.allocation.Stocks}% / 채권: {mp.allocation.Bonds}% / 
-                        대체투자: {mp.allocation.Alternatives}% / 현금: {mp.allocation.Cash}%
+                        주식: {mp.allocation?.Stocks || 0}% / 채권: {mp.allocation?.Bonds || 0}% / 
+                        대체투자: {mp.allocation?.Alternatives || 0}% / 현금: {mp.allocation?.Cash || 0}%
                       </div>
                     )}
                   </td>
@@ -490,11 +490,15 @@ const PortfolioManagementPage = () => {
                       </div>
                     ) : (
                       <div className="etf-display">
-                        {subMp.etf_details.map((etf, idx) => (
-                          <div key={idx} className="etf-item-display">
-                            {etf.category}: {etf.ticker} ({etf.name}) - {etf.weight * 100}%
-                          </div>
-                        ))}
+                        {subMp.etf_details && subMp.etf_details.length > 0 ? (
+                          subMp.etf_details.map((etf, idx) => (
+                            <div key={idx} className="etf-item-display">
+                              {etf.category}: {etf.ticker} ({etf.name}) - {(etf.weight || 0) * 100}%
+                            </div>
+                          ))
+                        ) : (
+                          <div className="etf-item-display" style={{ color: '#999' }}>ETF 정보 없음</div>
+                        )}
                       </div>
                     )}
                   </td>

@@ -160,9 +160,10 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            # sub_portfolio_models 테이블 사용
             cursor.execute("""
                 SELECT id, name, description, asset_class, display_order, is_active
-                FROM sub_model_portfolios
+                FROM sub_portfolio_models
                 WHERE is_active = TRUE
                 ORDER BY asset_class, display_order, id
             """)
@@ -170,14 +171,38 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
             
             result = {}
             for row in rows:
-                # ETF 상세 정보 로드
-                cursor.execute("""
-                    SELECT category, ticker, name, weight, display_order
-                    FROM sub_mp_etf_details
-                    WHERE sub_mp_id = %s
-                    ORDER BY display_order
-                """, (row['id'],))
-                etf_rows = cursor.fetchall()
+                # ETF 상세 정보 로드 (sub_portfolio_compositions 테이블)
+                # 외래키 컬럼 이름 확인 (여러 가능한 컬럼 이름 시도)
+                etf_rows = []
+                try:
+                    cursor.execute("""
+                        SELECT category, ticker, name, weight, display_order
+                        FROM sub_portfolio_compositions
+                        WHERE model_id = %s
+                        ORDER BY display_order
+                    """, (row['id'],))
+                    etf_rows = cursor.fetchall()
+                except Exception:
+                    try:
+                        cursor.execute("""
+                            SELECT category, ticker, name, weight, display_order
+                            FROM sub_portfolio_compositions
+                            WHERE portfolio_id = %s
+                            ORDER BY display_order
+                        """, (row['id'],))
+                        etf_rows = cursor.fetchall()
+                    except Exception:
+                        try:
+                            cursor.execute("""
+                                SELECT category, ticker, name, weight, display_order
+                                FROM sub_portfolio_compositions
+                                WHERE sub_mp_id = %s
+                                ORDER BY display_order
+                            """, (row['id'],))
+                            etf_rows = cursor.fetchall()
+                        except Exception as e:
+                            logger.warning(f"ETF 상세 정보 로드 실패 (model_id/portfolio_id/sub_mp_id 모두 시도): {e}")
+                            etf_rows = []
                 
                 etf_details = []
                 allocation = {}

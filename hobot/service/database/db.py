@@ -402,50 +402,53 @@ def init_database():
             pass
         
         # Sub-MP (자산군별 세부 모델) 테이블
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sub_model_portfolios (
-                id VARCHAR(20) PRIMARY KEY COMMENT 'Sub-MP ID (Eq-A, Eq-N, Eq-D, Bnd-L, Bnd-N, Bnd-S, Alt-I, Alt-C)',
-                name VARCHAR(255) NOT NULL COMMENT 'Sub-MP 이름',
-                description TEXT NOT NULL COMMENT 'Sub-MP 설명',
-                asset_class VARCHAR(50) NOT NULL COMMENT '자산군 (Stocks, Bonds, Alternatives)',
-                display_order INT DEFAULT 0 COMMENT '표시 순서',
-                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-                INDEX idx_asset_class (asset_class),
-                INDEX idx_display_order (display_order),
-                INDEX idx_is_active (is_active)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP (자산군별 세부 모델) 설정'
-        """)
+        # 주의: sub_model_portfolios / sub_mp_etf_details는 사용하지 않음
+        # 실제 사용하는 테이블: sub_portfolio_models / sub_portfolio_compositions
+        # 아래 테이블은 레거시이며, 새로 생성하지 않음
+        # cursor.execute("""
+        #     CREATE TABLE IF NOT EXISTS sub_model_portfolios (
+        #         id VARCHAR(20) PRIMARY KEY COMMENT 'Sub-MP ID (Eq-A, Eq-N, Eq-D, Bnd-L, Bnd-N, Bnd-S, Alt-I, Alt-C)',
+        #         name VARCHAR(255) NOT NULL COMMENT 'Sub-MP 이름',
+        #         description TEXT NOT NULL COMMENT 'Sub-MP 설명',
+        #         asset_class VARCHAR(50) NOT NULL COMMENT '자산군 (Stocks, Bonds, Alternatives)',
+        #         display_order INT DEFAULT 0 COMMENT '표시 순서',
+        #         is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
+        #         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+        #         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+        #         INDEX idx_asset_class (asset_class),
+        #         INDEX idx_display_order (display_order),
+        #         INDEX idx_is_active (is_active)
+        #     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP (자산군별 세부 모델) 설정'
+        # """)
         
-        # 기존 테이블에 컬럼 추가 (마이그레이션)
-        try:
-            cursor.execute("ALTER TABLE sub_model_portfolios ADD COLUMN display_order INT DEFAULT 0 COMMENT '표시 순서'")
-        except Exception:
-            pass
+        # 기존 테이블에 컬럼 추가 (마이그레이션) - 레거시 테이블이므로 주석 처리
+        # try:
+        #     cursor.execute("ALTER TABLE sub_model_portfolios ADD COLUMN display_order INT DEFAULT 0 COMMENT '표시 순서'")
+        # except Exception:
+        #     pass
+        # 
+        # try:
+        #     cursor.execute("ALTER TABLE sub_model_portfolios ADD COLUMN is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부'")
+        # except Exception:
+        #     pass
         
-        try:
-            cursor.execute("ALTER TABLE sub_model_portfolios ADD COLUMN is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부'")
-        except Exception:
-            pass
-        
-        # Sub-MP ETF 상세 테이블
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sub_mp_etf_details (
-                id INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 ID',
-                sub_mp_id VARCHAR(20) NOT NULL COMMENT 'Sub-MP ID',
-                category VARCHAR(100) NOT NULL COMMENT '카테고리 (예: 나스닥, S&P500, 배당주, 미국 장기채 등)',
-                ticker VARCHAR(20) NOT NULL COMMENT 'ETF 티커',
-                name VARCHAR(255) NOT NULL COMMENT 'ETF 이름',
-                weight DECIMAL(5,4) NOT NULL COMMENT '자산군 내 비중 (0-1)',
-                display_order INT DEFAULT 0 COMMENT '표시 순서',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-                FOREIGN KEY (sub_mp_id) REFERENCES sub_model_portfolios(id) ON DELETE CASCADE,
-                INDEX idx_sub_mp_id (sub_mp_id),
-                INDEX idx_display_order (display_order)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP별 ETF 상세 정보'
-        """)
+        # Sub-MP ETF 상세 테이블 - 레거시 테이블이므로 주석 처리
+        # cursor.execute("""
+        #     CREATE TABLE IF NOT EXISTS sub_mp_etf_details (
+        #         id INT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 ID',
+        #         sub_mp_id VARCHAR(20) NOT NULL COMMENT 'Sub-MP ID',
+        #         category VARCHAR(100) NOT NULL COMMENT '카테고리 (예: 나스닥, S&P500, 배당주, 미국 장기채 등)',
+        #         ticker VARCHAR(20) NOT NULL COMMENT 'ETF 티커',
+        #         name VARCHAR(255) NOT NULL COMMENT 'ETF 이름',
+        #         weight DECIMAL(5,4) NOT NULL COMMENT '자산군 내 비중 (0-1)',
+        #         display_order INT DEFAULT 0 COMMENT '표시 순서',
+        #         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+        #         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+        #         FOREIGN KEY (sub_mp_id) REFERENCES sub_model_portfolios(id) ON DELETE CASCADE,
+        #         INDEX idx_sub_mp_id (sub_mp_id),
+        #         INDEX idx_display_order (display_order)
+        #     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP별 ETF 상세 정보'
+        # """)
         
         conn.commit()
         
@@ -622,44 +625,50 @@ def migrate_portfolios_from_code():
                 ))
             
             # SUB_MODEL_PORTFOLIOS 마이그레이션
-            for sub_mp_id, sub_mp_data in SUB_MODEL_PORTFOLIOS.items():
-                cursor.execute("""
-                    INSERT INTO sub_model_portfolios 
-                    (id, name, description, asset_class, display_order, is_active)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE
-                        name = VALUES(name),
-                        description = VALUES(description),
-                        asset_class = VALUES(asset_class),
-                        display_order = VALUES(display_order),
-                        updated_at = CURRENT_TIMESTAMP
-                """, (
-                    sub_mp_id,
-                    sub_mp_data.get('name', ''),
-                    sub_mp_data.get('description', ''),
-                    sub_mp_data.get('asset_class', ''),
-                    0,  # display_order는 나중에 설정 가능
-                    True
-                ))
-                
-                # ETF 상세 정보 마이그레이션
-                etf_details = sub_mp_data.get('etf_details', [])
-                # 기존 ETF 상세 정보 삭제 (재생성을 위해)
-                cursor.execute("DELETE FROM sub_mp_etf_details WHERE sub_mp_id = %s", (sub_mp_id,))
-                
-                for idx, etf in enumerate(etf_details):
-                    cursor.execute("""
-                        INSERT INTO sub_mp_etf_details 
-                        (sub_mp_id, category, ticker, name, weight, display_order)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                    """, (
-                        sub_mp_id,
-                        etf.get('category', ''),
-                        etf.get('ticker', ''),
-                        etf.get('name', ''),
-                        etf.get('weight', 0),
-                        idx
-                    ))
+            # 주의: sub_model_portfolios / sub_mp_etf_details는 사용하지 않음
+            # 실제 사용하는 테이블: sub_portfolio_models / sub_portfolio_compositions
+            # 아래 코드는 레거시이며, 주석 처리함
+            # 사용자가 이미 sub_portfolio_models / sub_portfolio_compositions에 데이터가 있다고 했으므로
+            # 이 마이그레이션은 필요하지 않음
+            # 
+            # for sub_mp_id, sub_mp_data in SUB_MODEL_PORTFOLIOS.items():
+            #     cursor.execute("""
+            #         INSERT INTO sub_model_portfolios 
+            #         (id, name, description, asset_class, display_order, is_active)
+            #         VALUES (%s, %s, %s, %s, %s, %s)
+            #         ON DUPLICATE KEY UPDATE
+            #             name = VALUES(name),
+            #             description = VALUES(description),
+            #             asset_class = VALUES(asset_class),
+            #             display_order = VALUES(display_order),
+            #             updated_at = CURRENT_TIMESTAMP
+            #     """, (
+            #         sub_mp_id,
+            #         sub_mp_data.get('name', ''),
+            #         sub_mp_data.get('description', ''),
+            #         sub_mp_data.get('asset_class', ''),
+            #         0,  # display_order는 나중에 설정 가능
+            #         True
+            #     ))
+            #     
+            #     # ETF 상세 정보 마이그레이션
+            #     etf_details = sub_mp_data.get('etf_details', [])
+            #     # 기존 ETF 상세 정보 삭제 (재생성을 위해)
+            #     cursor.execute("DELETE FROM sub_mp_etf_details WHERE sub_mp_id = %s", (sub_mp_id,))
+            #     
+            #     for idx, etf in enumerate(etf_details):
+            #         cursor.execute("""
+            #             INSERT INTO sub_mp_etf_details 
+            #             (sub_mp_id, category, ticker, name, weight, display_order)
+            #             VALUES (%s, %s, %s, %s, %s, %s)
+            #         """, (
+            #             sub_mp_id,
+            #             etf.get('category', ''),
+            #             etf.get('ticker', ''),
+            #             etf.get('name', ''),
+            #             etf.get('weight', 0),
+            #             idx
+            #         ))
             
             conn.commit()
             print("✅ Portfolios migrated from code to MySQL")
