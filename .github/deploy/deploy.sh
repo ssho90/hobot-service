@@ -270,14 +270,40 @@ build_frontend() {
   BUILD_TIMEOUT=600
   ELAPSED=0
   while [ ${ELAPSED} -lt ${BUILD_TIMEOUT} ]; do
-    [ -f "../hobot/logs/frontend-build-complete.flag" ] && break
-    [ -f "../hobot/logs/frontend-build-failed.flag" ] && log_error "Frontend build failed"
+    if [ -f "../hobot/logs/frontend-build-complete.flag" ]; then
+      log_info "Build completed successfully"
+      break
+    fi
+    if [ -f "../hobot/logs/frontend-build-failed.flag" ]; then
+      log_error "Frontend build failed. Check logs:"
+      tail -50 ../hobot/logs/frontend-build.log >&2 || true
+      log_error "Frontend build failed"
+    fi
     sleep 10
     ELAPSED=$((ELAPSED + 10))
     [ $((ELAPSED % 60)) -eq 0 ] && log_info "Build in progress... (${ELAPSED}s)"
   done
   
-  [ ! -d "build" ] && log_error "Frontend build directory not found"
+  # 빌드 디렉토리 확인
+  if [ ! -d "build" ]; then
+    log_error "Frontend build directory not found"
+    log_info "Build log contents:"
+    tail -100 ../hobot/logs/frontend-build.log >&2 || true
+    log_error "Frontend build directory not found"
+  fi
+  
+  # 빌드 결과 확인
+  if [ ! -f "build/index.html" ]; then
+    log_error "build/index.html not found. Build may have failed."
+    tail -100 ../hobot/logs/frontend-build.log >&2 || true
+    log_error "Frontend build incomplete"
+  fi
+  
+  if [ ! -d "build/static" ]; then
+    log_error "build/static directory not found. Build may have failed."
+    tail -100 ../hobot/logs/frontend-build.log >&2 || true
+    log_error "Frontend build incomplete"
+  fi
   
   # 권한 설정 (홈 디렉토리부터 실행 권한 부여)
   # Nginx가 홈 디렉토리 하위의 파일에 접근하려면 상위 디렉토리들에 실행 권한(+x)이 있어야 함
