@@ -254,32 +254,14 @@ def parse_holdings_by_asset_class(holdings: List[Dict]) -> Dict[str, List[Dict]]
         # 티커 → 자산군 매핑 딕셔너리 생성
         ticker_to_asset_class = {}
         
-        # 먼저 DB에서 사용자 설정 조회
-        try:
-            from service.database.db import get_db_connection
-            with get_db_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT asset_class, ticker
-                    FROM asset_class_details
-                    WHERE is_active = TRUE
-                """)
-                rows = cursor.fetchall()
-                for row in rows:
-                    ticker_to_asset_class[row['ticker']] = row['asset_class']
-        except Exception as db_error:
-            print(f"Warning: Could not load asset class details from DB: {db_error}")
-            # DB 조회 실패 시 설정 파일 사용
+        # 설정 파일에서 로드
+        config_loader = ConfigLoader()
+        config = config_loader.load()
+        etf_mapping = config.etf_mapping
         
-        # DB에 설정이 없으면 설정 파일에서 로드
-        if not ticker_to_asset_class:
-            config_loader = ConfigLoader()
-            config = config_loader.load()
-            etf_mapping = config.etf_mapping
-            
-            for asset_class, mapping in etf_mapping.items():
-                for ticker in mapping.tickers:
-                    ticker_to_asset_class[ticker] = asset_class
+        for asset_class, mapping in etf_mapping.items():
+            for ticker in mapping.tickers:
+                ticker_to_asset_class[ticker] = asset_class
         
         # 자산군별 holdings 분류
         classified_holdings = {
