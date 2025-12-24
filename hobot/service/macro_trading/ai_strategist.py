@@ -172,48 +172,34 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
             result = {}
             for row in rows:
                 # ETF 상세 정보 로드 (sub_portfolio_compositions 테이블)
-                # 외래키 컬럼 이름 확인 (여러 가능한 컬럼 이름 시도)
-                etf_rows = []
-                try:
-                    cursor.execute("""
-                        SELECT category, ticker, name, weight, display_order
-                        FROM sub_portfolio_compositions
-                        WHERE model_id = %s
-                        ORDER BY display_order
-                    """, (row['id'],))
-                    etf_rows = cursor.fetchall()
-                except Exception:
-                    try:
-                        cursor.execute("""
-                            SELECT category, ticker, name, weight, display_order
-                            FROM sub_portfolio_compositions
-                            WHERE portfolio_id = %s
-                            ORDER BY display_order
-                        """, (row['id'],))
-                        etf_rows = cursor.fetchall()
-                    except Exception:
-                        try:
-                            cursor.execute("""
-                                SELECT category, ticker, name, weight, display_order
-                                FROM sub_portfolio_compositions
-                                WHERE sub_mp_id = %s
-                                ORDER BY display_order
-                            """, (row['id'],))
-                            etf_rows = cursor.fetchall()
-                        except Exception as e:
-                            logger.warning(f"ETF 상세 정보 로드 실패 (model_id/portfolio_id/sub_mp_id 모두 시도): {e}")
-                            etf_rows = []
+                # 외래키 컬럼: sub_portfolio_model_id
+                # category 컬럼이 없으므로 ticker나 name을 category로 사용
+                cursor.execute("""
+                    SELECT ticker, name, weight, display_order
+                    FROM sub_portfolio_compositions
+                    WHERE sub_portfolio_model_id = %s
+                    ORDER BY display_order
+                """, (row['id'],))
+                etf_rows = cursor.fetchall()
                 
                 etf_details = []
                 allocation = {}
                 for etf_row in etf_rows:
+                    ticker = etf_row.get('ticker') or ""
+                    name = etf_row.get('name') or ""
+                    weight = etf_row.get('weight') or 0
+                    
+                    # category 컬럼이 없으므로 name의 첫 단어를 category로 사용
+                    category = name.split()[0] if name else ""
+                    
                     etf_details.append({
-                        'category': etf_row['category'],
-                        'ticker': etf_row['ticker'],
-                        'name': etf_row['name'],
-                        'weight': float(etf_row['weight'])
+                        'category': category,
+                        'ticker': ticker,
+                        'name': name,
+                        'weight': float(weight) if weight is not None else 0.0
                     })
-                    allocation[etf_row['category']] = float(etf_row['weight'])
+                    if category:
+                        allocation[category] = float(weight) if weight is not None else 0.0
                 
                 result[row['id']] = {
                     'id': row['id'],

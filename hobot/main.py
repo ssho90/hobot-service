@@ -2016,56 +2016,27 @@ async def get_sub_model_portfolios(admin_user: dict = Depends(require_admin)):
             portfolios = []
             for row in rows:
                 # ETF 상세 정보 조회 (sub_portfolio_compositions 테이블)
-                # 외래키 컬럼 이름 확인 (여러 가능한 컬럼 이름 시도)
-                etf_rows = []
-                try:
-                    # model_id로 시도
-                    cursor.execute("""
-                        SELECT category, ticker, name, weight, display_order
-                        FROM sub_portfolio_compositions
-                        WHERE model_id = %s
-                        ORDER BY display_order
-                    """, (row["id"],))
-                    etf_rows = cursor.fetchall()
-                except Exception:
-                    try:
-                        # portfolio_id로 시도
-                        cursor.execute("""
-                            SELECT category, ticker, name, weight, display_order
-                            FROM sub_portfolio_compositions
-                            WHERE portfolio_id = %s
-                            ORDER BY display_order
-                        """, (row["id"],))
-                        etf_rows = cursor.fetchall()
-                    except Exception:
-                        try:
-                            # sub_mp_id로 시도
-                            cursor.execute("""
-                                SELECT category, ticker, name, weight, display_order
-                                FROM sub_portfolio_compositions
-                                WHERE sub_mp_id = %s
-                                ORDER BY display_order
-                            """, (row["id"],))
-                            etf_rows = cursor.fetchall()
-                        except Exception as e:
-                            logging.warning(f"ETF 상세 정보 조회 실패 (model_id/portfolio_id/sub_mp_id 모두 시도): {e}")
-                            # 테이블 구조 확인을 위해 컬럼 정보 조회
-                            try:
-                                cursor.execute("SHOW COLUMNS FROM sub_portfolio_compositions")
-                                columns = cursor.fetchall()
-                                column_names = [col[0] for col in columns]
-                                logging.info(f"sub_portfolio_compositions 컬럼: {column_names}")
-                            except:
-                                pass
+                # 외래키 컬럼: sub_portfolio_model_id
+                # category 컬럼이 없을 수 있으므로 ticker나 name을 category로 사용
+                cursor.execute("""
+                    SELECT ticker, name, weight, display_order
+                    FROM sub_portfolio_compositions
+                    WHERE sub_portfolio_model_id = %s
+                    ORDER BY display_order
+                """, (row["id"],))
+                etf_rows = cursor.fetchall()
                 
                 etf_details = []
                 allocation = {}
                 for etf_row in etf_rows:
                     # NULL 값 처리
-                    category = etf_row.get("category") or ""
                     ticker = etf_row.get("ticker") or ""
                     name = etf_row.get("name") or ""
                     weight = etf_row.get("weight") or 0
+                    
+                    # category 컬럼이 없으므로 name을 category로 사용하거나 빈 문자열
+                    # 또는 ticker를 기반으로 category 추출 (예: ETF 이름에서 카테고리 추출)
+                    category = name.split()[0] if name else ""  # 이름의 첫 단어를 category로 사용
                     
                     etf_details.append({
                         "category": category,
@@ -2130,74 +2101,25 @@ async def update_sub_model_portfolio(
                 raise HTTPException(status_code=404, detail="Sub-model portfolio not found")
             
             # ETF 상세 정보 업데이트 (기존 삭제 후 재생성)
-            # sub_portfolio_compositions 테이블의 외래키 컬럼 이름 확인
-            # 여러 가능한 컬럼 이름 시도
-            deleted = False
-            try:
-                cursor.execute("DELETE FROM sub_portfolio_compositions WHERE model_id = %s", (sub_mp_id,))
-                deleted = True
-            except Exception:
-                try:
-                    cursor.execute("DELETE FROM sub_portfolio_compositions WHERE portfolio_id = %s", (sub_mp_id,))
-                    deleted = True
-                except Exception:
-                    try:
-                        cursor.execute("DELETE FROM sub_portfolio_compositions WHERE sub_mp_id = %s", (sub_mp_id,))
-                        deleted = True
-                    except Exception as e:
-                        logging.warning(f"ETF 상세 정보 삭제 실패: {e}")
-            
-            if not deleted:
-                logging.warning(f"sub_portfolio_compositions 테이블에서 ETF 상세 정보를 삭제할 수 없습니다. 외래키 컬럼 이름을 확인해주세요.")
+            # sub_portfolio_compositions 테이블의 외래키 컬럼: sub_portfolio_model_id
+            # category 컬럼이 없으므로 제외
+            cursor.execute("DELETE FROM sub_portfolio_compositions WHERE sub_portfolio_model_id = %s", (sub_mp_id,))
             
             # ETF 상세 정보 삽입
             etf_details = request.get("etf_details", [])
             for idx, etf in enumerate(etf_details):
-                # 외래키 컬럼 이름에 따라 INSERT 쿼리 변경
-                try:
-                    cursor.execute("""
-                        INSERT INTO sub_portfolio_compositions 
-                        (model_id, category, ticker, name, weight, display_order)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                    """, (
-                        sub_mp_id,
-                        etf.get("category", ""),
-                        etf.get("ticker", ""),
-                        etf.get("name", ""),
-                        etf.get("weight", 0),
-                        idx
-                    ))
-                except Exception:
-                    try:
-                        cursor.execute("""
-                            INSERT INTO sub_portfolio_compositions 
-                            (portfolio_id, category, ticker, name, weight, display_order)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                        """, (
-                            sub_mp_id,
-                            etf.get("category", ""),
-                            etf.get("ticker", ""),
-                            etf.get("name", ""),
-                            etf.get("weight", 0),
-                            idx
-                        ))
-                    except Exception:
-                        try:
-                            cursor.execute("""
-                                INSERT INTO sub_portfolio_compositions 
-                                (sub_mp_id, category, ticker, name, weight, display_order)
-                                VALUES (%s, %s, %s, %s, %s, %s)
-                            """, (
-                                sub_mp_id,
-                                etf.get("category", ""),
-                                etf.get("ticker", ""),
-                                etf.get("name", ""),
-                                etf.get("weight", 0),
-                                idx
-                            ))
-                        except Exception as e:
-                            logging.error(f"ETF 상세 정보 삽입 실패: {e}")
-                            raise
+                # category 컬럼이 없으므로 제외하고 삽입
+                cursor.execute("""
+                    INSERT INTO sub_portfolio_compositions 
+                    (sub_portfolio_model_id, ticker, name, weight, display_order)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    sub_mp_id,
+                    etf.get("ticker", ""),
+                    etf.get("name", ""),
+                    etf.get("weight", 0),
+                    idx
+                ))
             
             conn.commit()
             
