@@ -558,100 +558,14 @@ def migrate_from_json():
 
 
 def migrate_portfolios_from_code():
-    """코드에 하드코딩된 포트폴리오 데이터를 DB로 마이그레이션"""
-    try:
-        # 순환 참조 방지를 위해 직접 기본값 사용
-        # ai_strategist.py의 _DEFAULT_MODEL_PORTFOLIOS와 _DEFAULT_SUB_MODEL_PORTFOLIOS 사용
-        from service.macro_trading.ai_strategist import _DEFAULT_MODEL_PORTFOLIOS, _DEFAULT_SUB_MODEL_PORTFOLIOS
-        MODEL_PORTFOLIOS = _DEFAULT_MODEL_PORTFOLIOS
-        SUB_MODEL_PORTFOLIOS = _DEFAULT_SUB_MODEL_PORTFOLIOS
-        
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            
-            # MODEL_PORTFOLIOS 마이그레이션
-            for mp_id, mp_data in MODEL_PORTFOLIOS.items():
-                allocation = mp_data.get('allocation', {})
-                cursor.execute("""
-                    INSERT INTO model_portfolios 
-                    (id, name, description, strategy, allocation_stocks, allocation_bonds, 
-                     allocation_alternatives, allocation_cash, display_order, is_active)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE
-                        name = VALUES(name),
-                        description = VALUES(description),
-                        strategy = VALUES(strategy),
-                        allocation_stocks = VALUES(allocation_stocks),
-                        allocation_bonds = VALUES(allocation_bonds),
-                        allocation_alternatives = VALUES(allocation_alternatives),
-                        allocation_cash = VALUES(allocation_cash),
-                        display_order = VALUES(display_order),
-                        updated_at = CURRENT_TIMESTAMP
-                """, (
-                    mp_id,
-                    mp_data.get('name', ''),
-                    mp_data.get('description', ''),
-                    mp_data.get('strategy', ''),
-                    allocation.get('Stocks', 0),
-                    allocation.get('Bonds', 0),
-                    allocation.get('Alternatives', 0),
-                    allocation.get('Cash', 0),
-                    int(mp_id.split('-')[1]) if '-' in mp_id else 0,  # MP-1 -> 1
-                    True
-                ))
-            
-            # SUB_MODEL_PORTFOLIOS 마이그레이션
-            # 주의: sub_model_portfolios / sub_mp_etf_details는 사용하지 않음
-            # 실제 사용하는 테이블: sub_portfolio_models / sub_portfolio_compositions
-            # 아래 코드는 레거시이며, 주석 처리함
-            # 사용자가 이미 sub_portfolio_models / sub_portfolio_compositions에 데이터가 있다고 했으므로
-            # 이 마이그레이션은 필요하지 않음
-            # 
-            # for sub_mp_id, sub_mp_data in SUB_MODEL_PORTFOLIOS.items():
-            #     cursor.execute("""
-            #         INSERT INTO sub_model_portfolios 
-            #         (id, name, description, asset_class, display_order, is_active)
-            #         VALUES (%s, %s, %s, %s, %s, %s)
-            #         ON DUPLICATE KEY UPDATE
-            #             name = VALUES(name),
-            #             description = VALUES(description),
-            #             asset_class = VALUES(asset_class),
-            #             display_order = VALUES(display_order),
-            #             updated_at = CURRENT_TIMESTAMP
-            #     """, (
-            #         sub_mp_id,
-            #         sub_mp_data.get('name', ''),
-            #         sub_mp_data.get('description', ''),
-            #         sub_mp_data.get('asset_class', ''),
-            #         0,  # display_order는 나중에 설정 가능
-            #         True
-            #     ))
-            #     
-            #     # ETF 상세 정보 마이그레이션
-            #     etf_details = sub_mp_data.get('etf_details', [])
-            #     # 기존 ETF 상세 정보 삭제 (재생성을 위해)
-            #     cursor.execute("DELETE FROM sub_mp_etf_details WHERE sub_mp_id = %s", (sub_mp_id,))
-            #     
-            #     for idx, etf in enumerate(etf_details):
-            #         cursor.execute("""
-            #             INSERT INTO sub_mp_etf_details 
-            #             (sub_mp_id, category, ticker, name, weight, display_order)
-            #             VALUES (%s, %s, %s, %s, %s, %s)
-            #         """, (
-            #             sub_mp_id,
-            #             etf.get('category', ''),
-            #             etf.get('ticker', ''),
-            #             etf.get('name', ''),
-            #             etf.get('weight', 0),
-            #             idx
-            #         ))
-            
-            conn.commit()
-            print("✅ Portfolios migrated from code to MySQL")
-    except Exception as e:
-        print(f"⚠️  Error migrating portfolios: {e}")
-        import traceback
-        traceback.print_exc()
+    """코드에 하드코딩된 포트폴리오 데이터를 DB로 마이그레이션
+    
+    주의: 초기 데이터는 이미 적재되어 있으므로 이 함수는 더 이상 사용하지 않습니다.
+    DEFAULT 포트폴리오 정의도 삭제되었습니다.
+    """
+    # 초기 데이터는 이미 적재되어 있으므로 마이그레이션 불필요
+    print("⚠️  migrate_portfolios_from_code()는 더 이상 사용하지 않습니다. 초기 데이터는 이미 적재되어 있습니다.")
+    pass
 
 
 def backup_database():

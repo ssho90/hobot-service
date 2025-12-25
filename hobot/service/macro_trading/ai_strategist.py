@@ -22,72 +22,6 @@ logger = logging.getLogger(__name__)
 # 모델 포트폴리오 (MP) 시나리오 정의
 # ============================================================================
 
-# 하위 호환성을 위한 기본값 (DB에서 로드 실패 시 사용)
-_DEFAULT_MODEL_PORTFOLIOS = {
-    "MP-1": {
-        "id": "MP-1",
-        "name": "Risk On (골디락스)",
-        "description": "경기 지표(GDP, PMI)가 확장 국면이며 기업 이익이 증가하지만, 물가는 안정적인 최상의 시나리오. 실업률은 완전고용 수준을 유지하며, 시장에 위험자산 선호 심리(Risk-on)가 지배적임.",
-        "strategy": "주식 풀매수",
-        "allocation": {
-            "Stocks": 80.0,
-            "Bonds": 10.0,
-            "Alternatives": 5.0,
-            "Cash": 5.0
-
-            
-        }
-    },
-    "MP-2": {
-        "id": "MP-2",
-        "name": "Reflation (물가상승)",
-        "description": "경기는 여전히 확장세이나, 수요 과열 또는 공급 충격으로 인해 물가(CPI/PCE)가 목표치를 상회하며 급등하는 구간. 금리 인상 압력이 존재하며, 화폐 가치 하락 방어를 위해 실물 자산이 선호됨.",
-        "strategy": "원자재/금 헤지 (인플레이션 방어)",
-        "allocation": {
-            "Stocks": 50.0,
-            "Bonds": 10.0,
-            "Alternatives": 30.0,
-            "Cash": 10.0
-        }
-    },
-    "MP-3": {
-        "id": "MP-3",
-        "name": "Neutral (중립)",
-        "description": "경제 지표가 호재와 악재가 섞여 뚜렷한 방향성(추세)이 보이지 않는 구간. 고용은 견조하나 소비가 둔화되는 등 지표 간 괴리가 발생하며, 시장은 연준의 정책 결정이나 새로운 모멘텀을 기다리며 박스권 등락을 반복함.",
-        "strategy": "자산배분 정석 (균형 투자)",
-        "allocation": {
-            "Stocks": 40.0,
-            "Bonds": 40.0,
-            "Alternatives": 10.0,
-            "Cash": 10.0
-        }
-    },
-    "MP-4": {
-        "id": "MP-4",
-        "name": "Defensive (경기둔화)",
-        "description": "제조업 PMI 등 선행 지표가 위축되고 실업률이 바닥을 찍고 완만하게 상승하기 시작하는 경기 하강 초기 국면. 물가 상승 압력이 둔화되면서 중앙은행의 '금리 인하' 기대감이 형성되어 채권 가격 상승(수익률 하락)이 유력함.",
-        "strategy": "채권 매집 (자본 차익 기대)",
-        "allocation": {
-            "Stocks": 20.0,
-            "Bonds": 50.0,
-            "Alternatives": 20.0,
-            "Cash": 10.0
-        }
-    },
-    "MP-5": {
-        "id": "MP-5",
-        "name": "Recession (침체/공포)",
-        "description": "실업률이 급격히 치솟으며(샴의 법칙 발동 등), 하이일드 스프레드가 급등하는 등 신용 위험이 현실화된 위기 국면. 주식 등 위험자산 투매가 나오며 안전자산(달러, 초단기 국채)으로의 자금 쏠림(Flight to Quality)이 발생함.",
-        "strategy": "안전자산 올인 (자산 방어 최우선)",
-        "allocation": {
-            "Stocks": 10.0,
-            "Bonds": 60.0,
-            "Alternatives": 10.0,
-            "Cash": 20.0
-        }
-    }
-}
-
 # DB에서 로드된 포트폴리오 캐시
 _MODEL_PORTFOLIOS_CACHE = None
 _SUB_MODEL_PORTFOLIOS_CACHE = None
@@ -108,8 +42,8 @@ def _load_model_portfolios_from_db() -> Dict[str, Dict]:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT id, name, description, strategy, 
-                       allocation_stocks, allocation_bonds, 
-                       allocation_alternatives, allocation_cash,
+                       stocks_allocation, bonds_allocation, 
+                       alternatives_allocation, cash_allocation,
                        display_order, is_active
                 FROM model_portfolios
                 WHERE is_active = TRUE
@@ -119,16 +53,24 @@ def _load_model_portfolios_from_db() -> Dict[str, Dict]:
             
             result = {}
             for row in rows:
-                result[row['id']] = {
-                    'id': row['id'],
+                stocks_allocation = row.get('stocks_allocation') or 0
+                bonds_allocation = row.get('bonds_allocation') or 0
+                alternatives_allocation = row.get('alternatives_allocation') or 0
+                cash_allocation = row.get('cash_allocation') or 0
+                
+                # id를 문자열로 변환 (DB에서 정수로 반환될 수 있음)
+                mp_id = str(row['id'])
+                
+                result[mp_id] = {
+                    'id': mp_id,
                     'name': row['name'],
                     'description': row['description'],
                     'strategy': row['strategy'],
                     'allocation': {
-                        'Stocks': float(row['allocation_stocks']),
-                        'Bonds': float(row['allocation_bonds']),
-                        'Alternatives': float(row['allocation_alternatives']),
-                        'Cash': float(row['allocation_cash'])
+                        'Stocks': float(stocks_allocation) if stocks_allocation is not None else 0.0,
+                        'Bonds': float(bonds_allocation) if bonds_allocation is not None else 0.0,
+                        'Alternatives': float(alternatives_allocation) if alternatives_allocation is not None else 0.0,
+                        'Cash': float(cash_allocation) if cash_allocation is not None else 0.0
                     }
                 }
             
@@ -171,6 +113,9 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
             
             result = {}
             for row in rows:
+                # id를 문자열로 변환 (DB에서 정수로 반환될 수 있음)
+                sub_mp_id = str(row['id'])
+                
                 # ETF 상세 정보 로드 (sub_portfolio_compositions 테이블)
                 # 외래키 컬럼: sub_portfolio_model_id
                 # category 컬럼이 없으므로 ticker나 name을 category로 사용
@@ -201,8 +146,8 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
                     if category:
                         allocation[category] = float(weight) if weight is not None else 0.0
                 
-                result[row['id']] = {
-                    'id': row['id'],
+                result[sub_mp_id] = {
+                    'id': sub_mp_id,
                     'name': row['name'],
                     'description': row['description'],
                     'asset_class': row['asset_class'],
@@ -262,10 +207,11 @@ def refresh_portfolio_cache():
     get_sub_model_portfolios()
 
 
-# 하위 호환성을 위한 변수 (함수 호출로 동적 로드)
-# 주의: 직접 접근 대신 get_model_portfolios() 함수 사용 권장
-MODEL_PORTFOLIOS = None  # 동적으로 로드됨
-SUB_MODEL_PORTFOLIOS = None  # 동적으로 로드됨
+# 하위 호환성을 위한 변수 (더 이상 사용하지 않음)
+# 주의: 직접 접근 대신 get_model_portfolios() / get_sub_model_portfolios() 함수 사용
+# DEFAULT 포트폴리오 정의는 삭제되었으며, 모든 데이터는 DB에서 로드됩니다.
+MODEL_PORTFOLIOS = None  # 사용하지 않음 (get_model_portfolios() 사용)
+SUB_MODEL_PORTFOLIOS = None  # 사용하지 않음 (get_sub_model_portfolios() 사용)
 
 
 def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
@@ -280,134 +226,6 @@ def get_model_portfolio_allocation(mp_id: str) -> Optional[Dict[str, float]]:
 # ============================================================================
 # Sub-MP (자산군별 세부 모델) 정의
 # ============================================================================
-
-# 하위 호환성을 위한 기본값 (DB에서 로드 실패 시 사용)
-_DEFAULT_SUB_MODEL_PORTFOLIOS = {
-    # 주식 (Equity) Sub-Models
-    "Eq-A": {
-        "id": "Eq-A",
-        "name": "Aggressive (성장 공격형)",
-        "description": "금리 인하기, 유동성 풍부, Risk-On. 기술주가 주도하는 상황.",
-        "asset_class": "Stocks",
-        "allocation": {
-            "나스닥": 0.5,
-            "S&P500": 0.3,
-            "배당주": 0.2
-        },
-        "etf_details": [
-            {"category": "나스닥", "ticker": "411420", "name": "KODEX 미국나스닥AI테크액티브", "weight": 0.5},
-            {"category": "S&P500", "ticker": "360750", "name": "TIGER 미국S&P500", "weight": 0.3},
-            {"category": "배당주", "ticker": "458730", "name": "TIGER 미국배당다우존스", "weight": 0.2}
-        ]
-    },
-    "Eq-N": {
-        "id": "Eq-N",
-        "name": "Neutral (시장 중립형)",
-        "description": "방향성 불확실, 일반적인 상승장.",
-        "asset_class": "Stocks",
-        "allocation": {
-            "S&P500": 0.5,
-            "나스닥": 0.3,
-            "배당주": 0.2
-        },
-        "etf_details": [
-            {"category": "S&P500", "ticker": "360750", "name": "TIGER 미국S&P500", "weight": 0.5},
-            {"category": "나스닥", "ticker": "411420", "name": "KODEX 미국나스닥AI테크액티브", "weight": 0.3},
-            {"category": "배당주", "ticker": "458730", "name": "TIGER 미국배당다우존스", "weight": 0.2}
-        ]
-    },
-    "Eq-D": {
-        "id": "Eq-D",
-        "name": "Defensive (방어형)",
-        "description": "고금리 장기화, 경기 침체 우려, 변동성 확대. 현금흐름이 좋은 배당주 선호.",
-        "asset_class": "Stocks",
-        "allocation": {
-            "배당주": 0.5,
-            "S&P500": 0.3,
-            "나스닥": 0.2
-        },
-        "etf_details": [
-            {"category": "배당주", "ticker": "458730", "name": "TIGER 미국배당다우존스", "weight": 0.5},
-            {"category": "S&P500", "ticker": "360750", "name": "TIGER 미국S&P500", "weight": 0.3},
-            {"category": "나스닥", "ticker": "411420", "name": "KODEX 미국나스닥AI테크액티브", "weight": 0.2}
-        ]
-    },
-    # 채권 (Bond) Sub-Models
-    "Bnd-L": {
-        "id": "Bnd-L",
-        "name": "Long Duration (장기채 베팅)",
-        "description": "금리 인하가 확실시될 때. 금리가 1% 떨어지면 장기채는 15% 폭등.",
-        "asset_class": "Bonds",
-        "allocation": {
-            "미국 장기채": 0.8,
-            "한국 단기채": 0.2
-        },
-        "etf_details": [
-            {"category": "미국 장기채", "ticker": "453850", "name": "ACE 미국30년국채액티브(H)", "weight": 0.8},
-            {"category": "한국 단기채", "ticker": "357870", "name": "TIGER CD금리투자KIS", "weight": 0.2}
-        ]
-    },
-    "Bnd-N": {
-        "id": "Bnd-N",
-        "name": "Balanced (균형)",
-        "description": "금리 동결 또는 완만한 인하.",
-        "asset_class": "Bonds",
-        "allocation": {
-            "미국 장기채": 0.5,
-            "한국 단기채": 0.5
-        },
-        "etf_details": [
-            {"category": "미국 장기채", "ticker": "453850", "name": "ACE 미국30년국채액티브(H)", "weight": 0.5},
-            {"category": "한국 단기채", "ticker": "357870", "name": "TIGER CD금리투자KIS", "weight": 0.5}
-        ]
-    },
-    "Bnd-S": {
-        "id": "Bnd-S",
-        "name": "Short Duration (단기채 방어)",
-        "description": "금리 인상기, 인플레이션 쇼크. 장기채 가격 폭락 방어.",
-        "asset_class": "Bonds",
-        "allocation": {
-            "한국 단기채": 0.8,
-            "미국 장기채": 0.2
-        },
-        "etf_details": [
-            {"category": "한국 단기채", "ticker": "357870", "name": "TIGER CD금리투자KIS", "weight": 0.8},
-            {"category": "미국 장기채", "ticker": "453850", "name": "ACE 미국30년국채액티브(H)", "weight": 0.2}
-        ]
-    },
-    # 대체자산 (Alternatives) Sub-Models
-    "Alt-I": {
-        "id": "Alt-I",
-        "name": "Inflation Fighter (인플레 방어)",
-        "description": "스태그플레이션, 물가 급등, 달러 약세.",
-        "asset_class": "Alternatives",
-        "allocation": {
-            "금": 0.8,
-            "달러": 0.2
-        },
-        "etf_details": [
-            {"category": "금", "ticker": "132030", "name": "KODEX 골드선물(H)", "weight": 0.8},
-            {"category": "달러", "ticker": "261240", "name": "KODEX 미국달러선물", "weight": 0.2}
-        ]
-    },
-    "Alt-C": {
-        "id": "Alt-C",
-        "name": "Crisis Hedge (위기 방어)",
-        "description": "금융 위기, 시스템 리스크, 주식 폭락(달러 강세).",
-        "asset_class": "Alternatives",
-        "allocation": {
-            "달러": 0.7,
-            "금": 0.3
-        },
-        "etf_details": [
-            {"category": "달러", "ticker": "261240", "name": "KODEX 미국달러선물", "weight": 0.7},
-            {"category": "금", "ticker": "132030", "name": "KODEX 골드선물(H)", "weight": 0.3}
-        ]
-    }
-}
-
-# 하위 호환성을 위한 속성 접근
-SUB_MODEL_PORTFOLIOS = _DEFAULT_SUB_MODEL_PORTFOLIOS
 
 
 def get_sub_model_portfolio_allocation(sub_mp_id: str) -> Optional[Dict[str, float]]:
@@ -1414,7 +1232,8 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         mp_id = mp_decision_data.get('mp_id')
         portfolios = get_model_portfolios()
         if not mp_id or mp_id not in portfolios:
-            valid_mp_ids = ', '.join(portfolios.keys())
+            # portfolios.keys()가 정수일 수 있으므로 문자열로 변환
+            valid_mp_ids = ', '.join(str(k) for k in portfolios.keys())
             logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
             raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
         

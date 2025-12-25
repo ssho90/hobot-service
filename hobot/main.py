@@ -713,11 +713,13 @@ async def get_ai_overview():
             sub_mp_details = None
             if sub_mp_data and mp_id:
                 from service.macro_trading.ai_strategist import (
-                    SUB_MODEL_PORTFOLIOS,
+                    get_sub_model_portfolios,
                     get_sub_mp_etf_details
                 )
                 
                 sub_mp_details = {}
+                sub_portfolios = get_sub_model_portfolios()
+                
                 # 각 자산군별 Sub-MP 세부 종목 정보
                 if sub_mp_data.get('stocks'):
                     stocks_sub_mp_id = sub_mp_data['stocks']
@@ -725,7 +727,7 @@ async def get_ai_overview():
                     if stocks_etf_details:
                         sub_mp_details['stocks'] = {
                             'sub_mp_id': stocks_sub_mp_id,
-                            'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(stocks_sub_mp_id, {}).get('name', ''),
+                            'sub_mp_name': sub_portfolios.get(stocks_sub_mp_id, {}).get('name', ''),
                             'etf_details': stocks_etf_details
                         }
                 
@@ -735,7 +737,7 @@ async def get_ai_overview():
                     if bonds_etf_details:
                         sub_mp_details['bonds'] = {
                             'sub_mp_id': bonds_sub_mp_id,
-                            'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(bonds_sub_mp_id, {}).get('name', ''),
+                            'sub_mp_name': sub_portfolios.get(bonds_sub_mp_id, {}).get('name', ''),
                             'etf_details': bonds_etf_details
                         }
                 
@@ -745,7 +747,7 @@ async def get_ai_overview():
                     if alternatives_etf_details:
                         sub_mp_details['alternatives'] = {
                             'sub_mp_id': alternatives_sub_mp_id,
-                            'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(alternatives_sub_mp_id, {}).get('name', ''),
+                            'sub_mp_name': sub_portfolios.get(alternatives_sub_mp_id, {}).get('name', ''),
                             'etf_details': alternatives_etf_details
                         }
             
@@ -974,18 +976,20 @@ async def get_strategy_decisions_history(
                 sub_mp_details = None
                 if sub_mp_data and mp_id:
                     from service.macro_trading.ai_strategist import (
-                        SUB_MODEL_PORTFOLIOS,
+                        get_sub_model_portfolios,
                         get_sub_mp_etf_details
                     )
                     
                     sub_mp_details = {}
+                    sub_portfolios = get_sub_model_portfolios()
+                    
                     if sub_mp_data.get('stocks'):
                         stocks_sub_mp_id = sub_mp_data['stocks']
                         stocks_etf_details = get_sub_mp_etf_details(stocks_sub_mp_id)
                         if stocks_etf_details:
                             sub_mp_details['stocks'] = {
                                 'sub_mp_id': stocks_sub_mp_id,
-                                'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(stocks_sub_mp_id, {}).get('name', ''),
+                                'sub_mp_name': sub_portfolios.get(stocks_sub_mp_id, {}).get('name', ''),
                                 'etf_details': stocks_etf_details
                             }
                     
@@ -995,7 +999,7 @@ async def get_strategy_decisions_history(
                         if bonds_etf_details:
                             sub_mp_details['bonds'] = {
                                 'sub_mp_id': bonds_sub_mp_id,
-                                'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(bonds_sub_mp_id, {}).get('name', ''),
+                                'sub_mp_name': sub_portfolios.get(bonds_sub_mp_id, {}).get('name', ''),
                                 'etf_details': bonds_etf_details
                             }
                     
@@ -1005,7 +1009,7 @@ async def get_strategy_decisions_history(
                         if alternatives_etf_details:
                             sub_mp_details['alternatives'] = {
                                 'sub_mp_id': alternatives_sub_mp_id,
-                                'sub_mp_name': SUB_MODEL_PORTFOLIOS.get(alternatives_sub_mp_id, {}).get('name', ''),
+                                'sub_mp_name': sub_portfolios.get(alternatives_sub_mp_id, {}).get('name', ''),
                                 'etf_details': alternatives_etf_details
                             }
                 
