@@ -1257,6 +1257,8 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
                 tracker.set_response(sub_mp_response)
                 logger.info("Sub-MP LLM 응답 수신 완료")
             
+            # with 블록이 끝나면 __exit__가 호출되어 로그가 저장되어야 함
+            logger.info("Sub-MP LLM 호출 컨텍스트 종료 (로그 저장 예상)")
             logger.info("Sub-MP 응답 파싱 시작...")
             sub_mp_response_text = _parse_llm_response(sub_mp_response)
             logger.info(f"Sub-MP 응답 텍스트 추출 완료 (길이: {len(sub_mp_response_text)}자)")

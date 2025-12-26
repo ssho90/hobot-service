@@ -95,8 +95,11 @@ def log_llm_usage(
                 now_kst_naive  # UTC+9 시간을 naive datetime으로 저장
             ))
             conn.commit()
+            logger.info(f"LLM 사용 로그 DB 저장 성공: service_name={service_name}, model_name={model_name}, "
+                       f"total_tokens={total_tokens}, created_at={now_kst_naive}")
     except Exception as e:
-        logger.error(f"LLM 사용 로그 저장 실패: {e}", exc_info=True)
+        logger.error(f"LLM 사용 로그 저장 실패 (service_name={service_name}, model_name={model_name}): {e}", exc_info=True)
+        # 예외를 다시 발생시키지 않음 (로그 저장 실패가 전체 프로세스를 중단시키지 않도록)
 
 
 def track_llm_usage(service_name: Optional[str] = None):
@@ -207,17 +210,25 @@ class LLMCallTracker:
             self.duration_ms = int((time.time() - self.start_time) * 1000)
         
         # 에러가 발생해도 로그는 저장
-        log_llm_usage(
-            model_name=self.model_name,
-            provider=self.provider,
-            request_prompt=self.request_prompt,
-            response_prompt=self.response_prompt,
-            prompt_tokens=self.prompt_tokens,
-            completion_tokens=self.completion_tokens,
-            total_tokens=self.total_tokens,
-            service_name=self.service_name,
-            duration_ms=self.duration_ms
-        )
+        try:
+            logger.info(f"LLM 사용 로그 저장 시도: service_name={self.service_name}, model_name={self.model_name}, "
+                       f"tokens={self.total_tokens}, duration={self.duration_ms}ms")
+            log_llm_usage(
+                model_name=self.model_name,
+                provider=self.provider,
+                request_prompt=self.request_prompt,
+                response_prompt=self.response_prompt,
+                prompt_tokens=self.prompt_tokens,
+                completion_tokens=self.completion_tokens,
+                total_tokens=self.total_tokens,
+                service_name=self.service_name,
+                duration_ms=self.duration_ms
+            )
+            logger.info(f"LLM 사용 로그 저장 완료: service_name={self.service_name}, model_name={self.model_name}")
+        except Exception as e:
+            # 로그 저장 실패 시에도 에러를 기록하되, 원래 예외는 전파하지 않음
+            logger.error(f"LLM 사용 로그 저장 실패 (service_name={self.service_name}, model_name={self.model_name}): {e}", exc_info=True)
+        
         return False
     
     def set_request_prompt(self, prompt: str):
