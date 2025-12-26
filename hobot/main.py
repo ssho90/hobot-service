@@ -179,12 +179,19 @@ async def kis_get_balance(current_user: dict = Depends(get_current_user)):
     """한국투자증권 계좌 잔액조회 (로그인 사용자별)"""
     try:
         from service.macro_trading.kis.kis import get_balance_info_api
+        logging.info(f"KIS balance API 호출 - user_id: {current_user['id']}")
         result = get_balance_info_api(user_id=current_user["id"])
-        logging.info(f"KIS balance check result: {result.get('status')}")
+        status = result.get('status')
+        message = result.get('message', '')
+        logging.info(f"KIS balance check result - status: {status}, message: {message}")
+        if status == "error":
+            logging.warning(f"KIS balance check 실패 상세 - result: {json.dumps(result, ensure_ascii=False)}")
         return result
     except Exception as e:
-        logging.error(f"Error in KIS balance check: {e}")
-        return {"status": "error", "message": str(e)}
+        import traceback
+        error_trace = traceback.format_exc()
+        logging.error(f"KIS balance check 예외 발생 - error: {str(e)}, trace: {error_trace}")
+        return {"status": "error", "message": str(e), "trace": error_trace}
 
 @api_router.get("/kis/healthcheck")
 async def kis_health_check_old():

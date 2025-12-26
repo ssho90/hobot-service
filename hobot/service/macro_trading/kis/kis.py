@@ -1,8 +1,10 @@
 # service/macro_trading/kis/kis.py
 from dotenv import load_dotenv
 import os
+import json
 import pandas as pd
 import traceback
+import logging
 from typing import Dict, List, Optional
 
 # 프로젝트 루트의 .env 파일 로드
@@ -368,27 +370,55 @@ def get_balance_info_api(user_id: Optional[int] = None):
         user_id: 사용자 ID. 제공되면 해당 사용자의 credential 사용, 없으면 환경 변수 사용
     """
     try:
+        logging.info(f"KIS balance API 호출 시작 - user_id: {user_id}")
+        
         # 사용자별 credential 사용
         if user_id:
+            logging.info(f"사용자별 credential 조회 중 - user_id: {user_id}")
             credentials = get_user_kis_credentials(user_id)
             if not credentials:
+                logging.warning(f"KIS API 인증 정보 없음 - user_id: {user_id}")
                 return {
                     "status": "error",
                     "message": "KIS API 인증 정보가 등록되지 않았습니다. 프로필에서 인증 정보를 등록해주세요."
                 }
+            logging.info(f"Credential 조회 성공 - account_no: {credentials.get('account_no', 'N/A')[:4]}****")
             api = KISAPI(credentials['app_key'], credentials['app_secret'], credentials['account_no'])
             account_no = credentials['account_no']
         else:
             # 기존 방식 (환경 변수 사용)
+            logging.info("환경 변수 사용하여 KIS API 초기화")
             api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
             account_no = ACCOUNT_NO
-        current_price = api.get_current_price(TARGET_TICKER)
-        balance_data = api.get_balance()
         
-        if not balance_data or balance_data.get('rt_cd') != '0':
+        logging.info(f"현재가 조회 시작 - ticker: {TARGET_TICKER}")
+        current_price = api.get_current_price(TARGET_TICKER)
+        logging.info(f"현재가 조회 완료 - price: {current_price}")
+        
+        logging.info("잔고 조회 시작")
+        balance_data = api.get_balance()
+        logging.info(f"잔고 조회 완료 - balance_data keys: {list(balance_data.keys()) if balance_data else 'None'}")
+        
+        if not balance_data:
+            logging.error("잔고 조회 결과가 None입니다")
             return {
                 "status": "error",
-                "message": balance_data.get('msg1', '잔고 조회 실패') if balance_data else '잔고 조회 실패'
+                "message": "잔고 조회 실패 (응답 없음)"
+            }
+        
+        rt_cd = balance_data.get('rt_cd')
+        msg1 = balance_data.get('msg1', '')
+        msg2 = balance_data.get('msg2', '')
+        logging.info(f"잔고 조회 응답 - rt_cd: {rt_cd}, msg1: {msg1}, msg2: {msg2}")
+        
+        if rt_cd != '0':
+            logging.error(f"잔고 조회 실패 - rt_cd: {rt_cd}, msg1: {msg1}, msg2: {msg2}, 전체 응답: {json.dumps(balance_data, ensure_ascii=False)}")
+            return {
+                "status": "error",
+                "message": balance_data.get('msg1', '잔고 조회 실패') if balance_data else '잔고 조회 실패',
+                "rt_cd": rt_cd,
+                "msg1": msg1,
+                "msg2": msg2
             }
         
         output1 = balance_data.get('output1', [])  # 주식 잔고

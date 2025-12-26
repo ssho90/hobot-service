@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import time
 import os
+import logging
 from datetime import datetime
 
 class KISAPI:
@@ -211,8 +212,11 @@ class KISAPI:
     def get_balance(self):
         """계좌 잔고 조회"""
         try:
+            logging.info(f"계좌번호 파싱 시작 - account_no: {self.account_no[:4]}****" if len(self.account_no) > 4 else f"account_no: {self.account_no}")
             cano, acnt_prdt_cd = self._parse_account_no()
+            logging.info(f"계좌번호 파싱 완료 - CANO: {cano}, ACNT_PRDT_CD: '{acnt_prdt_cd}'")
         except ValueError as e:
+            logging.error(f"계좌번호 파싱 실패: {e}")
             return {
                 "rt_cd": "1",
                 "msg1": str(e)
@@ -236,12 +240,23 @@ class KISAPI:
             "CTX_AREA_FK100": "",
             "CTX_AREA_NK100": ""
         }
+        
+        logging.info(f"KIS API 잔고 조회 요청 - URL: {url}, CANO: {cano}, ACNT_PRDT_CD: '{acnt_prdt_cd}'")
 
         res = requests.get(url, headers=headers, params=params)
+        logging.info(f"KIS API 응답 - status_code: {res.status_code}")
+        
         if res.status_code == 200:
-            return res.json()
+            response_data = res.json()
+            rt_cd = response_data.get('rt_cd', 'N/A')
+            msg1 = response_data.get('msg1', '')
+            logging.info(f"KIS API 응답 파싱 완료 - rt_cd: {rt_cd}, msg1: {msg1}")
+            if rt_cd != '0':
+                logging.warning(f"KIS API 에러 응답 - rt_cd: {rt_cd}, msg1: {msg1}, msg2: {response_data.get('msg2', '')}, 전체 응답: {json.dumps(response_data, ensure_ascii=False)}")
+            return response_data
         else:
-            print(f"Error getting balance: {res.text}")
+            error_text = res.text
+            logging.error(f"KIS API HTTP 에러 - status_code: {res.status_code}, response: {error_text}")
             return None
 
     def _place_order(self, ticker, quantity, order_type, tr_id):
