@@ -363,7 +363,7 @@ def calculate_asset_class_pnl(holdings: List[Dict], cash_balance: int = 0) -> Di
     return asset_class_info
 
 
-def get_balance_info_api(user_id: Optional[int] = None):
+def get_balance_info_api(user_id: Optional[str] = None):
     """잔액조회 API용 함수 - 상세 정보 반환 (자산군별 정보 포함)
     
     Args:

@@ -50,17 +50,16 @@ def init_db():
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM users WHERE username = %s", ('admin',))
+            cursor.execute("SELECT * FROM users WHERE id = %s", ('admin',))
             admin_user = cursor.fetchone()
             
             if not admin_user:
                 now = datetime.now()
                 cursor.execute("""
-                    INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO users (id, password_hash, role, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s)
                 """, (
                     'admin',
-                    'admin@hobot.com',
                     hash_password('admin'),
                     'admin',
                     now,
@@ -109,28 +108,8 @@ def verify_token(token: str) -> Optional[Dict]:
         )
 
 
-def get_user_by_username(username: str) -> Optional[Dict]:
-    """사용자명으로 사용자 조회"""
-    init_db()  # 지연 초기화
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        row = cursor.fetchone()
-        return _row_to_dict(row)
-
-
-def get_user_by_email(email: str) -> Optional[Dict]:
-    """이메일로 사용자 조회"""
-    init_db()  # 지연 초기화
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        row = cursor.fetchone()
-        return _row_to_dict(row)
-
-
-def get_user_by_id(user_id: int) -> Optional[Dict]:
-    """ID로 사용자 조회"""
+def get_user_by_id(user_id: str) -> Optional[Dict]:
+    """ID로 사용자 조회 (username이 id가 됨)"""
     init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -139,21 +118,14 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
         return _row_to_dict(row)
 
 
-def create_user(username: str, email: str, password: str, role: str = "user") -> Dict:
-    """새 사용자 생성"""
+def create_user(username: str, password: str, role: str = "user") -> Dict:
+    """새 사용자 생성 (username이 id가 됨)"""
     init_db()  # 지연 초기화
     # 중복 확인
-    if get_user_by_username(username):
+    if get_user_by_id(username):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already exists"
-        )
-    
-    # 이메일이 있는 경우에만 중복 확인
-    if email and get_user_by_email(email):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already exists"
         )
     
     password_hash = hash_password(password)
@@ -162,17 +134,14 @@ def create_user(username: str, email: str, password: str, role: str = "user") ->
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (username, email, password_hash, role, now, now))
-        user_id = cursor.lastrowid
+            INSERT INTO users (id, password_hash, role, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (username, password_hash, role, now, now))
         conn.commit()
     
     # 비밀번호 해시 제외하고 반환
     return {
-        'id': user_id,
-        'username': username,
-        'email': email,
+        'id': username,
         'role': role,
         'created_at': now,
         'updated_at': now
@@ -184,14 +153,12 @@ def get_all_users() -> List[Dict]:
     init_db()  # 지연 초기화
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, username, email, role, created_at, updated_at FROM users")
+        cursor.execute("SELECT id, role, created_at, updated_at FROM users")
         rows = cursor.fetchall()
         # 비밀번호 해시 제외하고 반환
         return [
             {
                 'id': row['id'],
-                'username': row['username'],
-                'email': row['email'],
                 'role': row['role'],
                 'created_at': row['created_at'],
                 'updated_at': row['updated_at']
@@ -200,9 +167,9 @@ def get_all_users() -> List[Dict]:
         ]
 
 
-def update_user(user_id: int, username: Optional[str] = None, 
-                email: Optional[str] = None, role: Optional[str] = None) -> Dict:
-    """사용자 정보 업데이트"""
+def update_user(user_id: str, new_user_id: Optional[str] = None, 
+                role: Optional[str] = None) -> Dict:
+    """사용자 정보 업데이트 (id 변경 시 모든 관련 데이터도 함께 업데이트)"""
     init_db()  # 지연 초기화
     # 사용자 존재 확인
     user = get_user_by_id(user_id)
@@ -212,29 +179,24 @@ def update_user(user_id: int, username: Optional[str] = None,
             detail="User not found"
         )
     
-    # 중복 확인 및 업데이트
-    update_fields = []
-    update_values = []
-    
-    if username is not None:
-        existing = get_user_by_username(username)
-        if existing and existing.get('id') != user_id:
+    # id 변경 시 중복 확인
+    if new_user_id is not None and new_user_id != user_id:
+        existing = get_user_by_id(new_user_id)
+        if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already exists"
             )
-        update_fields.append("username = %s")
-        update_values.append(username)
     
-    if email is not None:
-        existing = get_user_by_email(email)
-        if existing and existing.get('id') != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already exists"
-            )
-        update_fields.append("email = %s")
-        update_values.append(email)
+    # 업데이트 필드 구성
+    update_fields = []
+    update_values = []
+    
+    if new_user_id is not None and new_user_id != user_id:
+        # id 변경은 복잡하므로 별도 처리 필요 (외래키 참조 업데이트)
+        # 일단 role만 업데이트하고, id 변경은 별도 함수로 처리하는 것이 안전
+        # 여기서는 role만 업데이트
+        pass
     
     if role is not None:
         update_fields.append("role = %s")
@@ -247,28 +209,43 @@ def update_user(user_id: int, username: Optional[str] = None,
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            # MySQL에서는 마지막 값이 WHERE 조건
-            where_value = update_values.pop()
-            update_values.append(where_value)
             cursor.execute(
                 f"UPDATE users SET {', '.join(update_fields)} WHERE id = %s",
                 update_values
             )
             conn.commit()
     
+    # id 변경 처리
+    if new_user_id is not None and new_user_id != user_id:
+        # 외래키 참조가 있는 경우 CASCADE로 처리되지만, 명시적으로 업데이트
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            # user_kis_credentials 테이블의 user_id 업데이트
+            cursor.execute("""
+                UPDATE user_kis_credentials 
+                SET user_id = %s 
+                WHERE user_id = %s
+            """, (new_user_id, user_id))
+            # users 테이블의 id 업데이트
+            cursor.execute("""
+                UPDATE users 
+                SET id = %s, updated_at = %s
+                WHERE id = %s
+            """, (new_user_id, datetime.now(), user_id))
+            conn.commit()
+        user_id = new_user_id
+    
     # 업데이트된 사용자 정보 반환
     updated_user = get_user_by_id(user_id)
     return {
         'id': updated_user['id'],
-        'username': updated_user['username'],
-        'email': updated_user['email'],
         'role': updated_user['role'],
         'created_at': updated_user['created_at'],
         'updated_at': updated_user['updated_at']
     }
 
 
-def delete_user(user_id: int) -> bool:
+def delete_user(user_id: str) -> bool:
     """사용자 삭제"""
     init_db()  # 지연 초기화
     with get_db_connection() as conn:
@@ -278,9 +255,9 @@ def delete_user(user_id: int) -> bool:
         return cursor.rowcount > 0
 
 
-def is_system_admin(username: str) -> bool:
+def is_system_admin(user_id: str) -> bool:
     """시스템 어드민 여부 확인 (admin role을 가진 사용자)"""
-    user = get_user_by_username(username)
+    user = get_user_by_id(user_id)
     if not user:
         return False
     return user.get("role") == "admin"
@@ -381,12 +358,12 @@ def verify_backup_code(code: str, hashed_codes: List[str]) -> bool:
     return code_hash in hashed_codes
 
 
-def setup_mfa(user_id: int) -> Dict:
+def setup_mfa(user_id: str) -> Dict:
     """
     MFA 설정 시작 (Secret Key 및 QR 코드 생성)
     
     Args:
-        user_id: 사용자 ID
+        user_id: 사용자 ID (username)
         
     Returns:
         {
@@ -410,8 +387,8 @@ def setup_mfa(user_id: int) -> Dict:
     # Secret Key 생성
     secret = generate_mfa_secret()
     
-    # QR 코드 생성
-    qr_code = generate_mfa_qr_code(secret, user["username"])
+    # QR 코드 생성 (user_id를 username으로 사용)
+    qr_code = generate_mfa_qr_code(secret, user_id)
     
     return {
         "secret": secret,  # 임시로 평문 반환 (설정 완료 시 암호화하여 저장)
@@ -419,7 +396,7 @@ def setup_mfa(user_id: int) -> Dict:
     }
 
 
-def verify_mfa_setup(user_id: int, secret: str, code: str) -> Dict:
+def verify_mfa_setup(user_id: str, secret: str, code: str) -> Dict:
     """
     MFA 설정 완료 (코드 검증 후 DB에 저장)
     
@@ -465,7 +442,7 @@ def verify_mfa_setup(user_id: int, secret: str, code: str) -> Dict:
     }
 
 
-def disable_mfa(user_id: int, password: str) -> bool:
+def disable_mfa(user_id: str, password: str) -> bool:
     """
     MFA 비활성화
     
@@ -506,7 +483,7 @@ def disable_mfa(user_id: int, password: str) -> bool:
     return True
 
 
-def verify_user_mfa(user_id: int, code: str) -> bool:
+def verify_user_mfa(user_id: str, code: str) -> bool:
     """
     로그인 시 MFA 코드 검증
     
@@ -563,7 +540,7 @@ def verify_user_mfa(user_id: int, code: str) -> bool:
     return False
 
 
-def get_user_mfa_status(user_id: int) -> Dict:
+def get_user_mfa_status(user_id: str) -> Dict:
     """
     사용자 MFA 상태 조회
     
@@ -604,7 +581,7 @@ def get_user_mfa_status(user_id: int) -> Dict:
     }
 
 
-def regenerate_backup_codes(user_id: int, password: str) -> List[str]:
+def regenerate_backup_codes(user_id: str, password: str) -> List[str]:
     """
     백업 코드 재생성
     

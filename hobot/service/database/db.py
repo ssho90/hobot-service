@@ -108,9 +108,7 @@ def init_database():
         # 사용자 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
-                email VARCHAR(255) UNIQUE,
+                id VARCHAR(255) PRIMARY KEY,
                 password_hash VARCHAR(255) NOT NULL,
                 role VARCHAR(50) NOT NULL DEFAULT 'user',
                 mfa_enabled BOOLEAN DEFAULT FALSE COMMENT 'MFA 활성화 여부',
@@ -118,8 +116,7 @@ def init_database():
                 mfa_backup_codes JSON COMMENT 'MFA 백업 코드 목록',
                 created_at DATETIME NOT NULL,
                 updated_at DATETIME NOT NULL,
-                INDEX idx_username (username),
-                INDEX idx_email (email)
+                INDEX idx_id (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """)
         
@@ -143,7 +140,7 @@ def init_database():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_kis_credentials (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
+                user_id VARCHAR(255) NOT NULL,
                 kis_id VARCHAR(255) NOT NULL COMMENT '한국투자증권 ID',
                 account_no VARCHAR(50) NOT NULL COMMENT '계좌번호',
                 app_key_encrypted TEXT NOT NULL COMMENT '암호화된 App Key',
@@ -467,14 +464,14 @@ def migrate_from_json():
                 cursor = conn.cursor()
                 for user in users:
                     try:
+                        # username 값을 id로 사용 (기존 id는 무시)
+                        user_id = user.get('username') or user.get('id')
                         cursor.execute("""
                             INSERT IGNORE INTO users 
-                            (id, username, email, password_hash, role, created_at, updated_at)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            (id, password_hash, role, created_at, updated_at)
+                            VALUES (%s, %s, %s, %s, %s)
                         """, (
-                            user.get('id'),
-                            user.get('username'),
-                            user.get('email'),
+                            user_id,
                             user.get('password_hash'),
                             user.get('role', 'user'),
                             user.get('created_at', datetime.now().isoformat()),

@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException, Query, APIRouter, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import logging
 from service.slack_bot import post_message
 from app import daily_news_summary
@@ -49,7 +49,6 @@ class StrategyRequest(BaseModel):
 
 class RegisterRequest(BaseModel):
     username: str
-    email: Optional[EmailStr] = None
     password: str
 
 class LoginRequest(BaseModel):
@@ -58,7 +57,6 @@ class LoginRequest(BaseModel):
 
 class UserUpdateRequest(BaseModel):
     username: Optional[str] = None
-    email: Optional[EmailStr] = None
     role: Optional[str] = None
 
 class KISCredentialRequest(BaseModel):
@@ -89,7 +87,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     """현재 사용자 정보 가져오기"""
     token = credentials.credentials
     payload = auth.verify_token(token)
-    user = auth.get_user_by_username(payload.get("username"))
+    user = auth.get_user_by_id(payload.get("id"))
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
@@ -1672,11 +1670,8 @@ async def update_current_strategy_platform(platform: str, request: StrategyReque
 async def register(request: RegisterRequest):
     """회원가입"""
     try:
-        # 이메일이 없으면 사용자명@hobot.local로 설정
-        email = request.email or f"{request.username}@hobot.local"
         user = auth.create_user(
             username=request.username,
-            email=email,
             password=request.password,
             role="user"
         )
@@ -1691,7 +1686,7 @@ async def register(request: RegisterRequest):
 async def login(request: MFALoginRequest):
     """로그인 (MFA 지원)"""
     try:
-        user = auth.get_user_by_username(request.username)
+        user = auth.get_user_by_id(request.username)
         if not user:
             raise HTTPException(status_code=401, detail="Invalid username or password")
         
@@ -1716,7 +1711,7 @@ async def login(request: MFALoginRequest):
         
         # JWT 토큰 생성
         token = auth.create_access_token({
-            "username": user["username"],
+            "id": user["id"],
             "role": user["role"]
         })
         
@@ -1728,8 +1723,6 @@ async def login(request: MFALoginRequest):
             "token": token,
             "user": {
                 "id": user["id"],
-                "username": user["username"],
-                "email": user["email"],
                 "role": user["role"],
                 "is_system_admin": is_sys_admin
             }
@@ -1748,8 +1741,6 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     
     return {
         "id": current_user["id"],
-        "username": current_user["username"],
-        "email": current_user["email"],
         "role": current_user["role"],
         "is_system_admin": is_sys_admin
     }
@@ -1982,13 +1973,12 @@ async def get_all_users(admin_user: dict = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.put("/admin/users/{user_id}")
-async def update_user(user_id: int, request: UserUpdateRequest, admin_user: dict = Depends(require_admin)):
+async def update_user(user_id: str, request: UserUpdateRequest, admin_user: dict = Depends(require_admin)):
     """사용자 정보 업데이트 (admin 전용)"""
     try:
         user = auth.update_user(
             user_id=user_id,
-            username=request.username,
-            email=request.email,
+            new_user_id=request.username,
             role=request.role
         )
         return {"status": "success", "user": user}
@@ -1999,7 +1989,7 @@ async def update_user(user_id: int, request: UserUpdateRequest, admin_user: dict
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.delete("/admin/users/{user_id}")
-async def delete_user(user_id: int, admin_user: dict = Depends(require_admin)):
+async def delete_user(user_id: str, admin_user: dict = Depends(require_admin)):
     """사용자 삭제 (admin 전용)"""
     try:
         # 자기 자신은 삭제 불가

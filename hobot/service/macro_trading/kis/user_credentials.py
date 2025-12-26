@@ -7,7 +7,7 @@ from service.utils.encryption import decrypt_data
 import logging
 
 
-def get_user_kis_credentials(user_id: int) -> Optional[Dict[str, str]]:
+def get_user_kis_credentials(user_id: str) -> Optional[Dict[str, str]]:
     """
     사용자별 KIS API 인증 정보 조회 및 복호화
     
