@@ -27,7 +27,7 @@ const Header = () => {
       const tab = event.detail?.tab || null;
       setDashboardActiveTab(tab);
       // Admin 하위 탭이 활성화되면 하위 메뉴 열기
-      if (tab === 'admin-users' || tab === 'admin-logs' || tab === 'admin-llm-monitoring' || tab === 'admin-sector-management' || tab === 'admin-portfolio-management') {
+      if (tab === 'admin-users' || tab === 'admin-logs' || tab === 'admin-llm-monitoring' || tab === 'admin-portfolio-management') {
         setShowAdminSubmenu(true);
       }
       // Trading 하위 탭이 활성화되면 하위 메뉴 열기
@@ -69,7 +69,7 @@ const Header = () => {
   const getActiveTab = () => {
       if (location.pathname === '/dashboard') {
         if (dashboardActiveTab === 'trading-macro' || dashboardActiveTab === 'trading-crypto') return 'trading';
-        if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-sector-management' || dashboardActiveTab === 'admin-portfolio-management') return 'admin';
+        if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-portfolio-management') return 'admin';
         if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
         return 'macro-dashboard'; // 기본값
       }
@@ -279,12 +279,6 @@ const Header = () => {
                       LLM 모니터링
                     </button>
                     <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-sector-management' ? 'active' : ''}`}
-                      onClick={() => handleAdminSubmenuClick('admin-sector-management')}
-                    >
-                      종목 관리
-                    </button>
-                    <button
                       className={`admin-submenu-item ${dashboardActiveTab === 'admin-portfolio-management' ? 'active' : ''}`}
                       onClick={() => handleAdminSubmenuClick('admin-portfolio-management')}
                     >
@@ -471,13 +465,6 @@ const Header = () => {
                     >
                       <span className="mobile-nav-icon">🤖</span>
                       <span>LLM 모니터링</span>
-                    </button>
-                    <button
-                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-sector-management' ? 'active' : ''}`}
-                      onClick={() => handleMobileAdminSubmenuClick('admin-sector-management')}
-                    >
-                      <span className="mobile-nav-icon">📊</span>
-                      <span>종목 관리</span>
                     </button>
                     <button
                       className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-portfolio-management' ? 'active' : ''}`}
