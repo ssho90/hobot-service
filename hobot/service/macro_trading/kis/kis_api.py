@@ -116,6 +116,59 @@ class KISAPI:
             "custtype": "P"
         }
 
+    def _parse_account_no(self):
+        """
+        계좌번호를 CANO와 ACNT_PRDT_CD로 분리
+        하이픈이 있는 경우와 없는 경우 모두 처리
+        
+        Returns:
+            tuple: (CANO, ACNT_PRDT_CD)
+            
+        Raises:
+            ValueError: 계좌번호 형식이 올바르지 않은 경우
+        """
+        if not self.account_no:
+            raise ValueError("계좌번호가 설정되지 않았습니다.")
+        
+        account_no_clean = self.account_no.strip()
+        
+        # 하이픈이 있는 경우: '12345678-01' 형식
+        if '-' in account_no_clean:
+            parts = account_no_clean.split('-')
+            if len(parts) != 2:
+                raise ValueError(
+                    f"계좌번호 형식이 올바르지 않습니다. "
+                    f"예상 형식: '12345678-01' 또는 '1234567801', 현재 값: '{self.account_no}'"
+                )
+            cano = parts[0].strip()
+            acnt_prdt_cd = parts[1].strip()
+            
+            if not cano or not acnt_prdt_cd:
+                raise ValueError(
+                    f"계좌번호 형식이 올바르지 않습니다. "
+                    f"예상 형식: '12345678-01' 또는 '1234567801', 현재 값: '{self.account_no}'"
+                )
+        else:
+            # 하이픈이 없는 경우: '1234567801' 형식 (10자리) 또는 '12345678' 형식 (8자리)
+            # 숫자만 추출 (공백 제거)
+            account_no_digits = ''.join(filter(str.isdigit, account_no_clean))
+            
+            if len(account_no_digits) == 10:
+                # 10자리: 앞 8자리 = CANO, 뒤 2자리 = ACNT_PRDT_CD
+                cano = account_no_digits[:8]
+                acnt_prdt_cd = account_no_digits[8:]
+            elif len(account_no_digits) == 8:
+                # 8자리: 전체 = CANO, ACNT_PRDT_CD = 빈 문자열 (또는 기본값)
+                cano = account_no_digits
+                acnt_prdt_cd = ""  # 빈 문자열로 설정 (API에서 처리)
+            else:
+                raise ValueError(
+                    f"계좌번호 길이가 올바르지 않습니다. "
+                    f"예상: 8자리 또는 10자리 (하이픈 포함/제외), 현재 값: '{self.account_no}' (길이: {len(account_no_digits)})"
+                )
+        
+        return cano, acnt_prdt_cd
+
     def fetch_ohlcv(self, ticker, interval='D', count=250):
         """일/주/월봉 데이터 조회 (현재가 일자별)"""
         time.sleep(0.1) # 단기과열종목 지정 회피
@@ -157,14 +210,22 @@ class KISAPI:
 
     def get_balance(self):
         """계좌 잔고 조회"""
+        try:
+            cano, acnt_prdt_cd = self._parse_account_no()
+        except ValueError as e:
+            return {
+                "rt_cd": "1",
+                "msg1": str(e)
+            }
+        
         time.sleep(0.1)
         path = "/uapi/domestic-stock/v1/trading/inquire-balance"
         url = f"{self.base_url}{path}"
         headers = self._get_common_headers("TTTC8434R") # 실전투자: TTTC8434R, 모의투자: VTTC8434R
         
         params = {
-            "CANO": self.account_no.split('-')[0],
-            "ACNT_PRDT_CD": self.account_no.split('-')[1],
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt_prdt_cd,
             "AFHR_FLPR_YN": "N",
             "OFL_YN": "",
             "INQR_DVSN": "02",
@@ -185,14 +246,19 @@ class KISAPI:
 
     def _place_order(self, ticker, quantity, order_type, tr_id):
         """주문 실행 (공통 로직)"""
+        try:
+            cano, acnt_prdt_cd = self._parse_account_no()
+        except ValueError as e:
+            return {"rt_cd": "1", "msg1": str(e)}
+        
         time.sleep(0.1)
         path = "/uapi/domestic-stock/v1/trading/order-cash"
         url = f"{self.base_url}{path}"
         headers = self._get_common_headers(tr_id)
         
         data = {
-            "CANO": self.account_no.split('-')[0],
-            "ACNT_PRDT_CD": self.account_no.split('-')[1],
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt_prdt_cd,
             "PDNO": ticker,
             "ORD_DVSN": "01",  # 01: 시장가
             "ORD_QTY": str(quantity),
