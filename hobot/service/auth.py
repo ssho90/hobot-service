@@ -4,11 +4,17 @@
 import os
 import hashlib
 import secrets
+import json
+import base64
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
 import jwt
+import pyotp
+import qrcode
+from io import BytesIO
 from fastapi import HTTPException, status
 from service.database.db import get_db_connection
+from service.utils.encryption import encrypt_data, decrypt_data
 
 # JWT 시크릿 키 (환경 변수에서 가져오거나 기본값 사용)
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
@@ -278,6 +284,373 @@ def is_system_admin(username: str) -> bool:
     if not user:
         return False
     return user.get("role") == "admin"
+
+
+# ============================================
+# MFA (Multi-Factor Authentication) 함수
+# ============================================
+
+def generate_mfa_secret() -> str:
+    """MFA Secret Key 생성"""
+    return pyotp.random_base32()
+
+
+def generate_mfa_qr_code(secret: str, username: str, issuer: str = "Hobot") -> str:
+    """
+    MFA QR 코드 생성 (base64 인코딩된 이미지 반환)
+    
+    Args:
+        secret: MFA Secret Key
+        username: 사용자명
+        issuer: 발행자 이름
+        
+    Returns:
+        base64 인코딩된 QR 코드 이미지 문자열
+    """
+    totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        name=username,
+        issuer_name=issuer
+    )
+    
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(totp_uri)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    
+    return f"data:image/png;base64,{img_str}"
+
+
+def verify_mfa_code(secret: str, code: str) -> bool:
+    """
+    MFA 코드 검증
+    
+    Args:
+        secret: MFA Secret Key
+        code: 사용자가 입력한 6자리 코드
+        
+    Returns:
+        검증 성공 여부
+    """
+    try:
+        totp = pyotp.TOTP(secret)
+        # 현재 시간 기준 ±30초 허용
+        return totp.verify(code, valid_window=1)
+    except Exception:
+        return False
+
+
+def generate_backup_codes(count: int = 10) -> List[str]:
+    """
+    MFA 백업 코드 생성
+    
+    Args:
+        count: 생성할 백업 코드 개수
+        
+    Returns:
+        백업 코드 목록
+    """
+    codes = []
+    for _ in range(count):
+        # 8자리 숫자 코드 생성
+        code = ''.join([str(secrets.randbelow(10)) for _ in range(8)])
+        codes.append(code)
+    return codes
+
+
+def hash_backup_code(code: str) -> str:
+    """백업 코드 해싱 (비교용)"""
+    return hashlib.sha256(code.encode()).hexdigest()
+
+
+def verify_backup_code(code: str, hashed_codes: List[str]) -> bool:
+    """
+    백업 코드 검증
+    
+    Args:
+        code: 사용자가 입력한 백업 코드
+        hashed_codes: 해시된 백업 코드 목록
+        
+    Returns:
+        검증 성공 여부
+    """
+    code_hash = hash_backup_code(code)
+    return code_hash in hashed_codes
+
+
+def setup_mfa(user_id: int) -> Dict:
+    """
+    MFA 설정 시작 (Secret Key 및 QR 코드 생성)
+    
+    Args:
+        user_id: 사용자 ID
+        
+    Returns:
+        {
+            'secret': str,  # 임시 Secret (설정 완료 전까지만 사용)
+            'qr_code': str  # QR 코드 이미지 (base64)
+        }
+    """
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user.get("mfa_enabled"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA is already enabled"
+        )
+    
+    # Secret Key 생성
+    secret = generate_mfa_secret()
+    
+    # QR 코드 생성
+    qr_code = generate_mfa_qr_code(secret, user["username"])
+    
+    return {
+        "secret": secret,  # 임시로 평문 반환 (설정 완료 시 암호화하여 저장)
+        "qr_code": qr_code
+    }
+
+
+def verify_mfa_setup(user_id: int, secret: str, code: str) -> Dict:
+    """
+    MFA 설정 완료 (코드 검증 후 DB에 저장)
+    
+    Args:
+        user_id: 사용자 ID
+        secret: 임시 Secret Key
+        code: 사용자가 입력한 검증 코드
+        
+    Returns:
+        백업 코드 목록
+    """
+    # 코드 검증
+    if not verify_mfa_code(secret, code):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid verification code"
+        )
+    
+    # 백업 코드 생성
+    backup_codes = generate_backup_codes()
+    hashed_backup_codes = [hash_backup_code(code) for code in backup_codes]
+    
+    # DB에 저장
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE users
+            SET mfa_enabled = TRUE,
+                mfa_secret_encrypted = %s,
+                mfa_backup_codes = %s,
+                updated_at = %s
+            WHERE id = %s
+        """, (
+            encrypt_data(secret),
+            json.dumps(hashed_backup_codes),
+            datetime.now(),
+            user_id
+        ))
+        conn.commit()
+    
+    return {
+        "backup_codes": backup_codes  # 평문으로 반환 (사용자가 저장해야 함)
+    }
+
+
+def disable_mfa(user_id: int, password: str) -> bool:
+    """
+    MFA 비활성화
+    
+    Args:
+        user_id: 사용자 ID
+        password: 사용자 비밀번호 (보안 확인용)
+        
+    Returns:
+        성공 여부
+    """
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # 비밀번호 확인
+    if not verify_password(password, user["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password"
+        )
+    
+    # MFA 비활성화
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE users
+            SET mfa_enabled = FALSE,
+                mfa_secret_encrypted = NULL,
+                mfa_backup_codes = NULL,
+                updated_at = %s
+            WHERE id = %s
+        """, (datetime.now(), user_id))
+        conn.commit()
+    
+    return True
+
+
+def verify_user_mfa(user_id: int, code: str) -> bool:
+    """
+    로그인 시 MFA 코드 검증
+    
+    Args:
+        user_id: 사용자 ID
+        code: 사용자가 입력한 MFA 코드
+        
+    Returns:
+        검증 성공 여부
+    """
+    user = get_user_by_id(user_id)
+    if not user or not user.get("mfa_enabled"):
+        return False
+    
+    # Secret Key 복호화
+    try:
+        secret_encrypted = user.get("mfa_secret_encrypted")
+        if not secret_encrypted:
+            return False
+        
+        secret = decrypt_data(secret_encrypted)
+    except Exception:
+        return False
+    
+    # TOTP 코드 검증
+    if verify_mfa_code(secret, code):
+        return True
+    
+    # 백업 코드 검증
+    backup_codes_json = user.get("mfa_backup_codes")
+    if backup_codes_json:
+        try:
+            if isinstance(backup_codes_json, str):
+                hashed_codes = json.loads(backup_codes_json)
+            else:
+                hashed_codes = backup_codes_json
+            
+            if verify_backup_code(code, hashed_codes):
+                # 백업 코드 사용 시 해당 코드 제거
+                hashed_codes.remove(hash_backup_code(code))
+                with get_db_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE users
+                        SET mfa_backup_codes = %s,
+                            updated_at = %s
+                        WHERE id = %s
+                    """, (json.dumps(hashed_codes), datetime.now(), user_id))
+                    conn.commit()
+                return True
+        except Exception:
+            pass
+    
+    return False
+
+
+def get_user_mfa_status(user_id: int) -> Dict:
+    """
+    사용자 MFA 상태 조회
+    
+    Args:
+        user_id: 사용자 ID
+        
+    Returns:
+        {
+            'mfa_enabled': bool,
+            'backup_codes_count': int  # 남은 백업 코드 개수
+        }
+    """
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    mfa_enabled = user.get("mfa_enabled", False)
+    backup_codes_count = 0
+    
+    if mfa_enabled:
+        backup_codes_json = user.get("mfa_backup_codes")
+        if backup_codes_json:
+            try:
+                if isinstance(backup_codes_json, str):
+                    backup_codes = json.loads(backup_codes_json)
+                else:
+                    backup_codes = backup_codes_json
+                backup_codes_count = len(backup_codes) if isinstance(backup_codes, list) else 0
+            except Exception:
+                pass
+    
+    return {
+        "mfa_enabled": mfa_enabled,
+        "backup_codes_count": backup_codes_count
+    }
+
+
+def regenerate_backup_codes(user_id: int, password: str) -> List[str]:
+    """
+    백업 코드 재생성
+    
+    Args:
+        user_id: 사용자 ID
+        password: 사용자 비밀번호 (보안 확인용)
+        
+    Returns:
+        새로운 백업 코드 목록
+    """
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if not user.get("mfa_enabled"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA is not enabled"
+        )
+    
+    # 비밀번호 확인
+    if not verify_password(password, user["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password"
+        )
+    
+    # 새 백업 코드 생성
+    backup_codes = generate_backup_codes()
+    hashed_backup_codes = [hash_backup_code(code) for code in backup_codes]
+    
+    # DB에 저장
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE users
+            SET mfa_backup_codes = %s,
+                updated_at = %s
+            WHERE id = %s
+        """, (json.dumps(hashed_backup_codes), datetime.now(), user_id))
+        conn.commit()
+    
+    return backup_codes
 
 
 # 데이터베이스 초기화는 지연 초기화로 변경

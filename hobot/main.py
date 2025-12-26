@@ -67,6 +67,21 @@ class KISCredentialRequest(BaseModel):
     app_key: str
     app_secret: str
 
+class MFAVerifySetupRequest(BaseModel):
+    secret: str
+    code: str
+
+class MFADisableRequest(BaseModel):
+    password: str
+
+class MFARegenerateBackupCodesRequest(BaseModel):
+    password: str
+
+class MFALoginRequest(BaseModel):
+    username: str
+    password: str
+    mfa_code: Optional[str] = None
+
 # JWT 인증
 security = HTTPBearer()
 
@@ -1666,8 +1681,8 @@ async def register(request: RegisterRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/auth/login")
-async def login(request: LoginRequest):
-    """로그인"""
+async def login(request: MFALoginRequest):
+    """로그인 (MFA 지원)"""
     try:
         user = auth.get_user_by_username(request.username)
         if not user:
@@ -1675,6 +1690,22 @@ async def login(request: LoginRequest):
         
         if not auth.verify_password(request.password, user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        # MFA 활성화 여부 확인
+        mfa_enabled = user.get("mfa_enabled", False)
+        
+        if mfa_enabled:
+            # MFA 코드가 제공되지 않았으면 MFA 코드 요청 응답
+            if not request.mfa_code:
+                return {
+                    "status": "mfa_required",
+                    "message": "MFA code is required",
+                    "mfa_enabled": True
+                }
+            
+            # MFA 코드 검증
+            if not auth.verify_user_mfa(user["id"], request.mfa_code):
+                raise HTTPException(status_code=401, detail="Invalid MFA code")
         
         # JWT 토큰 생성
         token = auth.create_access_token({
@@ -1829,6 +1860,107 @@ async def save_user_kis_credentials(
             }
     except Exception as e:
         logging.error(f"Error saving KIS credentials: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# MFA 관련 API
+@api_router.get("/user/mfa/status")
+async def get_mfa_status(current_user: dict = Depends(get_current_user)):
+    """MFA 상태 조회"""
+    try:
+        status_data = auth.get_user_mfa_status(current_user["id"])
+        return {
+            "status": "success",
+            "data": status_data
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting MFA status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/user/mfa/setup")
+async def setup_mfa(current_user: dict = Depends(get_current_user)):
+    """MFA 설정 시작 (QR 코드 생성)"""
+    try:
+        result = auth.setup_mfa(current_user["id"])
+        return {
+            "status": "success",
+            "data": {
+                "secret": result["secret"],  # 임시 Secret (설정 완료 전까지만 사용)
+                "qr_code": result["qr_code"]
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error setting up MFA: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/user/mfa/verify-setup")
+async def verify_mfa_setup(
+    request: MFAVerifySetupRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """MFA 설정 완료 (코드 검증)"""
+    try:
+        result = auth.verify_mfa_setup(
+            current_user["id"],
+            request.secret,
+            request.code
+        )
+        return {
+            "status": "success",
+            "message": "MFA가 활성화되었습니다.",
+            "data": {
+                "backup_codes": result["backup_codes"]
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error verifying MFA setup: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/user/mfa/disable")
+async def disable_mfa(
+    request: MFADisableRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """MFA 비활성화"""
+    try:
+        auth.disable_mfa(current_user["id"], request.password)
+        return {
+            "status": "success",
+            "message": "MFA가 비활성화되었습니다."
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error disabling MFA: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/user/mfa/regenerate-backup-codes")
+async def regenerate_backup_codes(
+    request: MFARegenerateBackupCodesRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """백업 코드 재생성"""
+    try:
+        backup_codes = auth.regenerate_backup_codes(
+            current_user["id"],
+            request.password
+        )
+        return {
+            "status": "success",
+            "message": "백업 코드가 재생성되었습니다.",
+            "data": {
+                "backup_codes": backup_codes
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error regenerating backup codes: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Admin 전용 API

@@ -33,6 +33,10 @@ pymysql
 # Encryption
 cryptography
 
+# MFA (Multi-Factor Authentication)
+pyotp
+qrcode[pil]
+
 # Macro Trading
 fredapi
 pandas

@@ -113,12 +113,31 @@ def init_database():
                 email VARCHAR(255) UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
                 role VARCHAR(50) NOT NULL DEFAULT 'user',
+                mfa_enabled BOOLEAN DEFAULT FALSE COMMENT 'MFA 활성화 여부',
+                mfa_secret_encrypted TEXT COMMENT '암호화된 MFA Secret Key',
+                mfa_backup_codes JSON COMMENT 'MFA 백업 코드 목록',
                 created_at DATETIME NOT NULL,
                 updated_at DATETIME NOT NULL,
                 INDEX idx_username (username),
                 INDEX idx_email (email)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """)
+        
+        # MFA 관련 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN mfa_enabled BOOLEAN DEFAULT FALSE COMMENT 'MFA 활성화 여부'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
+        
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN mfa_secret_encrypted TEXT COMMENT '암호화된 MFA Secret Key'")
+        except Exception:
+            pass
+        
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN mfa_backup_codes JSON COMMENT 'MFA 백업 코드 목록'")
+        except Exception:
+            pass
         
         # 사용자별 KIS API 인증 정보 테이블
         cursor.execute("""

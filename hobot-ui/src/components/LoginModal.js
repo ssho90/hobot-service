@@ -12,6 +12,8 @@ const LoginModal = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaCode, setMfaCode] = useState('');
   
   // Register state
   const [regUsername, setRegUsername] = useState('');
@@ -31,12 +33,16 @@ const LoginModal = ({ isOpen, onClose }) => {
     setLoginLoading(true);
 
     try {
-      const result = await login(username, password);
+      const result = await login(username, password, mfaCode);
       
       if (result.success) {
         onClose();
         // 페이지 새로고침하여 로그인 상태 반영
         window.location.reload();
+      } else if (result.mfa_required) {
+        // MFA 코드 요청
+        setMfaRequired(true);
+        setLoginError('');
       } else {
         setLoginError(result.error || '로그인에 실패했습니다.');
       }
@@ -110,49 +116,104 @@ const LoginModal = ({ isOpen, onClose }) => {
 
         {activeTab === 'login' ? (
           <form onSubmit={handleLogin} className="login-modal-form">
-            <div className="form-group">
-              <input
-                type="text"
-                placeholder="사용자명"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="form-input"
-              />
-            </div>
-            
-            <div className="form-group password-group">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="비밀번호"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="form-input"
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
-            
-            {loginError && (
-              <div className="error-message">
-                {loginError}
-              </div>
+            {!mfaRequired ? (
+              <>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    placeholder="사용자명"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    className="form-input"
+                    disabled={loginLoading}
+                  />
+                </div>
+                
+                <div className="form-group password-group">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="비밀번호"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="form-input"
+                    disabled={loginLoading}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                  >
+                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
+                
+                {loginError && (
+                  <div className="error-message">
+                    {loginError}
+                  </div>
+                )}
+                
+                <button 
+                  type="submit" 
+                  className="login-modal-btn"
+                  disabled={loginLoading}
+                >
+                  {loginLoading ? '로그인 중...' : '로그인'}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="mfa-prompt">
+                  <p>2단계 인증 코드를 입력하세요</p>
+                  <p className="mfa-hint">인증 앱에 표시된 6자리 코드를 입력하거나 백업 코드를 사용하세요.</p>
+                </div>
+                
+                <div className="form-group">
+                  <input
+                    type="text"
+                    placeholder="인증 코드 (6자리 또는 백업 코드)"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                    required
+                    className="form-input"
+                    disabled={loginLoading}
+                    maxLength={8}
+                    autoFocus
+                  />
+                </div>
+                
+                {loginError && (
+                  <div className="error-message">
+                    {loginError}
+                  </div>
+                )}
+                
+                <div className="mfa-actions">
+                  <button 
+                    type="submit" 
+                    className="login-modal-btn"
+                    disabled={loginLoading || mfaCode.length < 6}
+                  >
+                    {loginLoading ? '인증 중...' : '인증하기'}
+                  </button>
+                  <button 
+                    type="button"
+                    className="login-modal-btn btn-secondary"
+                    onClick={() => {
+                      setMfaRequired(false);
+                      setMfaCode('');
+                      setLoginError('');
+                    }}
+                    disabled={loginLoading}
+                  >
+                    취소
+                  </button>
+                </div>
+              </>
             )}
-            
-            <button 
-              type="submit" 
-              className="login-modal-btn"
-              disabled={loginLoading}
-            >
-              {loginLoading ? '로그인 중...' : '로그인'}
-            </button>
           </form>
         ) : (
           <form onSubmit={handleRegister} className="login-modal-form">

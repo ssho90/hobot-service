@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [verifyToken]);
 
-  const login = async (username, password) => {
+  const login = async (username, password, mfaCode = null) => {
     const url = '/api/auth/login';
     console.log('[AuthContext] Attempting login to:', url);
     
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, mfa_code: mfaCode })
       }).catch((fetchError) => {
         console.error('[AuthContext] Fetch error details:', {
           name: fetchError.name,
@@ -103,9 +103,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log('[AuthContext] Login data received:', { hasToken: !!data.token, hasUser: !!data.user });
+      console.log('[AuthContext] Login data received:', { hasToken: !!data.token, hasUser: !!data.user, status: data.status });
 
-      if (response.ok) {
+      // MFA 코드 요청 응답 처리
+      if (data.status === 'mfa_required') {
+        return { success: false, mfa_required: true, message: data.message || 'MFA 코드가 필요합니다.' };
+      }
+
+      if (response.ok && data.status === 'success') {
         setToken(data.token);
         setUser(data.user);
         localStorage.setItem('token', data.token);
