@@ -30,6 +30,9 @@ langchain-tavily
 # MySQL
 pymysql
 
+# Encryption
+cryptography
+
 # Macro Trading
 fredapi
 pandas

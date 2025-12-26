@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { useAuth } from '../context/AuthContext';
 import './TradingDashboard.css';
 
 const TradingDashboard = () => {
+  const { getAuthHeaders } = useAuth();
   const [kisBalance, setKisBalance] = useState(null);
   const [kisLoading, setKisLoading] = useState(false);
   const [kisError, setKisError] = useState(null);
@@ -13,12 +15,19 @@ const TradingDashboard = () => {
       setKisLoading(true);
       setKisError(null);
       try {
-        const response = await fetch('/api/kis/balance');
+        const headers = getAuthHeaders();
+        const response = await fetch('/api/kis/balance', {
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           setKisBalance(data);
         } else {
-          throw new Error('계좌 정보를 불러오는데 실패했습니다.');
+          const errorData = await response.json();
+          throw new Error(errorData.message || '계좌 정보를 불러오는데 실패했습니다.');
         }
       } catch (err) {
         setKisError(err.message);
@@ -27,7 +36,7 @@ const TradingDashboard = () => {
       }
     };
     fetchKisBalance();
-  }, []);
+  }, [getAuthHeaders]);
 
   return (
     <div className="trading-dashboard">

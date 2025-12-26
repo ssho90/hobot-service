@@ -9,6 +9,7 @@ import LLMMonitoringPage from './LLMMonitoringPage';
 import PortfolioManagementPage from './PortfolioManagementPage';
 import MacroDashboard from './MacroDashboard';
 import TradingDashboard from './TradingDashboard';
+import ProfilePage from './ProfilePage';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
 import './Dashboard.css';
@@ -19,9 +20,9 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('macro-dashboard');
   const [activePlatform, setActivePlatform] = useState('upbit');
   
-  // 시스템 어드민이 아니면 trading 탭 접근 불가
+  // trading-crypto는 admin만 접근 가능, trading-macro는 전체 사용자 접근 가능
   useEffect(() => {
-    if ((activeTab === 'trading-macro' || activeTab === 'trading-crypto') && !isSystemAdmin()) {
+    if (activeTab === 'trading-crypto' && !isSystemAdmin()) {
       setActiveTab('macro-dashboard');
     }
   }, [activeTab, isSystemAdmin]);
@@ -38,7 +39,7 @@ const Dashboard = () => {
     // URL에서 탭 정보 확인 (예: /dashboard?tab=trading-macro)
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
-    if (tabParam === 'trading-macro' && isSystemAdmin()) {
+    if (tabParam === 'trading-macro') {
       setActiveTab('trading-macro');
     } else if (tabParam === 'trading-crypto' && isSystemAdmin()) {
       setActiveTab('trading-crypto');
@@ -46,6 +47,8 @@ const Dashboard = () => {
       setActiveTab('admin-users');
     } else if (tabParam === 'macro-dashboard') {
       setActiveTab('macro-dashboard');
+    } else if (tabParam === 'profile') {
+      setActiveTab('profile');
     }
   }, [isSystemAdmin]);
 
@@ -179,6 +182,10 @@ const Dashboard = () => {
 
           {activeTab === 'admin-portfolio-management' && (
             <PortfolioManagementPage />
+          )}
+
+          {activeTab === 'profile' && (
+            <ProfilePage />
           )}
 
         </div>

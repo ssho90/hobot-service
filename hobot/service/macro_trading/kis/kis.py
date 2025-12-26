@@ -17,6 +17,7 @@ from .kis_utils import (
 from service.slack_bot import post_message
 from .config import APP_KEY, APP_SECRET, ACCOUNT_NO, TARGET_TICKER, TARGET_TICKER_NAME, INTERVAL
 from service.macro_trading.config.config_loader import ConfigLoader
+from .user_credentials import get_user_kis_credentials
 
 # ===============================================
 # Helper Functions
@@ -360,10 +361,27 @@ def calculate_asset_class_pnl(holdings: List[Dict], cash_balance: int = 0) -> Di
     return asset_class_info
 
 
-def get_balance_info_api():
-    """잔액조회 API용 함수 - 상세 정보 반환 (자산군별 정보 포함)"""
+def get_balance_info_api(user_id: Optional[int] = None):
+    """잔액조회 API용 함수 - 상세 정보 반환 (자산군별 정보 포함)
+    
+    Args:
+        user_id: 사용자 ID. 제공되면 해당 사용자의 credential 사용, 없으면 환경 변수 사용
+    """
     try:
-        api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
+        # 사용자별 credential 사용
+        if user_id:
+            credentials = get_user_kis_credentials(user_id)
+            if not credentials:
+                return {
+                    "status": "error",
+                    "message": "KIS API 인증 정보가 등록되지 않았습니다. 프로필에서 인증 정보를 등록해주세요."
+                }
+            api = KISAPI(credentials['app_key'], credentials['app_secret'], credentials['account_no'])
+            account_no = credentials['account_no']
+        else:
+            # 기존 방식 (환경 변수 사용)
+            api = KISAPI(APP_KEY, APP_SECRET, ACCOUNT_NO)
+            account_no = ACCOUNT_NO
         current_price = api.get_current_price(TARGET_TICKER)
         balance_data = api.get_balance()
         
@@ -399,7 +417,7 @@ def get_balance_info_api():
         
         return {
             "status": "success",
-            "account_no": ACCOUNT_NO,
+            "account_no": account_no,
             "total_eval_amount": total_eval_amt,
             "cash_balance": cash_balance,
             "holdings": holdings,

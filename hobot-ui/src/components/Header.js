@@ -51,8 +51,10 @@ const Header = () => {
       // Trading 탭 클릭 시 하위 메뉴 토글
       setShowTradingSubmenu(!showTradingSubmenu);
     } else if (tab === 'admin') {
-      // Admin 탭 클릭 시 하위 메뉴 토글
-      setShowAdminSubmenu(!showAdminSubmenu);
+      // Admin 탭 클릭 시 하위 메뉴 토글 (admin만)
+      if (isSystemAdmin()) {
+        setShowAdminSubmenu(!showAdminSubmenu);
+      }
     }
   };
   
@@ -68,7 +70,7 @@ const Header = () => {
   // 현재 활성 탭 확인
   const getActiveTab = () => {
       if (location.pathname === '/dashboard') {
-        if (dashboardActiveTab === 'trading-macro' || dashboardActiveTab === 'trading-crypto') return 'trading';
+        if (dashboardActiveTab === 'trading-macro' || (dashboardActiveTab === 'trading-crypto' && isSystemAdmin())) return 'trading';
         if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-portfolio-management') return 'admin';
         if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
         return 'macro-dashboard'; // 기본값
@@ -209,47 +211,49 @@ const Header = () => {
           >
             Macro Dashboard
           </button>
-          {isSystemAdmin() && (
-            <>
-              <div className="header-tab-container" ref={tradingMenuRef}>
+          <div className="header-tab-container" ref={tradingMenuRef}>
+            <button
+              className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
+              onClick={() => handleTabClick('trading')}
+            >
+              Trading
+              <span className="tab-arrow">▼</span>
+            </button>
+            {showTradingSubmenu && (
+              <div className="admin-submenu">
                 <button
-                  className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('trading')}
+                  className={`admin-submenu-item ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate('/dashboard?tab=trading-macro');
+                    setShowTradingSubmenu(false);
+                    setTimeout(() => {
+                      const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-macro' } });
+                      window.dispatchEvent(event);
+                    }, 100);
+                  }}
                 >
-                  Trading
-                  <span className="tab-arrow">▼</span>
+                  Macro Quant
                 </button>
-                {showTradingSubmenu && (
-                  <div className="admin-submenu">
-                    <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
-                      onClick={() => {
-                        navigate('/dashboard?tab=trading-macro');
-                        setShowTradingSubmenu(false);
-                        setTimeout(() => {
-                          const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-macro' } });
-                          window.dispatchEvent(event);
-                        }, 100);
-                      }}
-                    >
-                      Macro Quant
-                    </button>
-                    <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
-                      onClick={() => {
-                        navigate('/dashboard?tab=trading-crypto');
-                        setShowTradingSubmenu(false);
-                        setTimeout(() => {
-                          const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-crypto' } });
-                          window.dispatchEvent(event);
-                        }, 100);
-                      }}
-                    >
-                      Crypto
-                    </button>
-                  </div>
+                {isSystemAdmin() && (
+                  <button
+                    className={`admin-submenu-item ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
+                    onClick={() => {
+                      navigate('/dashboard?tab=trading-crypto');
+                      setShowTradingSubmenu(false);
+                      setTimeout(() => {
+                        const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-crypto' } });
+                        window.dispatchEvent(event);
+                      }, 100);
+                    }}
+                  >
+                    Crypto
+                  </button>
                 )}
               </div>
+            )}
+          </div>
+          {isSystemAdmin() && (
+            <>
               <div className="header-tab-container" ref={adminMenuRef}>
                 <button
                   className={`header-tab ${activeTab === 'admin' ? 'active' : ''}`}
@@ -314,6 +318,20 @@ const Header = () => {
               
               {showMenu && (
                 <div className="user-dropdown-menu">
+                  <button 
+                    className="dropdown-item"
+                    onClick={() => {
+                      navigate('/dashboard?tab=profile');
+                      setShowMenu(false);
+                      setTimeout(() => {
+                        const event = new CustomEvent('switchToTab', { detail: { tab: 'profile' } });
+                        window.dispatchEvent(event);
+                      }, 100);
+                    }}
+                  >
+                    <span className="dropdown-icon">👤</span>
+                    <span>프로필</span>
+                  </button>
                   {isAdmin() && (
                     <button 
                       className="dropdown-item"
@@ -391,43 +409,45 @@ const Header = () => {
             <span>Macro Dashboard</span>
           </button>
 
-          {isSystemAdmin() && (
-            <>
-              <div className="mobile-nav-group">
+          <div className="mobile-nav-group">
+            <button
+              className={`mobile-nav-item ${activeTab === 'trading' ? 'active' : ''}`}
+              onClick={() => handleMobileTabClick('trading')}
+            >
+              <span className="mobile-nav-icon">💹</span>
+              <span>Trading</span>
+              <span className="mobile-nav-arrow" style={{
+                marginLeft: 'auto',
+                transform: mobileShowTradingSubmenu ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease'
+              }}>
+                ▶
+              </span>
+            </button>
+            {mobileShowTradingSubmenu && (
+              <div className="mobile-nav-submenu">
                 <button
-                  className={`mobile-nav-item ${activeTab === 'trading' ? 'active' : ''}`}
-                  onClick={() => handleMobileTabClick('trading')}
+                  className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
+                  onClick={() => handleMobileNavClick('/dashboard?tab=trading-macro', 'trading-macro')}
                 >
-                  <span className="mobile-nav-icon">💹</span>
-                  <span>Trading</span>
-                  <span className="mobile-nav-arrow" style={{
-                    marginLeft: 'auto',
-                    transform: mobileShowTradingSubmenu ? 'rotate(90deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s ease'
-                  }}>
-                    ▶
-                  </span>
+                  <span className="mobile-nav-icon">📈</span>
+                  <span>Macro Quant</span>
                 </button>
-                {mobileShowTradingSubmenu && (
-                  <div className="mobile-nav-submenu">
-                    <button
-                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
-                      onClick={() => handleMobileNavClick('/dashboard?tab=trading-macro', 'trading-macro')}
-                    >
-                      <span className="mobile-nav-icon">📈</span>
-                      <span>Macro Quant</span>
-                    </button>
-                    <button
-                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
-                      onClick={() => handleMobileNavClick('/dashboard?tab=trading-crypto', 'trading-crypto')}
-                    >
-                      <span className="mobile-nav-icon">₿</span>
-                      <span>Crypto</span>
-                    </button>
-                  </div>
+                {isSystemAdmin() && (
+                  <button
+                    className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
+                    onClick={() => handleMobileNavClick('/dashboard?tab=trading-crypto', 'trading-crypto')}
+                  >
+                    <span className="mobile-nav-icon">₿</span>
+                    <span>Crypto</span>
+                  </button>
                 )}
               </div>
+            )}
+          </div>
 
+          {isSystemAdmin() && (
+            <>
               <div className="mobile-nav-group">
                 <button
                   className={`mobile-nav-item ${activeTab === 'admin' ? 'active' : ''}`}
@@ -495,6 +515,20 @@ const Header = () => {
 
           {user && (
             <div className="mobile-sidebar-actions">
+              <button 
+                className="mobile-action-btn"
+                onClick={() => {
+                  navigate('/dashboard?tab=profile');
+                  setIsSidebarOpen(false);
+                  setTimeout(() => {
+                    const event = new CustomEvent('switchToTab', { detail: { tab: 'profile' } });
+                    window.dispatchEvent(event);
+                  }, 100);
+                }}
+              >
+                <span className="mobile-action-icon">👤</span>
+                <span>프로필</span>
+              </button>
               {isAdmin() && (
                 <button 
                   className="mobile-action-btn"

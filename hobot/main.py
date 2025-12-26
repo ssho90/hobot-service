@@ -61,6 +61,12 @@ class UserUpdateRequest(BaseModel):
     email: Optional[EmailStr] = None
     role: Optional[str] = None
 
+class KISCredentialRequest(BaseModel):
+    kis_id: str
+    account_no: str
+    app_key: str
+    app_secret: str
+
 # JWT 인증
 security = HTTPBearer()
 
@@ -154,11 +160,11 @@ async def kis_health_check():
         return {"status": "error", "message": str(e)}
 
 @api_router.get("/kis/balance")
-async def kis_get_balance():
-    """한국투자증권 계좌 잔액조회"""
+async def kis_get_balance(current_user: dict = Depends(get_current_user)):
+    """한국투자증권 계좌 잔액조회 (로그인 사용자별)"""
     try:
         from service.macro_trading.kis.kis import get_balance_info_api
-        result = get_balance_info_api()
+        result = get_balance_info_api(user_id=current_user["id"])
         logging.info(f"KIS balance check result: {result.get('status')}")
         return result
     except Exception as e:
@@ -1709,6 +1715,121 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
         "role": current_user["role"],
         "is_system_admin": is_sys_admin
     }
+
+# 사용자별 KIS Credential API
+@api_router.get("/user/kis-credentials")
+async def get_user_kis_credentials(current_user: dict = Depends(get_current_user)):
+    """사용자별 KIS API 인증 정보 조회"""
+    try:
+        from service.database.db import get_db_connection
+        from service.utils.encryption import decrypt_data
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT kis_id, account_no, app_key_encrypted, app_secret_encrypted
+                FROM user_kis_credentials
+                WHERE user_id = %s
+            """, (current_user["id"],))
+            row = cursor.fetchone()
+            
+            if not row:
+                return {
+                    "status": "success",
+                    "has_credentials": False,
+                    "data": None
+                }
+            
+            # 복호화
+            try:
+                app_key = decrypt_data(row["app_key_encrypted"])
+                app_secret = decrypt_data(row["app_secret_encrypted"])
+            except Exception as e:
+                logging.error(f"Error decrypting credentials: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail="인증 정보 복호화에 실패했습니다."
+                )
+            
+            return {
+                "status": "success",
+                "has_credentials": True,
+                "data": {
+                    "kis_id": row["kis_id"],
+                    "account_no": row["account_no"],
+                    "app_key": app_key,
+                    "app_secret": app_secret
+                }
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting KIS credentials: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/user/kis-credentials")
+async def save_user_kis_credentials(
+    request: KISCredentialRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """사용자별 KIS API 인증 정보 저장/업데이트"""
+    try:
+        from service.database.db import get_db_connection
+        from service.utils.encryption import encrypt_data
+        
+        # 암호화
+        app_key_encrypted = encrypt_data(request.app_key)
+        app_secret_encrypted = encrypt_data(request.app_secret)
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 기존 데이터 확인
+            cursor.execute("""
+                SELECT id FROM user_kis_credentials WHERE user_id = %s
+            """, (current_user["id"],))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # 업데이트
+                cursor.execute("""
+                    UPDATE user_kis_credentials
+                    SET kis_id = %s,
+                        account_no = %s,
+                        app_key_encrypted = %s,
+                        app_secret_encrypted = %s,
+                        updated_at = NOW()
+                    WHERE user_id = %s
+                """, (
+                    request.kis_id,
+                    request.account_no,
+                    app_key_encrypted,
+                    app_secret_encrypted,
+                    current_user["id"]
+                ))
+            else:
+                # 새로 생성
+                cursor.execute("""
+                    INSERT INTO user_kis_credentials
+                    (user_id, kis_id, account_no, app_key_encrypted, app_secret_encrypted)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    current_user["id"],
+                    request.kis_id,
+                    request.account_no,
+                    app_key_encrypted,
+                    app_secret_encrypted
+                ))
+            
+            conn.commit()
+            
+            return {
+                "status": "success",
+                "message": "KIS 인증 정보가 저장되었습니다."
+            }
+    except Exception as e:
+        logging.error(f"Error saving KIS credentials: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Admin 전용 API
 @api_router.get("/admin/users")
