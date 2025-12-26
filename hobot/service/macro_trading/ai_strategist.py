@@ -105,7 +105,7 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
             cursor = conn.cursor()
             # sub_portfolio_models 테이블 사용
             cursor.execute("""
-                SELECT id, name, description, asset_class, display_order, is_active
+                SELECT id, sub_model_id, name, description, asset_class, display_order, is_active
                 FROM sub_portfolio_models
                 WHERE is_active = TRUE
                 ORDER BY asset_class, display_order, id
@@ -114,8 +114,8 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
             
             result = {}
             for row in rows:
-                # id를 문자열로 변환 (DB에서 정수로 반환될 수 있음)
-                sub_mp_id = str(row['id'])
+                # sub_model_id를 키로 사용 (예: "Eq-D", "Bnd-L", "Alt-I")
+                sub_model_id = row.get('sub_model_id')
                 
                 # ETF 상세 정보 로드 (sub_portfolio_compositions 테이블)
                 # 외래키 컬럼: sub_portfolio_model_id
@@ -147,8 +147,9 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
                     if category:
                         allocation[category] = float(weight) if weight is not None else 0.0
                 
-                result[sub_mp_id] = {
-                    'id': sub_mp_id,
+                result[sub_model_id] = {
+                    'id': row['id'],
+                    'sub_model_id': sub_model_id,
                     'name': row['name'],
                     'description': row['description'],
                     'asset_class': row['asset_class'],
