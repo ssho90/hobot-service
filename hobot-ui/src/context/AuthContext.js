@@ -138,12 +138,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (username, email, password) => {
+  const register = async (username, password) => {
     try {
       const requestBody = { username, password };
-      if (email) {
-        requestBody.email = email;
-      }
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {

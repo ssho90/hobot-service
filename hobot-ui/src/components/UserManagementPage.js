@@ -7,7 +7,7 @@ const UserManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState(null);
-  const [editForm, setEditForm] = useState({ username: '', email: '', role: '' });
+  const [editForm, setEditForm] = useState({ role: '' });
   const { getAuthHeaders } = useAuth();
 
   const fetchUsers = useCallback(async () => {
@@ -37,15 +37,13 @@ const UserManagementPage = () => {
   const handleEdit = (user) => {
     setEditingUser(user.id);
     setEditForm({
-      username: user.username,
-      email: user.email,
       role: user.role
     });
   };
 
   const handleCancelEdit = () => {
     setEditingUser(null);
-    setEditForm({ username: '', email: '', role: '' });
+    setEditForm({ role: '' });
   };
 
   const handleSaveEdit = async (userId) => {
@@ -62,7 +60,7 @@ const UserManagementPage = () => {
       if (response.ok) {
         await fetchUsers();
         setEditingUser(null);
-        setEditForm({ username: '', email: '', role: '' });
+        setEditForm({ role: '' });
       } else {
         const data = await response.json();
         alert(data.detail || '사용자 정보 업데이트에 실패했습니다.');
@@ -122,9 +120,7 @@ const UserManagementPage = () => {
         <table className="users-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>사용자명</th>
-              <th>이메일</th>
+              <th>사용자명 (ID)</th>
               <th>역할</th>
               <th>생성일</th>
               <th>작업</th>
@@ -134,30 +130,6 @@ const UserManagementPage = () => {
             {users.map((user) => (
               <tr key={user.id}>
                 <td>{user.id}</td>
-                <td>
-                  {editingUser === user.id ? (
-                    <input
-                      type="text"
-                      value={editForm.username}
-                      onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                      className="edit-input"
-                    />
-                  ) : (
-                    user.username
-                  )}
-                </td>
-                <td>
-                  {editingUser === user.id ? (
-                    <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="edit-input"
-                    />
-                  ) : (
-                    user.email
-                  )}
-                </td>
                 <td>
                   {editingUser === user.id ? (
                     <select

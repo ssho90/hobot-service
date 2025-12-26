@@ -141,6 +141,8 @@ def create_user(username: str, password: str, role: str = "user") -> Dict:
     
     # 비밀번호 해시 제외하고 반환
     return {
+
+        'username': username,
         'id': username,
         'role': role,
         'created_at': now,

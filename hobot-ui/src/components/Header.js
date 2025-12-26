@@ -138,9 +138,9 @@ const Header = () => {
     setShowMenu(false);
   };
 
-  const getInitials = (username) => {
-    if (!username) return 'U';
-    return username.substring(0, 2).toUpperCase();
+  const getInitials = (userId) => {
+    if (!userId) return 'U';
+    return userId.substring(0, 2).toUpperCase();
   };
 
   const toggleSidebar = () => {
@@ -305,10 +305,10 @@ const Header = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="user-avatar">
-                  <span>{getInitials(user?.username)}</span>
+                  <span>{getInitials(user?.id)}</span>
                 </div>
                 <div className="user-info">
-                  <span className="user-name">{user?.username}</span>
+                  <span className="user-name">{user?.id}</span>
                   {user?.role === 'admin' && (
                     <span className="user-role">Admin</span>
                   )}
@@ -502,10 +502,10 @@ const Header = () => {
           {user && (
             <div className="mobile-sidebar-user">
               <div className="mobile-user-avatar">
-                <span>{getInitials(user?.username)}</span>
+                <span>{getInitials(user?.id)}</span>
               </div>
               <div className="mobile-user-info">
-                <span className="mobile-user-name">{user?.username}</span>
+                <span className="mobile-user-name">{user?.id}</span>
                 {user?.role === 'admin' && (
                   <span className="mobile-user-role">Admin</span>
                 )}
