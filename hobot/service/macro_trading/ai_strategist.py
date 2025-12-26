@@ -41,7 +41,7 @@ def _load_model_portfolios_from_db() -> Dict[str, Dict]:
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT id, name, description, strategy, 
+                SELECT id, mp_id, name, description, strategy, 
                        stocks_allocation, bonds_allocation, 
                        alternatives_allocation, cash_allocation,
                        display_order, is_active
@@ -58,11 +58,12 @@ def _load_model_portfolios_from_db() -> Dict[str, Dict]:
                 alternatives_allocation = row.get('alternatives_allocation') or 0
                 cash_allocation = row.get('cash_allocation') or 0
                 
-                # id를 문자열로 변환 (DB에서 정수로 반환될 수 있음)
-                mp_id = str(row['id'])
+                # mp_id를 키로 사용 (예: "MP-1", "MP-2")
+                mp_id = row.get('mp_id') or str(row['id'])
                 
                 result[mp_id] = {
-                    'id': mp_id,
+                    'id': row['id'],
+                    'mp_id': mp_id,
                     'name': row['name'],
                     'description': row['description'],
                     'strategy': row['strategy'],
