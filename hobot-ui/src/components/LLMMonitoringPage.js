@@ -37,6 +37,17 @@ const LLMMonitoringPage = () => {
     }
   }, [getAuthHeaders]);
 
+  // 로컬 시간대(UTC+9) 기준으로 날짜 문자열 생성
+  const formatLocalDateTime = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   // 날짜 범위 계산 함수
   const calculateDateRange = (range) => {
     const now = new Date();
@@ -73,9 +84,10 @@ const LLMMonitoringPage = () => {
 
     endDate = now;
 
+    // 로컬 시간대(UTC+9) 기준으로 포맷팅 (toISOString()은 UTC로 변환하므로 사용하지 않음)
     return {
-      start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
-      end_date: endDate.toISOString().slice(0, 19).replace('T', ' ')
+      start_date: formatLocalDateTime(startDate),
+      end_date: formatLocalDateTime(endDate)
     };
   };
 
