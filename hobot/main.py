@@ -2568,6 +2568,7 @@ async def get_llm_monitoring_logs(
             total = count_result['total'] if count_result else 0
             
             # 로그 조회
+            # created_at을 문자열로 직접 가져와서 시간대 변환 없이 그대로 사용
             query = f"""
                 SELECT 
                     id,
@@ -2580,7 +2581,7 @@ async def get_llm_monitoring_logs(
                     duration_ms,
                     request_prompt,
                     response_prompt,
-                    created_at
+                    DATE_FORMAT(created_at, '%%Y-%%m-%%d %%H:%%i:%%S') as created_at
                 FROM llm_usage_logs
                 {where_clause}
                 ORDER BY created_at DESC
@@ -2591,10 +2592,7 @@ async def get_llm_monitoring_logs(
             
             logs = cursor.fetchall()
             
-            # datetime 객체를 문자열로 변환
-            for log in logs:
-                if log.get('created_at'):
-                    log['created_at'] = log['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+            # created_at은 이미 문자열로 반환되므로 추가 변환 불필요
             
             return {
                 "status": "success",
