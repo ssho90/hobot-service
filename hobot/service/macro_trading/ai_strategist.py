@@ -582,52 +582,6 @@ def collect_account_status() -> Optional[Dict[str, Any]]:
         return None
 
 
-def get_overview_recommended_sectors() -> Dict[str, Dict[str, List[Dict]]]:
-    """Overview AI 추천 가능한 섹터/그룹 리스트 조회"""
-    try:
-        from service.database.db import get_db_connection
-        
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT asset_class, sector_group, ticker, name, display_order
-                FROM overview_recommended_sectors
-                WHERE is_active = TRUE
-                ORDER BY asset_class, sector_group, display_order
-            """)
-            
-            rows = cursor.fetchall()
-            
-            # 자산군 > 섹터 그룹 > ETF 구조로 그룹화
-            result = {
-                "stocks": {},
-                "bonds": {},
-                "alternatives": {},
-                "cash": {}
-            }
-            
-            for row in rows:
-                asset_class = row["asset_class"]
-                sector_group = row["sector_group"]
-                if asset_class in result:
-                    if sector_group not in result[asset_class]:
-                        result[asset_class][sector_group] = []
-                    result[asset_class][sector_group].append({
-                        "ticker": row["ticker"],
-                        "name": row["name"]
-                    })
-            
-            return result
-    except Exception as e:
-        logger.warning(f"Overview 추천 섹터 조회 실패: {e}")
-        return {
-            "stocks": {},
-            "bonds": {},
-            "alternatives": {},
-            "cash": {}
-        }
-
-
 def get_previous_decision() -> Optional[Dict[str, Any]]:
     """이전 전략 결정 결과 조회 (가장 최근 것)"""
     try:
