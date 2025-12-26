@@ -8,6 +8,24 @@ from typing import Optional, Dict, Any, Callable
 from functools import wraps
 from datetime import datetime
 
+try:
+    from zoneinfo import ZoneInfo
+    KST = ZoneInfo("Asia/Seoul")
+except ImportError:
+    try:
+        # Python 3.8 이하를 위한 fallback
+        from backports.zoneinfo import ZoneInfo
+        KST = ZoneInfo("Asia/Seoul")
+    except ImportError:
+        # pytz를 사용하는 fallback
+        try:
+            import pytz
+            KST = pytz.timezone("Asia/Seoul")
+        except ImportError:
+            # 최후의 수단: UTC+9를 수동으로 계산
+            from datetime import timedelta, timezone
+            KST = timezone(timedelta(hours=9))
+
 from service.database.db import get_db_connection
 
 logger = logging.getLogger(__name__)
@@ -39,14 +57,31 @@ def log_llm_usage(
         duration_ms: 응답 시간 (밀리초)
     """
     try:
+        # 현재 UTC 시간을 가져온 후 UTC+9로 변환
+        # 시스템 시간이 어떤 시간대든 상관없이 UTC+9로 저장
+        from datetime import timezone
+        utc_now = datetime.now(timezone.utc)
+        
+        # UTC를 UTC+9로 변환 (9시간 추가)
+        if hasattr(KST, 'localize'):
+            # pytz 사용: UTC 시간을 UTC+9로 변환
+            now_kst = utc_now.astimezone(KST)
+        else:
+            # zoneinfo 사용: UTC 시간을 UTC+9로 변환
+            now_kst = utc_now.astimezone(KST)
+        
+        # MySQL TIMESTAMP는 naive datetime을 저장하므로 시간대 정보 제거
+        # UTC+9 시간을 naive datetime으로 변환 (시간대 정보 제거, 값은 UTC+9 시간 유지)
+        now_kst_naive = now_kst.replace(tzinfo=None)
+        
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO llm_usage_logs (
                     model_name, provider, request_prompt, response_prompt,
                     prompt_tokens, completion_tokens, total_tokens,
-                    service_name, duration_ms
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    service_name, duration_ms, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 model_name,
                 provider,
@@ -56,7 +91,8 @@ def log_llm_usage(
                 completion_tokens,
                 total_tokens,
                 service_name,
-                duration_ms
+                duration_ms,
+                now_kst_naive  # UTC+9 시간을 naive datetime으로 저장
             ))
             conn.commit()
     except Exception as e:

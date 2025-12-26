@@ -2564,7 +2564,8 @@ async def get_llm_monitoring_logs(
             # 전체 개수 조회
             count_query = f"SELECT COUNT(*) as total FROM llm_usage_logs {where_clause}"
             cursor.execute(count_query, params)
-            total = cursor.fetchone()['total']
+            count_result = cursor.fetchone()
+            total = count_result['total'] if count_result else 0
             
             # 로그 조회
             query = f"""
