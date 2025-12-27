@@ -81,14 +81,6 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         )}
       </div>
 
-      {/* 자산군별 수익률 */}
-      {balance && balance.status === 'success' && balance.asset_class_info && (
-        <div className="card">
-          <h2>자산군별 수익률</h2>
-          <AssetClassPerformance assetClassInfo={balance.asset_class_info} />
-        </div>
-      )}
-
       {/* 보유 자산 */}
       {balance && balance.status === 'success' && balance.holdings && balance.holdings.length > 0 && (
         <div className="card">
@@ -130,83 +122,6 @@ const MacroQuantTradingTab = ({ balance, loading, error }) => {
         </div>
       )}
 
-    </div>
-  );
-};
-
-// 자산군별 수익률 컴포넌트
-const AssetClassPerformance = ({ assetClassInfo }) => {
-  const assetClassLabels = {
-    stocks: '주식',
-    bonds: '채권',
-    alternatives: '대체투자',
-    cash: '현금'
-  };
-
-  const assetClassOrder = ['stocks', 'bonds', 'alternatives', 'cash'];
-
-  return (
-    <div className="asset-class-performance">
-      {assetClassOrder.map((assetClass) => {
-        const info = assetClassInfo[assetClass];
-        if (!info || (info.count === 0 && assetClass !== 'cash')) {
-          return null;
-        }
-
-        return (
-          <div key={assetClass} className="asset-class-group">
-            <div className="asset-class-header">
-              <h3>{assetClassLabels[assetClass] || assetClass}</h3>
-              <div className="asset-class-summary">
-                <span className="summary-label">평가금액:</span>
-                <span className="summary-value">
-                  {info.total_eval_amount?.toLocaleString('ko-KR')} 원
-                </span>
-                <span className="summary-label">손익:</span>
-                <span className={`summary-value ${info.total_profit_loss >= 0 ? 'positive' : 'negative'}`}>
-                  {info.total_profit_loss?.toLocaleString('ko-KR')} 원
-                </span>
-                <span className="summary-label">수익률:</span>
-                <span className={`summary-value ${info.profit_loss_rate >= 0 ? 'positive' : 'negative'}`}>
-                  {info.profit_loss_rate?.toFixed(2)}%
-                </span>
-              </div>
-            </div>
-            
-            {/* 그룹 내 종목별 수익률 */}
-            {info.holdings && info.holdings.length > 0 && (
-              <div className="asset-class-holdings">
-                <table className="holdings-table">
-                  <thead>
-                    <tr>
-                      <th>종목명</th>
-                      <th>종목코드</th>
-                      <th>평가금액</th>
-                      <th>손익</th>
-                      <th>손익률</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {info.holdings.map((holding, idx) => (
-                      <tr key={idx}>
-                        <td>{holding.stock_name}</td>
-                        <td>{holding.stock_code}</td>
-                        <td>{holding.eval_amount?.toLocaleString('ko-KR')} 원</td>
-                        <td className={holding.profit_loss >= 0 ? 'positive' : 'negative'}>
-                          {holding.profit_loss?.toLocaleString('ko-KR')} 원
-                        </td>
-                        <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
-                          {holding.profit_loss_rate?.toFixed(2)}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        );
-      })}
     </div>
   );
 };
