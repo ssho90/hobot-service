@@ -256,8 +256,8 @@
 }
 
 .submp-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
@@ -266,6 +266,7 @@
   border-radius: 6px;
   padding: 12px;
   background: #fff;
+  width: 100%;
 }
 
 .submp-asset-title {
