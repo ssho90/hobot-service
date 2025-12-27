@@ -1757,7 +1757,7 @@ async def get_user_kis_credentials(current_user: dict = Depends(get_current_user
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT kis_id, account_no, app_key_encrypted, app_secret_encrypted
+                SELECT kis_id, account_no, app_key_encrypted, app_secret_encrypted, is_simulation
                 FROM user_kis_credentials
                 WHERE user_id = %s
             """, (current_user["id"],))
@@ -1788,7 +1788,8 @@ async def get_user_kis_credentials(current_user: dict = Depends(get_current_user
                     "kis_id": row["kis_id"],
                     "account_no": row["account_no"],
                     "app_key": app_key,
-                    "app_secret": app_secret
+                        "app_secret": app_secret,
+                        "is_simulation": bool(row.get("is_simulation", False))
                 }
             }
     except HTTPException:
