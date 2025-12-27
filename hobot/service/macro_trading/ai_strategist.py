@@ -259,14 +259,15 @@ def get_sub_mp_etf_details(sub_mp_id: str) -> Optional[List[Dict]]:
 
 
 def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[str, Dict]]:
-    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성"""
+    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성 (cash 포함)"""
     if not sub_mp_data:
         return None
 
     sub_portfolios = get_sub_model_portfolios()
     sub_mp_details: Dict[str, Dict] = {}
 
-    for asset_key in ("stocks", "bonds", "alternatives"):
+    # stocks, bonds, alternatives, cash 모두 처리
+    for asset_key in ("stocks", "bonds", "alternatives", "cash"):
         sub_mp_id = sub_mp_data.get(asset_key)
         if not sub_mp_id:
             continue
