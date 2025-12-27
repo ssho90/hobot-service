@@ -424,83 +424,160 @@ const PortfolioManagementPage = () => {
                     )}
                   </td>
                   <td>
-                    {editingSubMp === subMp.id ? (
-                      <select
-                        value={editForm.asset_class}
-                        onChange={(e) => setEditForm({ ...editForm, asset_class: e.target.value })}
-                        className="edit-input"
-                      >
-                        <option value="Stocks">Stocks</option>
-                        <option value="Bonds">Bonds</option>
-                        <option value="Alternatives">Alternatives</option>
-                      </select>
-                    ) : (
-                      subMp.asset_class
-                    )}
+                  {editingSubMp === subMp.id ? (
+                    <select
+                      value={editForm.asset_class}
+                      onChange={(e) => {
+                        const nextClass = e.target.value;
+                        // Cash 선택 시 기본 현금 아이템으로 초기화
+                        if (nextClass === 'Cash') {
+                          setEditForm({
+                            ...editForm,
+                            asset_class: nextClass,
+                            etf_details:
+                              editForm.etf_details && editForm.etf_details.length > 0
+                                ? editForm.etf_details
+                                : [{ category: '현금', ticker: 'CASH', name: '현금', weight: 1 }]
+                          });
+                        } else {
+                          setEditForm({ ...editForm, asset_class: nextClass });
+                        }
+                      }}
+                      className="edit-input"
+                    >
+                      <option value="Stocks">Stocks</option>
+                      <option value="Bonds">Bonds</option>
+                      <option value="Alternatives">Alternatives</option>
+                      <option value="Cash">Cash</option>
+                    </select>
+                  ) : (
+                    subMp.asset_class
+                  )}
                   </td>
                   <td>
-                    {editingSubMp === subMp.id ? (
-                      <div className="etf-editor">
-                        {editForm.etf_details.map((etf, index) => (
-                          <div key={index} className="etf-item">
-                            <input
-                              type="text"
-                              placeholder="카테고리"
-                              value={etf.category}
-                              onChange={(e) => handleEtfChange(index, 'category', e.target.value)}
-                              className="etf-input"
-                            />
-                            <input
-                              type="text"
-                              placeholder="티커"
-                              value={etf.ticker}
-                              onChange={(e) => handleEtfChange(index, 'ticker', e.target.value)}
-                              className="etf-input"
-                            />
-                            <input
-                              type="text"
-                              placeholder="이름"
-                              value={etf.name}
-                              onChange={(e) => handleEtfChange(index, 'name', e.target.value)}
-                              className="etf-input"
-                            />
-                            <input
-                              type="number"
-                              step="0.01"
-                              placeholder="비중"
-                              value={etf.weight}
-                              onChange={(e) => handleEtfChange(index, 'weight', e.target.value)}
-                              className="etf-input"
-                              style={{ width: '80px' }}
-                            />
+                  {editingSubMp === subMp.id ? (
+                    <div className="etf-editor">
+                      {editForm.asset_class === 'Cash' ? (
+                        <div className="cash-editor">
+                          {(!editForm.etf_details || editForm.etf_details.length === 0) && (
                             <button
-                              className="btn-remove"
-                              onClick={() => handleRemoveEtf(index)}
+                              className="btn-add"
+                              onClick={() =>
+                                setEditForm({
+                                  ...editForm,
+                                  etf_details: [{ category: '현금', ticker: 'CASH', name: '현금', weight: 1 }]
+                                })
+                              }
                             >
-                              삭제
+                              현금 추가
                             </button>
-                          </div>
-                        ))}
-                        <button
-                          className="btn-add"
-                          onClick={handleAddEtf}
-                        >
-                          ETF 추가
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="etf-display">
-                        {subMp.etf_details && subMp.etf_details.length > 0 ? (
-                          subMp.etf_details.map((etf, idx) => (
-                            <div key={idx} className="etf-item-display">
-                              {etf.category}: {etf.ticker} ({etf.name}) - {(etf.weight || 0) * 100}%
+                          )}
+                          {editForm.etf_details &&
+                            editForm.etf_details.map((etf, index) => (
+                              <div key={index} className="etf-item">
+                                <input
+                                  type="text"
+                                  value={etf.category}
+                                  onChange={(e) => handleEtfChange(index, 'category', e.target.value)}
+                                  className="etf-input"
+                                  placeholder="카테고리"
+                                />
+                                <input
+                                  type="text"
+                                  value={etf.ticker}
+                                  onChange={(e) => handleEtfChange(index, 'ticker', e.target.value)}
+                                  className="etf-input"
+                                  placeholder="티커"
+                                />
+                                <input
+                                  type="text"
+                                  value={etf.name}
+                                  onChange={(e) => handleEtfChange(index, 'name', e.target.value)}
+                                  className="etf-input"
+                                  placeholder="이름"
+                                />
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={etf.weight}
+                                  onChange={(e) => handleEtfChange(index, 'weight', e.target.value)}
+                                  className="etf-input"
+                                  style={{ width: '80px' }}
+                                  placeholder="비중(1=100%)"
+                                />
+                                <button
+                                  className="btn-remove"
+                                  onClick={() => handleRemoveEtf(index)}
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <>
+                          {editForm.etf_details.map((etf, index) => (
+                            <div key={index} className="etf-item">
+                              <input
+                                type="text"
+                                placeholder="카테고리"
+                                value={etf.category}
+                                onChange={(e) => handleEtfChange(index, 'category', e.target.value)}
+                                className="etf-input"
+                              />
+                              <input
+                                type="text"
+                                placeholder="티커"
+                                value={etf.ticker}
+                                onChange={(e) => handleEtfChange(index, 'ticker', e.target.value)}
+                                className="etf-input"
+                              />
+                              <input
+                                type="text"
+                                placeholder="이름"
+                                value={etf.name}
+                                onChange={(e) => handleEtfChange(index, 'name', e.target.value)}
+                                className="etf-input"
+                              />
+                              <input
+                                type="number"
+                                step="0.01"
+                                placeholder="비중"
+                                value={etf.weight}
+                                onChange={(e) => handleEtfChange(index, 'weight', e.target.value)}
+                                className="etf-input"
+                                style={{ width: '80px' }}
+                              />
+                              <button
+                                className="btn-remove"
+                                onClick={() => handleRemoveEtf(index)}
+                              >
+                                삭제
+                              </button>
                             </div>
-                          ))
-                        ) : (
-                          <div className="etf-item-display" style={{ color: '#999' }}>ETF 정보 없음</div>
-                        )}
-                      </div>
-                    )}
+                          ))}
+                          <button
+                            className="btn-add"
+                            onClick={handleAddEtf}
+                          >
+                            ETF 추가
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="etf-display">
+                      {subMp.etf_details && subMp.etf_details.length > 0 ? (
+                        subMp.etf_details.map((etf, idx) => (
+                          <div key={idx} className="etf-item-display">
+                            {etf.category}: {etf.ticker} ({etf.name}) - {(etf.weight || 0) * 100}%
+                          </div>
+                        ))
+                      ) : (
+                        <div className="etf-item-display" style={{ color: '#999' }}>ETF 정보 없음</div>
+                      )}
+                    </div>
+                  )}
                   </td>
                   <td>
                     {editingSubMp === subMp.id ? (

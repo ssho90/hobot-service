@@ -259,7 +259,7 @@ def get_sub_mp_etf_details(sub_mp_id: str) -> Optional[List[Dict]]:
 
 
 def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[str, Dict]]:
-    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성 (cash 포함)"""
+    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성 (cash 포함, 미지정 시 cash 기본값 사용)"""
     if not sub_mp_data:
         return None
 
@@ -269,6 +269,13 @@ def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[s
     # stocks, bonds, alternatives, cash 모두 처리
     for asset_key in ("stocks", "bonds", "alternatives", "cash"):
         sub_mp_id = sub_mp_data.get(asset_key)
+        # cash가 명시되지 않은 경우, DB에서 cash 자산군 Sub-MP가 하나라도 있으면 첫 번째를 사용
+        if asset_key == "cash" and not sub_mp_id:
+            cash_models = get_sub_models_by_asset_class("cash")
+            if cash_models:
+                # display_order로 정렬된 상태로 불러오므로 첫 번째 사용
+                sub_mp_id = next(iter(cash_models.keys()))
+
         if not sub_mp_id:
             continue
 
