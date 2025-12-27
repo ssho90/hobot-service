@@ -110,6 +110,34 @@
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
+/* 체크박스 그룹 스타일 추가 */
+.checkbox-group {
+  margin-bottom: 24px;
+}
+
+.checkbox-label {
+  display: flex !important; /* flex로 변경하여 가로 정렬 */
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto !important; /* 기본 input 스타일 오버라이드 */
+  margin-right: 8px;
+  cursor: pointer;
+  transform: scale(1.2); /* 체크박스 크기 약간 확대 */
+}
+
+.help-text {
+  margin: 0 0 0 28px; /* 체크박스 너비만큼 들여쓰기 */
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
 .form-actions {
   margin-top: 24px;
 }
@@ -279,5 +307,3 @@
   font-weight: 600;
   color: #333;
 }
-
-
