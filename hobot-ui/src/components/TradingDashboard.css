@@ -238,42 +238,21 @@
 }
 
 .mp-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 56px 1fr;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .mp-row-title {
-  width: 56px;
   font-weight: 600;
   color: #333;
+  text-align: center;
 }
 
-.mp-row-items {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+.mp-row-bar {
   width: 100%;
-}
-
-.mp-item {
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  background: #fff;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-}
-
-.mp-item-label {
-  color: #333;
-}
-
-.mp-item-value {
-  color: #111;
 }
 
 .submp-grid {
@@ -316,30 +295,8 @@
   gap: 8px;
 }
 
-.submp-chip {
-  border: 1px dashed #d0d7de;
-  border-radius: 6px;
-  padding: 8px 10px;
-  background: #f8fafc;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 140px;
-}
-
-.submp-chip.actual {
-  border-style: solid;
-  background: #f2f8ff;
-}
-
-.submp-chip-name {
-  font-weight: 600;
-  color: #111;
-}
-
-.submp-chip-meta {
-  color: #555;
-  font-size: 12px;
+.submp-bar-area {
+  flex: 1;
 }
 
 .submp-empty {
@@ -360,6 +317,41 @@
   .mp-row-items {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.stacked-bar {
+  display: flex;
+  width: 100%;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+.stacked-bar.tone-actual {
+  background: #f7fbff;
+}
+
+.stacked-bar-segment {
+  position: relative;
+  min-width: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stacked-bar-label {
+  padding: 0 8px;
+  text-shadow: 0 0 2px rgba(0,0,0,0.25);
+}
+
+.submp-bar-area .stacked-bar {
+  min-height: 38px;
 }
 
 .loading,

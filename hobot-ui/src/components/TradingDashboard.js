@@ -176,56 +176,54 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
     cash: '현금'
   };
 
-  const renderRow = (title, allocations) => {
-    if (!allocations) return null;
+  const buildBarSegmentsFromAlloc = (allocations) => {
     const ordered = ['stocks', 'bonds', 'alternatives', 'cash'];
-    return (
-      <div className="mp-row">
-        <div className="mp-row-title">{title}</div>
-        <div className="mp-row-items">
-          {ordered.map((key) => (
-            <div key={key} className="mp-item">
-              <span className="mp-item-label">{assetClassLabels[key]}</span>
-              <span className="mp-item-value">{(allocations[key] ?? 0).toFixed(1)}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    const colors = {
+      stocks: '#4F81BD',
+      bonds: '#9BBB59',
+      alternatives: '#C0504D',
+      cash: '#8064A2'
+    };
+    return ordered
+      .map((key) => ({
+        key,
+        label: assetClassLabels[key],
+        value: allocations?.[key] ?? 0,
+        color: colors[key] || '#888'
+      }))
+      .filter((seg) => seg.value > 0);
   };
 
   const renderSubMpBlock = (sub) => {
     const target = sub?.target || [];
     const actual = sub?.actual || [];
+    const buildBarSegments = (items) =>
+      items.map((item) => ({
+        label: item.name || item.ticker || '',
+        value: item.weight_percent ?? 0,
+        color: '#4F81BD'
+      }));
     return (
       <div className="submp-asset-block" key={sub.asset_class}>
         <div className="submp-asset-title">{assetClassLabels[sub.asset_class] || sub.asset_class}</div>
         <div className="submp-row">
           <div className="submp-row-title">목표</div>
-          <div className="submp-row-items">
-            {target.length === 0 && <div className="submp-empty">-</div>}
-            {target.map((item, idx) => (
-              <div key={idx} className="submp-chip">
-                <span className="submp-chip-name">{item.name}</span>
-                <span className="submp-chip-meta">
-                  {item.ticker ? `${item.ticker} · ` : ''}{(item.weight_percent ?? 0).toFixed(1)}%
-                </span>
-              </div>
-            ))}
+          <div className="submp-bar-area">
+            {target.length === 0 ? (
+              <div className="submp-empty">-</div>
+            ) : (
+              <StackedBar segments={buildBarSegments(target)} />
+            )}
           </div>
         </div>
         <div className="submp-row">
           <div className="submp-row-title">실제</div>
-          <div className="submp-row-items">
-            {actual.length === 0 && <div className="submp-empty">-</div>}
-            {actual.map((item, idx) => (
-              <div key={idx} className="submp-chip actual">
-                <span className="submp-chip-name">{item.name}</span>
-                <span className="submp-chip-meta">
-                  {item.ticker ? `${item.ticker} · ` : ''}{(item.weight_percent ?? 0).toFixed(1)}%
-                </span>
-              </div>
-            ))}
+          <div className="submp-bar-area">
+            {actual.length === 0 ? (
+              <div className="submp-empty">-</div>
+            ) : (
+              <StackedBar segments={buildBarSegments(actual)} tone="actual" />
+            )}
           </div>
         </div>
       </div>
@@ -242,8 +240,18 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         <div className="rebalance-sections">
           <div className="mp-section">
             <div className="section-title">MP</div>
-            {renderRow('목표', data.mp?.target_allocation)}
-            {renderRow('실제', data.mp?.actual_allocation)}
+            <div className="mp-row">
+              <div className="mp-row-title">목표</div>
+              <div className="mp-row-bar">
+                <StackedBar segments={buildBarSegmentsFromAlloc(data.mp?.target_allocation)} />
+              </div>
+            </div>
+            <div className="mp-row">
+              <div className="mp-row-title">실제</div>
+              <div className="mp-row-bar">
+                <StackedBar segments={buildBarSegmentsFromAlloc(data.mp?.actual_allocation)} tone="actual" />
+              </div>
+            </div>
           </div>
 
           <div className="submp-section">
@@ -254,6 +262,29 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const StackedBar = ({ segments, tone = 'target' }) => {
+  const total = segments.reduce((sum, s) => sum + (s.value || 0), 0) || 1;
+  return (
+    <div className={`stacked-bar ${tone === 'actual' ? 'tone-actual' : 'tone-target'}`}>
+      {segments.map((seg, idx) => {
+        const width = Math.max(0, (seg.value || 0) / total * 100);
+        return (
+          <div
+            key={`${seg.label}-${idx}`}
+            className="stacked-bar-segment"
+            style={{ width: `${width}%`, background: seg.color }}
+            title={`${seg.label}: ${(seg.value ?? 0).toFixed(1)}%`}
+          >
+            <span className="stacked-bar-label">
+              {seg.label} {(seg.value ?? 0).toFixed(1)}%
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 };
