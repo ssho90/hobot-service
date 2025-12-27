@@ -321,6 +321,7 @@ class SubMPDecision(BaseModel):
     stocks_sub_mp: Optional[str] = Field(default=None, description="주식 Sub-MP ID (Eq-A, Eq-N, Eq-D)")
     bonds_sub_mp: Optional[str] = Field(default=None, description="채권 Sub-MP ID (Bnd-L, Bnd-N, Bnd-S)")
     alternatives_sub_mp: Optional[str] = Field(default=None, description="대체자산 Sub-MP ID (Alt-I, Alt-C)")
+    cash_sub_mp: Optional[str] = Field(default=None, description="현금 Sub-MP ID (Cash 계열)")
     reasoning: str = Field(..., description="Sub-MP 선택 근거")
 
 
@@ -1259,6 +1260,7 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         stocks_sub_mp = sub_mp_decision_data.get('stocks_sub_mp')
         bonds_sub_mp = sub_mp_decision_data.get('bonds_sub_mp')
         alternatives_sub_mp = sub_mp_decision_data.get('alternatives_sub_mp')
+        cash_sub_mp = sub_mp_decision_data.get('cash_sub_mp')
         
         # 자산군 비중 확인
         target_allocation = get_model_portfolio_allocation(mp_id)
@@ -1269,11 +1271,14 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
                 bonds_sub_mp = None
             if target_allocation.get('Alternatives', 0) == 0:
                 alternatives_sub_mp = None
+            if target_allocation.get('Cash', 0) == 0:
+                cash_sub_mp = None
         
         # Sub-MP 유효성 검증
         valid_stocks_sub_mp = ["Eq-A", "Eq-N", "Eq-D"]
         valid_bonds_sub_mp = ["Bnd-L", "Bnd-N", "Bnd-S"]
         valid_alternatives_sub_mp = ["Alt-I", "Alt-C"]
+        valid_cash_sub_mp = None  # 현재 Cash Sub-MP ID 규칙이 명확하지 않으므로 검증 생략 (DB 저장/표시에만 활용)
         
         if stocks_sub_mp and stocks_sub_mp not in valid_stocks_sub_mp:
             logger.warning(f"유효하지 않은 주식 Sub-MP: {stocks_sub_mp}, None으로 설정")
@@ -1284,14 +1289,16 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         if alternatives_sub_mp and alternatives_sub_mp not in valid_alternatives_sub_mp:
             logger.warning(f"유효하지 않은 대체자산 Sub-MP: {alternatives_sub_mp}, None으로 설정")
             alternatives_sub_mp = None
+        # cash_sub_mp는 별도 검증 없이 사용 (DB 캐시에 있는 값이면 표시됨)
         
-        logger.info(f"Sub-MP 분석 완료: Stocks={stocks_sub_mp}, Bonds={bonds_sub_mp}, Alternatives={alternatives_sub_mp}")
+        logger.info(f"Sub-MP 분석 완료: Stocks={stocks_sub_mp}, Bonds={bonds_sub_mp}, Alternatives={alternatives_sub_mp}, Cash={cash_sub_mp}")
         
         # ===== 최종 결정 생성 =====
         sub_mp_decision = SubMPDecision(
             stocks_sub_mp=stocks_sub_mp,
             bonds_sub_mp=bonds_sub_mp,
             alternatives_sub_mp=alternatives_sub_mp,
+            cash_sub_mp=cash_sub_mp,
             reasoning=sub_mp_decision_data.get('reasoning', '')
         )
         
@@ -1587,6 +1594,7 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                     "stocks": decision.sub_mp.stocks_sub_mp,
                     "bonds": decision.sub_mp.bonds_sub_mp,
                     "alternatives": decision.sub_mp.alternatives_sub_mp,
+                    "cash": decision.sub_mp.cash_sub_mp,
                     "reasoning": decision.sub_mp.reasoning
                 }
             
