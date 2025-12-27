@@ -630,24 +630,6 @@ async def get_account_snapshots(
         logging.error(f"Error fetching account snapshots: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/macro-trading/rebalance")
-async def manual_rebalance(
-    admin_user: dict = Depends(require_admin)
-):
-    """수동 리밸런싱 실행 (admin 전용)"""
-    try:
-        from datetime import datetime
-        # TODO: 실제 리밸런싱 로직 구현 (Phase 4에서 구현 예정)
-        # 현재는 플레이스홀더 응답
-        return {
-            "status": "success",
-            "message": "리밸런싱이 요청되었습니다. (실제 구현은 Phase 4에서 완료 예정)",
-            "timestamp": datetime.now().isoformat()
-        }
-    except Exception as e:
-        logging.error(f"Error executing manual rebalance: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
 @api_router.get("/macro-trading/search-stocks")
 async def search_stocks(
     keyword: str = Query(..., description="검색 키워드 (종목명 일부)"),
@@ -1086,65 +1068,6 @@ async def get_strategy_decisions_history(
         logging.error(f"Error fetching strategy decisions history: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@api_router.get("/macro-trading/rebalancing-history")
-async def get_rebalancing_history(
-    days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
-    admin_user: dict = Depends(require_admin)
-):
-    """리밸런싱 실행 이력 조회 API (admin 전용)"""
-    try:
-        from service.database.db import get_db_connection
-        from datetime import datetime, timedelta
-        import json
-        
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days)
-        
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT 
-                    id,
-                    execution_date,
-                    threshold_used,
-                    drift_before,
-                    drift_after,
-                    trades_executed,
-                    total_cost,
-                    status,
-                    error_message,
-                    created_at
-                FROM rebalancing_history
-                WHERE execution_date >= %s AND execution_date <= %s
-                ORDER BY execution_date DESC
-            """, (start_date, end_date))
-            
-            rows = cursor.fetchall()
-            
-            result = []
-            for row in rows:
-                result.append({
-                    "id": row["id"],
-                    "execution_date": row["execution_date"].strftime("%Y-%m-%d %H:%M:%S") if row["execution_date"] else None,
-                    "threshold_used": float(row["threshold_used"]) if row["threshold_used"] else 0,
-                    "drift_before": row["drift_before"] if isinstance(row["drift_before"], dict) else (json.loads(row["drift_before"]) if row["drift_before"] else {}),
-                    "drift_after": row["drift_after"] if isinstance(row["drift_after"], dict) else (json.loads(row["drift_after"]) if row["drift_after"] else {}),
-                    "trades_executed": row["trades_executed"] if isinstance(row["trades_executed"], dict) else (json.loads(row["trades_executed"]) if row["trades_executed"] else {}),
-                    "total_cost": float(row["total_cost"]) if row["total_cost"] else 0,
-                    "status": row["status"],
-                    "error_message": row["error_message"],
-                    "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None
-                })
-            
-            return {
-                "status": "success",
-                "data": result,
-                "count": len(result)
-            }
-    except Exception as e:
-        logging.error(f"Error fetching rebalancing history: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
 def convert_numpy_types(obj):
     """
