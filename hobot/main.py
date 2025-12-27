@@ -1000,7 +1000,7 @@ async def get_strategy_decisions_history(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-햣 def convert_numpy_types(obj):
+def convert_numpy_types(obj):
     """
     numpy 타입을 Python 기본 타입으로 변환하는 재귀 함수
     """
