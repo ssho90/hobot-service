@@ -290,12 +290,14 @@ const ProfilePage = () => {
         <h2>사용자 정보</h2>
         <div className="user-info">
           <div className="info-item">
-            <span className="info-label">사용자명:</span>
-            <span className="info-value">{user?.username}</span>
+            <span className="info-label">사용자 ID:</span>
+            <span className="info-value">{user?.id}</span>
           </div>
           <div className="info-item">
-            <span className="info-label">이메일:</span>
-            <span className="info-value">{user?.email || '-'}</span>
+            <span className="info-label">모의투자 여부:</span>
+            <span className="info-value">
+              {credentials.is_simulation ? '사용 (모의투자)' : '미사용 (실전투자)'}
+            </span>
           </div>
           <div className="info-item">
             <span className="info-label">권한:</span>
