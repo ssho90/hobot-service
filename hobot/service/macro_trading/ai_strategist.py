@@ -927,7 +927,7 @@ def create_sub_mp_analysis_prompt(
         fred_signals: FRED 시그널 데이터
         economic_news: 경제 뉴스 데이터
         mp_id: 선택된 MP ID
-        previous_sub_mp: 이전 Sub-MP 정보 ({"stocks": "Eq-A", "bonds": "Bnd-L", "alternatives": "Alt-I"} 형태)
+        previous_sub_mp: 이전 Sub-MP 정보 ({"stocks": "Eq-A", "bonds": "Bnd-L", "alternatives": "Alt-I", "cash": "Cash-N"} 형태)
     """
     
     # FRED 시그널 요약 (간단히)
@@ -971,6 +971,9 @@ def create_sub_mp_analysis_prompt(
         if previous_sub_mp.get('alternatives'):
             prev_alt = sub_portfolios.get(previous_sub_mp['alternatives'], {})
             previous_sub_mp_info += f"이전 대체자산 Sub-MP: {previous_sub_mp['alternatives']} - {prev_alt.get('name', 'N/A')}\n"
+        if previous_sub_mp.get('cash'):
+            prev_cash = sub_portfolios.get(previous_sub_mp['cash'], {})
+            previous_sub_mp_info += f"이전 현금 Sub-MP: {previous_sub_mp['cash']} - {prev_cash.get('name', 'N/A')}\n"
         previous_sub_mp_info += "\n**중요:** 경제 상황이 크게 달라지지 않은 경우, 이전 Sub-MP를 유지하는 것이 좋습니다.\n"
         previous_sub_mp_info += "경제 지표의 변화가 명확하고 지속적인 경우에만 Sub-MP를 변경하세요.\n\n"
     
@@ -1019,6 +1022,21 @@ def create_sub_mp_analysis_prompt(
                 for etf in etf_details:
                     sub_mp_info += f"    * {etf.get('ticker', 'N/A')} ({etf.get('name', 'N/A')}): {etf.get('weight', 0)*100:.0f}%\n"
             sub_mp_info += "\n"
+
+    # 현금 Sub-MP (DB에 정의된 Cash 자산군 모델)
+    cash_models = {k: v for k, v in sub_portfolios.items() if str(v.get('asset_class', '')).lower() == 'cash'}
+    if cash_models:
+        sub_mp_info += "\n### 현금 (Cash) Sub-Models:\n"
+        # 현금성은 Cash-N 하나만 선택지라는 비즈니스 룰을 안내
+        for sub_mp_id, sub_mp in cash_models.items():
+            sub_mp_info += f"{sub_mp_id} (현금성): {sub_mp.get('name', 'N/A')}\n"
+            sub_mp_info += f"  - 상황: {sub_mp.get('description', 'N/A')}\n"
+            etf_details = sub_mp.get('etf_details', [])
+            if etf_details:
+                sub_mp_info += f"  - 세부 종목:\n"
+                for etf in etf_details:
+                    sub_mp_info += f"    * {etf.get('ticker', 'N/A')} ({etf.get('name', 'N/A')}): {etf.get('weight', 0)*100:.0f}%\n"
+            sub_mp_info += "\n"
     
     prompt = f"""당신은 거시경제 전문가입니다. 선택된 MP({mp_id})에 기반하여 각 자산군별 Sub-MP를 선택하세요.
 
@@ -1043,10 +1061,13 @@ def create_sub_mp_analysis_prompt(
 4. **대체자산 Sub-MP 선택 기준:**
    - 스태그플레이션, 물가 급등, 달러 약세 → Alt-I (인플레 방어)
    - 금융 위기, 시스템 리스크, 주식 폭락 → Alt-C (위기 방어)
-5. **이전 Sub-MP 고려사항:**
+5. **현금 Sub-MP 선택 기준:**
+   - 현금/단기 MMF/단기채 등 유동성 확보 목적: Cash-N(현금성) 선택
+   - 자산군 비중이 0%이면 null
+6. **이전 Sub-MP 고려사항:**
    - 경제 상황이 크게 달라지지 않은 경우 이전 Sub-MP를 유지하세요.
    - 경제 지표의 변화가 명확하고 지속적인 경우에만 Sub-MP를 변경하세요.
-6. **자산군 비중이 0%인 경우:**
+7. **자산군 비중이 0%인 경우:**
    - 해당 자산군의 Sub-MP는 null로 설정하세요.
 
 ## 출력 형식 (JSON):
@@ -1054,6 +1075,7 @@ def create_sub_mp_analysis_prompt(
     "stocks_sub_mp": "Eq-A" 또는 "Eq-N" 또는 "Eq-D" 또는 null,
     "bonds_sub_mp": "Bnd-L" 또는 "Bnd-N" 또는 "Bnd-S" 또는 null,
     "alternatives_sub_mp": "Alt-I" 또는 "Alt-C" 또는 null,
+    "cash_sub_mp": "Cash-N" 또는 null,
     "reasoning": "Sub-MP 선택 근거 (한국어, 300-500자) - 각 자산군별 선택 이유 및 이전 Sub-MP와 비교"
 }}
 
@@ -1278,7 +1300,7 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         valid_stocks_sub_mp = ["Eq-A", "Eq-N", "Eq-D"]
         valid_bonds_sub_mp = ["Bnd-L", "Bnd-N", "Bnd-S"]
         valid_alternatives_sub_mp = ["Alt-I", "Alt-C"]
-        valid_cash_sub_mp = None  # 현재 Cash Sub-MP ID 규칙이 명확하지 않으므로 검증 생략 (DB 저장/표시에만 활용)
+        valid_cash_sub_mp = ["Cash-N"]
         
         if stocks_sub_mp and stocks_sub_mp not in valid_stocks_sub_mp:
             logger.warning(f"유효하지 않은 주식 Sub-MP: {stocks_sub_mp}, None으로 설정")
@@ -1289,7 +1311,9 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         if alternatives_sub_mp and alternatives_sub_mp not in valid_alternatives_sub_mp:
             logger.warning(f"유효하지 않은 대체자산 Sub-MP: {alternatives_sub_mp}, None으로 설정")
             alternatives_sub_mp = None
-        # cash_sub_mp는 별도 검증 없이 사용 (DB 캐시에 있는 값이면 표시됨)
+        if cash_sub_mp and valid_cash_sub_mp and cash_sub_mp not in valid_cash_sub_mp:
+            logger.warning(f"유효하지 않은 현금 Sub-MP: {cash_sub_mp}, None으로 설정")
+            cash_sub_mp = None
         
         logger.info(f"Sub-MP 분석 완료: Stocks={stocks_sub_mp}, Bonds={bonds_sub_mp}, Alternatives={alternatives_sub_mp}, Cash={cash_sub_mp}")
         
