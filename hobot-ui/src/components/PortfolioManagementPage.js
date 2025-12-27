@@ -142,8 +142,11 @@ const PortfolioManagementPage = () => {
   };
 
   const handleAddEtf = () => {
+    // Cash 자산군은 수동 추가 불가
+    if (editForm.asset_class === 'Cash') return;
     if (!editForm.etf_details) {
       setEditForm({ ...editForm, etf_details: [] });
+      return;
     }
     setEditForm({
       ...editForm,
@@ -155,6 +158,7 @@ const PortfolioManagementPage = () => {
   };
 
   const handleRemoveEtf = (index) => {
+    if (editForm.asset_class === 'Cash') return; // Cash는 삭제 불가
     const newEtfDetails = editForm.etf_details.filter((_, i) => i !== index);
     setEditForm({ ...editForm, etf_details: newEtfDetails });
   };
@@ -429,15 +433,11 @@ const PortfolioManagementPage = () => {
                       value={editForm.asset_class}
                       onChange={(e) => {
                         const nextClass = e.target.value;
-                        // Cash 선택 시 기본 현금 아이템으로 초기화
                         if (nextClass === 'Cash') {
                           setEditForm({
                             ...editForm,
                             asset_class: nextClass,
-                            etf_details:
-                              editForm.etf_details && editForm.etf_details.length > 0
-                                ? editForm.etf_details
-                                : [{ category: '현금', ticker: 'CASH', name: '현금', weight: 1 }]
+                            etf_details: [{ category: 'KRW', ticker: 'CASH', name: '현금', weight: 1 }]
                           });
                         } else {
                           setEditForm({ ...editForm, asset_class: nextClass });
@@ -459,60 +459,9 @@ const PortfolioManagementPage = () => {
                     <div className="etf-editor">
                       {editForm.asset_class === 'Cash' ? (
                         <div className="cash-editor">
-                          {(!editForm.etf_details || editForm.etf_details.length === 0) && (
-                            <button
-                              className="btn-add"
-                              onClick={() =>
-                                setEditForm({
-                                  ...editForm,
-                                  etf_details: [{ category: '현금', ticker: 'CASH', name: '현금', weight: 1 }]
-                                })
-                              }
-                            >
-                              현금 추가
-                            </button>
-                          )}
-                          {editForm.etf_details &&
-                            editForm.etf_details.map((etf, index) => (
-                              <div key={index} className="etf-item">
-                                <input
-                                  type="text"
-                                  value={etf.category}
-                                  onChange={(e) => handleEtfChange(index, 'category', e.target.value)}
-                                  className="etf-input"
-                                  placeholder="카테고리"
-                                />
-                                <input
-                                  type="text"
-                                  value={etf.ticker}
-                                  onChange={(e) => handleEtfChange(index, 'ticker', e.target.value)}
-                                  className="etf-input"
-                                  placeholder="티커"
-                                />
-                                <input
-                                  type="text"
-                                  value={etf.name}
-                                  onChange={(e) => handleEtfChange(index, 'name', e.target.value)}
-                                  className="etf-input"
-                                  placeholder="이름"
-                                />
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={etf.weight}
-                                  onChange={(e) => handleEtfChange(index, 'weight', e.target.value)}
-                                  className="etf-input"
-                                  style={{ width: '80px' }}
-                                  placeholder="비중(1=100%)"
-                                />
-                                <button
-                                  className="btn-remove"
-                                  onClick={() => handleRemoveEtf(index)}
-                                >
-                                  삭제
-                                </button>
-                              </div>
-                            ))}
+                          <div className="etf-item-display" style={{ fontWeight: 600 }}>
+                            KRW 현금 (CASH) - 100%
+                          </div>
                         </div>
                       ) : (
                         <>
