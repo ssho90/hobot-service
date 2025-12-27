@@ -47,8 +47,9 @@ const ProfilePage = () => {
           setCredentials({
             kis_id: data.data.kis_id || '',
             account_no: data.data.account_no || '',
-            app_key: data.data.app_key || '',
-            app_secret: data.data.app_secret || '',
+            // 민감 정보는 서버가 반환하지 않으므로 빈 값 유지
+            app_key: '',
+            app_secret: '',
             is_simulation: data.data.is_simulation || false
           });
           setHasCredentials(true);

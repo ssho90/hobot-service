@@ -1757,7 +1757,7 @@ async def get_user_kis_credentials(current_user: dict = Depends(get_current_user
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT kis_id, account_no, app_key_encrypted, app_secret_encrypted, is_simulation
+                SELECT kis_id, account_no, is_simulation
                 FROM user_kis_credentials
                 WHERE user_id = %s
             """, (current_user["id"],))
@@ -1770,26 +1770,14 @@ async def get_user_kis_credentials(current_user: dict = Depends(get_current_user
                     "data": None
                 }
             
-            # 복호화
-            try:
-                app_key = decrypt_data(row["app_key_encrypted"])
-                app_secret = decrypt_data(row["app_secret_encrypted"])
-            except Exception as e:
-                logging.error(f"Error decrypting credentials: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail="인증 정보 복호화에 실패했습니다."
-                )
-            
+            # 민감정보(app_key, app_secret)는 절대 반환하지 않는다.
             return {
                 "status": "success",
                 "has_credentials": True,
                 "data": {
                     "kis_id": row["kis_id"],
                     "account_no": row["account_no"],
-                    "app_key": app_key,
-                        "app_secret": app_secret,
-                        "is_simulation": bool(row.get("is_simulation", False))
+                    "is_simulation": bool(row.get("is_simulation", False))
                 }
             }
     except HTTPException:
