@@ -33,10 +33,29 @@ const MacroDashboard = () => {
           setOverviewData(null);
         }
       } else {
-        throw new Error('AI 분석 데이터를 불러오는데 실패했습니다.');
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.message && errorData.message.includes("KIS API 인증 정보가 등록되지 않았습니다")) {
+          setError(
+            <span>
+              KIS API 인증 정보가 등록되지 않았습니다.<br />
+              <a href="/dashboard?tab=profile" onClick={(e) => {
+                e.preventDefault();
+                // 탭 전환 이벤트 발생
+                const event = new CustomEvent('switchToTab', { detail: { tab: 'profile' } });
+                window.dispatchEvent(event);
+              }} style={{ color: '#2196F3', textDecoration: 'underline', cursor: 'pointer' }}>
+                프로필 페이지
+              </a>에서 인증 정보를 등록해주세요.
+            </span>
+          );
+        } else {
+          throw new Error('AI 분석 데이터를 불러오는데 실패했습니다.');
+        }
       }
     } catch (err) {
-      setError(err.message);
+      if (!error) { // 위에서 설정한 에러가 없을 때만 설정
+        setError(err.message);
+      }
       console.error('Error fetching overview:', err);
     } finally {
       setLoading(false);
@@ -121,6 +140,9 @@ const MacroDashboard = () => {
         }
       } else {
         const errorData = await response.json().catch(() => ({ detail: '알 수 없는 오류' }));
+        if (errorData.message && errorData.message.includes("KIS API 인증 정보가 등록되지 않았습니다")) {
+          throw new Error('KIS API 인증 정보가 없습니다. 프로필 페이지에서 등록해주세요.');
+        }
         throw new Error(errorData.detail || 'AI 분석 실행에 실패했습니다.');
       }
     } catch (err) {
