@@ -176,6 +176,11 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
     cash: '현금'
   };
 
+  const barPalette = {
+    target: ['#4F81BD', '#9BBB59', '#C0504D', '#8064A2', '#46b5d1', '#f4b400'],
+    actual: ['#3b6aa3', '#7da444', '#a33f3a', '#684f88', '#2e9bc0', '#d49a00'],
+  };
+
   const buildBarSegmentsFromAlloc = (allocations) => {
     const ordered = ['stocks', 'bonds', 'alternatives', 'cash'];
     const colors = {
@@ -197,12 +202,18 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
   const renderSubMpBlock = (sub) => {
     const target = sub?.target || [];
     const actual = sub?.actual || [];
-    const buildBarSegments = (items) =>
-      items.map((item) => ({
+    const buildBarSegments = (items, tone = 'target') => {
+      const palette = barPalette[tone] || barPalette.target;
+      const list = [...items];
+      if (sub.asset_class === 'cash' && list.length === 0) {
+        list.push({ name: '현금', ticker: 'CASH', weight_percent: 100 });
+      }
+      return list.map((item, idx) => ({
         label: item.name || item.ticker || '',
         value: item.weight_percent ?? 0,
-        color: '#4F81BD'
+        color: palette[idx % palette.length],
       }));
+    };
     return (
       <div className="submp-asset-block" key={sub.asset_class}>
         <div className="submp-asset-title">{assetClassLabels[sub.asset_class] || sub.asset_class}</div>
@@ -212,7 +223,7 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
             {target.length === 0 ? (
               <div className="submp-empty">-</div>
             ) : (
-              <StackedBar segments={buildBarSegments(target)} />
+              <StackedBar segments={buildBarSegments(target, 'target')} />
             )}
           </div>
         </div>
@@ -222,7 +233,7 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
             {actual.length === 0 ? (
               <div className="submp-empty">-</div>
             ) : (
-              <StackedBar segments={buildBarSegments(actual)} tone="actual" />
+              <StackedBar segments={buildBarSegments(actual, 'actual')} tone="actual" />
             )}
           </div>
         </div>
