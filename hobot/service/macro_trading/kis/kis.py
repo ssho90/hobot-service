@@ -383,7 +383,12 @@ def get_balance_info_api(user_id: Optional[str] = None):
                     "message": "KIS API 인증 정보가 등록되지 않았습니다. 프로필에서 인증 정보를 등록해주세요."
                 }
             logging.info(f"Credential 조회 성공 - account_no: {credentials.get('account_no', 'N/A')[:4]}****")
-            api = KISAPI(credentials['app_key'], credentials['app_secret'], credentials['account_no'])
+            api = KISAPI(
+                credentials['app_key'], 
+                credentials['app_secret'], 
+                credentials['account_no'],
+                is_simulation=credentials.get('is_simulation', False)
+            )
             account_no = credentials['account_no']
         else:
             # 기존 방식 (환경 변수 사용)

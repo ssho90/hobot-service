@@ -12,7 +12,8 @@ const ProfilePage = () => {
     kis_id: '',
     account_no: '',
     app_key: '',
-    app_secret: ''
+    app_secret: '',
+    is_simulation: false
   });
   const [hasCredentials, setHasCredentials] = useState(false);
   const [mfaStatus, setMfaStatus] = useState({ mfa_enabled: false, backup_codes_count: 0 });
@@ -47,7 +48,8 @@ const ProfilePage = () => {
             kis_id: data.data.kis_id || '',
             account_no: data.data.account_no || '',
             app_key: data.data.app_key || '',
-            app_secret: data.data.app_secret || ''
+            app_secret: data.data.app_secret || '',
+            is_simulation: data.data.is_simulation || false
           });
           setHasCredentials(true);
         } else {
@@ -105,10 +107,10 @@ const ProfilePage = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setCredentials(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -347,6 +349,20 @@ const ProfilePage = () => {
               required
               placeholder="계좌번호를 입력하세요 (예: 12345678-01)"
             />
+          </div>
+
+          <div className="form-group checkbox-group">
+            <label htmlFor="is_simulation" className="checkbox-label">
+              <input
+                type="checkbox"
+                id="is_simulation"
+                name="is_simulation"
+                checked={credentials.is_simulation}
+                onChange={handleChange}
+              />
+              모의투자 계좌 사용
+            </label>
+            <p className="help-text">체크하면 모의투자 서버(vts)로 연결됩니다. 체크 해제 시 실전투자 서버로 연결됩니다.</p>
           </div>
 
           <div className="form-group">

@@ -64,6 +64,7 @@ class KISCredentialRequest(BaseModel):
     account_no: str
     app_key: str
     app_secret: str
+    is_simulation: bool = False
 
 class MFAVerifySetupRequest(BaseModel):
     secret: str
@@ -1827,6 +1828,7 @@ async def save_user_kis_credentials(
                         account_no = %s,
                         app_key_encrypted = %s,
                         app_secret_encrypted = %s,
+                        is_simulation = %s,
                         updated_at = NOW()
                     WHERE user_id = %s
                 """, (
@@ -1834,20 +1836,22 @@ async def save_user_kis_credentials(
                     request.account_no,
                     app_key_encrypted,
                     app_secret_encrypted,
+                    request.is_simulation,
                     current_user["id"]
                 ))
             else:
                 # 새로 생성
                 cursor.execute("""
                     INSERT INTO user_kis_credentials
-                    (user_id, kis_id, account_no, app_key_encrypted, app_secret_encrypted)
-                    VALUES (%s, %s, %s, %s, %s)
+                    (user_id, kis_id, account_no, app_key_encrypted, app_secret_encrypted, is_simulation)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                 """, (
                     current_user["id"],
                     request.kis_id,
                     request.account_no,
                     app_key_encrypted,
-                    app_secret_encrypted
+                    app_secret_encrypted,
+                    request.is_simulation
                 ))
             
             conn.commit()

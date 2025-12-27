@@ -145,6 +145,7 @@ def init_database():
                 account_no VARCHAR(50) NOT NULL COMMENT '계좌번호',
                 app_key_encrypted TEXT NOT NULL COMMENT '암호화된 App Key',
                 app_secret_encrypted TEXT NOT NULL COMMENT '암호화된 App Secret',
+                is_simulation BOOLEAN DEFAULT FALSE COMMENT '모의투자 여부',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
                 UNIQUE KEY unique_user_id (user_id) COMMENT '사용자별 중복 방지',
@@ -152,6 +153,12 @@ def init_database():
                 INDEX idx_user_id (user_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자별 KIS API 인증 정보'
         """)
+        
+        # 모의투자 여부 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE user_kis_credentials ADD COLUMN is_simulation BOOLEAN DEFAULT FALSE COMMENT '모의투자 여부'")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
         
         # 메모리 저장소 테이블
         cursor.execute("""

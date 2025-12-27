@@ -14,13 +14,18 @@ class KISAPI:
         'data', 'access_token.json'
     )
 
-    def __init__(self, app_key, app_secret, account_no, base_url="https://openapi.koreainvestment.com:9443"):
+    def __init__(self, app_key, app_secret, account_no, is_simulation=False, base_url=None):
         self.app_key = app_key
         self.app_secret = app_secret
         self.account_no = account_no
-        self.base_url = base_url
-        # 모의투자 여부 확인 (URL에 'vts'가 포함되어 있으면 모의투자)
-        self.is_simulation = "vts" in base_url
+        self.is_simulation = is_simulation
+        
+        # base_url이 제공되지 않으면 모의투자 여부에 따라 자동 설정
+        if base_url:
+            self.base_url = base_url
+        else:
+            self.base_url = "https://openapivts.koreainvestment.com:29443" if is_simulation else "https://openapi.koreainvestment.com:9443"
+            
         self.access_token = self._get_access_token()
 
     def _ensure_data_directory(self):
