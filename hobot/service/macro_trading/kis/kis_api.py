@@ -19,6 +19,8 @@ class KISAPI:
         self.app_secret = app_secret
         self.account_no = account_no
         self.base_url = base_url
+        # 모의투자 여부 확인 (URL에 'vts'가 포함되어 있으면 모의투자)
+        self.is_simulation = "vts" in base_url
         self.access_token = self._get_access_token()
 
     def _ensure_data_directory(self):
@@ -289,7 +291,10 @@ class KISAPI:
         time.sleep(0.1)
         path = "/uapi/domestic-stock/v1/trading/inquire-balance"
         url = f"{self.base_url}{path}"
-        headers = self._get_common_headers("TTTC8434R") # 실전투자: TTTC8434R, 모의투자: VTTC8434R
+        
+        # 모의투자 여부에 따른 TR ID 설정
+        tr_id = "VTTC8434R" if self.is_simulation else "TTTC8434R"
+        headers = self._get_common_headers(tr_id)
         
         params = {
             "CANO": cano,
@@ -354,12 +359,14 @@ class KISAPI:
     def buy_market_order(self, ticker, quantity):
         """시장가 매수"""
         # 실전투자: TTTC0802U, 모의투자: VTTC0802U
-        return self._place_order(ticker, quantity, "buy", "TTTC0802U")
+        tr_id = "VTTC0802U" if self.is_simulation else "TTTC0802U"
+        return self._place_order(ticker, quantity, "buy", tr_id)
 
     def sell_market_order(self, ticker, quantity):
         """시장가 매도"""
         # 실전투자: TTTC0801U, 모의투자: VTTC0801U
-        return self._place_order(ticker, quantity, "sell", "TTTC0801U")
+        tr_id = "VTTC0801U" if self.is_simulation else "TTTC0801U"
+        return self._place_order(ticker, quantity, "sell", tr_id)
 
     def get_current_price(self, ticker):
         """현재가 조회"""
