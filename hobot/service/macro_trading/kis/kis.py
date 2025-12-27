@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import traceback
 import logging
+import time
 from typing import Dict, List, Optional
 
 # 프로젝트 루트의 .env 파일 로드
@@ -400,12 +401,51 @@ def get_balance_info_api(user_id: Optional[str] = None):
         current_price = api.get_current_price(TARGET_TICKER)
         logging.info(f"현재가 조회 완료 - price: {current_price}")
         
-        logging.info("잔고 조회 시작")
-        balance_data = api.get_balance()
-        logging.info(f"잔고 조회 완료 - balance_data keys: {list(balance_data.keys()) if balance_data else 'None'}")
+        # 레이트리밋(EGW00201: 초당 거래건수 초과) 대응 재시도
+        retry_delays = [0, 0.5, 1.0]  # seconds
+        balance_data = None
+        last_err_text = None
+
+        for attempt, delay in enumerate(retry_delays, start=1):
+            if delay > 0:
+                logging.warning(f"KIS 잔고 조회 재시도 {attempt}/{len(retry_delays)} - 대기 {delay}s (직전 오류: {last_err_text})")
+                time.sleep(delay)
+
+            try:
+                logging.info(f"잔고 조회 시작 (attempt={attempt})")
+                balance_data = api.get_balance()
+                logging.info(f"잔고 조회 완료 - balance_data keys: {list(balance_data.keys()) if balance_data else 'None'}")
+            except Exception as e:
+                last_err_text = str(e)
+                if (("EGW00201" in last_err_text) or ("초당 거래건수" in last_err_text)) and attempt < len(retry_delays):
+                    continue
+                raise
+
+            if not balance_data:
+                last_err_text = "잔고 조회 결과 None"
+                if attempt < len(retry_delays):
+                    continue
+                logging.error("잔고 조회 결과가 None입니다")
+                return {
+                    "status": "error",
+                    "message": "잔고 조회 실패 (응답 없음)"
+                }
+
+            rt_cd = balance_data.get('rt_cd')
+            msg_cd = balance_data.get('msg_cd', '')
+            msg1 = balance_data.get('msg1', '')
+            msg2 = balance_data.get('msg2', '')
+            logging.info(f"잔고 조회 응답 - rt_cd: {rt_cd}, msg_cd: {msg_cd}, msg1: {msg1}, msg2: {msg2}")
+
+            rate_limit_hit = (msg_cd == "EGW00201") or ("초당 거래건수" in msg1)
+            if rt_cd != '0' and rate_limit_hit and attempt < len(retry_delays):
+                last_err_text = f"rt_cd:{rt_cd}, msg_cd:{msg_cd}, msg1:{msg1}"
+                continue
+
+            break  # 정상 응답 or 마지막 시도
         
         if not balance_data:
-            logging.error("잔고 조회 결과가 None입니다")
+            # 이론상 도달하지 않지만 안전망
             return {
                 "status": "error",
                 "message": "잔고 조회 실패 (응답 없음)"
