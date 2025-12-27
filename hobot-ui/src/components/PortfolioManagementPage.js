@@ -166,7 +166,11 @@ const PortfolioManagementPage = () => {
   const handleEtfChange = (index, field, value) => {
     const newEtfDetails = editForm.etf_details.map((etf, i) => {
       if (i === index) {
-        return { ...etf, [field]: field === 'weight' ? parseFloat(value) || 0 : value };
+        if (field === 'weight') {
+          const asNumber = parseFloat(value);
+          return { ...etf, weight: Number.isFinite(asNumber) ? asNumber / 100 : 0 };
+        }
+        return { ...etf, [field]: value };
       }
       return etf;
     });
@@ -490,9 +494,9 @@ const PortfolioManagementPage = () => {
                               />
                               <input
                                 type="number"
-                                step="0.01"
-                                placeholder="비중"
-                                value={etf.weight}
+                                step="0.1"
+                                placeholder="비중(0-100)"
+                                value={(etf.weight || 0) * 100}
                                 onChange={(e) => handleEtfChange(index, 'weight', e.target.value)}
                                 className="etf-input"
                                 style={{ width: '80px' }}
