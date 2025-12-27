@@ -117,6 +117,15 @@ const PortfolioManagementPage = () => {
   };
 
   const handleSaveSubMp = async (subMpId) => {
+    // Cash 자산군 저장 시 기본 현금 100%를 강제 설정
+    let payload = { ...editForm };
+    if (editForm.asset_class === 'Cash') {
+      payload = {
+        ...payload,
+        etf_details: [{ category: 'KRW', ticker: 'CASH', name: '현금', weight: 1 }]
+      };
+    }
+
     try {
       const response = await fetch(`/api/admin/portfolios/sub-model-portfolios/${subMpId}`, {
         method: 'PUT',
@@ -124,7 +133,7 @@ const PortfolioManagementPage = () => {
           'Content-Type': 'application/json',
           ...getAuthHeaders()
         },
-        body: JSON.stringify(editForm)
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
