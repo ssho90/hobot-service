@@ -212,6 +212,156 @@
   color: #999;
 }
 
+/* Rebalancing Status */
+.rebalancing-status-card {
+  border: 2px solid #d0d7de;
+}
+
+.rebalance-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mp-section,
+.submp-section {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 16px;
+  background: #fdfdfd;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.mp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.mp-row-title {
+  width: 56px;
+  font-weight: 600;
+  color: #333;
+}
+
+.mp-row-items {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.mp-item {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.mp-item-label {
+  color: #333;
+}
+
+.mp-item-value {
+  color: #111;
+}
+
+.submp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.submp-asset-block {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fff;
+}
+
+.submp-asset-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.submp-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.submp-row-title {
+  width: 48px;
+  font-weight: 600;
+  color: #444;
+  padding-top: 4px;
+}
+
+.submp-row-items {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.submp-chip {
+  border: 1px dashed #d0d7de;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.submp-chip.actual {
+  border-style: solid;
+  background: #f2f8ff;
+}
+
+.submp-chip-name {
+  font-weight: 600;
+  color: #111;
+}
+
+.submp-chip-meta {
+  color: #555;
+  font-size: 12px;
+}
+
+.submp-empty {
+  color: #999;
+  padding: 6px 0;
+}
+
+@media (max-width: 768px) {
+  .mp-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mp-row-title {
+    width: auto;
+  }
+
+  .mp-row-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .loading,
 .error {
   padding: 20px;

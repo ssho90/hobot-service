@@ -630,6 +630,168 @@ async def get_account_snapshots(
         logging.error(f"Error fetching account snapshots: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@api_router.get("/macro-trading/rebalancing-status")
+async def get_rebalancing_status(current_user: dict = Depends(get_current_user)):
+    """MP / Sub-MP 목표 vs 실제 현황 조회"""
+    try:
+        from service.database.db import get_db_connection
+        import json
+        from service.macro_trading.kis.kis import get_balance_info_api
+        from service.macro_trading.ai_strategist import (
+            get_model_portfolio_allocation,
+            get_sub_mp_details,
+        )
+
+        def normalize_alloc(alloc: dict) -> dict:
+            if not alloc:
+                return {"stocks": 0, "bonds": 0, "alternatives": 0, "cash": 0}
+            return {
+                "stocks": float(alloc.get("stocks") or alloc.get("Stocks") or 0),
+                "bonds": float(alloc.get("bonds") or alloc.get("Bonds") or 0),
+                "alternatives": float(alloc.get("alternatives") or alloc.get("Alternatives") or 0),
+                "cash": float(alloc.get("cash") or alloc.get("Cash") or 0),
+            }
+
+        # 1) 최신 AI 결정에서 MP/ Sub-MP 목표 조회
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT 
+                    target_allocation,
+                    decision_date
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT 1
+                """
+            )
+            decision_row = cursor.fetchone()
+
+        if not decision_row:
+            return {
+                "status": "success",
+                "data": None,
+                "message": "AI 전략 결정이 아직 없습니다.",
+            }
+
+        target_allocation_raw = decision_row["target_allocation"]
+        if isinstance(target_allocation_raw, str):
+            target_allocation_raw = json.loads(target_allocation_raw)
+
+        mp_id = None
+        target_alloc = None
+        sub_mp_data = None
+        if isinstance(target_allocation_raw, dict):
+            if "mp_id" in target_allocation_raw:
+                mp_id = target_allocation_raw["mp_id"]
+                allocation_from_mp = get_model_portfolio_allocation(mp_id)
+                target_alloc = allocation_from_mp or target_allocation_raw.get("target_allocation", target_allocation_raw)
+                sub_mp_data = target_allocation_raw.get("sub_mp")
+            else:
+                target_alloc = target_allocation_raw
+        else:
+            target_alloc = target_allocation_raw
+
+        target_alloc_norm = normalize_alloc(target_alloc)
+
+        sub_mp_details = None
+        if sub_mp_data and mp_id:
+            sub_mp_details = get_sub_mp_details(sub_mp_data)
+
+        # 2) 실제 자산 비중: KIS balance 기반
+        balance = get_balance_info_api(current_user.get("id"))
+        if not balance or balance.get("status") != "success":
+            return {
+                "status": "error",
+                "message": balance.get("message", "KIS 잔고 조회에 실패했습니다.") if balance else "KIS 잔고 조회에 실패했습니다.",
+            }
+
+        asset_class_info = balance.get("asset_class_info") or {}
+        total_eval_amount = float(balance.get("total_eval_amount") or 0)
+
+        def get_class_total(key: str) -> float:
+            info = asset_class_info.get(key) or {}
+            return float(info.get("total_eval_amount") or 0)
+
+        actual_alloc = {"stocks": 0, "bonds": 0, "alternatives": 0, "cash": 0}
+        if total_eval_amount > 0:
+            actual_alloc["stocks"] = round(get_class_total("stocks") / total_eval_amount * 100, 2)
+            actual_alloc["bonds"] = round(get_class_total("bonds") / total_eval_amount * 100, 2)
+            actual_alloc["alternatives"] = round(get_class_total("alternatives") / total_eval_amount * 100, 2)
+            cash_total = get_class_total("cash") or float(balance.get("cash_balance") or 0)
+            actual_alloc["cash"] = round(cash_total / total_eval_amount * 100, 2)
+
+        def build_target_items(asset_key: str):
+            items = []
+            detail = (sub_mp_details or {}).get(asset_key) if sub_mp_details else None
+            if not detail:
+                return items
+            for etf in detail.get("etf_details", []):
+                weight = etf.get("weight") or etf.get("weight_percent") or 0
+                weight_percent = weight * 100 if weight <= 1 else weight
+                items.append(
+                    {
+                        "name": etf.get("name") or etf.get("ticker") or "",
+                        "ticker": etf.get("ticker") or "",
+                        "weight_percent": round(float(weight_percent), 2),
+                    }
+                )
+            return items
+
+        def build_actual_items(asset_key: str):
+            items = []
+            info = asset_class_info.get(asset_key) or {}
+            class_total = float(info.get("total_eval_amount") or 0)
+            holdings = info.get("holdings") or []
+            if class_total <= 0:
+                if asset_key == "cash":
+                    cash_amount = float(balance.get("cash_balance") or 0)
+                    if cash_amount > 0:
+                        items.append({"name": "현금", "ticker": "CASH", "weight_percent": 100.0})
+                return items
+
+            for h in holdings:
+                eval_amount = float(h.get("eval_amount") or 0)
+                weight_percent = round(eval_amount / class_total * 100, 2) if class_total > 0 else 0
+                items.append(
+                    {
+                        "name": h.get("stock_name") or "",
+                        "ticker": h.get("stock_code") or "",
+                        "weight_percent": weight_percent,
+                    }
+                )
+
+            if asset_key == "cash" and not items and class_total > 0:
+                items.append({"name": "현금", "ticker": "CASH", "weight_percent": 100.0})
+            return items
+
+        asset_order = ["stocks", "bonds", "alternatives", "cash"]
+        sub_mp_payload = []
+        for key in asset_order:
+            sub_mp_payload.append(
+                {
+                    "asset_class": key,
+                    "target": build_target_items(key),
+                    "actual": build_actual_items(key),
+                }
+            )
+
+        return {
+            "status": "success",
+            "data": {
+                "mp": {
+                    "target_allocation": target_alloc_norm,
+                    "actual_allocation": actual_alloc,
+                },
+                "sub_mp": sub_mp_payload,
+            },
+        }
+    except Exception as e:
+        logging.error(f"Error fetching rebalancing status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/macro-trading/search-stocks")
 async def search_stocks(
     keyword: str = Query(..., description="검색 키워드 (종목명 일부)"),
