@@ -721,44 +721,9 @@ async def get_ai_overview():
             # Sub-MP 세부 종목 정보 가져오기
             sub_mp_details = None
             if sub_mp_data and mp_id:
-                from service.macro_trading.ai_strategist import (
-                    get_sub_model_portfolios,
-                    get_sub_mp_etf_details
-                )
-                
-                sub_mp_details = {}
-                sub_portfolios = get_sub_model_portfolios()
-                
-                # 각 자산군별 Sub-MP 세부 종목 정보
-                if sub_mp_data.get('stocks'):
-                    stocks_sub_mp_id = sub_mp_data['stocks']
-                    stocks_etf_details = get_sub_mp_etf_details(stocks_sub_mp_id)
-                    if stocks_etf_details:
-                        sub_mp_details['stocks'] = {
-                            'sub_mp_id': stocks_sub_mp_id,
-                            'sub_mp_name': sub_portfolios.get(stocks_sub_mp_id, {}).get('name', ''),
-                            'etf_details': stocks_etf_details
-                        }
-                
-                if sub_mp_data.get('bonds'):
-                    bonds_sub_mp_id = sub_mp_data['bonds']
-                    bonds_etf_details = get_sub_mp_etf_details(bonds_sub_mp_id)
-                    if bonds_etf_details:
-                        sub_mp_details['bonds'] = {
-                            'sub_mp_id': bonds_sub_mp_id,
-                            'sub_mp_name': sub_portfolios.get(bonds_sub_mp_id, {}).get('name', ''),
-                            'etf_details': bonds_etf_details
-                        }
-                
-                if sub_mp_data.get('alternatives'):
-                    alternatives_sub_mp_id = sub_mp_data['alternatives']
-                    alternatives_etf_details = get_sub_mp_etf_details(alternatives_sub_mp_id)
-                    if alternatives_etf_details:
-                        sub_mp_details['alternatives'] = {
-                            'sub_mp_id': alternatives_sub_mp_id,
-                            'sub_mp_name': sub_portfolios.get(alternatives_sub_mp_id, {}).get('name', ''),
-                            'etf_details': alternatives_etf_details
-                        }
+                from service.macro_trading.ai_strategist import get_sub_mp_details
+
+                sub_mp_details = get_sub_mp_details(sub_mp_data)
             
             recommended_stocks = row.get('recommended_stocks')
             if recommended_stocks:
@@ -984,43 +949,9 @@ async def get_strategy_decisions_history(
                 # Sub-MP 세부 종목 정보 가져오기
                 sub_mp_details = None
                 if sub_mp_data and mp_id:
-                    from service.macro_trading.ai_strategist import (
-                        get_sub_model_portfolios,
-                        get_sub_mp_etf_details
-                    )
-                    
-                    sub_mp_details = {}
-                    sub_portfolios = get_sub_model_portfolios()
-                    
-                    if sub_mp_data.get('stocks'):
-                        stocks_sub_mp_id = sub_mp_data['stocks']
-                        stocks_etf_details = get_sub_mp_etf_details(stocks_sub_mp_id)
-                        if stocks_etf_details:
-                            sub_mp_details['stocks'] = {
-                                'sub_mp_id': stocks_sub_mp_id,
-                                'sub_mp_name': sub_portfolios.get(stocks_sub_mp_id, {}).get('name', ''),
-                                'etf_details': stocks_etf_details
-                            }
-                    
-                    if sub_mp_data.get('bonds'):
-                        bonds_sub_mp_id = sub_mp_data['bonds']
-                        bonds_etf_details = get_sub_mp_etf_details(bonds_sub_mp_id)
-                        if bonds_etf_details:
-                            sub_mp_details['bonds'] = {
-                                'sub_mp_id': bonds_sub_mp_id,
-                                'sub_mp_name': sub_portfolios.get(bonds_sub_mp_id, {}).get('name', ''),
-                                'etf_details': bonds_etf_details
-                            }
-                    
-                    if sub_mp_data.get('alternatives'):
-                        alternatives_sub_mp_id = sub_mp_data['alternatives']
-                        alternatives_etf_details = get_sub_mp_etf_details(alternatives_sub_mp_id)
-                        if alternatives_etf_details:
-                            sub_mp_details['alternatives'] = {
-                                'sub_mp_id': alternatives_sub_mp_id,
-                                'sub_mp_name': sub_portfolios.get(alternatives_sub_mp_id, {}).get('name', ''),
-                                'etf_details': alternatives_etf_details
-                            }
+                    from service.macro_trading.ai_strategist import get_sub_mp_details
+
+                    sub_mp_details = get_sub_mp_details(sub_mp_data)
                 
                 recommended_stocks = row.get('recommended_stocks')
                 if recommended_stocks:
@@ -1069,7 +1000,7 @@ async def get_strategy_decisions_history(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def convert_numpy_types(obj):
+햣 def convert_numpy_types(obj):
     """
     numpy 타입을 Python 기본 타입으로 변환하는 재귀 함수
     """

@@ -258,6 +258,32 @@ def get_sub_mp_etf_details(sub_mp_id: str) -> Optional[List[Dict]]:
     return None
 
 
+def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[str, Dict]]:
+    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성"""
+    if not sub_mp_data:
+        return None
+
+    sub_portfolios = get_sub_model_portfolios()
+    sub_mp_details: Dict[str, Dict] = {}
+
+    for asset_key in ("stocks", "bonds", "alternatives"):
+        sub_mp_id = sub_mp_data.get(asset_key)
+        if not sub_mp_id:
+            continue
+
+        etf_details = get_sub_mp_etf_details(sub_mp_id)
+        if not etf_details:
+            continue
+
+        sub_mp_details[asset_key] = {
+            "sub_mp_id": sub_mp_id,
+            "sub_mp_name": sub_portfolios.get(sub_mp_id, {}).get("name", ""),
+            "etf_details": etf_details,
+        }
+
+    return sub_mp_details or None
+
+
 class TargetAllocation(BaseModel):
     """목표 자산 배분 모델"""
     Stocks: float = Field(..., ge=0, le=100, description="주식 비중 (%)")
