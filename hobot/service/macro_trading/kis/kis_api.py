@@ -117,6 +117,70 @@ class KISAPI:
             "custtype": "P"
         }
 
+    def _refresh_access_token(self):
+        """접근 토큰 강제 재발급"""
+        logging.info("토큰 만료 감지 - 강제 재발급 시도")
+        
+        headers = {"content-type": "application/json"}
+        body = {
+            "grant_type": "client_credentials",
+            "appkey": self.app_key,
+            "appsecret": self.app_secret
+        }
+        path = "/oauth2/tokenP"
+        url = f"{self.base_url}{path}"
+        
+        try:
+            res = requests.post(url, headers=headers, data=json.dumps(body))
+            if res.status_code == 200:
+                token = res.json()["access_token"]
+                issued_date = datetime.now().isoformat()
+                # 토큰과 발급 시간을 파일에 저장
+                self._save_token_to_file(token, issued_date)
+                self.access_token = token
+                logging.info("토큰 재발급 성공")
+                return token
+            else:
+                logging.error(f"Error refreshing access token: {res.text}")
+                raise Exception(f"Error refreshing access token: {res.text}")
+        except Exception as e:
+            logging.error(f"Exception during token refresh: {e}")
+            raise
+
+    def _request_with_token_refresh(self, method, url, headers, params=None, data=None):
+        """토큰 만료 시 자동 갱신하여 요청 재시도"""
+        try:
+            if method.upper() == 'GET':
+                res = requests.get(url, headers=headers, params=params)
+            else:
+                res = requests.post(url, headers=headers, data=data)
+            
+            # 토큰 만료 체크 (HTTP 500 또는 API 응답 코드 확인)
+            # KIS API는 토큰 만료 시 500 에러와 함께 msg_cd: EGW00123 반환
+            if res.status_code == 500:
+                try:
+                    error_resp = res.json()
+                    if error_resp.get('msg_cd') == 'EGW00123':
+                        # 토큰 갱신
+                        self._refresh_access_token()
+                        
+                        # 헤더의 토큰 업데이트
+                        headers['authorization'] = f"Bearer {self.access_token}"
+                        
+                        # 재시도
+                        logging.info("토큰 갱신 후 요청 재시도")
+                        if method.upper() == 'GET':
+                            return requests.get(url, headers=headers, params=params)
+                        else:
+                            return requests.post(url, headers=headers, data=data)
+                except Exception:
+                    pass
+            
+            return res
+        except Exception as e:
+            logging.error(f"API request failed: {e}")
+            raise
+
     def _parse_account_no(self):
         """
         계좌번호를 CANO와 ACNT_PRDT_CD로 분리
@@ -188,7 +252,7 @@ class KISAPI:
             "fid_org_adj_prc": "1" # 수정주가 반영
         }
 
-        res = requests.get(url, headers=headers, params=params)
+        res = self._request_with_token_refresh('GET', url, headers=headers, params=params)
 
         if res.status_code == 200:
             data = res.json()['output']
@@ -243,7 +307,7 @@ class KISAPI:
         
         logging.info(f"KIS API 잔고 조회 요청 - URL: {url}, CANO: {cano}, ACNT_PRDT_CD: '{acnt_prdt_cd}'")
 
-        res = requests.get(url, headers=headers, params=params)
+        res = self._request_with_token_refresh('GET', url, headers=headers, params=params)
         logging.info(f"KIS API 응답 - status_code: {res.status_code}")
         
         if res.status_code == 200:
@@ -280,7 +344,7 @@ class KISAPI:
             "ORD_UNPR": "0", # 시장가는 0
         }
         
-        res = requests.post(url, headers=headers, data=json.dumps(data))
+        res = self._request_with_token_refresh('POST', url, headers=headers, data=json.dumps(data))
         if res.status_code == 200:
             return res.json()
         else:
@@ -309,7 +373,7 @@ class KISAPI:
             "FID_INPUT_ISCD": ticker,
         }
 
-        res = requests.get(url, headers=headers, params=params)
+        res = self._request_with_token_refresh('GET', url, headers=headers, params=params)
         if res.status_code == 200:
             return int(res.json()['output']['stck_prpr'])
         else:
@@ -353,7 +417,7 @@ class KISAPI:
                 "FID_INPUT_ISCD": keyword
             }
             
-            res = requests.get(url, headers=headers, params=params)
+            res = self._request_with_token_refresh('GET', url, headers=headers, params=params)
             if res.status_code == 200:
                 data = res.json()
                 # API 응답 구조에 따라 파싱 필요
