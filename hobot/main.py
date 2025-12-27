@@ -745,10 +745,6 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
             class_total = float(info.get("total_eval_amount") or 0)
             holdings = info.get("holdings") or []
             if class_total <= 0:
-                if asset_key == "cash":
-                    cash_amount = float(balance.get("cash_balance") or 0)
-                    if cash_amount > 0:
-                        items.append({"name": "현금", "ticker": "CASH", "weight_percent": 100.0})
                 return items
 
             for h in holdings:
@@ -761,9 +757,6 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
                         "weight_percent": weight_percent,
                     }
                 )
-
-            if asset_key == "cash" and not items and class_total > 0:
-                items.append({"name": "현금", "ticker": "CASH", "weight_percent": 100.0})
             return items
 
         asset_order = ["stocks", "bonds", "alternatives", "cash"]
