@@ -327,6 +327,7 @@
   border-radius: 6px;
   overflow: hidden;
   background: #fafafa;
+  min-height: 38px;
 }
 
 .stacked-bar.tone-actual {
@@ -355,10 +356,6 @@
 .stacked-bar-label {
   padding: 0 8px;
   text-shadow: 0 0 2px rgba(0,0,0,0.25);
-}
-
-.submp-bar-area .stacked-bar {
-  min-height: 38px;
 }
 
 .loading,
