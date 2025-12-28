@@ -740,8 +740,10 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
             if class_total <= 0:
                 return items
 
+            holdings_sum = 0
             for h in holdings:
                 eval_amount = float(h.get("eval_amount") or 0)
+                holdings_sum += eval_amount
                 weight_percent = round(eval_amount / class_total * 100, 2) if class_total > 0 else 0
                 items.append(
                     {
@@ -750,6 +752,22 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
                         "weight_percent": weight_percent,
                     }
                 )
+            
+            # Cash 자산군의 경우 holdings에 포함되지 않은 예수금(Cash Balance)을 항목으로 추가
+            if asset_key == "cash":
+                # 역산하는 대신, KIS API로 직접 조회된 정확한 현금 잔고(cash_balance)를 사용
+                cash_balance = float(balance.get("cash_balance") or 0)
+                
+                # 부동소수점 오차 등을 고려하여 일정 금액 이상일 때만 표시 (예: 10원)
+                if cash_balance > 10:
+                    weight_percent = round(cash_balance / class_total * 100, 2) if class_total > 0 else 0
+                    items.append(
+                        {
+                            "name": "현금 (예수금)",
+                            "ticker": "CASH",
+                            "weight_percent": weight_percent,
+                        }
+                    )
             return items
 
         asset_order = ["stocks", "bonds", "alternatives", "cash"]
