@@ -247,24 +247,6 @@ def init_database():
         except Exception:
             pass
         
-        # 종목명-티커 매핑 테이블 (KIS API에서 수집)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS stock_tickers (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                ticker VARCHAR(20) NOT NULL COMMENT '종목 코드',
-                stock_name VARCHAR(255) NOT NULL COMMENT '종목명',
-                market_type VARCHAR(10) DEFAULT 'J' COMMENT '시장 구분 (J: 주식, ETF 등)',
-                is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부',
-                last_updated DATE NOT NULL COMMENT '마지막 업데이트 날짜',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-                UNIQUE KEY unique_ticker (ticker) COMMENT '티커 중복 방지',
-                INDEX idx_stock_name (stock_name) COMMENT '종목명 인덱스 (검색용)',
-                INDEX idx_is_active (is_active) COMMENT '활성화 여부 인덱스',
-                INDEX idx_last_updated (last_updated) COMMENT '업데이트 날짜 인덱스'
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='종목명-티커 매핑 (KIS API 수집)'
-        """)
-        
         # LLM 사용 로그 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS llm_usage_logs (

@@ -12,7 +12,6 @@ from functools import wraps
 from service.macro_trading.collectors.fred_collector import get_fred_collector
 from service.macro_trading.collectors.news_collector import get_news_collector
 from service.macro_trading.config.config_loader import get_config
-from service.macro_trading.kis.stock_collector import collect_all_stock_tickers
 from service.macro_trading.ai_strategist import run_ai_analysis
 
 logger = logging.getLogger(__name__)
@@ -273,47 +272,6 @@ def setup_news_scheduler():
 
 
 @retry_on_failure(max_retries=3, delay=60)
-def collect_stock_tickers():
-    """
-    종목명-티커 매핑 데이터를 수집하고 DB에 저장합니다.
-    
-    Returns:
-        int: 수집된 종목 수
-    """
-    try:
-        logger.info("=" * 60)
-        logger.info("종목명-티커 매핑 데이터 수집 시작")
-        logger.info("=" * 60)
-        
-        saved_count = collect_all_stock_tickers()
-        
-        logger.info("=" * 60)
-        logger.info(f"종목명-티커 매핑 데이터 수집 완료: {saved_count}개")
-        logger.info("=" * 60)
-        
-        return saved_count
-        
-    except Exception as e:
-        logger.error(f"종목 정보 수집 중 오류 발생: {e}", exc_info=True)
-        raise
-
-
-def setup_stock_ticker_scheduler():
-    """
-    종목명-티커 매핑 데이터 수집 스케줄을 설정합니다.
-    매일 08:00에 실행되도록 등록합니다.
-    """
-    try:
-        # 매일 08:00에 실행
-        schedule.every().day.at("08:00").do(collect_stock_tickers).tag('stock_ticker_collection')
-        logger.info("종목명-티커 매핑 데이터 수집 스케줄 등록: 매일 08:00 KST")
-        
-    except Exception as e:
-        logger.error(f"종목 정보 수집 스케줄 설정 실패: {e}", exc_info=True)
-        raise
-
-
-@retry_on_failure(max_retries=3, delay=60)
 def run_ai_strategy_analysis():
     """
     AI 전략 분석을 실행합니다.
@@ -451,12 +409,6 @@ def start_all_schedulers():
         logger.info("뉴스 스케줄 설정 완료")
     except Exception as e:
         logger.error(f"뉴스 스케줄 설정 실패: {e}")
-    
-    try:
-        setup_stock_ticker_scheduler()
-        logger.info("종목 정보 수집 스케줄 설정 완료")
-    except Exception as e:
-        logger.error(f"종목 정보 수집 스케줄 설정 실패: {e}")
     
     try:
         setup_ai_analysis_scheduler()

@@ -162,11 +162,11 @@ async def upbit_trading():
     return res
 
 @api_router.get("/kis/health")
-async def kis_health_check():
-    """한국투자증권 API 헬스체크"""
+async def kis_health_check(current_user: dict = Depends(get_current_user)):
+    """한국투자증권 API 헬스체크 (로그인 사용자별)"""
     try:
         from service.macro_trading.kis.kis import health_check as kis_health_check_func
-        result = kis_health_check_func()
+        result = kis_health_check_func(user_id=current_user["id"])
         logging.info(f"KIS health check result: {result}")
         return result
     except Exception as e:
