@@ -217,30 +217,6 @@
   border: 2px solid #d0d7de;
 }
 
-/* 총 자산 평가액 표시 */
-.total-asset-display {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: #f0f7ff;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  border: 1px solid #b3d9ff;
-}
-
-.total-asset-label {
-  font-weight: 600;
-  color: #333;
-  font-size: 16px;
-}
-
-.total-asset-value {
-  font-weight: 700;
-  color: #1976d2;
-  font-size: 20px;
-}
-
 .rebalance-sections {
   display: flex;
   flex-direction: column;
@@ -259,51 +235,6 @@
   font-weight: 700;
   font-size: 18px;
   margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* 괴리율 표시 및 신호등 */
-.drift-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.drift-indicator.drift-green {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.drift-indicator.drift-yellow {
-  background: #fff9c4;
-  color: #f57f17;
-}
-
-.drift-indicator.drift-red {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.mp-drift-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 13px;
-}
-
-.drift-label {
-  font-weight: 500;
-  color: #666;
-  min-width: 50px;
 }
 
 .mp-row {
@@ -342,10 +273,6 @@
   font-weight: 700;
   margin-bottom: 8px;
   font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .submp-row {
@@ -376,22 +303,6 @@
 .submp-empty {
   color: #999;
   padding: 6px 0;
-}
-
-/* 빈 바 표시 */
-.empty-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f0f0 !important;
-  border: 1px dashed #ccc;
-  min-height: 38px;
-}
-
-.empty-bar-indicator {
-  color: #999;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 @media (max-width: 768px) {
@@ -435,20 +346,15 @@
   white-space: nowrap;
 }
 
+.stacked-bar-segment.empty-bar {
+  min-height: 38px;
+  background: #e0e0e0;
+  border: 1px solid #d0d7de;
+}
+
 .stacked-bar-label {
   padding: 0 8px;
   text-shadow: 0 0 2px rgba(0,0,0,0.25);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  font-size: 11px;
-}
-
-.stacked-bar-amount {
-  font-size: 10px;
-  opacity: 0.9;
-  font-weight: 500;
 }
 
 .submp-bar-area .stacked-bar {
@@ -1268,98 +1174,6 @@
 }
 
 /* 반응형 디자인 */
-/* 매매 시뮬레이션 패널 */
-.trade-simulation-panel {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
-}
-
-.trade-simulation-panel h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  color: #333;
-  font-weight: 700;
-}
-
-.trade-simulation-panel h4 {
-  margin: 16px 0 12px 0;
-  font-size: 14px;
-  color: #666;
-  font-weight: 600;
-}
-
-.trade-group {
-  margin-bottom: 20px;
-}
-
-.trade-group:last-child {
-  margin-bottom: 0;
-}
-
-.trade-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.trade-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: white;
-  border-radius: 4px;
-  border-left: 4px solid;
-  font-size: 14px;
-}
-
-.trade-item.trade-buy {
-  border-left-color: #4caf50;
-}
-
-.trade-item.trade-sell {
-  border-left-color: #f44336;
-}
-
-.trade-action {
-  font-weight: 700;
-  min-width: 50px;
-}
-
-.trade-item.trade-buy .trade-action {
-  color: #4caf50;
-}
-
-.trade-item.trade-sell .trade-action {
-  color: #f44336;
-}
-
-.trade-asset {
-  font-weight: 600;
-  color: #333;
-  flex: 1;
-}
-
-.trade-asset-class {
-  font-size: 12px;
-  color: #999;
-}
-
-.trade-amount {
-  font-weight: 600;
-  color: #1976d2;
-  font-family: monospace;
-}
-
-.trade-percent {
-  font-size: 12px;
-  color: #666;
-  font-family: monospace;
-}
-
 @media (max-width: 768px) {
   .account-rebalancing-container {
     flex-direction: column;
@@ -1372,19 +1186,6 @@
   
   .allocation-grid {
     grid-template-columns: 1fr;
-  }
-
-  .stacked-bar-label {
-    font-size: 10px;
-  }
-
-  .stacked-bar-amount {
-    font-size: 9px;
-  }
-
-  .trade-item {
-    flex-wrap: wrap;
-    font-size: 13px;
   }
 }
 
