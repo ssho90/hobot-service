@@ -74,15 +74,25 @@ const PortfolioManagementPage = () => {
   };
 
   const handleEditSubMp = (subMp) => {
-    setEditingSubMp(subMp.id);
-    setEditForm({
+    const baseForm = {
       name: subMp.name,
       description: subMp.description,
       asset_class: subMp.asset_class,
-      etf_details: subMp.etf_details.map(etf => ({ ...etf })),
+      etf_details: (subMp.etf_details || []).map(etf => ({ ...etf })),
       display_order: subMp.display_order,
       is_active: subMp.is_active
-    });
+    };
+
+    // Cash 자산군 편집 시 기본 KRW 현금 100%로 강제
+    const nextForm = subMp.asset_class === 'Cash'
+      ? {
+          ...baseForm,
+          etf_details: [{ category: 'KRW', ticker: 'CASH', name: '현금', weight: 1 }]
+        }
+      : baseForm;
+
+    setEditingSubMp(subMp.id);
+    setEditForm(nextForm);
   };
 
   const handleCancelEdit = () => {
