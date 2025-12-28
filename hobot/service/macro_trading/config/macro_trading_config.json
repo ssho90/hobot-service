@@ -5,23 +5,6 @@
     "min_trade_amount": 100000,
     "cash_reserve_ratio": 0.03
   },
-  "etf_mapping": {
-    "stocks": {
-      "tickers": ["360750", "133690", "069500"],
-      "weights": [0.333, 0.333, 0.333],
-      "names": ["TIGER 미국 S&P500", "TIGER 미국나스닥100", "KODEX 200"]
-    },
-    "alternatives": {
-      "tickers": ["132030", "138230"],
-      "weights": [0.7, 0.3],
-      "names": ["KODEX 골드선물(H)", "KODEX 미국달러선물"]
-    },
-    "cash": {
-      "tickers": ["130730", "114260"],
-      "weights": [0.5, 0.5],
-      "names": ["TIGER CD금리투자KIS", "KODEX KOFR금리액티브"]
-    }
-  },
   "llm": {
     "model": "gemini-3-pro-preview",
     "temperature": 0.0,

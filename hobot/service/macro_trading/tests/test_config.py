@@ -39,13 +39,6 @@ def test_config_loading():
         print(f"  - 리밸런싱: {config.schedules.rebalancing}")
         print()
         
-        print("ETF 매핑:")
-        for asset_class, mapping in config.etf_mapping.items():
-            print(f"  - {asset_class}:")
-            for i, ticker in enumerate(mapping.tickers):
-                print(f"    * {mapping.names[i]} ({ticker}): {mapping.weights[i] * 100:.1f}%")
-        print()
-        
         print("안전장치 설정:")
         print(f"  - 일일 최대 손실: {config.safety.max_daily_loss_percent}%")
         print(f"  - 월간 최대 손실: {config.safety.max_monthly_loss_percent}%")

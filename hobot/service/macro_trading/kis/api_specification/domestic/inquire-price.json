@@ -1,0 +1,159 @@
+{
+  "api_info": {
+    "api_name": "주식현재가 시세",
+    "api_id": "v1_국내주식-008",
+    "method": "GET",
+    "description": "주식 현재가 시세 API입니다. 실시간 시세를 원하신다면 웹소켓 API를 활용하세요.\n※ 종목코드 마스터파일 파이썬 정제코드는 한국투자증권 Github 참고 부탁드립니다.",
+    "menu_location": "[국내주식] 기본시세",
+    "domains": {
+      "real": "https://openapi.koreainvestment.com:9443",
+      "mock": "https://openapivts.koreainvestment.com:29443"
+    },
+    "url": "/uapi/domestic-stock/v1/quotations/inquire-price",
+    "transaction_ids": {
+      "real": "FHKST01010100",
+      "mock": "FHKST01010100"
+    }
+  },
+  "request": {
+    "headers": [
+      {
+        "key": "content-type",
+        "name": "컨텐츠타입",
+        "type": "string",
+        "required": true,
+        "description": "application/json; charset=utf-8"
+      },
+      {
+        "key": "authorization",
+        "name": "접근토큰",
+        "type": "string",
+        "required": true,
+        "description": "OAuth 토큰 (Bearer 방식)"
+      },
+      {
+        "key": "appkey",
+        "name": "앱키",
+        "type": "string",
+        "required": true,
+        "description": "한국투자증권 홈페이지에서 발급받은 appkey"
+      },
+      {
+        "key": "appsecret",
+        "name": "앱시크릿키",
+        "type": "string",
+        "required": true,
+        "description": "한국투자증권 홈페이지에서 발급받은 appsecret"
+      },
+      {
+        "key": "tr_id",
+        "name": "거래ID",
+        "type": "string",
+        "required": true,
+        "description": "FHKST01010100"
+      },
+      {
+        "key": "custtype",
+        "name": "고객 타입",
+        "type": "string",
+        "required": true,
+        "description": "B : 법인, P : 개인"
+      }
+    ],
+    "query_params": [
+      {
+        "key": "FID_COND_MRKT_DIV_CODE",
+        "name": "조건 시장 분류 코드",
+        "type": "string",
+        "required": true,
+        "length": "2",
+        "description": "J:KRX, NX:NXT, UN:통합"
+      },
+      {
+        "key": "FID_INPUT_ISCD",
+        "name": "입력 종목코드",
+        "type": "string",
+        "required": true,
+        "length": "12",
+        "description": "종목코드 (ex 005930 삼성전자)"
+      }
+    ]
+  },
+  "response": {
+    "headers": [
+      {
+        "key": "content-type",
+        "name": "컨텐츠타입",
+        "description": "application/json; charset=utf-8"
+      },
+      {
+        "key": "tr_id",
+        "name": "거래ID",
+        "description": "요청한 tr_id"
+      }
+    ],
+    "body": {
+      "common": [
+        { "key": "rt_cd", "name": "성공 실패 여부", "description": "0: 성공, 0 이외: 실패" },
+        { "key": "msg_cd", "name": "응답코드" },
+        { "key": "msg1", "name": "응답메세지" }
+      ],
+      "output": {
+        "description": "주식 현재가 상세 정보",
+        "fields": [
+          { "key": "iscd_stat_cls_code", "name": "종목 상태 구분 코드", "description": "51:관리, 52:투위, 53:투경, 54:투주, 55:신용가능, 57:증거금100, 58:거래정지, 59:단기과열" },
+          { "key": "marg_rate", "name": "증거금 비율" },
+          { "key": "rprs_mrkt_kor_name", "name": "대표 시장 한글 명" },
+          { "key": "bstp_kor_isnm", "name": "업종 한글 종목명" },
+          { "key": "temp_stop_yn", "name": "임시 정지 여부" },
+          { "key": "stck_prpr", "name": "주식 현재가" },
+          { "key": "prdy_vrss", "name": "전일 대비" },
+          { "key": "prdy_vrss_sign", "name": "전일 대비 부호" },
+          { "key": "prdy_ctrt", "name": "전일 대비율" },
+          { "key": "acml_tr_pbmn", "name": "누적 거래 대금" },
+          { "key": "acml_vol", "name": "누적 거래량" },
+          { "key": "stck_oprc", "name": "주식 시가" },
+          { "key": "stck_hgpr", "name": "주식 최고가" },
+          { "key": "stck_lwpr", "name": "주식 최저가" },
+          { "key": "stck_mxpr", "name": "주식 상한가" },
+          { "key": "stck_llam", "name": "주식 하한가" },
+          { "key": "hts_frgn_ehrt", "name": "HTS 외국인 소진율" },
+          { "key": "frgn_ntby_qty", "name": "외국인 순매수 수량" },
+          { "key": "pgtr_ntby_qty", "name": "프로그램매매 순매수 수량" },
+          { "key": "cpfn", "name": "자본금" },
+          { "key": "stck_fcam", "name": "주식 액면가" },
+          { "key": "lstn_stcn", "name": "상장 주수" },
+          { "key": "hts_avls", "name": "HTS 시가총액" },
+          { "key": "per", "name": "PER" },
+          { "key": "pbr", "name": "PBR" },
+          { "key": "eps", "name": "EPS" },
+          { "key": "bps", "name": "BPS" },
+          { "key": "w52_hgpr", "name": "52주일 최고가" },
+          { "key": "w52_lwpr", "name": "52주일 최저가" },
+          { "key": "ssts_yn", "name": "공매도가능여부" },
+          { "key": "short_over_yn", "name": "단기과열여부" },
+          { "key": "vi_cls_code", "name": "VI적용구분코드" }
+        ]
+      }
+    }
+  },
+  "examples": {
+    "request_python": {
+      "FID_COND_MRKT_DIV_CODE": "J",
+      "FID_INPUT_ISCD": "000660"
+    },
+    "response_json": {
+      "rt_cd": "0",
+      "msg_cd": "MCA00000",
+      "msg1": "정상처리 되었습니다!",
+      "output": {
+        "iscd_stat_cls_code": "55",
+        "rprs_mrkt_kor_name": "KOSPI200",
+        "stck_prpr": "128500",
+        "prdy_vrss": "0",
+        "per": "19.67",
+        "pbr": "1.72"
+      }
+    }
+  }
+}

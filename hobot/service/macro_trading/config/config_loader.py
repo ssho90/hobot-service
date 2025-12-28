@@ -35,27 +35,6 @@ class RebalancingConfig(BaseModel):
             raise ValueError("시간 형식이 올바르지 않습니다 (HH:MM 형식 필요)")
 
 
-class ETFMappingConfig(BaseModel):
-    """ETF 매핑 설정"""
-    tickers: List[str] = Field(..., min_items=1, description="ETF 티커 리스트")
-    weights: List[float] = Field(..., description="각 ETF의 비중 (0-1)")
-    names: List[str] = Field(..., description="ETF 이름 리스트")
-
-    @model_validator(mode='after')
-    def validate_etf_mapping(self):
-        """ETF 매핑 전체 검증 (비중 합계, 개수 일치 등)"""
-        # 티커, 비중, 이름 개수 일치 확인
-        if len(self.tickers) != len(self.weights) or len(self.tickers) != len(self.names):
-            raise ValueError("티커, 비중, 이름의 개수가 일치하지 않습니다")
-        
-        # 비중 합계가 1인지 확인
-        total = sum(self.weights)
-        if abs(total - 1.0) > 0.01:  # 부동소수점 오차 허용
-            raise ValueError(f"비중 합계가 1이 아닙니다: {total}")
-        
-        return self
-
-
 class LLMConfig(BaseModel):
     """LLM 설정"""
     model: str = Field(..., description="모델명 (gemini-2.5-pro 등)")
@@ -113,22 +92,12 @@ class SafetyConfig(BaseModel):
 class MacroTradingConfig(BaseModel):
     """전체 설정 모델"""
     rebalancing: RebalancingConfig
-    etf_mapping: Dict[str, ETFMappingConfig] = Field(..., description="자산군별 ETF 매핑")
     llm: LLMConfig
     schedules: SchedulesConfig
     fred: FREDConfig
     liquidity: Optional[LiquidityConfig] = Field(default=None, description="유동성 평가 설정 (선택적)")
     safety: SafetyConfig
 
-    @field_validator('etf_mapping')
-    @classmethod
-    def validate_etf_mapping_keys(cls, v: Dict[str, ETFMappingConfig]) -> Dict[str, ETFMappingConfig]:
-        """ETF 매핑 키 검증 (stocks, alternatives, cash 등)"""
-        valid_keys = {'stocks', 'alternatives', 'cash'}
-        for key in v.keys():
-            if key not in valid_keys:
-                logger.warning(f"알 수 없는 ETF 매핑 키: {key}")
-        return v
 
 
 # ============================================

@@ -164,7 +164,6 @@
 #### 작업 항목
 - [x] **1.2.1** 설정 파일 생성 (`config/macro_trading_config.json`)
   - [x] 리밸런싱 설정 (임계값, 실행 시간, 최소 거래 금액, 여유 자금 비율)
-  - [x] ETF 매핑 설정 (자산군별 티커 및 비중)
   - [x] LLM 설정 (모델, temperature, max_tokens)
   - [x] FRED API 설정 (캐시 기간)
   - [x] 스케줄 설정 (계좌 조회, LLM 분석, 리밸런싱 실행 시간)
@@ -184,23 +183,6 @@
     "execution_time": "15:00",
     "min_trade_amount": 100000,
     "cash_reserve_ratio": 0.03
-  },
-  "etf_mapping": {
-    "stocks": {
-      "tickers": ["360750", "133690", "069500"],
-      "weights": [0.333, 0.333, 0.333],
-      "names": ["TIGER 미국 S&P500", "TIGER 미국나스닥100", "KODEX 200"]
-    },
-    "alternatives": {
-      "tickers": ["132030", "138230"],
-      "weights": [0.7, 0.3],
-      "names": ["KODEX 골드선물(H)", "KODEX 미국달러선물"]
-    },
-    "cash": {
-      "tickers": ["130730", "114260"],
-      "weights": [0.5, 0.5],
-      "names": ["TIGER CD금리투자KIS", "KODEX KOFR금리액티브"]
-    }
   },
   "llm": {
     "model": "gemini-2.5-pro",
@@ -480,7 +462,7 @@
     - [x] Alternatives (금, 달러)
     - [x] Cash
   - [x] `parse_holdings_by_asset_class()` 함수 구현 완료
-  - [x] 설정 파일(`macro_trading_config.json`)에서 ETF 매핑 로드
+  - [ ] 설정 파일(`macro_trading_config.json`)에서 ETF 매핑 제거됨 (동적 매핑으로 전환 예정)
 
 - [x] **2.3.2** 자산군별 손익 계산
   - [x] 각 자산군별 평가 손익률 계산

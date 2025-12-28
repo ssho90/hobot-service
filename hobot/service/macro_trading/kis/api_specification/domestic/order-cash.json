@@ -1,0 +1,234 @@
+{
+  "api_info": {
+    "api_name": "주식주문(현금)",
+    "api_id": "v1_국내주식-001",
+    "method": "POST",
+    "description": "국내주식주문(현금) API 입니다.\n※ TTC0802U(현금매수) 사용하셔서 미수매수 가능합니다. 단, 거래하시는 계좌가 증거금40%계좌로 신청이 되어있어야 가능합니다.\n※ 신용매수는 별도의 API가 준비되어 있습니다.\n※ ORD_QTY(주문수량), ORD_UNPR(주문단가) 등을 String으로 전달해야 함에 유의 부탁드립니다.\n※ ORD_UNPR(주문단가)가 없는 주문은 상한가로 주문금액을 선정하고 이후 체결이되면 체결금액로 정산됩니다.\n※ POST API의 경우 BODY값의 key값들을 대문자로 작성하셔야 합니다.",
+    "menu_location": "[국내주식] 주문/계좌",
+    "domains": {
+      "real": "https://openapi.koreainvestment.com:9443",
+      "mock": "https://openapivts.koreainvestment.com:29443"
+    },
+    "url": "/uapi/domestic-stock/v1/trading/order-cash",
+    "transaction_ids": {
+      "real_sell": "TTTC0011U",
+      "real_buy": "TTTC0012U",
+      "mock_sell": "VTTC0011U",
+      "mock_buy": "VTTC0012U"
+    }
+  },
+  "request": {
+    "headers": [
+      {
+        "key": "content-type",
+        "name": "컨텐츠타입",
+        "type": "string",
+        "required": true,
+        "description": "application/json; charset=utf-8"
+      },
+      {
+        "key": "authorization",
+        "name": "접근토큰",
+        "type": "string",
+        "required": true,
+        "description": "OAuth 토큰 (Bearer 방식)"
+      },
+      {
+        "key": "appkey",
+        "name": "앱키",
+        "type": "string",
+        "required": true,
+        "description": "한국투자증권 홈페이지에서 발급받은 appkey"
+      },
+      {
+        "key": "appsecret",
+        "name": "앱시크릿키",
+        "type": "string",
+        "required": true,
+        "description": "한국투자증권 홈페이지에서 발급받은 appsecret"
+      },
+      {
+        "key": "personalseckey",
+        "name": "고객식별키",
+        "type": "string",
+        "required": false,
+        "description": "[법인 필수] 제휴사 회원 관리를 위한 고객식별키"
+      },
+      {
+        "key": "tr_id",
+        "name": "거래ID",
+        "type": "string",
+        "required": true,
+        "description": "실전매도: TTTC0011U, 실전매수: TTTC0012U, 모의매도: VTTC0011U, 모의매수: VTTC0012U"
+      },
+      {
+        "key": "tr_cont",
+        "name": "연속 거래 여부",
+        "type": "string",
+        "required": false,
+        "description": "tr_cont를 이용한 다음조회 불가 API"
+      },
+      {
+        "key": "custtype",
+        "name": "고객타입",
+        "type": "string",
+        "required": true,
+        "description": "B: 법인, P: 개인"
+      },
+      {
+        "key": "seq_no",
+        "name": "일련번호",
+        "type": "string",
+        "required": false,
+        "description": "[법인 필수] 001"
+      },
+      {
+        "key": "mac_address",
+        "name": "맥주소",
+        "type": "string",
+        "required": false,
+        "description": "법인고객 혹은 개인고객의 Mac address 값"
+      },
+      {
+        "key": "phone_number",
+        "name": "핸드폰번호",
+        "type": "string",
+        "required": false,
+        "description": "[법인 필수] 하이픈 제거"
+      },
+      {
+        "key": "ip_addr",
+        "name": "접속 단말 공인 IP",
+        "type": "string",
+        "required": false,
+        "description": "[법인 필수] 사용자(회원)의 IP Address"
+      },
+      {
+        "key": "gt_uid",
+        "name": "Global UID",
+        "type": "string",
+        "required": false,
+        "description": "[법인 전용] 거래고유번호"
+      }
+    ],
+    "body": [
+      {
+        "key": "CANO",
+        "name": "종합계좌번호",
+        "type": "string",
+        "required": true,
+        "length": 8,
+        "description": "종합계좌번호 8자리"
+      },
+      {
+        "key": "ACNT_PRDT_CD",
+        "name": "계좌상품코드",
+        "type": "string",
+        "required": true,
+        "length": 2,
+        "description": "상품유형코드 2자리"
+      },
+      {
+        "key": "PDNO",
+        "name": "상품번호",
+        "type": "string",
+        "required": true,
+        "length": 12,
+        "description": "종목코드(6자리), ETN의 경우 7자리"
+      },
+      {
+        "key": "SLL_TYPE",
+        "name": "매도유형",
+        "type": "string",
+        "required": false,
+        "length": 2,
+        "description": "01: 일반매도(Default), 02: 임의매매, 05: 대차매도"
+      },
+      {
+        "key": "ORD_DVSN",
+        "name": "주문구분",
+        "type": "string",
+        "required": true,
+        "length": 2,
+        "description": "[KRX] 00:지정가, 01:시장가, 02:조건부지정가, 03:최유리지정가, 04:최우선지정가, 11:IOC지정가, 12:FOK지정가, 13:IOC시장가, 14:FOK시장가, ... (상세 코드 참조)"
+      },
+      {
+        "key": "ORD_QTY",
+        "name": "주문수량",
+        "type": "string",
+        "required": true,
+        "length": 10,
+        "description": "주문 수량"
+      },
+      {
+        "key": "ORD_UNPR",
+        "name": "주문단가",
+        "type": "string",
+        "required": true,
+        "length": 19,
+        "description": "주문 단가 (시장가 등 주문시 '0' 입력)"
+      },
+      {
+        "key": "CNDT_PRIC",
+        "name": "조건가격",
+        "type": "string",
+        "required": false,
+        "length": 19,
+        "description": "스탑지정가호가 주문 (ORD_DVSN이 22) 사용 시에만 필수"
+      },
+      {
+        "key": "EXCG_ID_DVSN_CD",
+        "name": "거래소ID구분코드",
+        "type": "string",
+        "required": false,
+        "length": 3,
+        "description": "KRX: 한국거래소(Default), NXT: 대체거래소, SOR: Smart Order Routing"
+      }
+    ]
+  },
+  "response": {
+    "headers": [
+      {
+        "key": "content-type",
+        "name": "컨텐츠타입",
+        "description": "application/json; charset=utf-8"
+      }
+    ],
+    "body": {
+      "common": [
+        { "key": "rt_cd", "name": "성공 실패 여부", "description": "0: 성공, 0 이외: 실패" },
+        { "key": "msg_cd", "name": "응답코드" },
+        { "key": "msg1", "name": "응답메세지" }
+      ],
+      "output": {
+        "type": "object",
+        "description": "주문 체결 정보",
+        "fields": [
+          { "key": "KRX_FWDG_ORD_ORGNO", "name": "거래소코드", "description": "거래소로 전달된 주문 기관 번호" },
+          { "key": "ODNO", "name": "주문번호", "description": "주문 접수 번호" },
+          { "key": "ORD_TMD", "name": "주문시간", "description": "주문 접수 시간 (HHMMSS)" }
+        ]
+      }
+    }
+  },
+  "examples": {
+    "request_python": {
+      "CANO": "810XXXXX",
+      "ACNT_PRDT_CD": "01",
+      "PDNO": "009150",
+      "ORD_DVSN": "00",
+      "ORD_QTY": "3",
+      "ORD_UNPR": "150000"
+    },
+    "response_json": {
+      "rt_cd": "0",
+      "msg_cd": "APBK0013",
+      "msg1": "주문 전송 완료 되었습니다.",
+      "output": {
+        "KRX_FWDG_ORD_ORGNO": "06010",
+        "ODNO": "0001569157",
+        "ORD_TMD": "155211"
+      }
+    }
+  }
+}

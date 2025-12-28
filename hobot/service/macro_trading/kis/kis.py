@@ -100,14 +100,9 @@ def parse_holdings_by_asset_class(holdings: List[Dict]) -> Dict[str, List[Dict]]
         # 티커 → 자산군 매핑 딕셔너리 생성
         ticker_to_asset_class = {}
         
-        # 설정 파일에서 로드
-        config_loader = ConfigLoader()
-        config = config_loader.load()
-        etf_mapping = config.etf_mapping
-        
-        for asset_class, mapping in etf_mapping.items():
-            for ticker in mapping.tickers:
-                ticker_to_asset_class[ticker] = asset_class
+        # etf_mapping 제거됨 (동적 할당 또는 다른 로직으로 대체 필요)
+        # 현재는 매핑 없이 'other'로 분류됨
+
         
         # 자산군별 holdings 분류
         classified_holdings = {
@@ -349,7 +344,7 @@ def get_balance_info_api(user_id: Optional[str] = None):
                     "stock_code": item.get('pdno', ''),
                     "stock_name": item.get('prdt_name', ''),
                     "quantity": int(item.get('hldg_qty', 0)),
-                    "avg_buy_price": int(item.get('pchs_avg_prc', 0)),
+                    "avg_buy_price": int(item.get('pchs_avg_pric', 0)),
                     "current_price": int(item.get('prpr', 0)),
                     "eval_amount": int(item.get('evlu_amt', 0)),
                     "profit_loss": int(item.get('evlu_pfls_amt', 0)),
