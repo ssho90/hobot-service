@@ -18,7 +18,6 @@ from .kis_utils import (
     current_time, read_current_strategy, get_buy_info, get_sell_info, calculate_atr
 )
 from service.slack_bot import post_message
-# config.py는 더 이상 사용하지 않음 - user_kis_credentials 테이블에서 사용자별 credential 사용
 from service.macro_trading.config.config_loader import ConfigLoader
 from .user_credentials import get_user_kis_credentials
 
@@ -309,7 +308,13 @@ def get_balance_info_api(user_id: Optional[str] = None):
         output2 = balance_data.get('output2', [])  # 계좌 총 평가
         
         total_eval_amt = int(output2[0]['tot_evlu_amt']) if output2 else 0
-        cash_balance = int(output2[0]['dnca_tot_amt']) if output2 else 0
+        
+        # 현금 잔액 (주문가능금액 사용)
+        if output2:
+            # ord_psbl_tot_amt (주문가능총액)만 사용
+            cash_balance = int(output2[0].get('ord_psbl_tot_amt') or 0)
+        else:
+            cash_balance = 0
         
         # 보유 주식 정보
         holdings = []

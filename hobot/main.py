@@ -192,13 +192,6 @@ async def kis_get_balance(current_user: dict = Depends(get_current_user)):
         logging.error(f"KIS balance check 예외 발생 - error: {str(e)}, trace: {error_trace}")
         return {"status": "error", "message": str(e), "trace": error_trace}
 
-@api_router.get("/kis/healthcheck")
-async def kis_health_check_old():
-    """기존 엔드포인트 (하위 호환성 유지)"""
-    from service.macro_trading.kis import connection_test
-    res = connection_test.run_connection_test()
-    logging.info(f"kis health check result: {res}")
-    return res
 
 @api_router.get("/upbit/test2")
 async def upbit_bbrsi_test2():
