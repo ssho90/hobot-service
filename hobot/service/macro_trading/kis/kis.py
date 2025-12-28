@@ -305,16 +305,41 @@ def get_balance_info_api(user_id: Optional[str] = None):
             }
         
         output1 = balance_data.get('output1', [])  # 주식 잔고
-        output2 = balance_data.get('output2', [])  # 계좌 총 평가
         
-        total_eval_amt = int(output2[0]['tot_evlu_amt']) if output2 else 0
+        # 주식 평가 금액 합계 계산
+        stock_eval_amt = 0
+        if output1:
+            for item in output1:
+                stock_eval_amt += int(item.get('evlu_amt', 0))
         
-        # 현금 잔액 (주문가능금액 사용)
-        if output2:
-            # ord_psbl_tot_amt (주문가능총액)만 사용
-            cash_balance = int(output2[0].get('ord_psbl_tot_amt') or 0)
-        else:
-            cash_balance = 0
+        # 현금 잔액 조회 (주문가능조회 API 사용)
+        cash_balance = 0
+        try:
+            logging.info("주문가능 현금 조회 시작")
+            psbl_order_data = api.get_buyable_cash()
+            
+            if psbl_order_data and psbl_order_data.get('rt_cd') == '0':
+                output = psbl_order_data.get('output', {})
+                # ord_psbl_cash: 주문가능현금
+                cash_balance = int(output.get('ord_psbl_cash', 0))
+                logging.info(f"주문가능 현금 조회 성공: {cash_balance:,}원")
+            else:
+                msg = psbl_order_data.get('msg1') if psbl_order_data else "응답 없음"
+                logging.warning(f"주문가능 현금 조회 실패: {msg}")
+                # 실패 시 기존 방식(잔고조회 output2) 시도
+                output2 = balance_data.get('output2', [])
+                if output2:
+                    cash_balance = int(output2[0].get('dnca_tot_amt', 0))
+                    logging.info(f"잔고조회(output2) 예수금 사용: {cash_balance:,}원")
+        except Exception as e:
+            logging.error(f"주문가능 현금 조회 중 오류: {e}")
+            # 오류 시 기존 방식 시도
+            output2 = balance_data.get('output2', [])
+            if output2:
+                cash_balance = int(output2[0].get('dnca_tot_amt', 0))
+
+        # 총 평가 금액 = 주식 평가 금액 + 현금 잔액
+        total_eval_amt = stock_eval_amt + cash_balance
         
         # 보유 주식 정보
         holdings = []

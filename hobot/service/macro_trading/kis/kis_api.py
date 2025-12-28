@@ -333,6 +333,41 @@ class KISAPI:
             logging.error(f"KIS API HTTP 에러 - status_code: {res.status_code}, response: {error_text}")
             return None
 
+    def get_buyable_cash(self):
+        """주문 가능 현금 조회 (매수가능조회 API 사용)"""
+        try:
+            cano, acnt_prdt_cd = self._parse_account_no()
+        except ValueError as e:
+            return {"rt_cd": "1", "msg1": str(e)}
+            
+        time.sleep(0.1)
+        path = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
+        url = f"{self.base_url}{path}"
+        
+        # 모의투자 여부에 따른 TR ID 설정
+        tr_id = "VTTC8908R" if self.is_simulation else "TTTC8908R"
+        headers = self._get_common_headers(tr_id)
+        
+        # PDNO(종목번호)는 필수값이므로 대표 종목(삼성전자: 005930) 사용
+        params = {
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt_prdt_cd,
+            "PDNO": "005930",
+            "ORD_UNPR": "0",
+            "ORD_DVSN": "01",
+            "CMA_EVLU_AMT_ICLD_YN": "N",
+            "OVRSE_DRIV_USE_YN": "N"
+        }
+        
+        logging.info(f"KIS API 주문가능조회 요청 - URL: {url}, TR_ID: {tr_id}")
+        res = self._request_with_token_refresh('GET', url, headers=headers, params=params)
+        
+        if res.status_code == 200:
+            return res.json()
+        else:
+            logging.error(f"KIS API 주문가능조회 실패 - status: {res.status_code}, response: {res.text}")
+            return None
+
     def _place_order(self, ticker, quantity, order_type, tr_id):
         """주문 실행 (공통 로직)"""
         try:

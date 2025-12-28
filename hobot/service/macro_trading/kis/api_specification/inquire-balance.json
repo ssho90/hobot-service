@@ -1,0 +1,346 @@
+{
+    "api_info": {
+      "api_name": "주식잔고조회",
+      "api_id": "v1_국내주식-006",
+      "method": "GET",
+      "description": "주식 잔고조회 API입니다.\n실전계좌의 경우, 한 번의 호출에 최대 50건까지 확인 가능하며, 이후의 값은 연속조회를 통해 확인하실 수 있습니다.\n모의계좌의 경우, 한 번의 호출에 최대 20건까지 확인 가능하며, 이후의 값은 연속조회를 통해 확인하실 수 있습니다.\n* 당일 전량매도한 잔고도 보유수량 0으로 보여질 수 있으나, 해당 보유수량 0인 잔고는 최종 D-2일 이후에는 잔고에서 사라집니다.\n※ 중요 : 해당 API는 제공 정보량이 많아 조회속도가 느린 API입니다. 단순 주문 준비를 위해서는 주식매수/매도가능수량 조회 TR 사용을 권장 드립니다.",
+      "menu_location": "[국내주식] 주문/계좌",
+      "domains": {
+        "real": "https://openapi.koreainvestment.com:9443",
+        "mock": "https://openapivts.koreainvestment.com:29443"
+      },
+      "url": "/uapi/domestic-stock/v1/trading/inquire-balance",
+      "transaction_ids": {
+        "real": "TTTC8434R",
+        "mock": "VTTC8434R"
+      }
+    },
+    "request": {
+      "headers": [
+        {
+          "key": "content-type",
+          "name": "컨텐츠타입",
+          "type": "string",
+          "required": false,
+          "description": "application/json; charset=utf-8"
+        },
+        {
+          "key": "authorization",
+          "name": "접근토큰",
+          "type": "string",
+          "required": true,
+          "description": "OAuth 토큰 (Bearer 방식)"
+        },
+        {
+          "key": "appkey",
+          "name": "앱키",
+          "type": "string",
+          "required": true,
+          "description": "한국투자증권 홈페이지에서 발급받은 appkey"
+        },
+        {
+          "key": "appsecret",
+          "name": "앱시크릿키",
+          "type": "string",
+          "required": true,
+          "description": "한국투자증권 홈페이지에서 발급받은 appsecret"
+        },
+        {
+          "key": "personalseckey",
+          "name": "고객식별키",
+          "type": "string",
+          "required": false,
+          "description": "[법인 필수] 제휴사 회원 관리를 위한 고객식별키"
+        },
+        {
+          "key": "tr_id",
+          "name": "거래ID",
+          "type": "string",
+          "required": true,
+          "description": "실전: TTTC8434R, 모의: VTTC8434R"
+        },
+        {
+          "key": "tr_cont",
+          "name": "연속 거래 여부",
+          "type": "string",
+          "required": false,
+          "description": "공백: 초기 조회, N: 다음 데이터 조회 (output header의 tr_cont가 M일 경우)"
+        },
+        {
+          "key": "custtype",
+          "name": "고객타입",
+          "type": "string",
+          "required": false,
+          "description": "B: 법인, P: 개인"
+        },
+        {
+          "key": "seq_no",
+          "name": "일련번호",
+          "type": "string",
+          "required": false,
+          "description": "[법인 필수] 001"
+        },
+        {
+          "key": "mac_address",
+          "name": "맥주소",
+          "type": "string",
+          "required": false,
+          "description": "법인고객 혹은 개인고객의 Mac address 값"
+        },
+        {
+          "key": "phone_number",
+          "name": "핸드폰번호",
+          "type": "string",
+          "required": false,
+          "description": "[법인 필수] ex) 01011112222 (하이픈 제거)"
+        },
+        {
+          "key": "ip_addr",
+          "name": "접속 단말 공인 IP",
+          "type": "string",
+          "required": false,
+          "description": "[법인 필수] 사용자(회원)의 IP Address"
+        },
+        {
+          "key": "gt_uid",
+          "name": "Global UID",
+          "type": "string",
+          "required": false,
+          "description": "[법인 전용] 거래고유번호 (Unique)"
+        }
+      ],
+      "query_params": [
+        {
+          "key": "CANO",
+          "name": "종합계좌번호",
+          "type": "string",
+          "required": true,
+          "length": 8,
+          "description": "계좌번호 체계(8-2)의 앞 8자리"
+        },
+        {
+          "key": "ACNT_PRDT_CD",
+          "name": "계좌상품코드",
+          "type": "string",
+          "required": true,
+          "length": 2,
+          "description": "계좌번호 체계(8-2)의 뒤 2자리"
+        },
+        {
+          "key": "AFHR_FLPR_YN",
+          "name": "시간외단일가, 거래소여부",
+          "type": "string",
+          "required": true,
+          "length": 1,
+          "description": "N: 기본값, Y: 시간외단일가, X: NXT 정규장"
+        },
+        {
+          "key": "OFL_YN",
+          "name": "오프라인여부",
+          "type": "string",
+          "required": false,
+          "length": 1,
+          "description": "공란(Default)"
+        },
+        {
+          "key": "INQR_DVSN",
+          "name": "조회구분",
+          "type": "string",
+          "required": true,
+          "length": 2,
+          "description": "01: 대출일별, 02: 종목별"
+        },
+        {
+          "key": "UNPR_DVSN",
+          "name": "단가구분",
+          "type": "string",
+          "required": true,
+          "length": 2,
+          "description": "01: 기본값"
+        },
+        {
+          "key": "FUND_STTL_ICLD_YN",
+          "name": "펀드결제분포함여부",
+          "type": "string",
+          "required": true,
+          "length": 1,
+          "description": "N: 포함하지 않음, Y: 포함"
+        },
+        {
+          "key": "FNCG_AMT_AUTO_RDPT_YN",
+          "name": "융자금액자동상환여부",
+          "type": "string",
+          "required": true,
+          "length": 1,
+          "description": "N: 기본값"
+        },
+        {
+          "key": "PRCS_DVSN",
+          "name": "처리구분",
+          "type": "string",
+          "required": true,
+          "length": 2,
+          "description": "00: 전일매매포함, 01: 전일매매미포함"
+        },
+        {
+          "key": "CTX_AREA_FK100",
+          "name": "연속조회검색조건100",
+          "type": "string",
+          "required": false,
+          "length": 100,
+          "description": "공란: 최초 조회시, 이전 조회 Output 값: 다음페이지 조회시"
+        },
+        {
+          "key": "CTX_AREA_NK100",
+          "name": "연속조회키100",
+          "type": "string",
+          "required": false,
+          "length": 100,
+          "description": "공란: 최초 조회시, 이전 조회 Output 값: 다음페이지 조회시"
+        }
+      ]
+    },
+    "response": {
+      "headers": [
+        {
+          "key": "content-type",
+          "name": "컨텐츠타입",
+          "description": "application/json; charset=utf-8"
+        },
+        {
+          "key": "tr_id",
+          "name": "거래ID",
+          "description": "요청한 tr_id"
+        },
+        {
+          "key": "tr_cont",
+          "name": "연속 거래 여부",
+          "description": "F or M: 다음 데이터 있음, D or E: 마지막 데이터"
+        },
+        {
+          "key": "gt_uid",
+          "name": "Global UID",
+          "description": "[법인 전용] 거래고유번호"
+        }
+      ],
+      "body": {
+        "common": [
+          { "key": "rt_cd", "name": "성공 실패 여부", "description": "0: 성공, 0 이외: 실패" },
+          { "key": "msg_cd", "name": "응답코드" },
+          { "key": "msg1", "name": "응답메세지" },
+          { "key": "ctx_area_fk100", "name": "연속조회검색조건100" },
+          { "key": "ctx_area_nk100", "name": "연속조회키100" }
+        ],
+        "output1": {
+          "description": "보유 종목 상세 리스트 (Array)",
+          "fields": [
+            { "key": "pdno", "name": "상품번호", "description": "종목번호(뒷 6자리)" },
+            { "key": "prdt_name", "name": "상품명", "description": "종목명" },
+            { "key": "trad_dvsn_name", "name": "매매구분명", "description": "매수매도구분 (현금/융자 등)" },
+            { "key": "bfdy_buy_qty", "name": "전일매수수량" },
+            { "key": "bfdy_sll_qty", "name": "전일매도수량" },
+            { "key": "thdt_buyqty", "name": "금일매수수량" },
+            { "key": "thdt_sll_qty", "name": "금일매도수량" },
+            { "key": "hldg_qty", "name": "보유수량" },
+            { "key": "ord_psbl_qty", "name": "주문가능수량" },
+            { "key": "pchs_avg_pric", "name": "매입평균가격", "description": "매입금액 / 보유수량" },
+            { "key": "pchs_amt", "name": "매입금액" },
+            { "key": "prpr", "name": "현재가" },
+            { "key": "evlu_amt", "name": "평가금액" },
+            { "key": "evlu_pfls_amt", "name": "평가손익금액", "description": "평가금액 - 매입금액" },
+            { "key": "evlu_pfls_rt", "name": "평가손익율" },
+            { "key": "evlu_erng_rt", "name": "평가수익율", "description": "미사용항목(0으로 출력)" },
+            { "key": "loan_dt", "name": "대출일자", "description": "INQR_DVSN(조회구분)을 01(대출일별)로 설정해야 값이 나옴" },
+            { "key": "loan_amt", "name": "대출금액" },
+            { "key": "stln_slng_chgs", "name": "대주매각대금" },
+            { "key": "expd_dt", "name": "만기일자" },
+            { "key": "fltt_rt", "name": "등락율" },
+            { "key": "bfdy_cprs_icdc", "name": "전일대비증감" },
+            { "key": "item_mgna_rt_name", "name": "종목증거금율명" },
+            { "key": "grta_rt_name", "name": "보증금율명" },
+            { "key": "sbst_pric", "name": "대용가격", "description": "증권매매의 위탁보증금으로서 현금 대신에 사용되는 유가증권 가격" },
+            { "key": "stck_loan_unpr", "name": "주식대출단가" }
+          ]
+        },
+        "output2": {
+          "description": "계좌 잔고 합계 및 예수금 상세 (Array)",
+          "fields": [
+            { "key": "dnca_tot_amt", "name": "예수금총금액", "description": "예수금" },
+            { "key": "nxdy_excc_amt", "name": "익일정산금액", "description": "D+1 예수금" },
+            { "key": "prvs_rcdl_excc_amt", "name": "가수도정산금액", "description": "D+2 예수금" },
+            { "key": "cma_evlu_amt", "name": "CMA평가금액" },
+            { "key": "bfdy_buy_amt", "name": "전일매수금액" },
+            { "key": "thdt_buy_amt", "name": "금일매수금액" },
+            { "key": "nxdy_auto_rdpt_amt", "name": "익일자동상환금액" },
+            { "key": "bfdy_sll_amt", "name": "전일매도금액" },
+            { "key": "thdt_sll_amt", "name": "금일매도금액" },
+            { "key": "d2_auto_rdpt_amt", "name": "D+2자동상환금액" },
+            { "key": "bfdy_tlex_amt", "name": "전일제비용금액" },
+            { "key": "thdt_tlex_amt", "name": "금일제비용금액" },
+            { "key": "tot_loan_amt", "name": "총대출금액" },
+            { "key": "scts_evlu_amt", "name": "유가평가금액" },
+            { "key": "tot_evlu_amt", "name": "총평가금액", "description": "유가증권 평가금액 합계금액 + D+2 예수금" },
+            { "key": "nass_amt", "name": "순자산금액" },
+            { "key": "fncg_gld_auto_rdpt_yn", "name": "융자금자동상환여부", "description": "보유현금에 대한 융자금만 차감여부" },
+            { "key": "pchs_amt_smtl_amt", "name": "매입금액합계금액" },
+            { "key": "evlu_amt_smtl_amt", "name": "평가금액합계금액", "description": "유가증권 평가금액 합계금액" },
+            { "key": "evlu_pfls_smtl_amt", "name": "평가손익합계금액" },
+            { "key": "tot_stln_slng_chgs", "name": "총대주매각대금" },
+            { "key": "bfdy_tot_asst_evlu_amt", "name": "전일총자산평가금액" },
+            { "key": "asst_icdc_amt", "name": "자산증감액" },
+            { "key": "asst_icdc_erng_rt", "name": "자산증감수익율", "description": "데이터 미제공" }
+          ]
+        }
+      }
+    },
+    "examples": {
+      "request_python": {
+        "CANO": "810XXXXX",
+        "ACNT_PRDT_CD": "01",
+        "AFHR_FLPR_YN": "N",
+        "OFL_YN": "",
+        "INQR_DVSN": "01",
+        "UNPR_DVSN": "01",
+        "FUND_STTL_ICLD_YN": "N",
+        "FNCG_AMT_AUTO_RDPT_YN": "N",
+        "PRCS_DVSN": "01",
+        "CTX_AREA_FK100": "",
+        "CTX_AREA_NK100": ""
+      },
+      "response_json": {
+        "rt_cd": "0",
+        "msg_cd": "KIOK0510",
+        "msg1": "조회가 완료되었습니다",
+        "ctx_area_fk100": "81055689^01^N^N^01^01^N^...",
+        "ctx_area_nk100": "...",
+        "output1": [
+          {
+            "pdno": "009150",
+            "prdt_name": "삼성전기",
+            "trad_dvsn_name": "현금",
+            "hldg_qty": "1657",
+            "pchs_avg_pric": "135440.2517",
+            "evlu_pfls_rt": "0.00",
+            "prpr": "0"
+          },
+          {
+            "pdno": "009150",
+            "prdt_name": "삼성전기",
+            "trad_dvsn_name": "자기융자",
+            "hldg_qty": "3",
+            "pchs_avg_pric": "123000.0000",
+            "evlu_pfls_rt": "0.00",
+            "prpr": "0"
+          }
+        ],
+        "output2": [
+          {
+            "dnca_tot_amt": "346455",
+            "tot_evlu_amt": "2106055",
+            "nass_amt": "2106055",
+            "evlu_pfls_smtl_amt": "-756922"
+          }
+        ]
+      }
+    }
+  }
