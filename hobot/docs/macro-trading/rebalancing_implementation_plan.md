@@ -32,24 +32,29 @@
   - `execute_sell_phase()`: 매도 단계 실행
   - `execute_buy_phase()`: 매수 단계 실행
 
-#### 1.2 자산 조회 모듈
+#### 1.2 자산 조회 모듈 (구현 완료 - 2024.12.29)
 - **파일**: `hobot/service/macro_trading/rebalancing/asset_retriever.py`
 - **역할**: 한국투자증권에서 현재 보유 자산 정보 조회
+- **구현 현황**:
+  - `kis.py`의 `get_balance_info_api()` 함수로 자산 및 현금 조회 구현 완료
+  - `rebalancing-status` API에서 활용 중
+- **참조 API Spec**: `hobot/service/macro_trading/kis/api_specification/domestic/`
+  - `inquire-balance.json`: 주식 잔고 조회
+  - `inquire-psbl-order.json`: 주문 가능 현금 조회
 - **주요 함수**:
-  - `get_current_holdings()`: 현재 보유 종목 및 수량 조회
-  - `get_current_asset_allocation()`: 현재 자산군별 비중 계산
-  - `get_current_sub_mp_allocation()`: 현재 Sub-MP별 비중 계산
-  - `get_available_cash()`: 가용 현금 조회
-- **의존성**: 기존 `kis.py`의 `get_balance_info_api()` 활용
+  - `get_current_holdings()`: 현재 보유 종목 및 수량 조회 (완료)
+  - `get_current_asset_allocation()`: 현재 자산군별 비중 계산 (완료)
+  - `get_available_cash()`: 가용 현금 조회 (완료 - `api.get_buyable_cash()`)
 
-#### 1.3 목표 비중 조회 모듈
+#### 1.3 목표 비중 조회 모듈 (구현 완료 - 2024.12.29)
 - **파일**: `hobot/service/macro_trading/rebalancing/target_retriever.py`
 - **역할**: MP 및 Sub-MP 목표 비중 조회
+- **구현 현황**:
+  - `ai_strategist.py` 및 `get_rebalancing_status` API에서 구현 완료
+  - `ai_strategy_decisions` 테이블에서 최신 목표 조회
 - **주요 함수**:
-  - `get_target_mp_allocation()`: 목표 MP 자산군별 비중 조회
-  - `get_target_sub_mp_allocation()`: 목표 Sub-MP 비중 조회
-  - `get_latest_strategy_decision()`: 최신 AI 전략 결정 조회
-- **의존성**: 기존 `ai_strategist.py`의 함수들 활용
+  - `get_target_mp_allocation()`: 목표 MP 자산군별 비중 조회 (완료)
+  - `get_target_sub_mp_allocation()`: 목표 Sub-MP 비중 조회 (완료)
 
 ### Phase 2: 리밸런싱 필요 여부 판단 모듈
 
@@ -59,23 +64,48 @@
 - **주요 함수**:
   - `calculate_mp_drift()`: MP 자산군별 편차 계산
   - `calculate_sub_mp_drift()`: Sub-MP별 편차 계산
-  - `check_threshold_exceeded()`: 임계값 초과 여부 확인
-- **임계값**:
-  - MP 자산군별: 3% 이상
-  - Sub-MP별: 5% 이상
+  - `check_threshold_exceeded()`: 임계값 초과 여부 확인 (DB 설정값 사용)
+- **임계값 (동적 설정)**:
+  - `rebalancing_config` 테이블에서 조회
+  - 기본값: MP 3%, Sub-MP 5%
+  - Admin 화면에서 설정 가능
 
 #### 2.2 리밸런싱 필요 여부 판단
 - **위치**: `rebalancing_engine.py` 내부
 - **로직**:
-  - MP 자산군별 편차가 3% 이상인 항목이 하나라도 있으면 리밸런싱 필요
-  - Sub-MP별 편차가 5% 이상인 항목이 하나라도 있으면 리밸런싱 필요
+  - MP 자산군별 편차가 설정된 임계값(예: 3%) 이상인 항목이 하나라도 있으면 리밸런싱 필요
+  - Sub-MP별 편차가 설정된 임계값(예: 5%) 이상인 항목이 하나라도 있으면 리밸런싱 필요
   - 두 조건 중 하나라도 만족하면 리밸런싱 실행
+
+### Phase 2.5: 리밸런싱 설정 관리 (신규 추가)
+
+#### 2.5.1 DB 스키마 추가
+- **테이블**: `rebalancing_config`
+- **컬럼**:
+  - `id` (PK)
+  - `mp_threshold_percent` (MP 임계값, Default 3.0)
+  - `sub_mp_threshold_percent` (Sub-MP 임계값, Default 5.0)
+  - `is_active` (활성화 여부)
+  - `updated_at`
+
+#### 2.5.2 설정 API
+- **엔드포인트**: 
+  - GET `/api/macro-trading/rebalancing/config`: 설정 조회
+  - POST `/api/macro-trading/rebalancing/config`: 설정 업데이트
+
+#### 2.5.3 UI 수정 (Admin)
+- **위치**: Admin > 리밸런싱 관리 (구 포트폴리오 관리)
+- **변경 사항**:
+  - 메뉴명 변경: '포트폴리오 관리' -> '리밸런싱 관리'
+  - 탭 추가: 'Rebalancing 설정' (MP, Sub-MP 탭 옆에 추가)
+  - 기능: MP 임계값, Sub-MP 임계값 입력 및 저장
 
 ### Phase 3: LLM 기반 전략 수립 모듈
 
 #### 3.1 매도 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/sell_strategy_planner.py`
 - **역할**: LLM을 활용한 매도 전략 수립
+- **사용 모델**: `gemini-3-pro-preview`
 - **주요 함수**:
   - `plan_sell_strategy()`: 매도 전략 수립 (LLM 호출)
   - `build_sell_prompt()`: 매도 전략 수립용 프롬프트 생성
@@ -90,6 +120,7 @@
 #### 3.2 매수 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/buy_strategy_planner.py`
 - **역할**: LLM을 활용한 매수 전략 수립
+- **사용 모델**: `gemini-3-pro-preview`
 - **주요 함수**:
   - `plan_buy_strategy()`: 매수 전략 수립 (LLM 호출)
   - `build_buy_prompt()`: 매수 전략 수립용 프롬프트 생성
@@ -187,9 +218,13 @@
   - 실제 리밸런싱 엔진 호출
   - 에러 처리 및 응답 형식 정의
 
-#### 7.2 리밸런싱 상태 조회 API (선택사항)
+#### 7.2 리밸런싱 상태 조회 API (구현 완료 - 2024.12.29)
 - **엔드포인트**: `/api/macro-trading/rebalancing-status` (GET)
 - **역할**: 현재 리밸런싱 필요 여부 및 편차 정보 조회
+- **구현 내용**:
+  - MP/Sub-MP 목표 vs 실제 비중 조회
+  - 자산군별 가용 현금 정확도 개선 (API 직접 조회)
+
 
 ## 데이터 구조
 
