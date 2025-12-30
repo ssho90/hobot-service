@@ -10,6 +10,7 @@ const TradingDashboard = () => {
   const [rebalanceStatus, setRebalanceStatus] = useState(null);
   const [rebalanceLoading, setRebalanceLoading] = useState(false);
   const [rebalanceError, setRebalanceError] = useState(null);
+  const [testModalOpen, setTestModalOpen] = useState(false);
 
   // KIS 계좌 잔액 조회
   useEffect(() => {
@@ -76,15 +77,27 @@ const TradingDashboard = () => {
         rebalanceStatus={rebalanceStatus}
         rebalanceLoading={rebalanceLoading}
         rebalanceError={rebalanceError}
+        onOpenTestModal={() => setTestModalOpen(true)}
       />
+      {testModalOpen && (
+        <RebalancingTestModal
+          onClose={() => setTestModalOpen(false)}
+          getAuthHeaders={getAuthHeaders}
+        />
+      )}
     </div>
   );
 };
 
 // Macro Quant Trading 탭 컴포넌트
-const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebalanceLoading, rebalanceError }) => {
+const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebalanceLoading, rebalanceError, onOpenTestModal }) => {
   return (
     <div className="tab-content">
+      <div className="tab-header-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+        <button className="btn btn-primary" onClick={onOpenTestModal}>
+          Rebalancing Test
+        </button>
+      </div>
       <RebalancingStatusCard
         data={rebalanceStatus}
         loading={rebalanceLoading}
@@ -371,6 +384,77 @@ const StackedBar = ({ segments, tone = 'target' }) => {
           );
         })
       )}
+    </div >
+  );
+};
+
+const RebalancingTestModal = ({ onClose, getAuthHeaders }) => {
+  const [maxPhase, setMaxPhase] = useState(5);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const runTest = async () => {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const headers = getAuthHeaders();
+      const response = await fetch('/api/macro-trading/rebalance/test', {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ max_phase: maxPhase })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || '테스트 실행 실패');
+      }
+      setResult(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content" style={{ maxWidth: '800px', width: '90%' }}>
+        <div className="modal-header">
+          <h3>Rebalancing Process Test</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label>Test Scope (Max Phase):</label>
+            <select value={maxPhase} onChange={(e) => setMaxPhase(Number(e.target.value))}>
+              <option value={2}>Phase 2: Drift Check (Analysis Only)</option>
+              <option value={3}>Phase 3: Strategy Plan (LLM Only)</option>
+              <option value={5}>Phase 5: Full Execution (Trade)</option>
+            </select>
+          </div>
+
+          <div className="action-row" style={{ marginTop: '10px' }}>
+            <button className="btn btn-primary" onClick={runTest} disabled={loading}>
+              {loading ? 'Running...' : 'Run Test'}
+            </button>
+          </div>
+
+          {error && <div className="error-message" style={{ marginTop: '10px', color: 'red' }}>{error}</div>}
+
+          {result && (
+            <div className="test-result" style={{ marginTop: '20px', background: '#f5f5f5', padding: '10px', borderRadius: '4px' }}>
+              <h4>Test Result</h4>
+              <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+                <pre style={{ fontSize: '12px' }}>{JSON.stringify(result, null, 2)}</pre>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
