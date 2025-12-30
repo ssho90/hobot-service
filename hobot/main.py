@@ -861,6 +861,27 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class RebalanceTestRequest(BaseModel):
+    max_phase: int = 5 # 2: Drift Check, 3: Strategy Plan, 5: Full Execution
+
+@api_router.post("/macro-trading/rebalance/test")
+async def test_rebalancing(
+    req: RebalanceTestRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    리밸런싱 프로세스 테스트 실행
+    max_phase에 따라 실행 범위 제어 가능
+    """
+    try:
+        from service.macro_trading.rebalancing.rebalancing_engine import execute_rebalancing
+        result = await execute_rebalancing(current_user.get("id"), max_phase=req.max_phase)
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/search-stocks")
 async def search_stocks(
     keyword: str = Query(..., description="검색 키워드 (종목명 일부)"),
