@@ -788,6 +788,58 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
                 }
             )
 
+        # ... (previous code)
+
+        # 3) 리밸런싱 필요 여부 판단 (Drift Calculation)
+        # rebalancing_engine의 check_rebalancing_needed 사용
+        from service.macro_trading.rebalancing.rebalancing_engine import check_rebalancing_needed
+        from service.macro_trading.rebalancing.config_retriever import get_rebalancing_config
+        
+        config = get_rebalancing_config()
+        # 기본값 로드
+        thresholds = {"mp": float(config.get("mp", 3.0)), "sub_mp": float(config.get("sub_mp", 5.0))}
+        
+        # 현재 상태 객체 구성 (rebalancing_engine에서 사용하는 형식으로 맞춤)
+        # get_balance_info_api 결과(balance)를 그대로 사용할 수 있는지 확인 필요
+        # rebalancing_engine의 asset_retriever.get_current_portfolio_state()는 balance 정보를 가공함
+        # 여기서는 효율성을 위해 asset_retriever를 직접 호출하거나 balance 결과를 변환해야 함.
+        # 중복 호출을 피하기 위해 asset_retriever를 사용하는 것이 가장 깔끔함.
+        
+        from service.macro_trading.rebalancing.asset_retriever import get_current_portfolio_state
+        current_state_for_engine = get_current_portfolio_state(current_user.get("id"))
+        
+        # Target MP/Sub-MP 포맷 맞춤
+        # rebalancing_engine은 target_retriever 형식을 따름.
+        # 여기서 구한 target_alloc_norm, sub_mp_details를 engine이 원하는 대로 변환하거나
+        # engine 내부 함수를 호출하는 것이 나음.
+        
+        # 간단하게 engine의 로직을 재사용하기 위해 필요한 데이터만 넘김
+        # 하지만 engine.check_rebalancing_needed는 특정 포맷을 원함.
+        # 가장 확실한 방법은 engine 내부 로직을 통해 Drift만 계산하는 것.
+        
+        rebalancing_needed = False
+        drift_info = {}
+        
+        if current_state_for_engine:
+            # target_retriever 형식으로 변환이 필요할 수 있으나, 
+            # engine의 check_rebalancing_needed 인자를 보면: 
+            # check_rebalancing_needed(current_state, target_mp, target_sub_mp, thresholds)
+            # target_mp: {"stocks": 50.0, ...} (퍼센트 단위) -> target_alloc_norm 와 동일
+            # target_sub_mp: {"stocks": {"etf_details": [...]}} -> sub_mp_details 와 거의 유사?
+            # get_sub_mp_details 반환값 구조: {"stocks": {"etf_details": [{"ticker":..., "weight":...}]}}
+            
+            # target_alloc_norm의 키는 소문자여야 함 (이미 처리됨)
+            
+            # sub_mp_details 구조 확인 필요. 
+            # get_sub_mp_details는 {"stocks": {"etf_details": [...]}} 형태 반환 예상.
+            
+            rebalancing_needed, drift_info = check_rebalancing_needed(
+                current_state_for_engine, 
+                target_alloc_norm, 
+                sub_mp_details or {}, 
+                thresholds
+            )
+
         return {
             "status": "success",
             "data": {
@@ -796,6 +848,12 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
                     "actual_allocation": actual_alloc,
                 },
                 "sub_mp": sub_mp_payload,
+                "rebalancing_status": {
+                    "needed": rebalancing_needed,
+                    "reasons": drift_info.get("reasons", []),
+                    "drift_details": drift_info,
+                    "thresholds": thresholds
+                }
             },
         }
     except Exception as e:

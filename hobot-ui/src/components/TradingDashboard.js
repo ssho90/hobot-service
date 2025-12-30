@@ -69,7 +69,7 @@ const TradingDashboard = () => {
 
   return (
     <div className="trading-dashboard">
-      <MacroQuantTradingTab 
+      <MacroQuantTradingTab
         balance={kisBalance}
         loading={kisLoading}
         error={kisError}
@@ -167,7 +167,18 @@ const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebala
 
 export default TradingDashboard;
 
-// 리밸런싱 현황 카드 (MP / Sub-MP 목표 vs 실제)
+// ... (TrafficLight component definition)
+const TrafficLight = ({ needed, reasons = [] }) => {
+  const status = needed ? 'red' : 'green';
+  const tooltip = reasons.length > 0 ? reasons.join('\n') : (needed ? '리밸런싱 필요' : '정상');
+  return (
+    <span
+      className={`traffic-light ${status}`}
+      title={tooltip}
+    />
+  );
+};
+
 const RebalancingStatusCard = ({ data, loading, error }) => {
   const assetClassLabels = {
     stocks: '주식',
@@ -179,6 +190,47 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
   const barPalette = {
     target: ['#4F81BD', '#9BBB59', '#C0504D', '#8064A2', '#46b5d1', '#f4b400'],
     actual: ['#3b6aa3', '#7da444', '#a33f3a', '#684f88', '#2e9bc0', '#d49a00'],
+  };
+
+  // Drift Analysis Logic
+  const getMpStatus = () => {
+    if (!data?.rebalancing_status) return { needed: false, reasons: [] };
+    const { drift_details, thresholds } = data.rebalancing_status;
+    const mpDrifts = drift_details?.mp_drifts || {};
+    const threshold = thresholds?.mp || 3.0;
+
+    let needed = false;
+    let reasons = [];
+
+    Object.entries(mpDrifts).forEach(([asset, drift]) => {
+      if (Math.abs(drift) >= threshold) {
+        needed = true;
+        reasons.push(`${assetClassLabels[asset] || asset}: ${drift}% (임계값 ${threshold}%)`);
+      }
+    });
+    return { needed, reasons };
+  };
+
+  const getSubMpStatus = (assetClass) => {
+    if (!data?.rebalancing_status) return { needed: false, reasons: [] };
+    const { drift_details, thresholds } = data.rebalancing_status;
+    const subMpDrifts = drift_details?.sub_mp_drifts || {};
+    // sub_mp_drifts: { "stocks": [{"ticker":..., "drift":...}] }
+
+    const items = subMpDrifts[assetClass] || [];
+    const threshold = thresholds?.sub_mp || 5.0;
+
+    let needed = false;
+    let reasons = [];
+
+    items.forEach(item => {
+      if (Math.abs(item.drift) >= threshold) {
+        needed = true;
+        reasons.push(`${item.name || item.ticker}: ${item.drift}% (임계값 ${threshold}%)`);
+      }
+    });
+
+    return { needed, reasons };
   };
 
   const buildBarSegmentsFromAlloc = (allocations) => {
@@ -196,12 +248,13 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         value: allocations?.[key] ?? 0,
         color: colors[key] || '#888'
       }));
-      // 0인 값도 포함하여 빈 바를 표시할 수 있도록 필터링 제거
   };
 
   const renderSubMpBlock = (sub) => {
     const target = sub?.target || [];
     const actual = sub?.actual || [];
+    const { needed, reasons } = getSubMpStatus(sub.asset_class);
+
     const buildBarSegments = (items, tone = 'target') => {
       const palette = barPalette[tone] || barPalette.target;
       const list = [...items];
@@ -214,9 +267,13 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         color: palette[idx % palette.length],
       }));
     };
+
     return (
       <div className="submp-asset-block" key={sub.asset_class}>
-        <div className="submp-asset-title">{assetClassLabels[sub.asset_class] || sub.asset_class}</div>
+        <div className="submp-asset-title">
+          {assetClassLabels[sub.asset_class] || sub.asset_class}
+          <TrafficLight needed={needed} reasons={reasons} />
+        </div>
         <div className="submp-row">
           <div className="submp-row-title">목표</div>
           <div className="submp-bar-area">
@@ -241,6 +298,8 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
     );
   };
 
+  const mpStatus = getMpStatus();
+
   return (
     <div className="card rebalancing-status-card">
       <h2>Rebalancing Status</h2>
@@ -250,7 +309,10 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
       {!loading && !error && data && (
         <div className="rebalance-sections">
           <div className="mp-section">
-            <div className="section-title">MP</div>
+            <div className="section-title">
+              MP
+              <TrafficLight needed={mpStatus.needed} reasons={mpStatus.reasons} />
+            </div>
             <div className="mp-row">
               <div className="mp-row-title">목표</div>
               <div className="mp-row-bar">
@@ -277,15 +339,16 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
   );
 };
 
+
 const StackedBar = ({ segments, tone = 'target' }) => {
   const total = segments.reduce((sum, s) => sum + (s.value || 0), 0) || 1;
   const hasVisibleSegments = segments.some(s => (s.value || 0) > 0);
-  
+
   return (
     <div className={`stacked-bar ${tone === 'actual' ? 'tone-actual' : 'tone-target'}`}>
       {segments.length === 0 || !hasVisibleSegments ? (
         // 빈 회색 바 표시
-        <div 
+        <div
           className="stacked-bar-segment empty-bar"
           style={{ width: '100%', background: '#e0e0e0' }}
         />

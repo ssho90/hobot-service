@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Tuple
 
 from service.macro_trading.rebalancing.target_retriever import (
     get_target_mp_allocation,
@@ -9,6 +9,11 @@ from service.macro_trading.rebalancing.asset_retriever import (
     get_current_portfolio_state,
     get_available_cash
 )
+from service.macro_trading.rebalancing.drift_calculator import (
+    calculate_detailed_drift,
+    check_threshold_exceeded
+)
+from service.macro_trading.rebalancing.config_retriever import get_rebalancing_config
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +50,29 @@ def execute_rebalancing(user_id: str) -> Dict[str, Any]:
     logger.info(f"Target MP: {target_mp}")
     
     # 2. 리밸런싱 필요 여부 확인 (Phase 2)
-    needed, drift_info = check_rebalancing_needed(current_state, target_mp, target_sub_mp)
+    # DB에서 임계값 및 활성화 여부 조회
+    config = get_rebalancing_config()
+    if not config.get("is_active", True):
+        logger.info("Rebalancing is disabled in config.")
+        return {"status": "success", "message": "Rebalancing disabled by config"}
+        
+    thresholds = {"mp": float(config["mp"]), "sub_mp": float(config["sub_mp"])}
+    logger.info(f"Using thresholds: {thresholds}")
+    
+    needed, drift_info = check_rebalancing_needed(current_state, target_mp, target_sub_mp, thresholds)
+    
+    logger.info(f"Rebalancing needed: {needed}")
+    if needed:
+        logger.info(f"Drift Reasons: {drift_info.get('reasons')}")
+
     if not needed:
         logger.info("Rebalancing not needed.")
-        return {"status": "success", "message": "Rebalancing not needed", "drift_info": drift_info}
+        return {
+            "status": "success", 
+            "message": "Rebalancing not needed", 
+            "drift_info": drift_info,
+            "thresholds": thresholds
+        }
     
     # 3. 매도 단계 (Phase 3~5)
     sell_result = execute_sell_phase(user_id, current_state, target_mp, target_sub_mp)
@@ -62,7 +86,7 @@ def execute_rebalancing(user_id: str) -> Dict[str, Any]:
     updated_cash = get_available_cash(user_id)
     logger.info(f"Available cash after sell: {updated_cash}")
     
-    buy_result = execute_buy_phase(user_id, current_state, target_mp, target_sub_mp) # current_state need update logic later
+    buy_result = execute_buy_phase(user_id, current_state, target_mp, target_sub_mp) 
     
     return {
         "status": "success", 
@@ -71,12 +95,19 @@ def execute_rebalancing(user_id: str) -> Dict[str, Any]:
         "buy_result": buy_result
     }
 
-def check_rebalancing_needed(current_state, target_mp, target_sub_mp):
+def check_rebalancing_needed(current_state, target_mp, target_sub_mp, thresholds):
     """
-    리밸런싱 필요 여부 판단 (Phase 2 구현 예정)
+    리밸런싱 필요 여부 판단 (Phase 2 Implementaiton)
     """
-    # TODO: Implement drift calculation
-    return False, {}
+    # 1. 상세 편차 계산
+    drift_details = calculate_detailed_drift(current_state, target_mp, target_sub_mp)
+    
+    # 2. 임계값 초과 여부 확인
+    is_exceeded, reasons = check_threshold_exceeded(drift_details, thresholds)
+    
+    drift_details['reasons'] = reasons
+    
+    return is_exceeded, drift_details
 
 def execute_sell_phase(user_id, current_state, target_mp, target_sub_mp):
     """
@@ -91,4 +122,3 @@ def execute_buy_phase(user_id, current_state, target_mp, target_sub_mp):
     """
     # TODO: Implement buy strategy planning, validation, execution
     return {"status": "success", "message": "No buy action (Not implemented)"}
-
