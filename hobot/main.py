@@ -10,6 +10,7 @@ from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 import logging
+import uuid
 from service.slack_bot import post_message
 from app import daily_news_summary
 from service.news.daily_news_agent import compiled
@@ -2331,15 +2332,15 @@ async def upsert_rebalancing_config(
         from service.database.db import get_db_connection
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            # 기존 활성 설정 비활성화
+            cursor.execute("UPDATE rebalancing_config SET is_active = FALSE")
+            # 새로운 해시 ID로 설정 저장
+            new_id = uuid.uuid4().hex
             cursor.execute("""
                 INSERT INTO rebalancing_config (id, mp_threshold_percent, sub_mp_threshold_percent, is_active)
-                VALUES (1, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                    mp_threshold_percent = VALUES(mp_threshold_percent),
-                    sub_mp_threshold_percent = VALUES(sub_mp_threshold_percent),
-                    is_active = VALUES(is_active),
-                    updated_at = CURRENT_TIMESTAMP
+                VALUES (%s, %s, %s, %s)
             """, (
+                new_id,
                 request.mp_threshold_percent,
                 request.sub_mp_threshold_percent,
                 request.is_active

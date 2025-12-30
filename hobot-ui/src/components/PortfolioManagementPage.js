@@ -15,6 +15,7 @@ const PortfolioManagementPage = () => {
   const [configLoading, setConfigLoading] = useState(false);
   const [configSaving, setConfigSaving] = useState(false);
   const [configError, setConfigError] = useState('');
+  const [isEditingConfig, setIsEditingConfig] = useState(false);
   const [configForm, setConfigForm] = useState({
     mp_threshold_percent: 3.0,
     sub_mp_threshold_percent: 5.0,
@@ -83,6 +84,7 @@ const PortfolioManagementPage = () => {
         sub_mp_threshold_percent: cfg.sub_mp_threshold_percent ?? 5.0,
         is_active: cfg.is_active ?? true,
       });
+      setIsEditingConfig(false);
     } catch (err) {
       setConfigError(err.message || '리밸런싱 설정을 불러오는데 실패했습니다.');
     } finally {
@@ -111,12 +113,25 @@ const PortfolioManagementPage = () => {
         throw new Error(data.message || '설정 저장에 실패했습니다.');
       }
       await fetchRebalancingConfig();
+      setIsEditingConfig(false);
       alert('리밸런싱 설정이 저장되었습니다.');
     } catch (err) {
       setConfigError(err.message || '설정 저장에 실패했습니다.');
     } finally {
       setConfigSaving(false);
     }
+  };
+
+  const handleCancelConfigEdit = () => {
+    if (rebalancingConfig) {
+      setConfigForm({
+        mp_threshold_percent: rebalancingConfig.mp_threshold_percent ?? 3.0,
+        sub_mp_threshold_percent: rebalancingConfig.sub_mp_threshold_percent ?? 5.0,
+        is_active: rebalancingConfig.is_active ?? true,
+      });
+    }
+    setIsEditingConfig(false);
+    setConfigError('');
   };
 
   useEffect(() => {
@@ -317,48 +332,83 @@ const PortfolioManagementPage = () => {
             {configLoading ? (
               <div style={{ padding: '16px' }}>불러오는 중...</div>
             ) : (
-              <div className="settings-form">
-                <label className="settings-row">
-                  <span>MP 임계값 (%)</span>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={configForm.mp_threshold_percent}
-                    onChange={(e) => setConfigForm({ ...configForm, mp_threshold_percent: e.target.value })}
-                  />
-                </label>
-                <label className="settings-row">
-                  <span>Sub-MP 임계값 (%)</span>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={configForm.sub_mp_threshold_percent}
-                    onChange={(e) => setConfigForm({ ...configForm, sub_mp_threshold_percent: e.target.value })}
-                  />
-                </label>
-                <label className="settings-row checkbox-row">
-                  <input
-                    type="checkbox"
-                    checked={configForm.is_active}
-                    onChange={(e) => setConfigForm({ ...configForm, is_active: e.target.checked })}
-                  />
-                  <span>설정 활성화</span>
-                </label>
-                <div className="settings-actions">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSaveConfig}
-                    disabled={configSaving}
-                  >
-                    {configSaving ? '저장 중...' : '저장'}
-                  </button>
+              <>
+                <div className="settings-summary">
+                  <div className="view-row">
+                    <span>MP 임계값</span>
+                    <strong>{(rebalancingConfig?.mp_threshold_percent ?? 3.0).toFixed(1)}%</strong>
+                  </div>
+                  <div className="view-row">
+                    <span>Sub-MP 임계값</span>
+                    <strong>{(rebalancingConfig?.sub_mp_threshold_percent ?? 5.0).toFixed(1)}%</strong>
+                  </div>
+                  <div className="view-row">
+                    <span>상태</span>
+                    <span className={`status-badge ${rebalancingConfig?.is_active ? 'active' : 'inactive'}`}>
+                      {rebalancingConfig?.is_active ? '활성' : '비활성'}
+                    </span>
+                  </div>
+                  {rebalancingConfig?.updated_at && (
+                    <div className="settings-updated-at">
+                      마지막 업데이트: {rebalancingConfig.updated_at}
+                    </div>
+                  )}
+                  <div className="settings-actions">
+                    {!isEditingConfig && (
+                      <button className="btn btn-primary" onClick={() => setIsEditingConfig(true)}>
+                        수정
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {rebalancingConfig?.updated_at && (
-                  <div className="settings-updated-at">
-                    마지막 업데이트: {rebalancingConfig.updated_at}
+
+                {isEditingConfig && (
+                  <div className="settings-form">
+                    <label className="settings-row">
+                      <span>MP 임계값 (%)</span>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={configForm.mp_threshold_percent}
+                        onChange={(e) => setConfigForm({ ...configForm, mp_threshold_percent: e.target.value })}
+                      />
+                    </label>
+                    <label className="settings-row">
+                      <span>Sub-MP 임계값 (%)</span>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={configForm.sub_mp_threshold_percent}
+                        onChange={(e) => setConfigForm({ ...configForm, sub_mp_threshold_percent: e.target.value })}
+                      />
+                    </label>
+                    <label className="settings-row checkbox-row">
+                      <input
+                        type="checkbox"
+                        checked={configForm.is_active}
+                        onChange={(e) => setConfigForm({ ...configForm, is_active: e.target.checked })}
+                      />
+                      <span>설정 활성화</span>
+                    </label>
+                    <div className="settings-actions">
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleSaveConfig}
+                        disabled={configSaving}
+                      >
+                        {configSaving ? '저장 중...' : '저장'}
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={handleCancelConfigEdit}
+                        disabled={configSaving}
+                      >
+                        취소
+                      </button>
+                    </div>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>

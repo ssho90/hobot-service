@@ -304,3 +304,26 @@
   font-size: 13px;
 }
 
+.settings-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.view-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.view-row strong {
+  font-size: 15px;
+  color: #333;
+}
+
