@@ -311,8 +311,9 @@ def get_balance_info_api(user_id: Optional[str] = None):
         
         # 현금 잔액 (주문가능금액 사용)
         if output2:
-            # ord_psbl_tot_amt (주문가능총액)만 사용   
-            cash_balance = int(output2[0].get('ord_psbl_tot_amt') or 0)
+            # ord_psbl_tot_amt (주문가능총액)만 사용 -> inquire-balance 응답에 없음
+            # prvs_rcdl_excc_amt (가수도정산금액/D+2예수금) 사용: 매도 정산 예정 금액 포함
+            cash_balance = int(output2[0].get('prvs_rcdl_excc_amt') or 0)
         else:
             cash_balance = 0
         
