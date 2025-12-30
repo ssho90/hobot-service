@@ -105,7 +105,7 @@
 #### 3.1 매도 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/sell_strategy_planner.py`
 - **역할**: LLM을 활용한 매도 전략 수립
-- **사용 모델**: `gemini-2.0-flash-exp` (또는 최신 모델)
+- **사용 모델**: `gemini-3-pro-preview`
 - **주요 함수**:
   - `plan_sell_strategy(current_state, target_mp, target_sub_mp, drift_info)`: 매도 전략 수립 (LLM 호출)
   - `build_sell_prompt()`: 매도 전략 수립용 프롬프트 생성
@@ -121,7 +121,7 @@
 #### 3.2 매수 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/buy_strategy_planner.py`
 - **역할**: LLM을 활용한 매수 전략 수립
-- **사용 모델**: `gemini-2.0-flash-exp`
+- **사용 모델**: `gemini-3-pro-preview`
 - **주요 함수**:
   - `plan_buy_strategy(current_state, target_mp, target_sub_mp, drift_info, cash_available)`: 매수 전략 수립 (LLM 호출)
   - `build_buy_prompt()`: 매수 전략 수립용 프롬프트 생성
@@ -137,6 +137,30 @@
 - **변경 사항**:
   - `execute_sell_phase` 및 `execute_buy_phase`에서 위 플래너 호출
   - Phase 2에서 계산된 `drift_info`를 플래너에 전달하여 LLM이 정확한 판단을 내리도록 지원
+
+### Manual Rebalancing Test Feature (User Request)
+
+#### Backend Updates
+- **`rebalancing_engine.py`**:
+  - Update `execute_rebalancing` to accept `max_phase` (int) argument.
+  - Logic:
+    - If `max_phase` <= 2: Stop after `check_rebalancing_needed`.
+    - If `max_phase` <= 3: Stop after `plan_sell_strategy` / `plan_buy_strategy` (do not execute).
+    - Else: Run full execution.
+- **`main.py`**:
+  - New Endpoint: `POST /api/macro-trading/rebalance/test`
+  - Body: `{"max_phase": int}`
+  - Returns: Execution result/log up to that phase.
+
+#### Frontend Updates
+- **`TradingDashboard.js`**:
+  - Add "Rebalancing Test" button.
+  - Create `RebalancingTestModal` component.
+  - Dropdown options:
+    - "Phase 2: Check Drift (Analysis Only)"
+    - "Phase 3: Plan Strategy (LLM Plan Only)"
+    - "Phase 5: Full Execution (Trade)"
+  - Display result JSON in a readable area within the modal.
 
 ### Phase 4: 룰 기반 검증 모듈
 
