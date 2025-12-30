@@ -117,9 +117,14 @@ async def plan_buy_strategy(current_state: Dict[str, Any], target_mp: Dict[str, 
             service_name="rebalancing_buy_strategy",
             request_prompt=prompt
         ) as tracker:
-            chain = llm | JsonOutputParser()
-            result = chain.invoke(prompt)
-            tracker.set_response(result)
+            response = llm.invoke(prompt)
+            tracker.set_response(response)
+            
+            parser = JsonOutputParser()
+            if hasattr(response, 'content'):
+                result = parser.parse(response.content)
+            else:
+                result = parser.parse(str(response))
         
         logger.info(f"LLM Buy Strategy Result: {result}")
         return result
