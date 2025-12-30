@@ -80,13 +80,13 @@ class MFARegenerateBackupCodesRequest(BaseModel):
 class MFALoginRequest(BaseModel):
     username: str
     password: str
+    mfa_code: Optional[str] = None
 
 
 class RebalancingConfigRequest(BaseModel):
     mp_threshold_percent: float
     sub_mp_threshold_percent: float
     is_active: bool = True
-    mfa_code: Optional[str] = None
 
 # JWT 인증
 security = HTTPBearer()
