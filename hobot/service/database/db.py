@@ -160,6 +160,18 @@ def init_database():
         except Exception:
             pass  # 이미 존재하는 경우 무시
         
+        # 리밸런싱 임계값 설정 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_config (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                mp_threshold_percent DECIMAL(5,2) NOT NULL DEFAULT 3.00 COMMENT 'MP 임계값(%)',
+                sub_mp_threshold_percent DECIMAL(5,2) NOT NULL DEFAULT 5.00 COMMENT 'Sub-MP 임계값(%)',
+                is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '활성화 여부',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_active (is_active)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 임계값 설정'
+        """)
+        
         # 메모리 저장소 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS memory_store (

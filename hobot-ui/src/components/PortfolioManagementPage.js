@@ -3,14 +3,23 @@ import { useAuth } from '../context/AuthContext';
 import './PortfolioManagementPage.css';
 
 const PortfolioManagementPage = () => {
-  const [activeTab, setActiveTab] = useState('mp'); // 'mp' or 'sub-mp'
+  const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'mp' | 'sub-mp'
   const [modelPortfolios, setModelPortfolios] = useState([]);
   const [subModelPortfolios, setSubModelPortfolios] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [editingMp, setEditingMp] = useState(null);
   const [editingSubMp, setEditingSubMp] = useState(null);
   const [editForm, setEditForm] = useState(null);
+  const [rebalancingConfig, setRebalancingConfig] = useState(null);
+  const [configLoading, setConfigLoading] = useState(false);
+  const [configSaving, setConfigSaving] = useState(false);
+  const [configError, setConfigError] = useState('');
+  const [configForm, setConfigForm] = useState({
+    mp_threshold_percent: 3.0,
+    sub_mp_threshold_percent: 5.0,
+    is_active: true,
+  });
   const { getAuthHeaders } = useAuth();
 
   const fetchModelPortfolios = useCallback(async () => {
@@ -53,13 +62,72 @@ const PortfolioManagementPage = () => {
     }
   }, [getAuthHeaders]);
 
+  const fetchRebalancingConfig = useCallback(async () => {
+    try {
+      setConfigLoading(true);
+      setConfigError('');
+      const response = await fetch('/api/macro-trading/rebalancing/config', {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('리밸런싱 설정을 불러오는데 실패했습니다.');
+      }
+      const data = await response.json();
+      if (data.status !== 'success') {
+        throw new Error(data.message || '리밸런싱 설정을 불러오는데 실패했습니다.');
+      }
+      const cfg = data.data || {};
+      setRebalancingConfig(cfg);
+      setConfigForm({
+        mp_threshold_percent: cfg.mp_threshold_percent ?? 3.0,
+        sub_mp_threshold_percent: cfg.sub_mp_threshold_percent ?? 5.0,
+        is_active: cfg.is_active ?? true,
+      });
+    } catch (err) {
+      setConfigError(err.message || '리밸런싱 설정을 불러오는데 실패했습니다.');
+    } finally {
+      setConfigLoading(false);
+    }
+  }, [getAuthHeaders]);
+
+  const handleSaveConfig = async () => {
+    try {
+      setConfigSaving(true);
+      setConfigError('');
+      const response = await fetch('/api/macro-trading/rebalancing/config', {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mp_threshold_percent: Number(configForm.mp_threshold_percent) || 0,
+          sub_mp_threshold_percent: Number(configForm.sub_mp_threshold_percent) || 0,
+          is_active: configForm.is_active,
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || data.status !== 'success') {
+        throw new Error(data.message || '설정 저장에 실패했습니다.');
+      }
+      await fetchRebalancingConfig();
+      alert('리밸런싱 설정이 저장되었습니다.');
+    } catch (err) {
+      setConfigError(err.message || '설정 저장에 실패했습니다.');
+    } finally {
+      setConfigSaving(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'mp') {
       fetchModelPortfolios();
-    } else {
+    } else if (activeTab === 'sub-mp') {
       fetchSubModelPortfolios();
+    } else if (activeTab === 'settings') {
+      fetchRebalancingConfig();
     }
-  }, [activeTab, fetchModelPortfolios, fetchSubModelPortfolios]);
+  }, [activeTab, fetchModelPortfolios, fetchSubModelPortfolios, fetchRebalancingConfig]);
 
   const handleEditMp = (mp) => {
     setEditingMp(mp.id);
@@ -200,7 +268,7 @@ const PortfolioManagementPage = () => {
     return (
       <div className="portfolio-management-page">
         <div className="portfolio-header">
-          <h1>포트폴리오 관리</h1>
+          <h1>리밸런싱 관리</h1>
         </div>
         <div style={{ textAlign: 'center', padding: '40px' }}>로딩 중...</div>
       </div>
@@ -210,8 +278,8 @@ const PortfolioManagementPage = () => {
   return (
     <div className="portfolio-management-page">
       <div className="portfolio-header">
-        <h1>포트폴리오 관리</h1>
-        <p>모델 포트폴리오(MP)와 Sub-MP 포트폴리오를 관리할 수 있습니다.</p>
+        <h1>리밸런싱 관리</h1>
+        <p>리밸런싱 임계값과 모델 포트폴리오(MP), Sub-MP 포트폴리오를 관리할 수 있습니다.</p>
       </div>
 
       {error && (
@@ -221,6 +289,12 @@ const PortfolioManagementPage = () => {
       )}
 
       <div className="portfolio-tabs">
+        <button
+          className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Rebalancing 설정
+        </button>
         <button
           className={`tab-button ${activeTab === 'mp' ? 'active' : ''}`}
           onClick={() => setActiveTab('mp')}
@@ -234,6 +308,61 @@ const PortfolioManagementPage = () => {
           Sub-MP 포트폴리오
         </button>
       </div>
+
+      {activeTab === 'settings' && (
+        <div className="rebalancing-settings">
+          <div className="settings-card">
+            <h2>리밸런싱 임계값 설정</h2>
+            {configError && <div className="error-message">{configError}</div>}
+            {configLoading ? (
+              <div style={{ padding: '16px' }}>불러오는 중...</div>
+            ) : (
+              <div className="settings-form">
+                <label className="settings-row">
+                  <span>MP 임계값 (%)</span>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={configForm.mp_threshold_percent}
+                    onChange={(e) => setConfigForm({ ...configForm, mp_threshold_percent: e.target.value })}
+                  />
+                </label>
+                <label className="settings-row">
+                  <span>Sub-MP 임계값 (%)</span>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={configForm.sub_mp_threshold_percent}
+                    onChange={(e) => setConfigForm({ ...configForm, sub_mp_threshold_percent: e.target.value })}
+                  />
+                </label>
+                <label className="settings-row checkbox-row">
+                  <input
+                    type="checkbox"
+                    checked={configForm.is_active}
+                    onChange={(e) => setConfigForm({ ...configForm, is_active: e.target.checked })}
+                  />
+                  <span>설정 활성화</span>
+                </label>
+                <div className="settings-actions">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleSaveConfig}
+                    disabled={configSaving}
+                  >
+                    {configSaving ? '저장 중...' : '저장'}
+                  </button>
+                </div>
+                {rebalancingConfig?.updated_at && (
+                  <div className="settings-updated-at">
+                    마지막 업데이트: {rebalancingConfig.updated_at}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {activeTab === 'mp' && (
         <div className="portfolios-table-container">

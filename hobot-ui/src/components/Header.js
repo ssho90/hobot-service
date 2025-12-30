@@ -286,7 +286,7 @@ const Header = () => {
                       className={`admin-submenu-item ${dashboardActiveTab === 'admin-portfolio-management' ? 'active' : ''}`}
                       onClick={() => handleAdminSubmenuClick('admin-portfolio-management')}
                     >
-                      포트폴리오 관리
+                      리밸런싱 관리
                     </button>
                   </div>
                 )}
@@ -491,7 +491,7 @@ const Header = () => {
                       onClick={() => handleMobileAdminSubmenuClick('admin-portfolio-management')}
                     >
                       <span className="mobile-nav-icon">💼</span>
-                      <span>포트폴리오 관리</span>
+                      <span>리밸런싱 관리</span>
                     </button>
                   </div>
                 )}

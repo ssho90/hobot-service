@@ -79,6 +79,12 @@ class MFARegenerateBackupCodesRequest(BaseModel):
 class MFALoginRequest(BaseModel):
     username: str
     password: str
+
+
+class RebalancingConfigRequest(BaseModel):
+    mp_threshold_percent: float
+    sub_mp_threshold_percent: float
+    is_active: bool = True
     mfa_code: Optional[str] = None
 
 # JWT 인증
@@ -2270,6 +2276,80 @@ async def update_sub_model_portfolio(
         raise
     except Exception as e:
         logging.error(f"Error updating sub-model portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# 리밸런싱 임계값 설정 (admin 전용)
+@api_router.get("/macro-trading/rebalancing/config")
+async def get_rebalancing_config(admin_user: dict = Depends(require_admin)):
+    """리밸런싱 임계값 설정 조회"""
+    try:
+        from service.database.db import get_db_connection
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, mp_threshold_percent, sub_mp_threshold_percent, is_active, updated_at
+                FROM rebalancing_config
+                WHERE is_active = TRUE
+                ORDER BY updated_at DESC
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            if not row:
+                return {
+                    "status": "success",
+                    "data": {
+                        "mp_threshold_percent": 3.0,
+                        "sub_mp_threshold_percent": 5.0,
+                        "is_active": True,
+                        "updated_at": None
+                    }
+                }
+            return {
+                "status": "success",
+                "data": {
+                    "mp_threshold_percent": float(row.get("mp_threshold_percent", 3.0)),
+                    "sub_mp_threshold_percent": float(row.get("sub_mp_threshold_percent", 5.0)),
+                    "is_active": bool(row.get("is_active", True)),
+                    "updated_at": row.get("updated_at").isoformat() if row.get("updated_at") else None
+                }
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting rebalancing config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/macro-trading/rebalancing/config")
+async def upsert_rebalancing_config(
+    request: RebalancingConfigRequest,
+    admin_user: dict = Depends(require_admin)
+):
+    """리밸런싱 임계값 설정 저장/업데이트"""
+    try:
+        from service.database.db import get_db_connection
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO rebalancing_config (id, mp_threshold_percent, sub_mp_threshold_percent, is_active)
+                VALUES (1, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    mp_threshold_percent = VALUES(mp_threshold_percent),
+                    sub_mp_threshold_percent = VALUES(sub_mp_threshold_percent),
+                    is_active = VALUES(is_active),
+                    updated_at = CURRENT_TIMESTAMP
+            """, (
+                request.mp_threshold_percent,
+                request.sub_mp_threshold_percent,
+                request.is_active
+            ))
+            conn.commit()
+            return {"status": "success", "message": "Rebalancing config saved"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error saving rebalancing config: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

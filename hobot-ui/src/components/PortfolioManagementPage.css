@@ -257,3 +257,50 @@
   margin-bottom: 20px;
 }
 
+.rebalancing-settings {
+  margin-top: 10px;
+}
+
+.settings-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.settings-row input[type="number"] {
+  width: 120px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.checkbox-row {
+  gap: 8px;
+}
+
+.settings-actions {
+  margin-top: 8px;
+}
+
+.settings-updated-at {
+  margin-top: 6px;
+  color: #666;
+  font-size: 13px;
+}
+

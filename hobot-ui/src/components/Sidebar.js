@@ -22,7 +22,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       { id: 'admin-users', label: '사용자 관리', icon: '👥' },
       { id: 'admin-logs', label: '로그 관리', icon: '📋' },
       { id: 'admin-llm-monitoring', label: 'LLM 모니터링', icon: '🤖' },
-      { id: 'admin-portfolio-management', label: '포트폴리오 관리', icon: '💼' }
+      { id: 'admin-portfolio-management', label: '리밸런싱 관리', icon: '💼' }
     ]
   };
 
