@@ -96,10 +96,25 @@ async def plan_sell_strategy(current_state: Dict[str, Any], target_mp: Dict[str,
     
     # 3. Call LLM
     try:
-        llm = llm_gemini_3_pro()
-        chain = llm | JsonOutputParser()
+        from service.llm_monitoring import track_llm_call
         
-        result = chain.invoke(prompt)
+        llm = llm_gemini_3_pro()
+        
+        # We need to track the raw LLM call or just the final result.
+        # Since we use a chain (LLM | Parser), tracking the chain invocation 
+        # will give us the parsed result (List[Dict]).
+        # If we want the raw string, we might need to invoke LLM separately, 
+        # but tracking the parsed result is likely more useful for debugging logic.
+        
+        with track_llm_call(
+            model_name="gemini-3-pro-preview",
+            provider="Google",
+            service_name="rebalancing_sell_strategy",
+            request_prompt=prompt
+        ) as tracker:
+            chain = llm | JsonOutputParser()
+            result = chain.invoke(prompt)
+            tracker.set_response(result)
         
         logger.info(f"LLM Sell Strategy Result: {result}")
         return result

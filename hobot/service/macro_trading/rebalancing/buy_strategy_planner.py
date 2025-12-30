@@ -107,10 +107,19 @@ async def plan_buy_strategy(current_state: Dict[str, Any], target_mp: Dict[str, 
     
     # 4. Call LLM
     try:
-        llm = llm_gemini_3_pro()
-        chain = llm | JsonOutputParser()
+        from service.llm_monitoring import track_llm_call
         
-        result = chain.invoke(prompt)
+        llm = llm_gemini_3_pro()
+        
+        with track_llm_call(
+            model_name="gemini-3-pro-preview",
+            provider="Google",
+            service_name="rebalancing_buy_strategy",
+            request_prompt=prompt
+        ) as tracker:
+            chain = llm | JsonOutputParser()
+            result = chain.invoke(prompt)
+            tracker.set_response(result)
         
         logger.info(f"LLM Buy Strategy Result: {result}")
         return result
