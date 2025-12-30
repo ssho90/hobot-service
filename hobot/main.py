@@ -810,17 +810,35 @@ async def search_stocks(
 ):
     """종목명으로 티커 검색"""
     try:
-        from service.macro_trading.kis.stock_collector import search_stock_tickers
-        
         if not keyword or len(keyword.strip()) < 1:
             return {
                 "status": "success",
                 "data": [],
                 "count": 0
             }
-        
-        results = search_stock_tickers(keyword.strip(), limit=limit)
-        
+
+        from service.database.db import get_db_connection
+        kw = f"%{keyword.strip()}%"
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT ticker, stock_name, market_type, last_updated
+                FROM stock_tickers
+                WHERE ticker LIKE %s OR stock_name LIKE %s
+                ORDER BY stock_name
+                LIMIT %s
+            """, (kw, kw, limit))
+            rows = cursor.fetchall()
+            results = [
+                {
+                    "ticker": row.get("ticker"),
+                    "stock_name": row.get("stock_name"),
+                    "market_type": row.get("market_type"),
+                    "last_updated": row.get("last_updated").isoformat() if row.get("last_updated") else None
+                }
+                for row in rows
+            ]
+
         return {
             "status": "success",
             "data": results,

@@ -172,6 +172,14 @@ def init_database():
                 INDEX idx_updated_at (updated_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 임계값 설정'
         """)
+        # 기존 INT 컬럼을 VARCHAR(64)로 마이그레이션 (기존 테이블이 있을 수 있음)
+        try:
+            cursor.execute("""
+                ALTER TABLE rebalancing_config 
+                MODIFY COLUMN id VARCHAR(64) NOT NULL COMMENT '해시 기반 ID'
+            """)
+        except Exception:
+            pass
         
         # 메모리 저장소 테이블
         cursor.execute("""
