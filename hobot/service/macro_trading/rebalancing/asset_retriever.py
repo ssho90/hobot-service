@@ -58,17 +58,19 @@ def get_current_portfolio_state(user_id: str) -> Optional[Dict[str, Any]]:
             cash_val = cash_total_in_class or cash_balance
             actual_alloc["cash"] = round(cash_val / total_eval_amount * 100, 2)
 
-        # 자산군별 보유 종목 정리
+        # 자산군별 보유 종목 정리 & 전체 보유 종목 리스트 생성
         holdings_by_asset_class = {}
+        all_holdings = []
         for key in ["stocks", "bonds", "alternatives", "cash"]:
             info = asset_class_info.get(key) or {}
             holdings = info.get("holdings") or []
-            # Normalize holding structure if needed
             holdings_by_asset_class[key] = holdings
+            all_holdings.extend(holdings)
 
         return {
             "mp_actual": actual_alloc,
             "holdings_by_asset_class": holdings_by_asset_class,
+            "holdings": all_holdings,
             "total_eval_amount": total_eval_amount,
             "cash_balance": cash_balance
         }

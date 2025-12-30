@@ -84,7 +84,11 @@ def calculate_detailed_drift(current_state, target_mp, target_sub_mp):
             global_target_pct = float(mp_weight) * local_weight
             
             # 현재 실제 비중 (Global Actual %)
-            current_amt = current_map.get(ticker, 0)
+            if ticker == 'CASH':
+                current_amt = float(current_state.get('cash_balance', 0))
+            else:
+                current_amt = current_map.get(ticker, 0)
+                
             global_actual_pct = (current_amt / total_eval * 100) if total_eval > 0 else 0.0
             
             drift = global_target_pct - global_actual_pct
