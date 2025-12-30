@@ -24,7 +24,7 @@ def llm_gpt4o():
 
     return gpt4o
 
-def llm_gemini_pro(model="gemini-2.5-pro"):
+def llm_gemini_pro(model="gemini-2.0-flash-exp"):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
 
@@ -37,6 +37,9 @@ def llm_gemini_pro(model="gemini-2.5-pro"):
     )
 
     return llm
+
+def llm_gemini_3_pro(model="gemini-3-pro-preview"):
+    return llm_gemini_pro(model=model)
 
 def llm_gemini_flash(model="gemini-2.5-flash"):
     from langchain_google_genai import ChatGoogleGenerativeAI

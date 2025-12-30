@@ -105,37 +105,38 @@
 #### 3.1 매도 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/sell_strategy_planner.py`
 - **역할**: LLM을 활용한 매도 전략 수립
-- **사용 모델**: `gemini-3-pro-preview`
+- **사용 모델**: `gemini-2.0-flash-exp` (또는 최신 모델)
 - **주요 함수**:
-  - `plan_sell_strategy()`: 매도 전략 수립 (LLM 호출)
+  - `plan_sell_strategy(current_state, target_mp, target_sub_mp, drift_info)`: 매도 전략 수립 (LLM 호출)
   - `build_sell_prompt()`: 매도 전략 수립용 프롬프트 생성
-- **프롬프트 입력 데이터**:
-  1. 현재 보유 자산 (종목명, 현재가)
-  2. 현재 자산 비율 (자산군 비율, 자산군 내부 세부 종목 비율)
-  3. 목표 MP, Sub-MP 비율
+    - "You are a portfolio manager..."
+    - "Goal: Generate SELL orders to reduce overweight assets to target."
+- **로직**:
+  1. Drift < 0 (과비중)인 자산 식별
+  2. 현재 보유량, 목표 비중, 편차 정보를 포함한 프롬프트 생성
+  3. LLM 호출하여 매도 주문 JSON 생성
 - **LLM 출력 형식**: JSON
-  - 종목별 매도 수량
-  - 매도 이유
+  - `[{"ticker": "...", "quantity": 10, "reason": "..."}]`
 
 #### 3.2 매수 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/buy_strategy_planner.py`
 - **역할**: LLM을 활용한 매수 전략 수립
-- **사용 모델**: `gemini-3-pro-preview`
+- **사용 모델**: `gemini-2.0-flash-exp`
 - **주요 함수**:
-  - `plan_buy_strategy()`: 매수 전략 수립 (LLM 호출)
+  - `plan_buy_strategy(current_state, target_mp, target_sub_mp, drift_info, cash_available)`: 매수 전략 수립 (LLM 호출)
   - `build_buy_prompt()`: 매수 전략 수립용 프롬프트 생성
-- **프롬프트 입력 데이터**:
-  1. 현재 보유 자산과 가용 현금 (종목명, 현재가)
-  2. 현재 자산 비율 (자산군 비율, 자산군 내부 세부 종목 비율)
-  3. 목표 MP, Sub-MP 비율
+- **로직**:
+  1. Drift > 0 (저비중)인 자산 식별
+  2. 현재 보유량, 가용 현금, 목표 비중, 편차 정보를 포함한 프롬프트 생성
+  3. LLM 호출하여 매수 주문 JSON 생성
 - **LLM 출력 형식**: JSON
-  - 종목별 매수 수량
-  - 매수 이유
+  - `[{"ticker": "...", "quantity": 10, "reason": "..."}]`
 
-#### 3.3 LLM 통합
-- **의존성**: 기존 `service/llm.py`의 LLM 함수 활용
-- **모니터링**: `service/llm_monitoring.py`의 `track_llm_call` 사용
-- **서비스명**: `rebalancing_sell_strategy`, `rebalancing_buy_strategy`
+#### 3.3 LLM 통합 및 엔진 연동
+- **위치**: `rebalancing_engine.py`
+- **변경 사항**:
+  - `execute_sell_phase` 및 `execute_buy_phase`에서 위 플래너 호출
+  - Phase 2에서 계산된 `drift_info`를 플래너에 전달하여 LLM이 정확한 판단을 내리도록 지원
 
 ### Phase 4: 룰 기반 검증 모듈
 

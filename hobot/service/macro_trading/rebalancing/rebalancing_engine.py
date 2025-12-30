@@ -14,10 +14,12 @@ from service.macro_trading.rebalancing.drift_calculator import (
     check_threshold_exceeded
 )
 from service.macro_trading.rebalancing.config_retriever import get_rebalancing_config
+from service.macro_trading.rebalancing.sell_strategy_planner import plan_sell_strategy
+from service.macro_trading.rebalancing.buy_strategy_planner import plan_buy_strategy
 
 logger = logging.getLogger(__name__)
 
-def execute_rebalancing(user_id: str) -> Dict[str, Any]:
+async def execute_rebalancing(user_id: str) -> Dict[str, Any]:
     """
     전체 리밸런싱 프로세스 실행
     
@@ -56,7 +58,7 @@ def execute_rebalancing(user_id: str) -> Dict[str, Any]:
         logger.info("Rebalancing is disabled in config.")
         return {"status": "success", "message": "Rebalancing disabled by config"}
         
-    thresholds = {"mp": float(config["mp"]), "sub_mp": float(config["sub_mp"])}
+    thresholds = {"mp": float(config.get("mp", 3.0)), "sub_mp": float(config.get("sub_mp", 5.0))}
     logger.info(f"Using thresholds: {thresholds}")
     
     needed, drift_info = check_rebalancing_needed(current_state, target_mp, target_sub_mp, thresholds)
@@ -75,7 +77,7 @@ def execute_rebalancing(user_id: str) -> Dict[str, Any]:
         }
     
     # 3. 매도 단계 (Phase 3~5)
-    sell_result = execute_sell_phase(user_id, current_state, target_mp, target_sub_mp)
+    sell_result = await execute_sell_phase(user_id, current_state, target_mp, target_sub_mp, drift_info)
     if sell_result["status"] != "success":
         logger.warning(f"Sell phase issues: {sell_result.get('message')}")
         # 매도 실패시 중단할지 계속할지 정책 결정 필요. 여기선 중단.
@@ -86,7 +88,10 @@ def execute_rebalancing(user_id: str) -> Dict[str, Any]:
     updated_cash = get_available_cash(user_id)
     logger.info(f"Available cash after sell: {updated_cash}")
     
-    buy_result = execute_buy_phase(user_id, current_state, target_mp, target_sub_mp) 
+    # Update cash in current_state for buy phase
+    current_state["cash_balance"] = updated_cash
+    
+    buy_result = await execute_buy_phase(user_id, current_state, target_mp, target_sub_mp, drift_info) 
     
     return {
         "status": "success", 
@@ -109,16 +114,38 @@ def check_rebalancing_needed(current_state, target_mp, target_sub_mp, thresholds
     
     return is_exceeded, drift_details
 
-def execute_sell_phase(user_id, current_state, target_mp, target_sub_mp):
+async def execute_sell_phase(user_id, current_state, target_mp, target_sub_mp, drift_info):
     """
-    매도 단계 실행 (Phase 3, 4, 5 구현 예정)
+    매도 단계 실행 (Phase 3: LLM 전략 수립)
     """
-    # TODO: Implement sell strategy planning, validation, execution
-    return {"status": "success", "message": "No sell action (Not implemented)"}
+    logger.info("Executing Sell Phase...")
+    
+    # Phase 3: LLM 매도 전략 수립
+    sell_orders = await plan_sell_strategy(current_state, target_mp, target_sub_mp, drift_info)
+    
+    logger.info(f"Planned Sell Orders: {sell_orders}")
+    
+    if not sell_orders:
+        return {"status": "success", "message": "No sell orders generated", "orders": []}
 
-def execute_buy_phase(user_id, current_state, target_mp, target_sub_mp):
+    # TODO: Phase 4 (Validation) & Phase 5 (Execution)
+    
+    return {"status": "success", "message": "Sell strategy planned", "orders": sell_orders}
+
+async def execute_buy_phase(user_id, current_state, target_mp, target_sub_mp, drift_info):
     """
-    매수 단계 실행 (Phase 3, 4, 5 구현 예정)
+    매수 단계 실행 (Phase 3: LLM 전략 수립)
     """
-    # TODO: Implement buy strategy planning, validation, execution
-    return {"status": "success", "message": "No buy action (Not implemented)"}
+    logger.info("Executing Buy Phase...")
+    
+    # Phase 3: LLM 매수 전략 수립
+    buy_orders = await plan_buy_strategy(current_state, target_mp, target_sub_mp, drift_info)
+    
+    logger.info(f"Planned Buy Orders: {buy_orders}")
+    
+    if not buy_orders:
+        return {"status": "success", "message": "No buy orders generated", "orders": []}
+
+    # TODO: Phase 4 (Validation) & Phase 5 (Execution)
+    
+    return {"status": "success", "message": "Buy strategy planned", "orders": buy_orders}
