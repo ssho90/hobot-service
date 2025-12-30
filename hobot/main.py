@@ -86,7 +86,6 @@ class MFALoginRequest(BaseModel):
 class RebalancingConfigRequest(BaseModel):
     mp_threshold_percent: float
     sub_mp_threshold_percent: float
-    is_active: bool = True
 
 # JWT 인증
 security = HTTPBearer()
@@ -2386,9 +2385,8 @@ async def get_rebalancing_config(admin_user: dict = Depends(require_admin)):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT id, mp_threshold_percent, sub_mp_threshold_percent, is_active, updated_at
+                SELECT id, mp_threshold_percent, sub_mp_threshold_percent, updated_at
                 FROM rebalancing_config
-                WHERE is_active = TRUE
                 ORDER BY updated_at DESC
                 LIMIT 1
             """)
@@ -2399,7 +2397,6 @@ async def get_rebalancing_config(admin_user: dict = Depends(require_admin)):
                     "data": {
                         "mp_threshold_percent": 3.0,
                         "sub_mp_threshold_percent": 5.0,
-                        "is_active": True,
                         "updated_at": None
                     }
                 }
@@ -2408,7 +2405,6 @@ async def get_rebalancing_config(admin_user: dict = Depends(require_admin)):
                 "data": {
                     "mp_threshold_percent": float(row.get("mp_threshold_percent", 3.0)),
                     "sub_mp_threshold_percent": float(row.get("sub_mp_threshold_percent", 5.0)),
-                    "is_active": bool(row.get("is_active", True)),
                     "updated_at": row.get("updated_at").isoformat() if row.get("updated_at") else None
                 }
             }
@@ -2429,18 +2425,15 @@ async def upsert_rebalancing_config(
         from service.database.db import get_db_connection
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            # 기존 활성 설정 비활성화
-            cursor.execute("UPDATE rebalancing_config SET is_active = FALSE")
             # 새로운 해시 ID로 설정 저장
             new_id = uuid.uuid4().hex
             cursor.execute("""
-                INSERT INTO rebalancing_config (id, mp_threshold_percent, sub_mp_threshold_percent, is_active)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO rebalancing_config (id, mp_threshold_percent, sub_mp_threshold_percent)
+                VALUES (%s, %s, %s)
             """, (
                 new_id,
                 request.mp_threshold_percent,
-                request.sub_mp_threshold_percent,
-                request.is_active
+                request.sub_mp_threshold_percent
             ))
             conn.commit()
             return {"status": "success", "message": "Rebalancing config saved"}

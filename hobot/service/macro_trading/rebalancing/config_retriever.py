@@ -13,8 +13,7 @@ def get_rebalancing_config() -> Dict[str, float]:
     """
     default_config = {
         "mp": 3.0, 
-        "sub_mp": 5.0,
-        "is_active": True
+        "sub_mp": 5.0
     }
     
     try:
@@ -28,7 +27,7 @@ def get_rebalancing_config() -> Dict[str, float]:
             # LIMIT 1로 가져오는게 안전.
             
             cursor.execute("""
-                SELECT mp_threshold_percent, sub_mp_threshold_percent, is_active
+                SELECT mp_threshold_percent, sub_mp_threshold_percent
                 FROM rebalancing_config
                 ORDER BY updated_at DESC
                 LIMIT 1
@@ -38,8 +37,7 @@ def get_rebalancing_config() -> Dict[str, float]:
             if row:
                 return {
                     "mp": float(row.get('mp_threshold_percent', 3.0)),
-                    "sub_mp": float(row.get('sub_mp_threshold_percent', 5.0)),
-                    "is_active": bool(row.get('is_active', True))
+                    "sub_mp": float(row.get('sub_mp_threshold_percent', 5.0))
                 }
             else:
                 logger.info("No rebalancing config found in DB, using defaults.")

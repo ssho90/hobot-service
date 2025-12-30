@@ -58,11 +58,8 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
     logger.info(f"Target MP: {target_mp}")
     
     # 2. 리밸런싱 필요 여부 확인 (Phase 2)
-    # DB에서 임계값 및 활성화 여부 조회
+    # DB에서 임계값 조회
     config = get_rebalancing_config()
-    if not config.get("is_active", True):
-        logger.info("Rebalancing is disabled in config.")
-        return {"status": "success", "message": "Rebalancing disabled by config"}
         
     thresholds = {"mp": float(config.get("mp", 3.0)), "sub_mp": float(config.get("sub_mp", 5.0))}
     logger.info(f"Using thresholds: {thresholds}")

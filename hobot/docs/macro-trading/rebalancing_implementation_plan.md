@@ -85,7 +85,6 @@
   - `id` (PK)
   - `mp_threshold_percent` (MP 임계값, Default 3.0)
   - `sub_mp_threshold_percent` (Sub-MP 임계값, Default 5.0)
-  - `is_active` (활성화 여부)
   - `updated_at`
 
 #### 2.5.2 설정 API
