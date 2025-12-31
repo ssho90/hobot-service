@@ -7,7 +7,7 @@ worker_class = "uvicorn.workers.UvicornWorker"
 worker_connections = 1000
 max_requests = 1000
 max_requests_jitter = 100
-timeout = 180  # 3분 (180초) - 뉴스 API가 Tavily + LLM 요약으로 시간이 오래 걸릴 수 있음
+timeout = 300  # 5분 (300초) - 뉴스 API가 Tavily + LLM 요약, Rebalacing 등 오래 걸리는 작업 대비
 keepalive = 2
 preload_app = True
 
