@@ -9,7 +9,7 @@ from service.macro_trading.kis.kis import get_current_price_api
 
 logger = logging.getLogger(__name__)
 
-def build_buy_prompt(current_holdings: str, cash_available: float, target_portfolio: str, drift_analysis: str, current_prices_str: str = '{}') -> str:
+def build_buy_prompt(current_holdings: str, cash_available: float, target_portfolio: str, drift_analysis: str) -> str:
     template = """
     You are an expert Portfolio Manager. Your goal is to rebalance the portfolio by BUYING underweight assets to align with the target allocation, utilizing the available cash.
     
@@ -18,10 +18,7 @@ def build_buy_prompt(current_holdings: str, cash_available: float, target_portfo
     - Current Holdings:
     {current_holdings}
 
-    Current Prices for Candidates (Reference):
-    {current_prices_str}
-    
-    Target Allocation:
+    Target Allocation (Includes Current Prices):
     {target_portfolio}
     
     Drift Analysis (Difference between Target and Actual):
@@ -35,7 +32,7 @@ def build_buy_prompt(current_holdings: str, cash_available: float, target_portfo
     5. Each order must include:
        - "ticker": Stock code
        - "name": Stock name
-       - "quantity": Integer amount to buy (must be > 0)
+       - "quantity": Integer amount to buy (must be > 0). Calculate based on 'current_price' in Target Allocation and Available Cash.
        - "reason": A brief explanation for the buy decision based on the drift.
     
     Constraints:
@@ -57,8 +54,7 @@ def build_buy_prompt(current_holdings: str, cash_available: float, target_portfo
         current_holdings=current_holdings,
         cash_available=cash_available,
         target_portfolio=target_portfolio,
-        drift_analysis=drift_analysis,
-        current_prices_str=current_prices_str
+        drift_analysis=drift_analysis
     )
 
 async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_mp: Dict[str, Any], target_sub_mp: Dict[str, Any], drift_info: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -149,21 +145,37 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
                 
                 if price:
                     current_prices[ticker] = price
-                    
-    current_prices_str = json.dumps(current_prices, ensure_ascii=False, indent=2)
 
-    # 4. Prepare Context for LLM
+    # 4. Inject Current Prices into Target Sub MP for Prompt
+    # Deep copy slightly safer but here we might just modify in place if we don't reuse strictly
+    import copy
+    target_sub_mp_with_prices = copy.deepcopy(target_sub_mp)
+    
+    for asset_class, data in target_sub_mp_with_prices.items():
+        items = []
+        if isinstance(data, list):
+            items = data
+        elif isinstance(data, dict) and 'etf_details' in data:
+            items = data['etf_details']
+            
+        for item in items:
+            if isinstance(item, dict):
+                t = item.get('ticker')
+                if t and t in current_prices:
+                    item['current_price'] = current_prices[t]
+
+    # 5. Prepare Context for LLM
     current_holdings_str = json.dumps(current_state.get('holdings', []), ensure_ascii=False, indent=2)
     
     target_info = {
         "mp_target": target_mp,
-        "sub_mp_target": target_sub_mp
+        "sub_mp_target": target_sub_mp_with_prices
     }
     target_portfolio_str = json.dumps(target_info, ensure_ascii=False, indent=2)
     
     drift_analysis_str = json.dumps(drift_info, ensure_ascii=False, indent=2)
 
-    prompt = build_buy_prompt(current_holdings_str, cash, target_portfolio_str, drift_analysis_str, current_prices_str=current_prices_str)
+    prompt = build_buy_prompt(current_holdings_str, cash, target_portfolio_str, drift_analysis_str)
     
     # 4. Call LLM
     try:
