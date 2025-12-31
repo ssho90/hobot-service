@@ -357,6 +357,7 @@ def get_current_price_api(user_id: str, ticker: str) -> Optional[int]:
     특정 종목의 현재가를 조회합니다.
     """
     try:
+        start_t = time.time()
         credentials = get_user_kis_credentials(user_id)
         if not credentials:
             logging.error(f"No credentials found for user {user_id}")
@@ -368,7 +369,10 @@ def get_current_price_api(user_id: str, ticker: str) -> Optional[int]:
             credentials['account_no'],
             is_simulation=credentials.get('is_simulation', False)
         )
-        return api.get_current_price(ticker)
+        price = api.get_current_price(ticker)
+        end_t = time.time()
+        logging.info(f"Price fetch for {ticker} took {end_t - start_t:.4f}s")
+        return price
     except Exception as e:
         logging.error(f"Error fetching current price for {ticker}: {e}")
         return None

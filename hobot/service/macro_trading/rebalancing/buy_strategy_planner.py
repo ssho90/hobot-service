@@ -1,6 +1,7 @@
 import logging
 import json
 import asyncio
+import time
 from typing import Dict, Any, List
 
 from langchain_core.output_parsers import JsonOutputParser
@@ -155,7 +156,11 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
                     return t, None
 
         tasks = [fetch_price_async(t) for t in tickers_to_fetch]
+        
+        fetch_start = time.time()
         results = await asyncio.gather(*tasks)
+        fetch_end = time.time()
+        logger.info(f"Parallel fetch for {len(tickers_to_fetch)} items took {fetch_end - fetch_start:.2f}s")
         
         for t, p in results:
             if p:

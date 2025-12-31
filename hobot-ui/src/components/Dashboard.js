@@ -19,21 +19,21 @@ const Dashboard = () => {
   const [currentStrategy, setCurrentStrategy] = useState('');
   const [activeTab, setActiveTab] = useState('macro-dashboard');
   const [activePlatform, setActivePlatform] = useState('upbit');
-  
+
   // trading-crypto는 admin만 접근 가능, trading-macro는 전체 사용자 접근 가능
   useEffect(() => {
     if (activeTab === 'trading-crypto' && !isSystemAdmin()) {
       setActiveTab('macro-dashboard');
     }
   }, [activeTab, isSystemAdmin]);
-  
+
   // 시스템 어드민이 아니면 admin 탭 접근 불가
   useEffect(() => {
     if ((activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-portfolio-management') && !isSystemAdmin()) {
       setActiveTab('news');
     }
   }, [activeTab, isSystemAdmin]);
-  
+
   // Header 탭 클릭에 따라 초기 탭 설정
   useEffect(() => {
     // URL에서 탭 정보 확인 (예: /dashboard?tab=trading-macro)
@@ -73,11 +73,14 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchCurrentStrategy(activePlatform);
-    // 1분마다 상태 업데이트
-    const interval = setInterval(() => fetchCurrentStrategy(activePlatform), 60000);
-    return () => clearInterval(interval);
-  }, [activePlatform]);
+    // trading-crypto 탭일 때만 폴링 시작
+    if (activeTab === 'trading-crypto') {
+      fetchCurrentStrategy(activePlatform);
+      // 1분마다 상태 업데이트
+      const interval = setInterval(() => fetchCurrentStrategy(activePlatform), 60000);
+      return () => clearInterval(interval);
+    }
+  }, [activePlatform, activeTab]);
 
   // Header에서 사용자 관리 클릭 시 admin 탭으로 전환
   useEffect(() => {
@@ -85,7 +88,7 @@ const Dashboard = () => {
       const tab = event.detail?.tab || 'admin-users';
       setActiveTab(tab);
     };
-    
+
     const handleSwitchToTab = (event) => {
       const tab = event.detail?.tab || 'macro-dashboard';
       setActiveTab(tab);
@@ -104,7 +107,7 @@ const Dashboard = () => {
     // API 호출도 업데이트
     fetchCurrentStrategy(activePlatform);
   };
-  
+
   // activeTab 변경 시 Header에 알림
   useEffect(() => {
     const event = new CustomEvent('dashboardTabChange', { detail: { tab: activeTab } });
@@ -124,11 +127,11 @@ const Dashboard = () => {
           {/* Crypto Auto Trading */}
           {activeTab === 'trading-crypto' && (
             <>
-              <PlatformSelector 
-                activePlatform={activePlatform} 
+              <PlatformSelector
+                activePlatform={activePlatform}
                 setActivePlatform={setActivePlatform}
               />
-              
+
               {/* Upbit 선택 시에만 Status, Position, Tools 표시 */}
               {activePlatform === 'upbit' && (
                 <>
@@ -137,17 +140,17 @@ const Dashboard = () => {
                       <HobotStatus platform={activePlatform} />
                     </div>
                     <div className="status-item">
-                      <CurrentPosition 
+                      <CurrentPosition
                         platform={activePlatform}
-                        currentStrategy={currentStrategy} 
+                        currentStrategy={currentStrategy}
                       />
                     </div>
                   </div>
 
                   <div className="tools-section">
-                    <Tools 
+                    <Tools
                       platform={activePlatform}
-                      currentStrategy={currentStrategy} 
+                      currentStrategy={currentStrategy}
                       onStrategyChange={handleStrategyChange}
                     />
                   </div>

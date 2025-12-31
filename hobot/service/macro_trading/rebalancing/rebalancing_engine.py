@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Dict, Any, Tuple
 
 from service.macro_trading.rebalancing.target_retriever import (
@@ -57,7 +58,11 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
     logger.info(f"Current MP Actual: {current_state.get('mp_actual')}")
     logger.info(f"Target MP: {target_mp}")
     
+    start_time = time.time()
+    
     # 2. 리밸런싱 필요 여부 확인 (Phase 2)
+    logger.info("Starting Phase 2: Drift Calculation")
+    phase2_start = time.time()
     # DB에서 임계값 조회
     config = get_rebalancing_config()
         
@@ -80,6 +85,9 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
             "thresholds": thresholds
         }
 
+    phase2_end = time.time()
+    logger.info(f"Phase 2 Completed in {phase2_end - phase2_start:.2f}s")
+    
     if not needed:
         logger.info("Rebalancing not needed.")
         return {
@@ -90,7 +98,10 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         }
     
     # 3. 매도 단계 (Phase 3~5)
+    phase3_sell_start = time.time()
     sell_result = await execute_sell_phase(user_id, current_state, target_mp, target_sub_mp, drift_info)
+    phase3_sell_end = time.time()
+    logger.info(f"Phase 3 (Sell Strategy) Completed in {phase3_sell_end - phase3_sell_start:.2f}s")
     if sell_result["status"] != "success":
         logger.warning(f"Sell phase issues: {sell_result.get('message')}")
         return sell_result
@@ -99,7 +110,13 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
     if max_phase <= 3:
         # 매도 시뮬레이션: sell_result['orders']의 예상 수익금을 더해서 현금 추정 가능하나
         # 현재는 간단히 현재 현금으로 Buy Plan 수립
+        phase3_buy_start = time.time()
         buy_result = await execute_buy_phase(user_id, current_state, target_mp, target_sub_mp, drift_info)
+        phase3_buy_end = time.time()
+        logger.info(f"Phase 3 (Buy Strategy) Completed in {phase3_buy_end - phase3_buy_start:.2f}s")
+        
+        total_end = time.time()
+        logger.info(f"Total Rebalancing Process Completed in {total_end - start_time:.2f}s")
         
         return {
             "status": "success",
