@@ -35,13 +35,23 @@ app.add_middleware(
 )
 
 # Configure logging
-log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'log.txt')
+# Configure logging
+# EC2 배포 위치 기준: /home/ec2-user/hobot-service/hobot/logs/log.txt
+current_dir = os.path.dirname(os.path.abspath(__file__))
+log_dir = os.path.join(current_dir, 'logs')
+os.makedirs(log_dir, exist_ok=True)
+log_file_path = os.path.join(log_dir, 'log.txt')
+
 # 로깅 설정 (기존 설정이 있어도 덮어쓰기)
+# FileHandler와 StreamHandler(콘솔) 모두 추가
 logging.basicConfig(
-    filename=log_file_path, 
     level=logging.DEBUG,  # DEBUG 레벨로 변경하여 모든 로그 출력
     format='%(asctime)s - %(levelname)s - %(message)s',
-    force=True  # 기존 핸들러가 있어도 재설정
+    force=True,  # 기존 핸들러가 있어도 재설정
+    handlers=[
+        logging.FileHandler(log_file_path, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
 )
 
 # Pydantic 모델
