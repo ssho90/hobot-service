@@ -110,7 +110,7 @@ const LLMMonitoringPage = () => {
         limit: '100',
         offset: '0'
       });
-      
+
       if (filters.model_name && filters.model_name !== 'All') {
         params.append('model_name', filters.model_name);
       }
@@ -143,7 +143,7 @@ const LLMMonitoringPage = () => {
       const params = new URLSearchParams({
         group_by: groupBy
       });
-      
+
       if (filters.start_date) params.append('start_date', filters.start_date);
       if (filters.end_date) params.append('end_date', filters.end_date);
       if (filters.model_name && filters.model_name !== 'All') {
@@ -168,7 +168,7 @@ const LLMMonitoringPage = () => {
 
   // 필터 변경 시 자동 조회 (초기 로드 후)
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   useEffect(() => {
     if (isInitialized && filters.start_date && filters.end_date) {
       fetchLogs();
@@ -272,6 +272,16 @@ const LLMMonitoringPage = () => {
     };
   };
 
+  const handleCopy = (text) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      // 복사 성공 시 간단한 피드백 (선택 사항)
+      // alert('복사되었습니다.');
+    }).catch(err => {
+      console.error('복사 실패:', err);
+    });
+  };
+
   return (
     <div className="admin-page">
       <div className="admin-header">
@@ -288,7 +298,7 @@ const LLMMonitoringPage = () => {
       {/* 필터 섹션 */}
       <div className="card" style={{ marginBottom: '20px' }}>
         <h2>필터</h2>
-        
+
         {/* 날짜 범위 버튼 */}
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>
@@ -402,7 +412,7 @@ const LLMMonitoringPage = () => {
           <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
             <h3>일자별 토큰 사용량 추이</h3>
             <p style={{ color: '#6b7280', fontSize: '14px' }}>
-              일자별 토큰 사용량은 아래 표에서 확인할 수 있습니다. 
+              일자별 토큰 사용량은 아래 표에서 확인할 수 있습니다.
               그래프 기능은 추후 Chart.js를 통해 추가될 예정입니다.
             </p>
           </div>
@@ -521,13 +531,39 @@ const LLMMonitoringPage = () => {
             </div>
             <div className="modal-body">
               <div className="detail-section">
-                <h3>요청 프롬프트</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0 }}>요청 프롬프트</h3>
+                  <button
+                    onClick={() => handleCopy(selectedLog.request_prompt)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', color: '#6b7280' }}
+                    title="요청 프롬프트 복사"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span style={{ marginLeft: '4px', fontSize: '12px' }}>복사</span>
+                  </button>
+                </div>
                 <pre className="prompt-box">
                   {selectedLog.request_prompt || '-'}
                 </pre>
               </div>
               <div className="detail-section">
-                <h3>응답 프롬프트</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0 }}>응답 프롬프트</h3>
+                  <button
+                    onClick={() => handleCopy(selectedLog.response_prompt)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', color: '#6b7280' }}
+                    title="응답 프롬프트 복사"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span style={{ marginLeft: '4px', fontSize: '12px' }}>복사</span>
+                  </button>
+                </div>
                 <pre className="prompt-box">
                   {selectedLog.response_prompt || '-'}
                 </pre>
