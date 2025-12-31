@@ -1,5 +1,6 @@
 import logging
 import json
+import asyncio
 from typing import Dict, Any, List
 
 from langchain_core.output_parsers import JsonOutputParser
@@ -93,11 +94,14 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
         logger.info(f"Insufficient cash: {cash}. Skipping buy strategy.")
         return []
 
-    # 3. Fetch Current Prices for Potential Buy Candidates
-    # 후보: Drift > 0 인 종목들 + Target Sub MP에 있는 모든 종목 (혹시 보유 안한 종목 매수해야 할 수도 있으므로)
-    # 효율성을 위해 target_sub_mp에 있는 종목들의 현재가를 조회
+    # 3. Fetch Current Prices for Potential Buy Candidates (Optimized Parallel Version)
+    # 후보: Drift > 0 인 종목들 + Target Sub MP에 있는 모든 종목
+    # 효율성을 위해 target_sub_mp에 있는 종목들의 현재가를 병렬로 조회
     
     current_prices = {}
+    tickers_to_fetch = set()
+    
+    # 1. Collect all tickers and check holdings first
     for asset_class, data in target_sub_mp.items():
         # Handle structure: could be list of items OR dict with 'etf_details' list
         items = []
@@ -115,36 +119,49 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
                 ticker = item
             elif isinstance(item, dict):
                 ticker = item.get('ticker')
-            else:
-                logger.warning(f"Unexpected item type in {asset_class}: {type(item)}")
-                continue
-
+            
             if ticker and ticker != 'CASH':
-                price = None
-                # 1. Check holdings first
-                # To be safe and meet the requirement "fetch current price of ALL stocks", 
-                # we SHOULD try to get the most up-to-date price.
-                # However, calling API for every stock might be slow.
-                # Let's try API first, or fallback to holding price if API fails?
-                # Actually, KIS API limit is generous. Let's try to fetch fresh price if possible.
-                
-                # Check holdings as fallback or primary specific to logic
-                # For now: if holding has price, use it? Or fetch fresh?
-                # User asked to fetch "all". Let's try fetching holding first to see if it has valid price.
-                
+                # Optimization: Check holdings first (Fast Path)
+                # If we already have the price from the recent balance check, use it.
+                price_from_holdings = None
                 for h in current_state.get('holdings', []):
                     if h.get('stock_code') == ticker:
-                        price = h.get('current_price')
+                        p = h.get('current_price')
+                        if p and p > 0:
+                            price_from_holdings = p
                         break
                 
-                # If price is 0 or None, (or maybe we want fresh anyway? strict real-time?)
-                # If we assume holding price is from balance API which is real-time, it's fine.
-                # If not found, definitely fetch.
-                if not price:
-                   price = get_current_price_api(user_id, ticker)
-                
-                if price:
-                    current_prices[ticker] = price
+                if price_from_holdings:
+                    current_prices[ticker] = price_from_holdings
+                else:
+                    # Not found in holdings, add to fetch list
+                    tickers_to_fetch.add(ticker)
+
+    # 2. Execute parallel fetch for missing tickers
+    if tickers_to_fetch:
+        logger.info(f"Fetching prices for {len(tickers_to_fetch)} items in parallel: {tickers_to_fetch}")
+        
+        # Rate Limiting: Max 10 concurrent requests
+        sem = asyncio.Semaphore(10)
+
+        async def fetch_price_async(t):
+            async with sem:
+                try:
+                    loop = asyncio.get_event_loop()
+                    p = await loop.run_in_executor(None, get_current_price_api, user_id, t)
+                    return t, p
+                except Exception as e:
+                    logger.error(f"Error fetching price for {t}: {e}")
+                    return t, None
+
+        tasks = [fetch_price_async(t) for t in tickers_to_fetch]
+        results = await asyncio.gather(*tasks)
+        
+        for t, p in results:
+            if p:
+                current_prices[t] = p
+            else:
+                logger.warning(f"Failed to fetch price for {t}")
 
     # 4. Inject Current Prices into Target Sub MP for Prompt
     # Deep copy slightly safer but here we might just modify in place if we don't reuse strictly
@@ -163,6 +180,33 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
                 t = item.get('ticker')
                 if t and t in current_prices:
                     item['current_price'] = current_prices[t]
+
+    # Validation: Ensure all target assets (except CASH) have a current price
+    missing_prices = []
+    for asset_class, data in target_sub_mp_with_prices.items():
+        items = []
+        if isinstance(data, list):
+            items = data
+        elif isinstance(data, dict) and 'etf_details' in data:
+            items = data['etf_details']
+            
+        for item in items:
+            ticker = None
+            if isinstance(item, dict):
+                ticker = item.get('ticker')
+            elif isinstance(item, str):
+                ticker = item
+            
+            if ticker and ticker != 'CASH':
+                has_price = False
+                if isinstance(item, dict) and 'current_price' in item:
+                    has_price = True
+                
+                if not has_price:
+                    missing_prices.append(ticker)
+    
+    if missing_prices:
+        raise ValueError(f"CRITICAL: Missing current prices for {missing_prices}. Cannot proceed with buy strategy.")
 
     # 5. Prepare Context for LLM
     current_holdings_str = json.dumps(current_state.get('holdings', []), ensure_ascii=False, indent=2)
