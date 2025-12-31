@@ -155,9 +155,21 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
             response = llm.invoke(prompt)
             tracker.set_response(response)
             
+            # 2. Parse the content
             parser = JsonOutputParser()
             if hasattr(response, 'content'):
-                result = parser.parse(response.content)
+                content = response.content
+                # Handle case where content is a list (multimodal response)
+                if isinstance(content, list):
+                    text_parts = []
+                    for part in content:
+                        if isinstance(part, dict) and 'text' in part:
+                            text_parts.append(part['text'])
+                        elif isinstance(part, str):
+                            text_parts.append(part)
+                    content = "".join(text_parts)
+                
+                result = parser.parse(content)
             else:
                 result = parser.parse(str(response))
         
