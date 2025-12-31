@@ -24,31 +24,31 @@ def llm_gpt4o():
 
     return gpt4o
 
-def llm_gemini_pro(model="gemini-2.0-flash-exp"):
+def llm_gemini_pro(model="gemini-3-pro-preview", timeout=60):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
 
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=0,
-        timeout=None,
+        timeout=timeout,
         max_retries=2,
         transport='rest'
     )
 
     return llm
 
-def llm_gemini_3_pro(model="gemini-3-pro-preview"):
-    return llm_gemini_pro(model=model)
+def llm_gemini_3_pro(model="gemini-3-pro-preview", timeout=60):
+    return llm_gemini_pro(model=model, timeout=timeout)
 
-def llm_gemini_flash(model="gemini-2.5-flash"):
+def llm_gemini_flash(model="gemini-2.5-flash", timeout=60):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
 
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=0.5,
-        timeout=None,
+        timeout=timeout,
         max_retries=2,
     )
 
