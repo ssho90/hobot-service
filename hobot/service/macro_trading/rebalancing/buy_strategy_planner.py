@@ -9,7 +9,7 @@ from service.macro_trading.kis.kis import get_current_price_api
 
 logger = logging.getLogger(__name__)
 
-def build_buy_prompt(current_holdings: str, cash_available: float, target_portfolio: str, drift_analysis: str) -> str:
+def build_buy_prompt(current_holdings: str, cash_available: float, target_portfolio: str, drift_analysis: str, current_prices_str: str = '{}') -> str:
     template = """
     You are an expert Portfolio Manager. Your goal is to rebalance the portfolio by BUYING underweight assets to align with the target allocation, utilizing the available cash.
     
@@ -58,7 +58,7 @@ def build_buy_prompt(current_holdings: str, cash_available: float, target_portfo
         cash_available=cash_available,
         target_portfolio=target_portfolio,
         drift_analysis=drift_analysis,
-        current_prices_str=kwargs.get('current_prices_str', '{}')
+        current_prices_str=current_prices_str
     )
 
 async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_mp: Dict[str, Any], target_sub_mp: Dict[str, Any], drift_info: Dict[str, Any]) -> List[Dict[str, Any]]:
