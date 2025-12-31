@@ -102,9 +102,15 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
     # 효율성을 위해 target_sub_mp에 있는 종목들의 현재가를 조회
     
     current_prices = {}
-    for asset_class, items in target_sub_mp.items():
-        if not isinstance(items, list):
-            logger.warning(f"Expected list for items in {asset_class}, got {type(items)}: {items}")
+    for asset_class, data in target_sub_mp.items():
+        # Handle structure: could be list of items OR dict with 'etf_details' list
+        items = []
+        if isinstance(data, list):
+            items = data
+        elif isinstance(data, dict) and 'etf_details' in data:
+            items = data['etf_details']
+        else:
+            logger.warning(f"Unexpected data structure for {asset_class}: {type(data)}. Skipping.")
             continue
             
         for item in items:
@@ -119,24 +125,25 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
 
             if ticker and ticker != 'CASH':
                 price = None
-                # 1. Check holdings first (optional optimization, but user requested "fetch current price of ALL stocks")
+                # 1. Check holdings first
                 # To be safe and meet the requirement "fetch current price of ALL stocks", 
                 # we SHOULD try to get the most up-to-date price.
                 # However, calling API for every stock might be slow.
                 # Let's try API first, or fallback to holding price if API fails?
                 # Actually, KIS API limit is generous. Let's try to fetch fresh price if possible.
                 
-                # But wait, if we hold it, we have a price from balance lookup. Is it real-time?
-                # Balance lookup is usually near real-time.
-                # Let's stick to the logic: If we have it in holdings, use it. If not, fetch it.
-                # BUT ensure we populate current_prices for EVERYTHING.
+                # Check holdings as fallback or primary specific to logic
+                # For now: if holding has price, use it? Or fetch fresh?
+                # User asked to fetch "all". Let's try fetching holding first to see if it has valid price.
                 
                 for h in current_state.get('holdings', []):
                     if h.get('stock_code') == ticker:
                         price = h.get('current_price')
                         break
                 
-                # If price is 0 or None, definitely fetch from API
+                # If price is 0 or None, (or maybe we want fresh anyway? strict real-time?)
+                # If we assume holding price is from balance API which is real-time, it's fine.
+                # If not found, definitely fetch.
                 if not price:
                    price = get_current_price_api(user_id, ticker)
                 
