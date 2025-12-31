@@ -108,26 +108,36 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
             continue
             
         for item in items:
+            ticker = None
             if isinstance(item, str):
-                logger.warning(f"Expected dict for item in {asset_class}, got str: {item}. Skipping.")
+                ticker = item
+            elif isinstance(item, dict):
+                ticker = item.get('ticker')
+            else:
+                logger.warning(f"Unexpected item type in {asset_class}: {type(item)}")
                 continue
-                
-            ticker = item.get('ticker')
+
             if ticker and ticker != 'CASH':
-                # 이미 보유중이고 현재가가 있으면 재사용 가능하지만, 실시간성을 위해 다시 조회하거나 current_state 것 사용
-                # 여기서는 편의상 KIS API로 최신가 조회 (API 호출 비용 고려 필요)
-                # 보유중인 종목은 current_state에 가격이 있을 수 있음.
-                
                 price = None
-                # 1. Check holdings first
+                # 1. Check holdings first (optional optimization, but user requested "fetch current price of ALL stocks")
+                # To be safe and meet the requirement "fetch current price of ALL stocks", 
+                # we SHOULD try to get the most up-to-date price.
+                # However, calling API for every stock might be slow.
+                # Let's try API first, or fallback to holding price if API fails?
+                # Actually, KIS API limit is generous. Let's try to fetch fresh price if possible.
+                
+                # But wait, if we hold it, we have a price from balance lookup. Is it real-time?
+                # Balance lookup is usually near real-time.
+                # Let's stick to the logic: If we have it in holdings, use it. If not, fetch it.
+                # BUT ensure we populate current_prices for EVERYTHING.
+                
                 for h in current_state.get('holdings', []):
                     if h.get('stock_code') == ticker:
                         price = h.get('current_price')
                         break
                 
-                # 2. If not found or want fresh, fetch API
-                # (보유하지 않은 종목은 반드시 API 호출 필요)
-                if price is None or price == 0:
+                # If price is 0 or None, definitely fetch from API
+                if not price:
                    price = get_current_price_api(user_id, ticker)
                 
                 if price:
