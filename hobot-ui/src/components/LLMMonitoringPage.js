@@ -18,6 +18,7 @@ const LLMMonitoringPage = () => {
   });
   const [timeRange, setTimeRange] = useState('1hour'); // 기본값: 1시간
   const [groupBy, setGroupBy] = useState('day');
+  const [copyFeedback, setCopyFeedback] = useState('');
   const { getAuthHeaders } = useAuth();
 
   // 필터 옵션 조회 (모델명, 서비스명 목록)
@@ -275,8 +276,8 @@ const LLMMonitoringPage = () => {
   const handleCopy = (text) => {
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
-      // 복사 성공 시 간단한 피드백 (선택 사항)
-      // alert('복사되었습니다.');
+      setCopyFeedback('복사되었습니다.');
+      setTimeout(() => setCopyFeedback(''), 2000);
     }).catch(err => {
       console.error('복사 실패:', err);
     });
@@ -542,7 +543,6 @@ const LLMMonitoringPage = () => {
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                     </svg>
-                    <span style={{ marginLeft: '4px', fontSize: '12px' }}>복사</span>
                   </button>
                 </div>
                 <pre className="prompt-box">
@@ -570,6 +570,25 @@ const LLMMonitoringPage = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 복사 알림 토스트 */}
+      {copyFeedback && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '4px',
+          zIndex: 2000,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+          fontSize: '14px'
+        }}>
+          {copyFeedback}
         </div>
       )}
     </div>
