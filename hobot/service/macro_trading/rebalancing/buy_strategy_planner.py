@@ -103,7 +103,15 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
     
     current_prices = {}
     for asset_class, items in target_sub_mp.items():
+        if not isinstance(items, list):
+            logger.warning(f"Expected list for items in {asset_class}, got {type(items)}: {items}")
+            continue
+            
         for item in items:
+            if isinstance(item, str):
+                logger.warning(f"Expected dict for item in {asset_class}, got str: {item}. Skipping.")
+                continue
+                
             ticker = item.get('ticker')
             if ticker and ticker != 'CASH':
                 # 이미 보유중이고 현재가가 있으면 재사용 가능하지만, 실시간성을 위해 다시 조회하거나 current_state 것 사용
