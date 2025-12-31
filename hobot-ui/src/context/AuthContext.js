@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           'Authorization': `Bearer ${tokenToVerify}`
         }
       });
-      
+
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     // localStorage에서 토큰과 사용자 정보 복원
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    
+
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password, mfaCode = null) => {
     const url = '/api/auth/login';
     console.log('[AuthContext] Attempting login to:', url);
-    
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }) => {
         type: error.constructor.name,
         toString: error.toString(),
       });
-      
+
       // 네트워크 에러인 경우
       if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
         console.error('[AuthContext] Network error - 프록시 또는 백엔드 서버 연결 실패');
@@ -187,14 +187,14 @@ export const AuthProvider = ({ children }) => {
     return user.role === 'admin';
   };
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = useCallback(() => {
     if (!token) return {};
     return {
       'Authorization': `Bearer ${token}`
     };
-  };
+  }, [token]);
 
-  const value = {
+  const value = React.useMemo(() => ({
     user,
     token,
     loading,
@@ -204,7 +204,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     isSystemAdmin,
     getAuthHeaders
-  };
+  }), [user, token, loading, login, register, logout, getAuthHeaders]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
