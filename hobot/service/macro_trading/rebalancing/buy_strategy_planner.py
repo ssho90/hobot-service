@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 from langchain_core.output_parsers import JsonOutputParser
 
 from service.llm import llm_gemini_3_pro
+from service.macro_trading.kis.kis import get_current_price_api
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,9 @@ def build_buy_prompt(current_holdings: str, cash_available: float, target_portfo
     - Available Cash: {cash_available} KRW
     - Current Holdings:
     {current_holdings}
+
+    Current Prices for Candidates (Reference):
+    {current_prices_str}
     
     Target Allocation:
     {target_portfolio}
@@ -53,10 +57,11 @@ def build_buy_prompt(current_holdings: str, cash_available: float, target_portfo
         current_holdings=current_holdings,
         cash_available=cash_available,
         target_portfolio=target_portfolio,
-        drift_analysis=drift_analysis
+        drift_analysis=drift_analysis,
+        current_prices_str=kwargs.get('current_prices_str', '{}')
     )
 
-async def plan_buy_strategy(current_state: Dict[str, Any], target_mp: Dict[str, Any], target_sub_mp: Dict[str, Any], drift_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_mp: Dict[str, Any], target_sub_mp: Dict[str, Any], drift_info: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     LLM을 활용하여 매수 전략 수립
     """
@@ -92,7 +97,37 @@ async def plan_buy_strategy(current_state: Dict[str, Any], target_mp: Dict[str, 
         logger.info(f"Insufficient cash: {cash}. Skipping buy strategy.")
         return []
 
-    # 3. Prepare Context for LLM
+    # 3. Fetch Current Prices for Potential Buy Candidates
+    # 후보: Drift > 0 인 종목들 + Target Sub MP에 있는 모든 종목 (혹시 보유 안한 종목 매수해야 할 수도 있으므로)
+    # 효율성을 위해 target_sub_mp에 있는 종목들의 현재가를 조회
+    
+    current_prices = {}
+    for asset_class, items in target_sub_mp.items():
+        for item in items:
+            ticker = item.get('ticker')
+            if ticker and ticker != 'CASH':
+                # 이미 보유중이고 현재가가 있으면 재사용 가능하지만, 실시간성을 위해 다시 조회하거나 current_state 것 사용
+                # 여기서는 편의상 KIS API로 최신가 조회 (API 호출 비용 고려 필요)
+                # 보유중인 종목은 current_state에 가격이 있을 수 있음.
+                
+                price = None
+                # 1. Check holdings first
+                for h in current_state.get('holdings', []):
+                    if h.get('stock_code') == ticker:
+                        price = h.get('current_price')
+                        break
+                
+                # 2. If not found or want fresh, fetch API
+                # (보유하지 않은 종목은 반드시 API 호출 필요)
+                if price is None or price == 0:
+                   price = get_current_price_api(user_id, ticker)
+                
+                if price:
+                    current_prices[ticker] = price
+                    
+    current_prices_str = json.dumps(current_prices, ensure_ascii=False, indent=2)
+
+    # 4. Prepare Context for LLM
     current_holdings_str = json.dumps(current_state.get('holdings', []), ensure_ascii=False, indent=2)
     
     target_info = {
@@ -103,7 +138,7 @@ async def plan_buy_strategy(current_state: Dict[str, Any], target_mp: Dict[str, 
     
     drift_analysis_str = json.dumps(drift_info, ensure_ascii=False, indent=2)
 
-    prompt = build_buy_prompt(current_holdings_str, cash, target_portfolio_str, drift_analysis_str)
+    prompt = build_buy_prompt(current_holdings_str, cash, target_portfolio_str, drift_analysis_str, current_prices_str=current_prices_str)
     
     # 4. Call LLM
     try:

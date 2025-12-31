@@ -147,7 +147,7 @@ async def execute_sell_phase(user_id, current_state, target_mp, target_sub_mp, d
     logger.info("Executing Sell Phase...")
     
     # Phase 3: LLM 매도 전략 수립
-    sell_orders = await plan_sell_strategy(current_state, target_mp, target_sub_mp, drift_info)
+    sell_orders = await plan_sell_strategy(user_id, current_state, target_mp, target_sub_mp, drift_info)
     
     logger.info(f"Planned Sell Orders: {sell_orders}")
     
@@ -165,7 +165,7 @@ async def execute_buy_phase(user_id, current_state, target_mp, target_sub_mp, dr
     logger.info("Executing Buy Phase...")
     
     # Phase 3: LLM 매수 전략 수립
-    buy_orders = await plan_buy_strategy(current_state, target_mp, target_sub_mp, drift_info)
+    buy_orders = await plan_buy_strategy(user_id, current_state, target_mp, target_sub_mp, drift_info)
     
     logger.info(f"Planned Buy Orders: {buy_orders}")
     

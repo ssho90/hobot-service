@@ -351,3 +351,25 @@ def get_balance_info_api(user_id: Optional[str] = None):
             "trace": trace
         }
 
+
+def get_current_price_api(user_id: str, ticker: str) -> Optional[int]:
+    """
+    특정 종목의 현재가를 조회합니다.
+    """
+    try:
+        credentials = get_user_kis_credentials(user_id)
+        if not credentials:
+            logging.error(f"No credentials found for user {user_id}")
+            return None
+            
+        api = KISAPI(
+            credentials['app_key'], 
+            credentials['app_secret'], 
+            credentials['account_no'],
+            is_simulation=credentials.get('is_simulation', False)
+        )
+        return api.get_current_price(ticker)
+    except Exception as e:
+        logging.error(f"Error fetching current price for {ticker}: {e}")
+        return None
+

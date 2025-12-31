@@ -14,6 +14,7 @@ def build_sell_prompt(current_portfolio: str, target_portfolio: str, drift_analy
     
     Current Portfolio Status:
     {current_portfolio}
+    (Contains 'current_price', 'quantity', 'eval_amount', etc.)
     
     Target Allocation:
     {target_portfolio}
@@ -52,7 +53,7 @@ def build_sell_prompt(current_portfolio: str, target_portfolio: str, drift_analy
         drift_analysis=drift_analysis
     )
 
-async def plan_sell_strategy(current_state: Dict[str, Any], target_mp: Dict[str, Any], target_sub_mp: Dict[str, Any], drift_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+async def plan_sell_strategy(user_id: str, current_state: Dict[str, Any], target_mp: Dict[str, Any], target_sub_mp: Dict[str, Any], drift_info: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     LLM을 활용하여 매도 전략 수립
     """
