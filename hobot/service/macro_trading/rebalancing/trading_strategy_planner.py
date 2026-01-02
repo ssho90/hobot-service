@@ -33,7 +33,15 @@ async def plan_trading_strategy(
             response_msg = await llm.ainvoke(prompt)
             tracker.set_response(response_msg)
             
-            response_text = response_msg.content
+            # Handle variable content types (String or List[Dict])
+            content = response_msg.content
+            if isinstance(content, list) and len(content) > 0 and isinstance(content[0], dict):
+                 # Extract text from [{'type': 'text', 'text': '...'}] structure
+                 response_text = content[0].get('text', '')
+            elif isinstance(content, str):
+                 response_text = content
+            else:
+                 response_text = str(content)
             
         execution_plan = parse_llm_response(response_text)
         return execution_plan

@@ -95,6 +95,8 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         price = kis.get_current_price(ticker)
         if price:
             current_prices[ticker] = price
+        # Rate Limit: Max 2 req/sec -> Sleep 0.5s
+        time.sleep(0.5)
             
     # Flatten Target Weights (Global Weights)
     target_global_weights = {}
