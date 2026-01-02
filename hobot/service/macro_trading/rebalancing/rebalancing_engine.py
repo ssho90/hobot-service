@@ -24,7 +24,7 @@ from service.macro_trading.rebalancing.trading_strategy_planner import plan_trad
 from service.macro_trading.rebalancing.strategy_validator import validate_strategy
 
 from service.macro_trading.kis.kis_api import KISAPI
-from service.macro_trading.kis.user_credentials import USERS
+from service.macro_trading.kis.user_credentials import get_user_kis_credentials
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +84,11 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         relevant_tickers.add(holding['stock_code'])
         
     # Get Prices
-    user_cred = USERS.get(user_id)
+    user_cred = get_user_kis_credentials(user_id)
     if not user_cred:
          return {"status": "error", "message": "User credentials not found"}
          
-    kis = KISAPI(user_cred['app_key'], user_cred['app_secret'], user_cred['account_no'], is_simulation=True) 
+    kis = KISAPI(user_cred['app_key'], user_cred['app_secret'], user_cred['account_no'], is_simulation=user_cred.get('is_simulation', True)) 
     
     current_prices = {}
     for ticker in relevant_tickers:
