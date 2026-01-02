@@ -2572,7 +2572,7 @@ async def get_logs(
         if log_type == "backend":
             # 백엔드 로그 파일 매핑
             backend_log_map = {
-                "log.txt": os.path.join(base_path, "log.txt"),
+                "log.txt": os.path.join(base_path, "logs", "log.txt"),
                 "error.log": os.path.join(base_path, "logs", "error.log"),
                 "access.log": os.path.join(base_path, "logs", "access.log")
             }
