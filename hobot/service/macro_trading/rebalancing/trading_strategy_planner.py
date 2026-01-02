@@ -1,7 +1,8 @@
 import logging
 import json
 from typing import List, Dict, Any, Optional
-from service.llm import LLMService
+from service.llm import llm_gemini_3_pro
+from service.llm_monitoring import track_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -12,14 +13,6 @@ async def plan_trading_strategy(
 ) -> List[Dict[str, Any]]:
     """
     확정된 매매 리스트(Target Trades)에 대한 집행 전략 수립 (LLM)
-    
-    Args:
-        user_id: 사용자 ID
-        target_trades: portfolio_calculator.calculate_net_trades 결과 (매수/매도 리스트)
-        current_state: 현재 시장 상황 및 포트폴리오 상태 (VIX 등 포함 가능)
-        
-    Returns:
-        List[Dict]: 실행 계획 (주문 유형, 호가 전략 등 포함)
     """
     if not target_trades:
         return []
@@ -27,21 +20,26 @@ async def plan_trading_strategy(
     prompt = build_trading_strategy_prompt(target_trades, current_state)
     
     try:
-        llm = LLMService() # Assuming LLMService is available in service.llm
-        # Using gemini-2.0-flash-exp as per common usage or gemini-1.5-pro as fallback
-        # The prompt asks for JSON output
-        response_text = await llm.generate_response(
-            prompt=prompt,
-            model_name="gemini-2.0-flash-exp", # Using a fast model for strategy planning
-            temperature=0.2
-        )
+        # Use function from service.llm
+        llm = llm_gemini_3_pro() 
         
+        # LangChain Usage: ainvoke within tracker
+        with track_llm_call(
+            model_name="gemini-3-pro-preview",
+            provider="Google",
+            service_name="trading_strategy_planner",
+            request_prompt=prompt
+        ) as tracker:
+            response_msg = await llm.ainvoke(prompt)
+            tracker.set_response(response_msg)
+            
+            response_text = response_msg.content
+            
         execution_plan = parse_llm_response(response_text)
         return execution_plan
         
     except Exception as e:
         logger.error(f"Error in LLM trading strategy planning: {e}", exc_info=True)
-        # Fallback: Default to Market Strategy if LLM fails
         return create_fallback_strategy(target_trades)
 
 def build_trading_strategy_prompt(trades: List[Dict[str, Any]], current_state: Dict[str, Any]) -> str:
