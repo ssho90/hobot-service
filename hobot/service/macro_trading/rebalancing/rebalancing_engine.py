@@ -90,13 +90,26 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
          
     kis = KISAPI(user_cred['app_key'], user_cred['app_secret'], user_cred['account_no'], is_simulation=user_cred.get('is_simulation', True)) 
     
+    # Remove CASH placeholder if exists
+    relevant_tickers.discard('CASH')
+    
     current_prices = {}
     for ticker in relevant_tickers:
         price = kis.get_current_price(ticker)
         if price:
             current_prices[ticker] = price
+        else:
+             logger.warning(f"Failed to fetch price for {ticker}")
+             
         # Rate Limit: Max 2 req/sec -> Sleep 0.5s
         time.sleep(0.5)
+        
+    # Validate if all prices are fetched
+    missing_tickers = [t for t in relevant_tickers if t not in current_prices]
+    if missing_tickers:
+         error_msg = f"Failed to fetch current prices for: {missing_tickers}. Aborting rebalancing."
+         logger.error(error_msg)
+         return {"status": "error", "message": error_msg}
             
     # Flatten Target Weights (Global Weights)
     target_global_weights = {}
