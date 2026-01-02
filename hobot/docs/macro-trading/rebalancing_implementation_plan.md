@@ -99,247 +99,130 @@
   - 탭 추가: 'Rebalancing 설정' (MP, Sub-MP 탭 옆에 추가)
   - 기능: MP 임계값, Sub-MP 임계값 입력 및 저장
 
-### Phase 3: LLM 기반 전략 수립 모듈
+### Phase 3: 포트폴리오 최적화 및 전략 수립 (전면 수정)
 
-#### 3.1 매도 전략 수립 모듈
-- **파일**: `hobot/service/macro_trading/rebalancing/sell_strategy_planner.py`
-- **역할**: LLM을 활용한 매도 전략 수립
-- **사용 모델**: `gemini-3-pro-preview`
-- **주요 함수**:
-  - `plan_sell_strategy(current_state, target_mp, target_sub_mp, drift_info)`: 매도 전략 수립 (LLM 호출)
-  - `build_sell_prompt()`: 매도 전략 수립용 프롬프트 생성
-    - "You are a portfolio manager..."
-    - "Goal: Generate SELL orders to reduce overweight assets to target."
-- **로직**:
-  1. Drift < 0 (과비중)인 자산 식별
-  2. 현재 보유량, 목표 비중, 편차 정보를 포함한 프롬프트 생성
-  3. LLM 호출하여 매도 주문 JSON 생성
-- **LLM 출력 형식**: JSON
-  - `[{"ticker": "...", "quantity": 10, "reason": "..."}]`
+**기존의 '매도 전략 -> 매수 전략' 분리 방식을 폐기하고, '목표 포트폴리오 산출 -> 트레이딩 전략 수립'으로 변경합니다.**
 
-#### 3.2 매수 전략 수립 모듈
-- **파일**: `hobot/service/macro_trading/rebalancing/buy_strategy_planner.py`
-- **역할**: LLM을 활용한 매수 전략 수립
-- **사용 모델**: `gemini-3-pro-preview`
-- **주요 함수**:
-  - `plan_buy_strategy(current_state, target_mp, target_sub_mp, drift_info, cash_available)`: 매수 전략 수립 (LLM 호출)
-  - `build_buy_prompt()`: 매수 전략 수립용 프롬프트 생성
-- **로직**:
-  1. Drift > 0 (저비중)인 자산 식별
-  2. 현재 보유량, 가용 현금, 목표 비중, 편차 정보, 종목별 현재가를 포함한 프롬프트 생성
-  3. LLM 호출하여 매수 주문 JSON 생성
-- **LLM 출력 형식**: JSON
-  - `[{"ticker": "...", "quantity": 10, "reason": "..."}]`
+#### 3.1 Netting 및 수량 산출 모듈 (Python Core)
 
-#### 3.3 LLM 통합 및 엔진 연동
-- **위치**: `rebalancing_engine.py`
-- **변경 사항**:
-  - `execute_sell_phase` 및 `execute_buy_phase`에서 위 플래너 호출
-  - Phase 2에서 계산된 `drift_info`를 플래너에 전달하여 LLM이 정확한 판단을 내리도록 지원
+* **파일**: `hobot/service/macro_trading/rebalancing/portfolio_calculator.py`
+* **역할**: 시점의 총 자산과 목표 비중을 기반으로 정확한 매매 수량 계산
+* **주요 함수**:
+    * `calculate_target_quantities(total_equity, target_weights, current_prices)`:
+        * 로직: `(총 자산 * 목표 비중) / 현재가` = 목표 수량
+    * `calculate_net_trades(current_holdings, target_quantities)`:
+        * 로직: `목표 수량 - 현재 수량` = **Delta (순매매 수량)**
+        * **핵심**: 여기서 `+`는 매수, `-`는 매도, `0`은 유지로 확정됨. (불필요한 매도 후 재매수 방지)
+    * `apply_minimum_trade_filter(trades, min_amount)`:
+        * 너무 소액(예: 1만원 미만)의 리밸런싱은 수수료 낭비이므로 제외
 
-### Manual Rebalancing Test Feature (User Request)
+#### 3.2 트레이딩 전략 수립 모듈 (LLM)
 
-#### Backend Updates
-- **`rebalancing_engine.py`**:
-  - Update `execute_rebalancing` to accept `max_phase` (int) argument.
-  - Logic:
-    - If `max_phase` <= 2: Stop after `check_rebalancing_needed`.
-    - If `max_phase` <= 3: Stop after `plan_sell_strategy` / `plan_buy_strategy` (do not execute).
-    - Else: Run full execution.
-- **`main.py`**:
-  - New Endpoint: `POST /api/macro-trading/rebalance/test`
-  - Body: `{"max_phase": int}`
-  - Returns: Execution result/log up to that phase.
+* **파일**: `hobot/service/macro_trading/rebalancing/trading_strategy_planner.py`
+* **역할**: Python이 계산한 '숙제(매매 리스트)'를 LLM이 '어떻게(How)' 수행할지 결정
+* **사용 모델**: `gemini-3-pro-preview`
+* **입력(Prompt)**:
+    * "시장 상황(VIX, 이슈)을 고려하여 아래 확정된 매매 리스트의 집행 전략을 세워라."
+    * Input Data: `[{ticker: "Samsung", action: "SELL", qty: 50}, {ticker: "Bond ETF", action: "BUY", qty: 100}]`
+* **출력(JSON)**:
+    * 주문 유형(`market` vs `limit`), 호가 전략(`current_price` vs `ask_price`), 분할 매매 여부 등
 
-#### Frontend Updates
-- **`TradingDashboard.js`**:
-  - Add "Rebalancing Test" button.
-  - Create `RebalancingTestModal` component.
-  - Dropdown options:
-    - "Phase 2: Check Drift (Analysis Only)"
-    - "Phase 3: Plan Strategy (LLM Plan Only)"
-    - "Phase 5: Full Execution (Trade)"
-  - Display result JSON in a readable area within the modal.
+#### 3.3 엔진 연동
 
-### Phase 4: 룰 기반 검증 모듈
+* `rebalancing_engine.py`에서 `calculate_net_trades` 호출 후 `plan_trading_strategy` 호출
 
-#### 4.1 매도 전략 검증 모듈
-- **파일**: `hobot/service/macro_trading/rebalancing/sell_strategy_validator.py`
-- **역할**: LLM이 수립한 매도 전략의 유효성 검증
-- **주요 함수**:
-  - `validate_sell_strategy()`: 매도 전략 검증
-  - `check_sell_drift_reduction()`: 매도 후 편차 감소 확인
-- **검증 규칙**:
-  1. LLM이 판단한 매도 종목이 목표와 임계값 이상 차이 나는가?
-  2. LLM이 판단한 매도 수량만큼 팔았을 때 목표와 1% 안쪽으로 차이가 좁혀지는가?
-- **검증 실패 시**: 전략 수립 단계로 재진행 또는 리밸런싱 중단
+---
 
-#### 4.2 매수 전략 검증 모듈
-- **파일**: `hobot/service/macro_trading/rebalancing/buy_strategy_validator.py`
-- **역할**: LLM이 수립한 매수 전략의 유효성 검증
-- **주요 함수**:
-  - `validate_buy_strategy()`: 매수 전략 검증
-  - `check_buy_drift_reduction()`: 매수 후 편차 감소 확인
-- **검증 규칙**:
-  1. LLM이 판단한 매수 종목이 목표와 임계값 이상 차이 나는가?
-  2. LLM이 판단한 매수 수량만큼 샀을 때 목표와 1% 안쪽으로 차이가 좁혀지는가?
-- **검증 실패 시**: 전략 수립 단계로 재진행 또는 리밸런싱 중단
+### Phase 4: 룰 기반 검증 모듈 (수정)
 
-### Phase 5: 매매 실행 모듈
+#### 4.1 통합 검증 모듈
 
-#### 5.1 매도 실행 모듈
-- **파일**: `hobot/service/macro_trading/rebalancing/sell_executor.py`
-- **역할**: 한국투자증권 API를 통한 실제 매도 주문 실행
-- **주요 함수**:
-  - `execute_sell_orders()`: 매도 주문 실행
-  - `execute_single_sell()`: 단일 종목 매도 실행
-- **의존성**: 기존 `kis_api.py`의 `sell_market_order()` 활용
-- **에러 처리**:
-  - 주문 실패 시 재시도 로직
-  - 부분 실행 시 처리
+* **파일**: `hobot/service/macro_trading/rebalancing/strategy_validator.py`
+* **역할**: 산출된 Netting 결과와 LLM 전략의 안전성 검증
+* **검증 규칙**:
+    1. **현금 흐름 검증**: `(예상 매도 금액 + 현재 예수금) > (예상 매수 금액 * 1.01)` (수수료/슬리피지 버퍼 포함)
+    2. **비중 정합성**: 제안된 매매 수행 후의 예상 비중이 목표 비중과 오차 범위(1%) 내에 들어오는가?
+    3. **이상 거래 탐지**: 단일 종목 매매액이 총 자산의 50%를 초과하는 등 비정상적 주문 차단
 
-#### 5.2 매수 실행 모듈
-- **파일**: `hobot/service/macro_trading/rebalancing/buy_executor.py`
-- **역할**: 한국투자증권 API를 통한 실제 매수 주문 실행
-- **주요 함수**:
-  - `execute_buy_orders()`: 매수 주문 실행
-  - `execute_single_buy()`: 단일 종목 매수 실행
-- **의존성**: 기존 `kis_api.py`의 `buy_market_order()` 활용
-- **에러 처리**:
-  - 주문 실패 시 재시도 로직
-  - 부분 실행 시 처리
+---
 
-### Phase 6: 이력 저장 및 로깅 모듈
+### Phase 5: 매매 실행 모듈 (순차 실행 유지)
 
-#### 6.1 리밸런싱 이력 저장
-- **위치**: `rebalancing_engine.py` 내부 또는 별도 모듈
-- **역할**: 리밸런싱 실행 결과를 DB에 저장
-- **저장 데이터**:
-  - 실행 일시
-  - 사용된 임계값
-  - 실행 전/후 편차
-  - 실행된 거래 내역
-  - 총 거래 비용
-  - 실행 상태 (SUCCESS, PARTIAL, FAILED)
-- **테이블**: `rebalancing_history` (기존 스키마 활용)
+**계획은 동시에 세웠지만(Phase 3), 실행은 현금 유동성을 위해 매도 후 매수 순서를 유지합니다.**
 
-#### 6.2 로깅
-- **로깅 레벨**: INFO, WARNING, ERROR
-- **로깅 내용**:
-  - 각 단계별 실행 상태
-  - LLM 전략 수립 결과
-  - 검증 결과
-  - 매매 실행 결과
-  - 에러 발생 시 상세 정보
+#### 5.1 주문 실행기
 
-### Phase 7: API 엔드포인트 통합
+* **파일**: `hobot/service/macro_trading/rebalancing/order_executor.py`
+* **주요 함수**:
+    * `execute_sell_orders(sell_list)`: 확정된 매도 리스트 실행. (시장가 체결 확인 대기)
+    * `execute_buy_orders(buy_list)`: 매도 체결 후 확보된 현금 확인 후 매수 실행.
+* **안전 장치**:
+    * 매도 후 예상보다 현금이 적게 확보된 경우(급락 등), 매수 리스트의 수량을 비율대로 자동 축소(`adjust_buy_quantities`)하여 미수 발생 방지.
 
-#### 7.1 기존 API 엔드포인트 수정
-- **파일**: `hobot/main.py`
-- **엔드포인트**: `/api/macro-trading/rebalance` (POST)
-- **수정 내용**:
-  - TODO 주석 제거
-  - 실제 리밸런싱 엔진 호출
-  - 에러 처리 및 응답 형식 정의
+---
 
-#### 7.2 리밸런싱 상태 조회 API (구현 완료 - 2024.12.29)
-- **엔드포인트**: `/api/macro-trading/rebalancing-status` (GET)
-- **역할**: 현재 리밸런싱 필요 여부 및 편차 정보 조회
-- **구현 내용**:
-  - MP/Sub-MP 목표 vs 실제 비중 조회
-  - 자산군별 가용 현금 정확도 개선 (API 직접 조회)
+### Phase 6: 이력 저장 및 로깅 (유지)
 
+* **테이블**: `rebalancing_history`, `rebalancing_trades`
+* **내용**: 시점의 스냅샷 데이터, 목표 비중, 실제 체결 내역 저장
 
-## 데이터 구조
+### Phase 7: API 통합 (유지)
 
-### 리밸런싱 전략 JSON 형식
+* 엔드포인트 및 Dashboard 연동
 
-#### 매도 전략 JSON
+---
+
+## 데이터 구조 (변경됨)
+
+### 트레이딩 전략 요청/응답 JSON (Phase 3)
+
+#### LLM 입력 (Python 계산 결과)
+
 ```json
 {
-  "sell_orders": [
+  "portfolio_equity": 100000000,
+  "required_trades": [
+    { "ticker": "005930", "name": "삼성전자", "action": "SELL", "quantity": 50, "est_amount": 3500000 },
+    { "ticker": "123456", "name": "KODEX 채권", "action": "BUY", "quantity": 100, "est_amount": 10000000 }
+  ]
+}
+```
+
+#### LLM 출력 (집행 전략)
+
+```json
+{
+  "execution_plan": [
     {
-      "ticker": "종목코드",
-      "name": "종목명",
-      "quantity": 매도수량,
-      "reason": "매도 이유"
+      "ticker": "005930",
+      "action": "SELL",
+      "quantity": 50,
+      "order_type": "MARKET",
+      "reason": "유동성이 풍부하고 괴리율 해소가 시급하므로 시장가 매도"
+    },
+    {
+      "ticker": "123456",
+      "action": "BUY",
+      "quantity": 100,
+      "order_type": "LIMIT",
+      "price_strategy": "CURRENT_BID_1",
+      "reason": "변동성이 낮으므로 1호가 아래에 지정가 주문하여 비용 절감"
     }
   ]
 }
 ```
 
-#### 매수 전략 JSON
-```json
-{
-  "buy_orders": [
-    {
-      "ticker": "종목코드",
-      "name": "종목명",
-      "quantity": 매수수량,
-      "reason": "매수 이유"
-    }
-  ]
-}
-```
+## 핵심 주의사항 (Revised)
 
-## 에러 처리 전략
+1. **Snapshot Timing**: 자산 조회()와 실제 주문 실행() 사이의 시간차를 최소화해야 합니다. (장중 급변동 시 오차 발생 가능)
+2. **현금 버퍼(Cash Buffer)**: 매수 주문 시, 계산된 현금의 98~99%만 사용하도록 설정하여 수수료 미수 발생을 방지해야 합니다.
+3. **원자성(Atomicity)**: Python 계산 단계에서 매수/매도 세트가 하나의 트랜잭션처럼 취급되어야 합니다. "팔기만 하고 안 사는" 상황을 막기 위한 예외 처리가 중요합니다.
 
-### 단계별 에러 처리
-1. **자산 조회 실패**: 리밸런싱 중단, 에러 로그 기록
-2. **목표 비중 조회 실패**: 리밸런싱 중단, 에러 로그 기록
-3. **리밸런싱 불필요**: 정상 종료, 로그 기록
-4. **LLM 전략 수립 실패**: 재시도 (최대 3회), 실패 시 리밸런싱 중단
-5. **전략 검증 실패**: 전략 수립 재진행 또는 리밸런싱 중단
-6. **매도 실행 실패**: 부분 실행 허용, 실패한 주문은 로그 기록
-7. **매수 실행 실패**: 부분 실행 허용, 실패한 주문은 로그 기록
+## 개발 순서 (Revised)
 
-### 트랜잭션 관리
-- 매도와 매수는 별도 트랜잭션으로 처리
-- 매도 성공 후 매수 실패 시에도 매도는 유지
-- 부분 실행 시 상태를 PARTIAL로 기록
-
-## 테스트 계획
-
-### 단위 테스트
-- 각 모듈별 단위 테스트 작성
-- Mock 객체를 활용한 KIS API 테스트
-- LLM 응답 시뮬레이션 테스트
-
-### 통합 테스트
-- 전체 리밸런싱 프로세스 통합 테스트
-- 실제 KIS API 호출 없이 시뮬레이션 테스트
-- 에러 시나리오 테스트
-
-### 수동 테스트
-- 모의투자 환경에서 실제 리밸런싱 실행
-- 다양한 시나리오 테스트 (편차 크기, 종목 수 등)
-
-## 개발 순서
-
-1. **Phase 1**: 기본 구조 및 데이터 조회 모듈 (1-2주)
-2. **Phase 2**: 리밸런싱 필요 여부 판단 모듈 (1주)
-3. **Phase 3**: LLM 기반 전략 수립 모듈 (2주)
-4. **Phase 4**: 룰 기반 검증 모듈 (1주)
-5. **Phase 5**: 매매 실행 모듈 (1-2주)
-6. **Phase 6**: 이력 저장 및 로깅 모듈 (1주)
-7. **Phase 7**: API 엔드포인트 통합 (1주)
-
-**총 예상 기간**: 8-10주
-
-## 주의사항
-
-1. **실제 거래 실행**: 실제 계좌에 영향을 주므로 신중하게 개발 및 테스트 필요
-2. **LLM 응답 검증**: LLM이 잘못된 전략을 수립할 수 있으므로 룰 기반 검증 필수
-3. **에러 복구**: 매도 후 매수 실패 시 현금이 남을 수 있으므로 복구 전략 필요
-4. **성능**: LLM 호출이 시간이 걸리므로 타임아웃 설정 필요
-5. **비용**: 거래 수수료 및 LLM API 비용 고려
-
-## 향후 개선 사항
-
-1. **부분 리밸런싱**: 편차가 큰 자산만 우선 처리
-2. **거래 비용 최적화**: 거래 비용을 고려한 리밸런싱 전략
-3. **시장 상황 고려**: 시장 변동성이 큰 경우 리밸런싱 지연
-4. **다중 계좌 지원**: 여러 계좌에 대한 동시 리밸런싱
-5. **백테스팅**: 과거 데이터를 통한 리밸런싱 전략 검증
-
-
+1. **Phase 1**: 기본 구조 및 데이터 조회
+2. **Phase 2**: 리밸런싱 판단 및 설정
+3. **Phase 3 (핵심)**: **Python Netting 로직 구현** 및 LLM 연동
+4. **Phase 4**: 통합 검증 로직 구현
+5. **Phase 5**: 순차 실행(Sell -> Wait -> Buy) 구현
+6. **Phase 6 & 7**: 로깅 및 API
