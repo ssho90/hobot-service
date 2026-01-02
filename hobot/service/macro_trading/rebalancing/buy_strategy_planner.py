@@ -142,12 +142,15 @@ async def plan_buy_strategy(user_id: str, current_state: Dict[str, Any], target_
     if tickers_to_fetch:
         logger.info(f"Fetching prices for {len(tickers_to_fetch)} items in parallel: {tickers_to_fetch}")
         
-        # Rate Limiting: Max 10 concurrent requests
-        sem = asyncio.Semaphore(10)
+        # Rate Limiting: Max 1 concurrent request (Sequential) to ensure stability
+        # KIS API limit is very strict (EGW00201: Transactions per second exceeded)
+        sem = asyncio.Semaphore(1)
 
         async def fetch_price_async(t):
             async with sem:
                 try:
+                    # Small delay between requests
+                    await asyncio.sleep(0.5)
                     loop = asyncio.get_event_loop()
                     p = await loop.run_in_executor(None, get_current_price_api, user_id, t)
                     return t, p
