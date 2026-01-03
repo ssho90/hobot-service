@@ -871,7 +871,7 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
 
 
 class RebalanceTestRequest(BaseModel):
-    max_phase: int = 5 # 2: Drift Check, 3: Strategy Plan, 5: Full Execution
+    max_phase: int = 5 # 2: Drift Check, 4: Plan & Validate, 5: Full Execution
 
 @api_router.post("/macro-trading/rebalance/test")
 async def test_rebalancing(

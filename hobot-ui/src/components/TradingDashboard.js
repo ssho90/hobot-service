@@ -432,7 +432,7 @@ const RebalancingTestModal = ({ onClose, getAuthHeaders }) => {
             <label>Test Scope (Max Phase):</label>
             <select value={maxPhase} onChange={(e) => setMaxPhase(Number(e.target.value))}>
               <option value={2}>Phase 2: Drift Check (Analysis Only)</option>
-              <option value={3}>Phase 3: Strategy Plan (LLM Only)</option>
+              <option value={4}>Phase 3 & 4: Plan & Validate (Python Algorithm)</option>
               <option value={5}>Phase 5: Full Execution (Trade)</option>
             </select>
           </div>
