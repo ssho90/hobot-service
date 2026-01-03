@@ -99,65 +99,70 @@
   - 탭 추가: 'Rebalancing 설정' (MP, Sub-MP 탭 옆에 추가)
   - 기능: MP 임계값, Sub-MP 임계값 입력 및 저장
 
-### Phase 3: 포트폴리오 최적화 및 전략 수립 (전면 수정)
+### Phase 3: 포트폴리오 최적화 및 전략 수립 (Python Algorithmic - 전면 수정)
 
-**기존의 '매도 전략 -> 매수 전략' 분리 방식을 폐기하고, '목표 포트폴리오 산출 -> 트레이딩 전략 수립'으로 변경합니다.**
+**Refined Workflow: '목표 수량 산출 -> 매도 전략 수립 -> 매도 실행 -> 매수 전략 수립 -> 매수 실행'의 단계적 접근 적용**
 
-#### 3.1 Netting 및 수량 산출 모듈 (Python Core)
+#### 3.1 목표 수량 산출 및 1차 검증 (Step 1, 2)
 
 * **파일**: `hobot/service/macro_trading/rebalancing/portfolio_calculator.py`
-* **역할**: 시점의 총 자산과 목표 비중을 기반으로 정확한 매매 수량 계산
+* **역할**: 시점의 총 자산과 목표 비중을 기반으로 티커별 매수/매도 목표 수량을 확정합니다.
 * **주요 함수**:
     * `calculate_target_quantities(total_equity, target_weights, current_prices)`:
-        * 로직: `(총 자산 * 목표 비중) / 현재가` = 목표 수량
+        * 로직: `(총 자산 * 목표 비중) / 현재가` = 목표 수량 (소수점 버림)
     * `calculate_net_trades(current_holdings, target_quantities)`:
         * 로직: `목표 수량 - 현재 수량` = **Delta (순매매 수량)**
-        * **핵심**: 여기서 `+`는 매수, `-`는 매도, `0`은 유지로 확정됨. (불필요한 매도 후 재매수 방지)
-    * `apply_minimum_trade_filter(trades, min_amount)`:
-        * 너무 소액(예: 1만원 미만)의 리밸런싱은 수수료 낭비이므로 제외
+    * `verify_strategy_feasibility(trades, current_holdings)`:
+        * **1차 검증 (Step 2)**: 산출된 매매 계획이 논리적으로 타당한지 검증 (예: 보유 수량보다 많은 매도 요청 방지)
 
-#### 3.2 트레이딩 전략 수립 모듈 (LLM)
+#### 3.2 매도 전략(JSON) 생성 (Step 3)
 
-* **파일**: `hobot/service/macro_trading/rebalancing/trading_strategy_planner.py`
-* **역할**: Python이 계산한 '숙제(매매 리스트)'를 LLM이 '어떻게(How)' 수행할지 결정
-* **사용 모델**: `gemini-3-pro-preview`
-* **입력(Prompt)**:
-    * "시장 상황(VIX, 이슈)을 고려하여 아래 확정된 매매 리스트의 집행 전략을 세워라."
-    * Input Data: `[{ticker: "Samsung", action: "SELL", qty: 50}, {ticker: "Bond ETF", action: "BUY", qty: 100}]`
-* **출력(JSON)**:
-    * 주문 유형(`market` vs `limit`), 호가 전략(`current_price` vs `ask_price`), 분할 매매 여부 등
+* **파일**: `hobot/service/macro_trading/rebalancing/trading_strategy_builder.py` (LLM 대체)
+* **역할**: 확정된 매도 수량에 대해 구체적인 주문 정보를 생성합니다.
+* **전략 로직**:
+    * **매도 가격**: `현재가 - 1 tick` (ETF 기준 -5원)
+    * **이유**: 즉각적인 체결 유도 및 불확실성 제거
+* **출력 데이터**: `sell_orders` 리스트 (Ticker, Quantity, Price)
 
-#### 3.3 엔진 연동
+#### 3.3 매수 전략(JSON) 생성 (Step 5)
 
-* `rebalancing_engine.py`에서 `calculate_net_trades` 호출 후 `plan_trading_strategy` 호출
+* **파일**: `hobot/service/macro_trading/rebalancing/trading_strategy_builder.py`
+* **역할**: (매도 실행 후) 확정된 매수 수량에 대해 구체적인 주문 정보를 생성합니다.
+* **전략 로직**:
+    * **매수 가격**: `현재가 + 1 tick` (ETF 기준 +5원)
+    * **이유**: 즉각적인 체결 유도
+* **출력 데이터**: `buy_orders` 리스트 (Ticker, Quantity, Price)
 
 ---
 
-### Phase 4: 룰 기반 검증 모듈 (수정)
+### Phase 4: 룰 기반 검증 모듈 (Step 6)
 
-#### 4.1 통합 검증 모듈
+#### 4.1 매수 로직 검증
 
 * **파일**: `hobot/service/macro_trading/rebalancing/strategy_validator.py`
-* **역할**: 산출된 Netting 결과와 LLM 전략의 안전성 검증
-* **검증 규칙**:
-    1. **현금 흐름 검증**: `(예상 매도 금액 + 현재 예수금) > (예상 매수 금액 * 1.01)` (수수료/슬리피지 버퍼 포함)
-    2. **비중 정합성**: 제안된 매매 수행 후의 예상 비중이 목표 비중과 오차 범위(1%) 내에 들어오는가?
-    3. **이상 거래 탐지**: 단일 종목 매매액이 총 자산의 50%를 초과하는 등 비정상적 주문 차단
+* **역할**: 매수 주문 실행 전, 재정적/비율적 타당성을 최종 검증합니다.
+* **검증 항목**:
+    1. **가용 현금 검증**: `(매수 예정 금액 + 수수료) <= 현재 예수금`
+        * 매도 실행(Phase 5)이 완료된 후의 실제 예수금을 기준으로 해야 함.
+    2. **리밸런싱 목표 근접성 검증**:
+        * 이번 매수까지 실행되었을 때, 최종 포트폴리오 비중이 목표 비중과 허용 오차 내로 수렴하는지 시뮬레이션.
+
+#### 4.2 실행 로직 연동 (Workflow)
+
+* `rebalancing_engine.py`가 전체 오케스트레이션을 담당:
+    * `Step 1~2` (산출) -> `Step 3` (매도계획) -> **`Step 4` (매도 실행 - Phase 5)** -> `Step 5` (매수계획) -> `Step 6` (매수검증) -> **`Step 7` (매수 실행 - Phase 5)** -> `Step 8` (완료체크)
 
 ---
 
-### Phase 5: 매매 실행 모듈 (순차 실행 유지)
-
-**계획은 동시에 세웠지만(Phase 3), 실행은 현금 유동성을 위해 매도 후 매수 순서를 유지합니다.**
+### Phase 5: 매매 실행 모듈 (Step 4, 7)
 
 #### 5.1 주문 실행기
 
 * **파일**: `hobot/service/macro_trading/rebalancing/order_executor.py`
+* **역할**: 생성된 JSON 전략을 실제 API 주문으로 변환하여 전송.
 * **주요 함수**:
-    * `execute_sell_orders(sell_list)`: 확정된 매도 리스트 실행. (시장가 체결 확인 대기)
-    * `execute_buy_orders(buy_list)`: 매도 체결 후 확보된 현금 확인 후 매수 실행.
-* **안전 장치**:
-    * 매도 후 예상보다 현금이 적게 확보된 경우(급락 등), 매수 리스트의 수량을 비율대로 자동 축소(`adjust_buy_quantities`)하여 미수 발생 방지.
+    * `execute_sell_phase(sell_orders)`: 매도 주문 전송 및 **체결 완료 대기**(중요).
+    * `execute_buy_phase(buy_orders)`: 매수 주문 전송.
 
 ---
 
@@ -174,42 +179,38 @@
 
 ## 데이터 구조 (변경됨)
 
-### 트레이딩 전략 요청/응답 JSON (Phase 3)
+### 트레이딩 전략 JSON 구조 (Phase 3)
 
-#### LLM 입력 (Python 계산 결과)
+LLM을 사용하지 않으므로 복잡한 프롬프트/응답 구조 대신, 내부 처리를 위한 명확한 JSON 구조를 정의합니다.
+
+#### 매도 주문 리스트 (Step 3 Output)
 
 ```json
-{
-  "portfolio_equity": 100000000,
-  "required_trades": [
-    { "ticker": "005930", "name": "삼성전자", "action": "SELL", "quantity": 50, "est_amount": 3500000 },
-    { "ticker": "123456", "name": "KODEX 채권", "action": "BUY", "quantity": 100, "est_amount": 10000000 }
-  ]
-}
+[
+  {
+    "ticker": "005930",
+    "name": "삼성전자",
+    "action": "SELL",
+    "quantity": 50,
+    "limit_price": 75000, 
+    "price_logic": "current_price - 1 tick"
+  }
+]
 ```
 
-#### LLM 출력 (집행 전략)
+#### 매수 주문 리스트 (Step 5 Output)
 
 ```json
-{
-  "execution_plan": [
-    {
-      "ticker": "005930",
-      "action": "SELL",
-      "quantity": 50,
-      "order_type": "MARKET",
-      "reason": "유동성이 풍부하고 괴리율 해소가 시급하므로 시장가 매도"
-    },
-    {
-      "ticker": "123456",
-      "action": "BUY",
-      "quantity": 100,
-      "order_type": "LIMIT",
-      "price_strategy": "CURRENT_BID_1",
-      "reason": "변동성이 낮으므로 1호가 아래에 지정가 주문하여 비용 절감"
-    }
-  ]
-}
+[
+  {
+    "ticker": "123456",
+    "name": "KODEX 국고채",
+    "action": "BUY",
+    "quantity": 100,
+    "limit_price": 101050,
+    "price_logic": "current_price + 1 tick"
+  }
+]
 ```
 
 ## 핵심 주의사항 (Revised)

@@ -111,3 +111,31 @@ def apply_minimum_trade_filter(
             logger.info(f"Trade filtered for {ticker}: Amount {est_amount} < {min_amount}")
             
     return filtered_trades
+
+def verify_strategy_feasibility(
+    trades: List[Dict[str, Any]], 
+    current_holdings: Dict[str, int]
+) -> Tuple[bool, List[str]]:
+    """
+    1차 검증: 산출된 매매 계획의 논리적 타당성 검증
+    
+    Args:
+        trades: 산출된 매매 리스트
+        current_holdings: 현재 보유 수량
+        
+    Returns:
+        (is_valid, error_messages)
+    """
+    errors = []
+    
+    for trade in trades:
+        ticker = trade["ticker"]
+        action = trade["action"]
+        quantity = trade["quantity"]
+        
+        if action == "SELL":
+            current_qty = current_holdings.get(ticker, 0)
+            if quantity > current_qty:
+                errors.append(f"Invalid SELL quantity for {ticker}: Request {quantity} > Holding {current_qty}")
+                
+    return len(errors) == 0, errors

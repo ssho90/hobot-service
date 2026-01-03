@@ -69,7 +69,7 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         return {"status": "success", "message": "Rebalancing not needed", "drift_info": drift_info}
         
     # --- Phase 3: Portfolio Optimization & Strategy Planning ---
-    logger.info("Starting Phase 3: Netting & Planning")
+    logger.info("Starting Phase 3: Netting & Planning (Python Algorithmic)")
     
     # 3.1 Netting & Sizing (Python)
     # Fetch current prices for all relevant tickers
@@ -131,25 +131,59 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
     filtered_trades = apply_minimum_trade_filter(net_trades, current_prices)
     
     logger.info(f"Net Trades Calculated: {len(filtered_trades)} trades")
+
+    # 3.1.2 Feasibility Check
+    from service.macro_trading.rebalancing.portfolio_calculator import verify_strategy_feasibility
+    is_feasible, logic_errors = verify_strategy_feasibility(filtered_trades, current_holdings_map)
     
-    # 3.2 LLM Strategy Planning
-    execution_plan = await plan_trading_strategy(user_id, filtered_trades, current_state)
-    logger.info(f"Execution Plan: {execution_plan}")
+    if not is_feasible:
+         return {"status": "error", "message": f"Strategy Logic Error: {logic_errors}"}
+
+    # 3.2 Build Sell Orders
+    from service.macro_trading.rebalancing.trading_strategy_builder import build_sell_orders, build_buy_orders
+    sell_orders = build_sell_orders(filtered_trades, current_prices, tick_size=5)
+    
+    logger.info(f"Sell Orders Built: {len(sell_orders)}")
     
     if max_phase <= 3:
         return {
             "status": "success",
-            "message": "Phase 3 Completed",
+            "message": "Phase 3 Completed (Planning)",
             "net_trades": filtered_trades,
-            "execution_plan": execution_plan
+            "sell_orders": sell_orders
         }
 
-    # --- Phase 4: Strategy Validation ---
-    logger.info("Starting Phase 4: Validation")
-    is_valid, reasons, validation_summary = validate_strategy(
+    # --- Phase 5 (Step 4): Execute Sell Orders ---
+    # NOTE: In a real scenario, this should be async and wait for completion. 
+    # Here we assume immediate execution or we just log it for now as infrastructure might not be fully ready.
+    # To properly implement, we need OrderExecutor.
+    # from service.macro_trading.rebalancing.order_executor import execute_sell_phase
+    # executed_sells = execute_sell_phase(sell_orders)
+    
+    # Mocking Sell Execution Effect for Cash Calculation
+    # We need to know 'Available Cash' after Sell.
+    # Since we can't real-trade here without user auth/market open, we simulate.
+    current_cash = float(current_state.get('cash_balance', 0))
+    est_sell_proceeds = sum([o['quantity'] * o['limit_price'] for o in sell_orders])
+    
+    # Simulate Cash (Current + Sell Proceeds - Fees)
+    simulated_cash_balance = current_cash + int(est_sell_proceeds * 0.998) # 0.2% fee/tax buffer
+    
+    logger.info(f"Simulated Cash after SELL: {simulated_cash_balance} (Start: {current_cash} + Sell: {est_sell_proceeds})")
+
+    # 3.3 Build Buy Orders
+    buy_orders = build_buy_orders(filtered_trades, current_prices, tick_size=5)
+    logger.info(f"Buy Orders Built: {len(buy_orders)}")
+
+    # --- Phase 4: Buy Strategy Validation ---
+    logger.info("Starting Phase 4: Buy Validation")
+    from service.macro_trading.rebalancing.strategy_validator import validate_buy_strategy
+    
+    is_valid, reasons, validation_summary = validate_buy_strategy(
+        buy_orders=buy_orders,
+        current_cash=simulated_cash_balance,
         current_state=current_state,
         target_mp=target_mp,
-        execution_plan=execution_plan,
         current_prices=current_prices
     )
     
@@ -159,29 +193,33 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         "summary": validation_summary
     }
     
+    if not is_valid:
+        logger.error(f"Buy Strategy Validation Failed: {reasons}")
+        return {
+            "status": "error",
+            "message": "Buy Strategy Validation Failed",
+            "validation_result": validation_result,
+            "sell_orders": sell_orders, # Return what was planned/executed
+            "buy_orders": buy_orders
+        }
+        
     if max_phase <= 4:
          return {
             "status": "success",
-            "message": "Phase 4 Completed",
-            "execution_plan": execution_plan,
-            "validation_result": validation_result
-        }
-        
-    if not is_valid:
-        logger.error(f"Strategy Validation Failed: {reasons}")
-        return {
-            "status": "error",
-            "message": "Strategy Validation Failed",
+            "message": "Phase 4 Completed (Validation)",
+            "sell_orders": sell_orders,
+            "buy_orders": buy_orders,
             "validation_result": validation_result
         }
 
-    # --- Phase 5 (Execute) ---
-    # TODO: Implement Phase 5 Execution
+    # --- Phase 5 (Step 7): Execute Buy Orders ---
+    # execute_buy_phase(buy_orders)
     
     return {
         "status": "success", 
-        "message": "Rebalancing Completed (Phase 5 not fully linked yet)",
-        "execution_plan": execution_plan,
+        "message": "Rebalancing Completed (Simulated)",
+        "sell_orders": sell_orders,
+        "buy_orders": buy_orders,
         "validation_result": validation_result
     }
 
