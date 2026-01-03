@@ -1,6 +1,6 @@
 import logging
 import math
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 logger = logging.getLogger(__name__)
 

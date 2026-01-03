@@ -417,7 +417,7 @@ class KISAPI:
 
     def get_current_price(self, ticker):
         """현재가 조회"""
-        time.sleep(0.1)
+        time.sleep(0.5) # Rate Limit: 2 req/sec
         path = "/uapi/domestic-stock/v1/quotations/inquire-price"
         url = f"{self.base_url}{path}"
         headers = self._get_common_headers("FHKST01010100")
