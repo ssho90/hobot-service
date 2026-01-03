@@ -230,9 +230,9 @@ class KISAPI:
                 cano = account_no_digits[:8]
                 acnt_prdt_cd = account_no_digits[8:]
             elif len(account_no_digits) == 8:
-                # 8자리: 전체 = CANO, ACNT_PRDT_CD = 빈 문자열 (또는 기본값)
+                # 8자리: 전체 = CANO, ACNT_PRDT_CD = "01" (기본값)
                 cano = account_no_digits
-                acnt_prdt_cd = ""  # 빈 문자열로 설정 (API에서 처리)
+                acnt_prdt_cd = "01"  # 8자리 계좌번호의 경우 기본값 01 설정
             else:
                 raise ValueError(
                     f"계좌번호 길이가 올바르지 않습니다. "
@@ -314,6 +314,13 @@ class KISAPI:
             "CTX_AREA_FK100": "",
             "CTX_AREA_NK100": ""
         }
+        
+        # 디버깅: 헤더 및 요청 정보 상세 로깅
+        logging.info(f"KIS API Reqyest Debug - URL: {url}")
+        logging.info(f"KIS API Request Debug - TR_ID: {headers.get('tr_id')}")
+        logging.info(f"KIS API Request Debug - AppKey: {headers.get('appKey')}")
+        logging.info(f"KIS API Request Headers: {json.dumps(headers, ensure_ascii=False)}")
+        logging.info(f"KIS API Request Params: {json.dumps(params, ensure_ascii=False)}")
         
         logging.info(f"KIS API 잔고 조회 요청 - URL: {url}, CANO: {cano}, ACNT_PRDT_CD: '{acnt_prdt_cd}'")
 

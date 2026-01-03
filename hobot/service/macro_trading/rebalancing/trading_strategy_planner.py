@@ -20,8 +20,8 @@ async def plan_trading_strategy(
     prompt = build_trading_strategy_prompt(target_trades, current_state)
     
     try:
-        # Use function from service.llm
-        llm = llm_gemini_3_pro() 
+        # Use function from service.llm - Flash model is faster for strategy planning
+        llm = llm_gemini_3_pro(timeout=120)
         
         # LangChain Usage: ainvoke within tracker
         with track_llm_call(
