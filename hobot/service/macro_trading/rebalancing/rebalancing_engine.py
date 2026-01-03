@@ -20,8 +20,6 @@ from service.macro_trading.rebalancing.portfolio_calculator import (
     calculate_net_trades,
     apply_minimum_trade_filter
 )
-from service.macro_trading.rebalancing.trading_strategy_planner import plan_trading_strategy
-from service.macro_trading.rebalancing.strategy_validator import validate_strategy
 
 from service.macro_trading.kis.kis_api import KISAPI
 from service.macro_trading.kis.user_credentials import get_user_kis_credentials
