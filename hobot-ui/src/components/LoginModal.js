@@ -6,7 +6,7 @@ const LoginModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('login'); // 'login' or 'register'
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Login state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +14,7 @@ const LoginModal = ({ isOpen, onClose }) => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
-  
+
   // Register state
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
@@ -22,7 +22,7 @@ const LoginModal = ({ isOpen, onClose }) => {
   const [registerError, setRegisterError] = useState('');
   const [registerSuccess, setRegisterSuccess] = useState('');
   const [registerLoading, setRegisterLoading] = useState(false);
-  
+
   const { login, register } = useAuth();
 
   if (!isOpen) return null;
@@ -34,7 +34,7 @@ const LoginModal = ({ isOpen, onClose }) => {
 
     try {
       const result = await login(username, password, mfaCode);
-      
+
       if (result.success) {
         onClose();
         // 페이지 새로고침하여 로그인 상태 반영
@@ -72,8 +72,8 @@ const LoginModal = ({ isOpen, onClose }) => {
     setRegisterLoading(true);
 
     try {
-      const result = await register(regUsername, null, regPassword);
-      
+      const result = await register(regUsername, regPassword);
+
       if (result.success) {
         setRegisterSuccess('회원가입이 완료되었습니다. 로그인해주세요.');
         // 회원가입 성공 후 자동 로그인
@@ -109,7 +109,7 @@ const LoginModal = ({ isOpen, onClose }) => {
         <button className="login-modal-close" onClick={onClose}>
           ✕
         </button>
-        
+
         <div className="login-modal-logo">
           <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
         </div>
@@ -129,7 +129,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                     disabled={loginLoading}
                   />
                 </div>
-                
+
                 <div className="form-group password-group">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -149,15 +149,15 @@ const LoginModal = ({ isOpen, onClose }) => {
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
-                
+
                 {loginError && (
                   <div className="error-message">
                     {loginError}
                   </div>
                 )}
-                
-                <button 
-                  type="submit" 
+
+                <button
+                  type="submit"
                   className="login-modal-btn"
                   disabled={loginLoading}
                 >
@@ -170,7 +170,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                   <p>2단계 인증 코드를 입력하세요</p>
                   <p className="mfa-hint">인증 앱에 표시된 6자리 코드를 입력하거나 백업 코드를 사용하세요.</p>
                 </div>
-                
+
                 <div className="form-group">
                   <input
                     type="text"
@@ -184,22 +184,22 @@ const LoginModal = ({ isOpen, onClose }) => {
                     autoFocus
                   />
                 </div>
-                
+
                 {loginError && (
                   <div className="error-message">
                     {loginError}
                   </div>
                 )}
-                
+
                 <div className="mfa-actions">
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="login-modal-btn"
                     disabled={loginLoading || mfaCode.length < 6}
                   >
                     {loginLoading ? '인증 중...' : '인증하기'}
                   </button>
-                  <button 
+                  <button
                     type="button"
                     className="login-modal-btn btn-secondary"
                     onClick={() => {
@@ -228,7 +228,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 className="form-input"
               />
             </div>
-            
+
             <div className="form-group password-group">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -248,7 +248,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
             </div>
-            
+
             <div className="form-group password-group">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -268,21 +268,21 @@ const LoginModal = ({ isOpen, onClose }) => {
                 {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
               </button>
             </div>
-            
+
             {registerError && (
               <div className="error-message">
                 {registerError}
               </div>
             )}
-            
+
             {registerSuccess && (
               <div className="success-message">
                 {registerSuccess}
               </div>
             )}
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               className="login-modal-btn"
               disabled={registerLoading}
             >
@@ -296,8 +296,8 @@ const LoginModal = ({ isOpen, onClose }) => {
             <>
               <span>비밀번호 찾기</span>
               <span className="link-divider">|</span>
-              <span 
-                className="link-clickable" 
+              <span
+                className="link-clickable"
                 onClick={() => {
                   setActiveTab('register');
                   setLoginError('');
@@ -309,8 +309,8 @@ const LoginModal = ({ isOpen, onClose }) => {
               <span>아이디 찾기</span>
             </>
           ) : (
-            <span 
-              className="link-clickable" 
+            <span
+              className="link-clickable"
               onClick={() => {
                 setActiveTab('login');
                 setRegisterError('');
