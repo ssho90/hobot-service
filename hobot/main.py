@@ -77,6 +77,10 @@ class KISCredentialRequest(BaseModel):
     app_secret: str
     is_simulation: bool = False
 
+class UpbitCredentialRequest(BaseModel):
+    access_key: str
+    secret_key: str
+
 class MFAVerifySetupRequest(BaseModel):
     secret: str
     code: str
@@ -1984,6 +1988,107 @@ async def save_user_kis_credentials(
             }
     except Exception as e:
         logging.error(f"Error saving KIS credentials: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 사용자별 Upbit Credential API
+@api_router.get("/user/upbit-credentials")
+async def get_user_upbit_credentials(current_user: dict = Depends(get_current_user)):
+    """사용자별 Upbit API 인증 정보 조회"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT user_id
+                FROM user_upbit_credentials
+                WHERE user_id = %s
+            """, (current_user["id"],))
+            row = cursor.fetchone()
+            
+            if not row:
+                return {
+                    "status": "success",
+                    "has_credentials": False,
+                    "data": None
+                }
+            
+            # 민감정보(access_key, secret_key)는 절대 반환하지 않는다.
+            return {
+                "status": "success",
+                "has_credentials": True,
+                "data": {
+                    "user_id": row["user_id"]
+                }
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting Upbit credentials: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/user/upbit-credentials")
+async def save_user_upbit_credentials(
+    request: UpbitCredentialRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """사용자별 Upbit API 인증 정보 저장/업데이트"""
+    try:
+        from service.database.db import get_db_connection
+        from service.utils.encryption import encrypt_data
+        import hashlib
+        
+        # 암호화
+        access_key_encrypted = encrypt_data(request.access_key)
+        secret_key_encrypted = encrypt_data(request.secret_key)
+        
+        # 해시 기반 ID 생성
+        id_str = f"{current_user['id']}_upbit"
+        id_hash = hashlib.sha256(id_str.encode()).hexdigest()
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 기존 데이터 확인
+            cursor.execute("""
+                SELECT id FROM user_upbit_credentials WHERE user_id = %s
+            """, (current_user["id"],))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # 업데이트
+                cursor.execute("""
+                    UPDATE user_upbit_credentials
+                    SET access_key = %s,
+                        secret_key = %s,
+                        updated_at = NOW()
+                    WHERE user_id = %s
+                """, (
+                    access_key_encrypted,
+                    secret_key_encrypted,
+                    current_user["id"]
+                ))
+            else:
+                # 새로 생성
+                cursor.execute("""
+                    INSERT INTO user_upbit_credentials
+                    (id, user_id, access_key, secret_key)
+                    VALUES (%s, %s, %s, %s)
+                """, (
+                    id_hash,
+                    current_user["id"],
+                    access_key_encrypted,
+                    secret_key_encrypted
+                ))
+            
+            conn.commit()
+            
+            return {
+                "status": "success",
+                "message": "Upbit 인증 정보가 저장되었습니다."
+            }
+    except Exception as e:
+        logging.error(f"Error saving Upbit credentials: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # MFA 관련 API

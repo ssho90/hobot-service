@@ -34,7 +34,7 @@ export DB_CHARSET="${DB_CHARSET:-utf8mb4}"
 export JWT_SECRET_KEY="${JWT_SECRET_KEY}"
 
 # KIS Encryption Master Key
-export KIS_ENCRYPTION_MASTER_KEY="${KIS_ENCRYPTION_MASTER_KEY}"
+export ENCRYPTION_MASTER_KEY="${ENCRYPTION_MASTER_KEY}"
 
 # 유틸리티 함수 (모든 로그는 stderr로 출력하여 변수 할당에 영향을 주지 않도록)
 log_info() {
@@ -203,7 +203,7 @@ DB_CHARSET=${DB_CHARSET:-utf8mb4}
 JWT_SECRET_KEY=${JWT_SECRET_KEY}
 
 # KIS Encryption Master Key
-KIS_ENCRYPTION_MASTER_KEY=${KIS_ENCRYPTION_MASTER_KEY}
+ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
 EOF
   chmod 600 "${DEPLOY_PATH}/hobot/.env"
   log_success ".env file created"

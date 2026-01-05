@@ -13,7 +13,8 @@ from typing import Optional
 def get_master_key() -> bytes:
     """
     마스터키를 환경 변수에서 가져옴
-    GitHub Action Secret에 등록된 KIS_ENCRYPTION_MASTER_KEY 사용
+    마스터키를 환경 변수에서 가져옴
+    GitHub Action Secret에 등록된 ENCRYPTION_MASTER_KEY 사용
     
     환경 변수 값은 Fernet 키 형식(32바이트를 base64로 인코딩한 문자열)이어야 합니다.
     Fernet 키 생성 방법:
@@ -21,10 +22,10 @@ def get_master_key() -> bytes:
         key = Fernet.generate_key()
         print(key.decode())  # 이 값을 환경 변수에 설정
     """
-    master_key = os.getenv("KIS_ENCRYPTION_MASTER_KEY")
+    master_key = os.getenv("ENCRYPTION_MASTER_KEY")
     if not master_key:
         raise ValueError(
-            "KIS_ENCRYPTION_MASTER_KEY 환경 변수가 설정되지 않았습니다. "
+            "ENCRYPTION_MASTER_KEY 환경 변수가 설정되지 않았습니다. "
             "GitHub Action Secret에 등록해주세요."
         )
     

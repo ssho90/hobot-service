@@ -161,6 +161,21 @@ def init_database():
         except Exception:
             pass  # 이미 존재하는 경우 무시
         
+        # 사용자별 Upbit API 인증 정보 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_upbit_credentials (
+                id VARCHAR(64) PRIMARY KEY COMMENT '해시 기반 ID',
+                user_id VARCHAR(50) NOT NULL COMMENT '사용자 ID',
+                access_key TEXT NOT NULL COMMENT '암호화된 Access Key',
+                secret_key TEXT NOT NULL COMMENT '암호화된 Secret Key',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY unique_user_id (user_id) COMMENT '사용자별 중복 방지',
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                INDEX idx_user_id (user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자별 Upbit API 인증 정보'
+        """)
+
         # 리밸런싱 임계값 설정 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS rebalancing_config (

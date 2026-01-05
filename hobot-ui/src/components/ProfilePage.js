@@ -15,6 +15,12 @@ const ProfilePage = () => {
     app_secret: '',
     is_simulation: false
   });
+  const [upbitCredentials, setUpbitCredentials] = useState({
+    access_key: '',
+    secret_key: ''
+  });
+  const [hasUpbitCredentials, setHasUpbitCredentials] = useState(false);
+  const [upbitSaving, setUpbitSaving] = useState(false);
   const [hasCredentials, setHasCredentials] = useState(false);
   const [mfaStatus, setMfaStatus] = useState({ mfa_enabled: false, backup_codes_count: 0 });
   const [mfaSetup, setMfaSetup] = useState({ secret: '', qr_code: '', showQR: false });
@@ -26,6 +32,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchCredentials();
+    fetchUpbitCredentials();
     fetchMfaStatus();
   }, []);
 
@@ -105,6 +112,75 @@ const ProfilePage = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const fetchUpbitCredentials = async () => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await fetch('/api/user/upbit-credentials', {
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.has_credentials) {
+          setHasUpbitCredentials(true);
+        } else {
+          setHasUpbitCredentials(false);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching Upbit credentials:', err);
+    }
+  };
+
+  const handleUpbitSubmit = async (e) => {
+    e.preventDefault();
+    setUpbitSaving(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const headers = getAuthHeaders();
+      const response = await fetch('/api/user/upbit-credentials', {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(upbitCredentials)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuccess(data.message || 'Upbit 인증 정보가 저장되었습니다.');
+        setHasUpbitCredentials(true);
+        // 비밀번호 필드 초기화
+        setUpbitCredentials({
+          access_key: '',
+          secret_key: ''
+        });
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || 'Upbit 인증 정보 저장에 실패했습니다.');
+      }
+    } catch (err) {
+      setError('서버 연결에 실패했습니다.');
+      console.error('Error saving Upbit credentials:', err);
+    } finally {
+      setUpbitSaving(false);
+    }
+  };
+
+  const handleUpbitChange = (e) => {
+    const { name, value } = e.target;
+    setUpbitCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleChange = (e) => {
@@ -286,7 +362,7 @@ const ProfilePage = () => {
   return (
     <div className="profile-page">
       <h1>프로필 설정</h1>
-      
+
       <div className="profile-section">
         <h2>사용자 정보</h2>
         <div className="user-info">
@@ -313,16 +389,16 @@ const ProfilePage = () => {
           <div className="credentials-status">
             <span className="status-badge status-active">인증 정보가 등록되어 있습니다</span>
             <p className="status-note">
-              보안을 위해 기존 인증 정보는 표시되지 않습니다. 
+              보안을 위해 기존 인증 정보는 표시되지 않습니다.
               수정하려면 아래 필드에 새로운 값을 입력하세요.
             </p>
           </div>
         )}
-        
+
         {error && (
           <div className="error-message">{error}</div>
         )}
-        
+
         {success && (
           <div className="success-message">{success}</div>
         )}
@@ -395,8 +471,8 @@ const ProfilePage = () => {
           </div>
 
           <div className="form-actions">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary"
               disabled={saving}
             >
@@ -417,8 +493,68 @@ const ProfilePage = () => {
       </div>
 
       <div className="profile-section">
+        <h2>Upbit API 인증 정보</h2>
+        {hasUpbitCredentials && (
+          <div className="credentials-status">
+            <span className="status-badge status-active">인증 정보가 등록되어 있습니다</span>
+            <p className="status-note">
+              보안을 위해 기존 인증 정보는 표시되지 않습니다.
+              수정하려면 아래 필드에 새로운 값을 입력하세요.
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleUpbitSubmit} className="credentials-form">
+          <div className="form-group">
+            <label htmlFor="access_key">Access Key *</label>
+            <input
+              type="password"
+              id="access_key"
+              name="access_key"
+              value={upbitCredentials.access_key}
+              onChange={handleUpbitChange}
+              required
+              placeholder={hasUpbitCredentials ? "새로운 Access Key를 입력하세요" : "Access Key를 입력하세요"}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="secret_key">Secret Key *</label>
+            <input
+              type="password"
+              id="secret_key"
+              name="secret_key"
+              value={upbitCredentials.secret_key}
+              onChange={handleUpbitChange}
+              required
+              placeholder={hasUpbitCredentials ? "새로운 Secret Key를 입력하세요" : "Secret Key를 입력하세요"}
+            />
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={upbitSaving}
+            >
+              {upbitSaving ? '저장 중...' : hasUpbitCredentials ? '인증 정보 업데이트' : '인증 정보 저장'}
+            </button>
+          </div>
+        </form>
+
+        <div className="credentials-info">
+          <h3>인증 정보 안내</h3>
+          <ul>
+            <li>Upbit Open API에서 발급받은 인증 정보를 입력하세요.</li>
+            <li>모든 인증 정보는 암호화(ENCRYPTION_MASTER_KEY 사용)되어 안전하게 저장됩니다.</li>
+            <li>인증 정보는 본인만 확인할 수 있으며, 다른 사용자에게 공유되지 않습니다.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="profile-section">
         <h2>2단계 인증 (MFA)</h2>
-        
+
         {mfaStatus.mfa_enabled ? (
           <div>
             <div className="credentials-status">
@@ -515,7 +651,7 @@ const ProfilePage = () => {
                   <li>아래 QR 코드를 스캔하세요.</li>
                   <li>앱에 표시된 6자리 코드를 입력하세요.</li>
                 </ol>
-                
+
                 <div className="qr-code-container">
                   <img src={mfaSetup.qr_code} alt="MFA QR Code" />
                 </div>
