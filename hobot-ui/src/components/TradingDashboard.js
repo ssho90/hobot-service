@@ -494,11 +494,23 @@ const StackedBar = ({ segments, tone = 'target' }) => {
             ? `${(seg.value ?? 0).toFixed(1)}%`
             : `${seg.label} ${(seg.value ?? 0).toFixed(1)}%`;
 
+          // Narrow width handling: reduce font size to prevent truncation
+          let segmentStyle = { width: `${width}%`, background: seg.color };
+          if (seg.isMobile && width < 15) {
+            segmentStyle.fontSize = width < 10 ? '9px' : '10px';
+            if (width < 8) {
+              segmentStyle.fontSize = '8px';
+              segmentStyle.letterSpacing = '-0.5px';
+            }
+          }
+
+          const segmentClass = `stacked-bar-segment ${seg.isMobile && width < 15 ? 'compact' : ''}`;
+
           return (
             <div
               key={`${seg.label}-${idx}`}
-              className="stacked-bar-segment"
-              style={{ width: `${width}%`, background: seg.color }}
+              className={segmentClass}
+              style={segmentStyle}
               title={`${seg.label}: ${(seg.value ?? 0).toFixed(1)}%`}
             >
               <span className="stacked-bar-label">
