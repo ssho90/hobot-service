@@ -112,87 +112,112 @@ const TradingDashboard = () => {
 
 // Macro Quant Trading 탭 컴포넌트
 const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebalanceLoading, rebalanceError, onOpenTestModal }) => {
+  const [activeTab, setActiveTab] = useState('account');
+
   return (
     <div className="tab-content">
-      <div className="tab-header-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-        <button className="btn btn-primary" onClick={onOpenTestModal}>
-          Rebalancing Test
+      <div className="dashboard-tabs" style={{ marginBottom: '15px', borderBottom: '1px solid #e0e0e0', justifyContent: 'flex-start' }}>
+        <button
+          className={`dashboard-tab ${activeTab === 'account' ? 'active' : ''}`}
+          onClick={() => setActiveTab('account')}
+        >
+          계좌/자산
         </button>
-      </div>
-      <RebalancingStatusCard
-        data={rebalanceStatus}
-        loading={rebalanceLoading}
-        error={rebalanceError}
-      />
-
-      <div className="card account-info-card">
-        <h2>계좌 정보</h2>
-        {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
-        {error && <div className="error">오류: {error}</div>}
-        {!loading && !error && balance && balance.status === 'success' && (
-          <div className="account-info-summary">
-            <div className="info-row">
-              <span className="info-label">계좌번호:</span>
-              <span className="info-value">{balance.account_no}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">총 평가금액:</span>
-              <span className="info-value">
-                {balance.total_eval_amount?.toLocaleString('ko-KR')} 원
-              </span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">현금 잔액:</span>
-              <span className="info-value">
-                {balance.cash_balance?.toLocaleString('ko-KR')} 원
-              </span>
-            </div>
+        <button
+          className={`dashboard-tab ${activeTab === 'rebalance' ? 'active' : ''}`}
+          onClick={() => setActiveTab('rebalance')}
+        >
+          리밸런싱 현황
+        </button>
+        {activeTab === 'rebalance' && (
+          <div style={{ marginLeft: 'auto', alignSelf: 'center' }}>
+            <button className="btn btn-primary" onClick={onOpenTestModal} style={{ padding: '6px 12px', fontSize: '13px' }}>
+              Rebalancing Test
+            </button>
           </div>
-        )}
-        {!loading && !error && (!balance || balance.status !== 'success') && (
-          <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
         )}
       </div>
 
-      {/* 보유 자산 */}
-      {balance && balance.status === 'success' && balance.holdings && balance.holdings.length > 0 && (
-        <div className="card">
-          <h2>보유 자산</h2>
-          <div className="holdings-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>종목명</th>
-                  <th>종목코드</th>
-                  <th>보유수량</th>
-                  <th>평균매수가</th>
-                  <th>현재가</th>
-                  <th>평가금액</th>
-                  <th>손익</th>
-                  <th>손익률</th>
-                </tr>
-              </thead>
-              <tbody>
-                {balance.holdings.map((holding, idx) => (
-                  <tr key={idx}>
-                    <td>{holding.stock_name}</td>
-                    <td>{holding.stock_code}</td>
-                    <td>{holding.quantity?.toLocaleString('ko-KR')} 주</td>
-                    <td>{holding.avg_buy_price?.toLocaleString('ko-KR')} 원</td>
-                    <td>{holding.current_price?.toLocaleString('ko-KR')} 원</td>
-                    <td>{holding.eval_amount?.toLocaleString('ko-KR')} 원</td>
-                    <td className={holding.profit_loss >= 0 ? 'positive' : 'negative'}>
-                      {holding.profit_loss?.toLocaleString('ko-KR')} 원
-                    </td>
-                    <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
-                      {holding.profit_loss_rate?.toFixed(2)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {activeTab === 'rebalance' && (
+        <RebalancingStatusCard
+          data={rebalanceStatus}
+          loading={rebalanceLoading}
+          error={rebalanceError}
+        />
+      )}
+
+      {activeTab === 'account' && (
+        <>
+          <div className="card account-info-card">
+            <h2>계좌 정보</h2>
+            {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
+            {error && <div className="error">오류: {error}</div>}
+            {!loading && !error && balance && balance.status === 'success' && (
+              <div className="account-info-summary">
+                <div className="info-row">
+                  <span className="info-label">계좌번호:</span>
+                  <span className="info-value">{balance.account_no}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">총 평가금액:</span>
+                  <span className="info-value">
+                    {balance.total_eval_amount?.toLocaleString('ko-KR')} 원
+                  </span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">현금 잔액:</span>
+                  <span className="info-value">
+                    {balance.cash_balance?.toLocaleString('ko-KR')} 원
+                  </span>
+                </div>
+              </div>
+            )}
+            {!loading && !error && (!balance || balance.status !== 'success') && (
+              <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
+            )}
           </div>
-        </div>
+
+          {/* 보유 자산 */}
+          {balance && balance.status === 'success' && balance.holdings && balance.holdings.length > 0 && (
+            <div className="card">
+              <h2>보유 자산</h2>
+              <div className="holdings-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>종목명</th>
+                      <th>종목코드</th>
+                      <th>보유수량</th>
+                      <th>평균매수가</th>
+                      <th>현재가</th>
+                      <th>평가금액</th>
+                      <th>손익</th>
+                      <th>손익률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {balance.holdings.map((holding, idx) => (
+                      <tr key={idx}>
+                        <td>{holding.stock_name}</td>
+                        <td>{holding.stock_code}</td>
+                        <td>{holding.quantity?.toLocaleString('ko-KR')} 주</td>
+                        <td>{holding.avg_buy_price?.toLocaleString('ko-KR')} 원</td>
+                        <td>{holding.current_price?.toLocaleString('ko-KR')} 원</td>
+                        <td>{holding.eval_amount?.toLocaleString('ko-KR')} 원</td>
+                        <td className={holding.profit_loss >= 0 ? 'positive' : 'negative'}>
+                          {holding.profit_loss?.toLocaleString('ko-KR')} 원
+                        </td>
+                        <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
+                          {holding.profit_loss_rate?.toFixed(2)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
     </div>
