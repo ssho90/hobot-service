@@ -7,6 +7,9 @@ const LoginModal = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Ref to track where the mouse down event occurred
+  const mouseDownTarget = React.useRef(null);
+
   // Login state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -97,14 +100,23 @@ const LoginModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleMouseDown = (e) => {
+    mouseDownTarget.current = e.target;
+  };
+
   const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
+    // Only close if the mouse down event also happened on the overlay
+    if (mouseDownTarget.current === e.currentTarget && e.target === e.currentTarget) {
       onClose();
     }
   };
 
   return (
-    <div className="login-modal-overlay" onClick={handleOverlayClick}>
+    <div
+      className="login-modal-overlay"
+      onMouseDown={handleMouseDown}
+      onClick={handleOverlayClick}
+    >
       <div className="login-modal">
         <button className="login-modal-close" onClick={onClose}>
           ✕
