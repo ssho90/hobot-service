@@ -10,6 +10,7 @@ from datetime import datetime
 import pymysql
 from pymysql.cursors import DictCursor
 from pymysql.err import OperationalError, IntegrityError
+import uuid
 
 # MySQL 연결 설정 (환경 변수에서 가져오기)
 DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -179,6 +180,32 @@ def init_database():
             """)
         except Exception:
             pass
+        
+        # Crypto 설정 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS crypto_config (
+                id VARCHAR(64) PRIMARY KEY COMMENT '해시 기반 ID',
+                market_status VARCHAR(20) NOT NULL DEFAULT 'BULL' COMMENT '시장 상태 (BULL/BEAR)',
+                strategy VARCHAR(50) NOT NULL DEFAULT 'STRATEGY_NULL' COMMENT '현재 전략',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_updated_at (updated_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='가상화폐 매매 설정'
+        """)
+        
+        # Crypto 설정 초기 데이터 확인 및 삽입
+        try:
+            cursor.execute("SELECT COUNT(*) as count FROM crypto_config")
+            row = cursor.fetchone()
+            if row['count'] == 0:
+                # 초기 데이터 삽입
+                initial_id = uuid.uuid4().hex
+                cursor.execute("""
+                    INSERT INTO crypto_config (id, market_status, strategy)
+                    VALUES (%s, 'BULL', 'STRATEGY_NULL')
+                """, (initial_id,))
+                print("✅ crypto_config initialized with default values")
+        except Exception as e:
+            print(f"⚠️  crypto_config 초기화 실패: {e}")
         
         # 메모리 저장소 테이블
         cursor.execute("""

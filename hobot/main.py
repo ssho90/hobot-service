@@ -2454,6 +2454,83 @@ async def upsert_rebalancing_config(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Crypto 설정 (admin 전용)
+class CryptoConfigRequest(BaseModel):
+    market_status: str
+
+@api_router.get("/macro-trading/crypto-config")
+async def get_crypto_config(admin_user: dict = Depends(require_admin)):
+    """가상화폐 매매 설정 조회"""
+    try:
+        from service.database.db import get_db_connection
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, market_status, strategy, updated_at
+                FROM crypto_config
+                ORDER BY updated_at DESC
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            if not row:
+                # 데이터가 없으면 기본값 반환
+                return {
+                    "status": "success",
+                    "data": {
+                        "market_status": "BULL",
+                        "strategy": "STRATEGY_NULL",
+                        "updated_at": None
+                    }
+                }
+            return {
+                "status": "success",
+                "data": {
+                    "market_status": row["market_status"],
+                    "strategy": row["strategy"],
+                    "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None
+                }
+            }
+    except Exception as e:
+        logging.error(f"Error getting crypto config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/macro-trading/crypto-config")
+async def update_crypto_config(
+    request: CryptoConfigRequest,
+    admin_user: dict = Depends(require_admin)
+):
+    """가상화폐 매매 설정 업데이트 (시장 상태 변경)"""
+    try:
+        from service.database.db import get_db_connection
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 최신 설정 조회
+            cursor.execute("SELECT id FROM crypto_config ORDER BY updated_at DESC LIMIT 1")
+            row = cursor.fetchone()
+            
+            if row:
+                # 기존 설정 업데이트
+                cursor.execute("""
+                    UPDATE crypto_config
+                    SET market_status = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """, (request.market_status, row["id"]))
+            else:
+                # 설정이 없으면 새로 생성
+                new_id = uuid.uuid4().hex
+                cursor.execute("""
+                    INSERT INTO crypto_config (id, market_status, strategy)
+                    VALUES (%s, %s, 'STRATEGY_NULL')
+                """, (new_id, request.market_status))
+                
+            conn.commit()
+            return {"status": "success", "message": "Crypto config updated"}
+    except Exception as e:
+        logging.error(f"Error updating crypto config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # 로그 조회 API (admin 전용)
 @api_router.get("/admin/logs")
 async def get_logs(

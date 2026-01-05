@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import './PortfolioManagementPage.css';
 
 const PortfolioManagementPage = () => {
-  const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'mp' | 'sub-mp'
+  const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'mp' | 'sub-mp' | 'crypto'
   const [modelPortfolios, setModelPortfolios] = useState([]);
   const [subModelPortfolios, setSubModelPortfolios] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,6 +19,14 @@ const PortfolioManagementPage = () => {
   const [configForm, setConfigForm] = useState({
     mp_threshold_percent: 3.0,
     sub_mp_threshold_percent: 5.0,
+    sub_mp_threshold_percent: 5.0,
+  });
+  const [cryptoConfig, setCryptoConfig] = useState(null);
+  const [cryptoLoading, setCryptoLoading] = useState(false);
+  const [cryptoSaving, setCryptoSaving] = useState(false);
+  const [cryptoError, setCryptoError] = useState('');
+  const [cryptoForm, setCryptoForm] = useState({
+    market_status: 'BULL'
   });
   const { getAuthHeaders } = useAuth();
 
@@ -90,6 +98,59 @@ const PortfolioManagementPage = () => {
     }
   }, [getAuthHeaders]);
 
+  const fetchCryptoConfig = useCallback(async () => {
+    try {
+      setCryptoLoading(true);
+      setCryptoError('');
+      const response = await fetch('/api/macro-trading/crypto-config', {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Crypto 설정을 불러오는데 실패했습니다.');
+      }
+      const data = await response.json();
+      if (data.status !== 'success') {
+        throw new Error(data.message || 'Crypto 설정을 불러오는데 실패했습니다.');
+      }
+      const cfg = data.data || {};
+      setCryptoConfig(cfg);
+      setCryptoForm({
+        market_status: cfg.market_status || 'BULL'
+      });
+    } catch (err) {
+      setCryptoError(err.message || 'Crypto 설정을 불러오는데 실패했습니다.');
+    } finally {
+      setCryptoLoading(false);
+    }
+  }, [getAuthHeaders]);
+
+  const handleSaveCryptoConfig = async () => {
+    try {
+      setCryptoSaving(true);
+      setCryptoError('');
+      const response = await fetch('/api/macro-trading/crypto-config', {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          market_status: cryptoForm.market_status
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || data.status !== 'success') {
+        throw new Error(data.message || 'Crypto 설정 저장에 실패했습니다.');
+      }
+      await fetchCryptoConfig();
+      alert('Crypto 설정이 저장되었습니다.');
+    } catch (err) {
+      setCryptoError(err.message || 'Crypto 설정 저장에 실패했습니다.');
+    } finally {
+      setCryptoSaving(false);
+    }
+  };
+
   const handleSaveConfig = async () => {
     try {
       setConfigSaving(true);
@@ -137,8 +198,10 @@ const PortfolioManagementPage = () => {
       fetchSubModelPortfolios();
     } else if (activeTab === 'settings') {
       fetchRebalancingConfig();
+    } else if (activeTab === 'crypto') {
+      fetchCryptoConfig();
     }
-  }, [activeTab, fetchModelPortfolios, fetchSubModelPortfolios, fetchRebalancingConfig]);
+  }, [activeTab, fetchModelPortfolios, fetchSubModelPortfolios, fetchRebalancingConfig, fetchCryptoConfig]);
 
   const handleEditMp = (mp) => {
     setEditingMp(mp.id);
@@ -317,6 +380,12 @@ const PortfolioManagementPage = () => {
           onClick={() => setActiveTab('sub-mp')}
         >
           Sub-MP 포트폴리오
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'crypto' ? 'active' : ''}`}
+          onClick={() => setActiveTab('crypto')}
+        >
+          Crypto 설정
         </button>
       </div>
 
@@ -767,6 +836,59 @@ const PortfolioManagementPage = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {activeTab === 'crypto' && (
+        <div className="rebalancing-settings">
+          <div className="settings-card">
+            <h2>Crypto 시장 설정</h2>
+            {cryptoError && <div className="error-message">{cryptoError}</div>}
+            {cryptoLoading ? (
+              <div style={{ padding: '16px' }}>불러오는 중...</div>
+            ) : (
+              <div className="settings-form">
+                <div className="settings-row">
+                  <span>시장 상태</span>
+                  <div className="radio-group">
+                    <label>
+                      <input
+                        type="radio"
+                        value="BULL"
+                        checked={cryptoForm.market_status === 'BULL'}
+                        onChange={(e) => setCryptoForm({ ...cryptoForm, market_status: e.target.value })}
+                      />
+                      상승장 (BULL)
+                    </label>
+                    <label style={{ marginLeft: '10px' }}>
+                      <input
+                        type="radio"
+                        value="BEAR"
+                        checked={cryptoForm.market_status === 'BEAR'}
+                        onChange={(e) => setCryptoForm({ ...cryptoForm, market_status: e.target.value })}
+                      />
+                      하락장 (BEAR)
+                    </label>
+                  </div>
+                </div>
+
+                <div className="settings-row">
+                  <span>현재 전략 (System)</span>
+                  <strong>{cryptoConfig?.strategy || 'STRATEGY_NULL'}</strong>
+                </div>
+
+                <div className="settings-actions">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleSaveCryptoConfig}
+                    disabled={cryptoSaving}
+                  >
+                    {cryptoSaving ? '저장 중...' : '저장'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

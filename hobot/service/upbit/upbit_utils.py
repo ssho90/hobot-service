@@ -5,19 +5,60 @@ import numpy as np
 # current state Read/Write
 # 현재 매수한 거래가 어떤 전략인지
 # ================
-def write_current_strategy(text):
-    with open('service/CurrentStrategy.txt', 'w') as file:
-        file.write(text)
-
-    current_strategy = read_current_strategy()
-
-    return "[System] Current Strategy : " + current_strategy
+def write_current_strategy(strategy):
+    try:
+        from service.database.db import get_db_connection
+        import uuid
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 최신 설정 조회
+            cursor.execute("SELECT id FROM crypto_config ORDER BY updated_at DESC LIMIT 1")
+            row = cursor.fetchone()
+            
+            if row:
+                # 기존 설정 업데이트 (strategy만 변경, market_status 유지)
+                cursor.execute("""
+                    UPDATE crypto_config
+                    SET strategy = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """, (strategy, row["id"]))
+            else:
+                # 설정이 없으면 새로 생성 (기본값 BULL)
+                new_id = uuid.uuid4().hex
+                cursor.execute("""
+                    INSERT INTO crypto_config (id, market_status, strategy)
+                    VALUES (%s, 'BULL', %s)
+                """, (new_id, strategy))
+            
+            conn.commit()
+            
+        return "[System] Current Strategy : " + strategy
+    except Exception as e:
+        print(f"Error writing current strategy: {e}")
+        return f"[System] Error writing strategy: {e}"
 
 def read_current_strategy():
-    with open('service/CurrentStrategy.txt', 'r') as file:
-        condition = file.read()
-
-    return condition
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT strategy FROM crypto_config
+                ORDER BY updated_at DESC
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            
+            if row:
+                return row["strategy"]
+            
+        return "STRATEGY_NULL"
+    except Exception as e:
+        print(f"Error reading current strategy: {e}")
+        return "STRATEGY_NULL"
 
 
 def calculate_rsi(df):
