@@ -320,6 +320,7 @@
   }
 }
 
+/* Stacked Bar Styles */
 .stacked-bar {
   display: flex;
   width: 100%;
@@ -327,7 +328,8 @@
   border-radius: 6px;
   overflow: hidden;
   background: #fafafa;
-  min-height: 38px;
+  min-height: 28px;
+  /* 바 높이 약간 축소 */
 }
 
 .stacked-bar.tone-actual {
@@ -336,26 +338,88 @@
 
 .stacked-bar-segment {
   position: relative;
-  min-width: 4px;
+  min-width: 0;
+  /* Flexbox overflow 방지 중요 */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 0;
+  padding: 4px 0;
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+  overflow: hidden;
+  /* 넘치는 텍스트 숨김 */
+  transition: width 0.3s ease;
 }
 
 .stacked-bar-segment.empty-bar {
-  min-height: 38px;
+  min-height: 28px;
   background: #e0e0e0;
   border: 1px solid #d0d7de;
 }
 
 .stacked-bar-label {
-  padding: 0 8px;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+  padding: 0 4px;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #fdfdfd;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-weight: 500;
+}
+
+/* Responsive Styles for Bar Chart */
+@media (max-width: 768px) {
+  .submp-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .submp-row-title {
+    width: auto;
+    font-size: 11px;
+    color: #666;
+  }
+
+  /* 모바일에서는 바 내부 텍스트 간소화 (JS에서 처리하지만 CSS로도 보조) */
+  .stacked-bar-segment {
+    font-size: 10px;
+  }
+
+  .stacked-bar {
+    min-height: 24px;
+  }
 }
 
 .loading,

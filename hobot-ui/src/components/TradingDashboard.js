@@ -226,6 +226,18 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
     actual: ['#3b6aa3', '#7da444', '#a33f3a', '#684f88', '#2e9bc0', '#d49a00'],
   };
 
+  // 화면 크기에 따른 라벨 표시 모드 관리
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
   // Drift Analysis Logic
   const getMpStatus = () => {
     if (!data?.rebalancing_status) return { needed: false, reasons: [] };
@@ -280,7 +292,8 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         key,
         label: assetClassLabels[key],
         value: allocations?.[key] ?? 0,
-        color: colors[key] || '#888'
+        color: colors[key] || '#888',
+        isMobile: isMobile // Closure access
       }));
   };
 
@@ -290,30 +303,44 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
     const { needed, reasons } = getSubMpStatus(sub.asset_class);
 
     // 1. 모든 고유 티커 수집 및 색상 매핑 생성
-    // Target에 있는 순서를 우선으로 하여 정렬 기준 마련
     const targetTickers = target.map(item => item.ticker);
     const actualTickers = actual.map(item => item.ticker);
     const allTickers = Array.from(new Set([...targetTickers, ...actualTickers]));
 
-    // 정렬 로직: Target에 있는 것이 우선, 그 외에는 티커 알파벳순
+    // 정렬 로직
     allTickers.sort((a, b) => {
       const idxA = targetTickers.indexOf(a);
       const idxB = targetTickers.indexOf(b);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB; // 둘 다 Target에 있으면 Target 순서
-      if (idxA !== -1) return -1; // a만 Target에 있음
-      if (idxB !== -1) return 1;  // b만 Target에 있음
-      return a.localeCompare(b);  // 둘 다 Target에 없으면 알파벳순
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
     });
 
-    // 색상 매핑 (Palette 순환)
+    // 색상 매핑 및 범례 아이템 생성
     const palette = barPalette.target;
     const colorMap = {};
+    const legendItems = [];
+
     allTickers.forEach((ticker, idx) => {
-      colorMap[ticker] = palette[idx % palette.length];
+      const color = palette[idx % palette.length];
+      colorMap[ticker] = color;
+
+      const itemInfo = [...target, ...actual].find(t => t.ticker === ticker);
+      const name = itemInfo?.name || ticker;
+      if (name !== '현금' && ticker !== 'CASH') {
+        legendItems.push({ label: name, color: color });
+      }
     });
 
+    if (sub.asset_class === 'cash' || [...target, ...actual].some(t => t.name === '현금' || t.ticker === 'CASH')) {
+      const cashColor = '#8064A2';
+      if (!legendItems.some(i => i.label === '현금')) {
+        legendItems.push({ label: '현금', color: cashColor });
+      }
+    }
+
     const buildBarSegments = (items) => {
-      // items를 위에서 정한 canonical order인 allTickers 순서로 정렬
       const sortedItems = [...items].sort((a, b) => {
         const tickerA = a.ticker || (a.name === '현금' ? 'CASH' : '');
         const tickerB = b.ticker || (b.name === '현금' ? 'CASH' : '');
@@ -321,10 +348,8 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
       });
 
       if (sub.asset_class === 'cash' && sortedItems.length === 0) {
-        // 현금 자산군인데 항목이 비어있으면 기본값 추가
-        // (CASH 티커에 대한 매핑이 없을 수 있으므로 안전하게 처리)
         const cashColor = colorMap['CASH'] || '#8064A2';
-        return [{ label: '현금', value: 100, color: cashColor }];
+        return [{ label: '현금', value: 100, color: cashColor, isMobile: isMobile }];
       }
 
       return sortedItems.map((item) => {
@@ -332,7 +357,8 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         return {
           label: item.name || item.ticker || '',
           value: item.weight_percent ?? 0,
-          color: colorMap[ticker] || '#888', // 매핑된 색상 사용
+          color: colorMap[ticker] || '#888',
+          isMobile: isMobile
         };
       });
     };
@@ -343,6 +369,19 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
           {assetClassLabels[sub.asset_class] || sub.asset_class}
           <TrafficLight needed={needed} reasons={reasons} />
         </div>
+
+        {/* 범례 (Legend) 표시 - 모바일이거나 항목이 많을 때 유용 */}
+        {legendItems.length > 0 && (
+          <div className="chart-legend">
+            {legendItems.map((item, idx) => (
+              <div key={idx} className="legend-item">
+                <div className="legend-color" style={{ background: item.color }}></div>
+                <span className="legend-label">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="submp-row">
           <div className="submp-row-title">목표</div>
           <div className="submp-bar-area">
@@ -424,8 +463,14 @@ const StackedBar = ({ segments, tone = 'target' }) => {
       ) : (
         segments.map((seg, idx) => {
           const width = Math.max(0, (seg.value || 0) / total * 100);
-          // 0인 세그먼트는 표시하지 않음 (하지만 전체 바는 표시됨)
-          if ((seg.value || 0) === 0) return null;
+          // 0.5% 미만은 공간 문제로 렌더링 하지 않거나 아주 작게 표시
+          if (width < 0.5) return null;
+
+          // 모바일이면 라벨 숨기고 %만 표시 or 짧은 라벨
+          const displayText = seg.isMobile
+            ? `${(seg.value ?? 0).toFixed(1)}%`
+            : `${seg.label} ${(seg.value ?? 0).toFixed(1)}%`;
+
           return (
             <div
               key={`${seg.label}-${idx}`}
@@ -434,7 +479,7 @@ const StackedBar = ({ segments, tone = 'target' }) => {
               title={`${seg.label}: ${(seg.value ?? 0).toFixed(1)}%`}
             >
               <span className="stacked-bar-label">
-                {seg.label} {(seg.value ?? 0).toFixed(1)}%
+                {displayText}
               </span>
             </div>
           );
