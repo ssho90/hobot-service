@@ -293,8 +293,15 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         label: assetClassLabels[key],
         value: allocations?.[key] ?? 0,
         color: colors[key] || '#888',
-        isMobile: isMobile // Closure access
+        isMobile: isMobileView // Closure access
       }));
+  };
+
+  const mpColors = {
+    stocks: '#4F81BD',
+    bonds: '#9BBB59',
+    alternatives: '#C0504D',
+    cash: '#8064A2'
   };
 
   const renderSubMpBlock = (sub) => {
@@ -370,8 +377,8 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
           <TrafficLight needed={needed} reasons={reasons} />
         </div>
 
-        {/* 범례 (Legend) 표시 - 모바일이거나 항목이 많을 때 유용 */}
-        {legendItems.length > 0 && (
+        {/* 범례 (Legend) 표시 - 모바일일 때만 표시 */}
+        {isMobile && legendItems.length > 0 && (
           <div className="chart-legend">
             {legendItems.map((item, idx) => (
               <div key={idx} className="legend-item">
@@ -407,6 +414,11 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
   };
 
   const mpStatus = getMpStatus();
+  // MP 범례 아이템 생성
+  const mpLegendItems = isMobile ? Object.entries(mpColors).map(([key, color]) => ({
+    label: assetClassLabels[key],
+    color: color
+  })) : [];
 
   return (
     <div className="card rebalancing-status-card">
@@ -421,6 +433,17 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
               MP
               <TrafficLight needed={mpStatus.needed} reasons={mpStatus.reasons} />
             </div>
+            {/* MP 범례 - 모바일일 때만 표시 */}
+            {isMobile && mpLegendItems.length > 0 && (
+              <div className="chart-legend">
+                {mpLegendItems.map((item, idx) => (
+                  <div key={idx} className="legend-item">
+                    <div className="legend-color" style={{ background: item.color }}></div>
+                    <span className="legend-label">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="mp-row">
               <div className="mp-row-title">목표</div>
               <div className="mp-row-bar">
