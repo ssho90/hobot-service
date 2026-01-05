@@ -18,7 +18,8 @@ from .kis_utils import (
     current_time, read_current_strategy, get_buy_info, get_sell_info, calculate_atr
 )
 from service.slack_bot import post_message
-from service.macro_trading.config.config_loader import ConfigLoader
+
+from service.database.db import get_db_connection
 from .user_credentials import get_user_kis_credentials
 
 # ===============================================
@@ -85,6 +86,73 @@ def health_check(user_id: Optional[str] = None):
         post_message(f"Health Check Error: {e}\n{trace}", channel="#auto-trading-error")
         return {"status": "error", "message": str(e), "trace": trace}
 
+def get_active_etf_mapping_from_db() -> Dict[str, str]:
+    """
+    최신 AI 전략 결정에 따른 ETF 티커 -> 자산군 매핑 정보를 DB에서 조회
+    
+    Returns:
+        Dict[str, str]: 티커(ticker) -> 자산군(asset_class) 매핑
+        예: {"005930": "stocks", "305080": "bonds"}
+    """
+    try:
+        mapping = {}
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 1. 최신 AI 전략 결정의 target_allocation 조회
+            cursor.execute("""
+                SELECT target_allocation
+                FROM ai_strategy_decisions
+                ORDER BY decision_date DESC
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            if not row:
+                return {}
+            
+            target_alloc_raw = row['target_allocation']
+            if isinstance(target_alloc_raw, str):
+                target_alloc = json.loads(target_alloc_raw)
+            else:
+                target_alloc = target_alloc_raw
+            
+            # "sub_mp" 필드 확인 (예: {"stocks": "Eq-D", "bonds": "Bnd-L", ...})
+            sub_mp_map = target_alloc.get('sub_mp')
+            if not sub_mp_map:
+                # sub_mp가 없으면 매핑 불가
+                return {}
+            
+            # 2. 각 자산군별 Sub-MP ID에 대해 티커 목록 조회
+            # asset_class: stocks, bonds, alternatives, cash
+            for asset_class, sub_mp_id in sub_mp_map.items():
+                if asset_class == 'reasoning': continue  # reasoning 필드 제외
+
+                # Sub-MP ID로 sub_portfolio_models의 ID 조회
+                cursor.execute("SELECT id FROM sub_portfolio_models WHERE sub_model_id = %s", (sub_mp_id,))
+                model_row = cursor.fetchone()
+                if not model_row:
+                    continue
+                
+                model_id = model_row['id']
+                
+                # 3. sub_portfolio_compositions에서 티커 조회
+                cursor.execute("""
+                    SELECT ticker 
+                    FROM sub_portfolio_compositions 
+                    WHERE sub_portfolio_model_id = %s
+                """, (model_id,))
+                
+                tickers = cursor.fetchall()
+                for t_row in tickers:
+                    ticker = t_row.get('ticker')
+                    if ticker:
+                        mapping[ticker] = asset_class.lower() # 소문자로 통일 (stocks, bonds, ...)
+                        
+        return mapping
+    except Exception as e:
+        logging.error(f"Error fetching ETF mapping from DB: {e}")
+        return {}
+
 def parse_holdings_by_asset_class(holdings: List[Dict]) -> Dict[str, List[Dict]]:
     """
     보유 종목을 자산군별로 분류
@@ -98,16 +166,11 @@ def parse_holdings_by_asset_class(holdings: List[Dict]) -> Dict[str, List[Dict]]
     """
     try:
         # 티커 → 자산군 매핑 딕셔너리 생성
-        ticker_to_asset_class = {}
+        ticker_to_asset_class = get_active_etf_mapping_from_db()
         
-        # 설정 파일에서 로드
-        config_loader = ConfigLoader()
-        config = config_loader.load()
-        etf_mapping = config.etf_mapping
-        
-        for asset_class, mapping in etf_mapping.items():
-            for ticker in mapping.tickers:
-                ticker_to_asset_class[ticker] = asset_class
+        # DB에서 매핑 정보가 없는 경우 (안전망), 설정 파일 로더는 사용하지 않음 (ConfigLoader.etf_mapping 없음)
+        if not ticker_to_asset_class:
+            logging.warning("No ETF mapping found in DB. Holdings classification may be incorrect.")
         
         # 자산군별 holdings 분류
         classified_holdings = {
