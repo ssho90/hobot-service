@@ -325,7 +325,7 @@ def get_balance_info_api(user_id: Optional[str] = None):
                     "stock_code": item.get('pdno', ''),
                     "stock_name": item.get('prdt_name', ''),
                     "quantity": int(item.get('hldg_qty', 0)),
-                    "avg_buy_price": int(item.get('pchs_avg_prc', 0)),
+                    "avg_buy_price": int(item.get('pchs_avg_pric', 0)),
                     "current_price": int(item.get('prpr', 0)),
                     "eval_amount": int(item.get('evlu_amt', 0)),
                     "profit_loss": int(item.get('evlu_pfls_amt', 0)),

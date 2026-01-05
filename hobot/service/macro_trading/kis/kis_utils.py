@@ -95,7 +95,7 @@ def get_balance_info(balance_data, ticker_name, current_price):
         for item in output1:
             if item['pdno'] == ticker_name: # 종목코드가 아닌 종목명으로 비교 (API 응답 기준)
                 stock_quantity = int(item['hldg_qty'])
-                avg_buy_price = int(item['pchs_avg_prc'])
+                avg_buy_price = int(item['pchs_avg_pric'])
                 eval_amt = int(item['evlu_amt'])
                 eval_profit_loss = int(item['evlu_pfls_amt'])
                 eval_profit_loss_rate = float(item['evlu_pfls_rt'])
