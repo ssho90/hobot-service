@@ -300,23 +300,19 @@
   flex: 1;
 }
 
-.submp-empty {
-  color: #999;
-  padding: 6px 0;
-}
-
+/* Responsive Styles for Bar Chart */
 @media (max-width: 768px) {
   .mp-row {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    margin-bottom: 12px;
   }
 
   .mp-row-title {
+    text-align: left;
+    font-size: 13px;
+    margin-bottom: 2px;
     width: auto;
-  }
-
-  .mp-row-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1294,5 +1290,17 @@
 
   .allocation-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Mobile padding adjustments */
+  .trading-dashboard,
+  .rebalancing-status,
+  .card {
+    padding: 10px;
+  }
+
+  .mp-section,
+  .submp-section {
+    padding: 12px;
   }
 }
