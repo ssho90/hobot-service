@@ -14,9 +14,11 @@ const TradingDashboard = () => {
 
   // KIS 계좌 잔액 조회
   useEffect(() => {
-    const fetchKisBalance = async () => {
-      setKisLoading(true);
-      setKisError(null);
+    const fetchKisBalance = async (isBackground = false) => {
+      if (!isBackground) {
+        setKisLoading(true);
+        setKisError(null);
+      }
       try {
         const headers = getAuthHeaders();
         const response = await fetch('/api/kis/balance', {
@@ -30,15 +32,34 @@ const TradingDashboard = () => {
           setKisBalance(data);
         } else {
           const errorData = await response.json();
-          throw new Error(errorData.message || '계좌 정보를 불러오는데 실패했습니다.');
+          // 백그라운드 갱신 중 에러는 조용히 로그만 남기거나 에러 상태 업데이트 (선택사항)
+          // 여기서는 에러 상태를 업데이트하되, 화면 전체가 에러로 바뀌는 UX 고려
+          if (!isBackground) {
+            throw new Error(errorData.message || '계좌 정보를 불러오는데 실패했습니다.');
+          } else {
+            console.error('Background fetch failed:', errorData.message);
+          }
         }
       } catch (err) {
-        setKisError(err.message);
+        if (!isBackground) {
+          setKisError(err.message);
+        } else {
+          console.error('Background fetch error:', err.message);
+        }
       } finally {
-        setKisLoading(false);
+        if (!isBackground) {
+          setKisLoading(false);
+        }
       }
     };
-    fetchKisBalance();
+
+    fetchKisBalance(false); // 초기 로딩
+
+    const intervalId = setInterval(() => {
+      fetchKisBalance(true); // 백그라운드 갱신
+    }, 10000); // 10초마다
+
+    return () => clearInterval(intervalId);
   }, [getAuthHeaders]);
 
   // 리밸런싱 현황 조회 (MP / Sub-MP 목표 vs 실제)
