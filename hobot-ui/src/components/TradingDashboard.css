@@ -363,6 +363,16 @@
   max-width: 100%;
 }
 
+.stacked-bar-segment.compact {
+  padding: 0;
+  /* 좁은 공간 최대한 활용 */
+}
+
+.stacked-bar-segment.compact .stacked-bar-label {
+  padding: 0 1px;
+  /* 라벨 패딩도 축소 */
+}
+
 /* Chart Legend */
 .chart-legend {
   display: flex;
