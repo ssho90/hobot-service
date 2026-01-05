@@ -268,17 +268,52 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
     const actual = sub?.actual || [];
     const { needed, reasons } = getSubMpStatus(sub.asset_class);
 
-    const buildBarSegments = (items, tone = 'target') => {
-      const palette = barPalette[tone] || barPalette.target;
-      const list = [...items];
-      if (sub.asset_class === 'cash' && list.length === 0) {
-        list.push({ name: '현금', ticker: 'CASH', weight_percent: 100 });
+    // 1. 모든 고유 티커 수집 및 색상 매핑 생성
+    // Target에 있는 순서를 우선으로 하여 정렬 기준 마련
+    const targetTickers = target.map(item => item.ticker);
+    const actualTickers = actual.map(item => item.ticker);
+    const allTickers = Array.from(new Set([...targetTickers, ...actualTickers]));
+
+    // 정렬 로직: Target에 있는 것이 우선, 그 외에는 티커 알파벳순
+    allTickers.sort((a, b) => {
+      const idxA = targetTickers.indexOf(a);
+      const idxB = targetTickers.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB; // 둘 다 Target에 있으면 Target 순서
+      if (idxA !== -1) return -1; // a만 Target에 있음
+      if (idxB !== -1) return 1;  // b만 Target에 있음
+      return a.localeCompare(b);  // 둘 다 Target에 없으면 알파벳순
+    });
+
+    // 색상 매핑 (Palette 순환)
+    const palette = barPalette.target;
+    const colorMap = {};
+    allTickers.forEach((ticker, idx) => {
+      colorMap[ticker] = palette[idx % palette.length];
+    });
+
+    const buildBarSegments = (items) => {
+      // items를 위에서 정한 canonical order인 allTickers 순서로 정렬
+      const sortedItems = [...items].sort((a, b) => {
+        const tickerA = a.ticker || (a.name === '현금' ? 'CASH' : '');
+        const tickerB = b.ticker || (b.name === '현금' ? 'CASH' : '');
+        return allTickers.indexOf(tickerA) - allTickers.indexOf(tickerB);
+      });
+
+      if (sub.asset_class === 'cash' && sortedItems.length === 0) {
+        // 현금 자산군인데 항목이 비어있으면 기본값 추가
+        // (CASH 티커에 대한 매핑이 없을 수 있으므로 안전하게 처리)
+        const cashColor = colorMap['CASH'] || '#8064A2';
+        return [{ label: '현금', value: 100, color: cashColor }];
       }
-      return list.map((item, idx) => ({
-        label: item.name || item.ticker || '',
-        value: item.weight_percent ?? 0,
-        color: palette[idx % palette.length],
-      }));
+
+      return sortedItems.map((item) => {
+        const ticker = item.ticker || (item.name === '현금' ? 'CASH' : '');
+        return {
+          label: item.name || item.ticker || '',
+          value: item.weight_percent ?? 0,
+          color: colorMap[ticker] || '#888', // 매핑된 색상 사용
+        };
+      });
     };
 
     return (
@@ -293,7 +328,7 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
             {target.length === 0 ? (
               <StackedBar segments={[]} tone="target" />
             ) : (
-              <StackedBar segments={buildBarSegments(target, 'target')} />
+              <StackedBar segments={buildBarSegments(target)} />
             )}
           </div>
         </div>
@@ -303,7 +338,7 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
             {actual.length === 0 ? (
               <StackedBar segments={[]} tone="actual" />
             ) : (
-              <StackedBar segments={buildBarSegments(actual, 'actual')} tone="actual" />
+              <StackedBar segments={buildBarSegments(actual)} tone="actual" />
             )}
           </div>
         </div>
