@@ -1310,23 +1310,64 @@
   .rebalancing-status,
   .card,
   .rebalancing-status-card {
-    padding: 8px;
+    padding: 5px;
   }
 
   .mp-section,
   .submp-section {
-    padding: 8px;
+    padding: 5px;
   }
 
   .submp-asset-block {
-    padding: 8px;
+    padding: 5px;
   }
 
   .rebalance-sections {
-    gap: 12px;
+    gap: 10px;
   }
 
   .submp-grid {
-    gap: 8px;
+    gap: 5px;
+  }
+}
+
+/* Parallel Layout for Account Tab */
+.account-assets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.account-holdings-row {
+  display: flex;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.account-holdings-row .account-info-card {
+  margin-bottom: 0;
+}
+
+.holdings-card {
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.holdings-table {
+  overflow-x: auto;
+}
+
+.account-chart-card {
+  height: auto;
+}
+
+@media (max-width: 900px) {
+  .account-holdings-row {
+    flex-direction: column;
+  }
+
+  .card.account-info-card {
+    flex: none !important;
+    width: 100% !important;
   }
 }

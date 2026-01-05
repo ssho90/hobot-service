@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { createChart, ColorType } from 'lightweight-charts';
 import './TradingDashboard.css';
 
 const TradingDashboard = () => {
@@ -10,6 +11,7 @@ const TradingDashboard = () => {
   const [rebalanceStatus, setRebalanceStatus] = useState(null);
   const [rebalanceLoading, setRebalanceLoading] = useState(false);
   const [rebalanceError, setRebalanceError] = useState(null);
+  const [historyData, setHistoryData] = useState([]);
   const [testModalOpen, setTestModalOpen] = useState(false);
 
   // KIS 계좌 잔액 조회
@@ -87,6 +89,28 @@ const TradingDashboard = () => {
       }
     };
     fetchRebalanceStatus();
+    fetchRebalanceStatus();
+  }, [getAuthHeaders]);
+
+  // 자산 히스토리 조회
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const headers = getAuthHeaders();
+        const response = await fetch('/api/macro-trading/account-snapshots?days=30', {
+          headers: { ...headers, 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // 날짜 오름차순 정렬
+          const sorted = data.sort((a, b) => new Date(a.snapshot_date) - new Date(b.snapshot_date));
+          setHistoryData(sorted);
+        }
+      } catch (err) {
+        console.error("Failed to fetch history:", err);
+      }
+    };
+    fetchHistory();
   }, [getAuthHeaders]);
 
   return (
@@ -98,6 +122,7 @@ const TradingDashboard = () => {
         rebalanceStatus={rebalanceStatus}
         rebalanceLoading={rebalanceLoading}
         rebalanceError={rebalanceError}
+        historyData={historyData}
         onOpenTestModal={() => setTestModalOpen(true)}
       />
       {testModalOpen && (
@@ -111,8 +136,38 @@ const TradingDashboard = () => {
 };
 
 // Macro Quant Trading 탭 컴포넌트
-const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebalanceLoading, rebalanceError, onOpenTestModal }) => {
+const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebalanceLoading, rebalanceError, historyData, onOpenTestModal }) => {
   const [activeTab, setActiveTab] = useState('account');
+  const chartContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (activeTab === 'account' && chartContainerRef.current && historyData.length > 0) {
+      const chart = createChart(chartContainerRef.current, {
+        layout: { background: { type: ColorType.Solid, color: 'white' } },
+        width: chartContainerRef.current.clientWidth,
+        height: 200,
+        rightPriceScale: { borderVisible: false },
+        timeScale: { borderVisible: false, timeVisible: false, secondsVisible: false },
+        grid: { horzLines: { visible: false }, vertLines: { visible: false } }
+      });
+
+      const lineSeries = chart.addLineSeries({ color: '#2962FF' });
+      const data = historyData.map(d => ({ time: d.snapshot_date, value: d.total_value }));
+      lineSeries.setData(data);
+      chart.timeScale().fitContent();
+
+      const handleResize = () => {
+        if (chartContainerRef.current) {
+          chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+        }
+      };
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        chart.remove();
+      };
+    }
+  }, [activeTab, historyData]);
 
   return (
     <div className="tab-content">
@@ -147,77 +202,90 @@ const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebala
       )}
 
       {activeTab === 'account' && (
-        <>
-          <div className="card account-info-card">
-            <h2>계좌 정보</h2>
-            {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
-            {error && <div className="error">오류: {error}</div>}
-            {!loading && !error && balance && balance.status === 'success' && (
-              <div className="account-info-summary">
-                <div className="info-row">
-                  <span className="info-label">계좌번호:</span>
-                  <span className="info-value">{balance.account_no}</span>
+        <div className="account-assets-container">
+          <div className="account-holdings-row">
+            {/* Left: Account Info */}
+            <div className="card account-info-card" style={{ flex: '0 0 350px' }}>
+              <h2>계좌 정보</h2>
+              {loading && <div className="loading">계좌 정보를 불러오는 중...</div>}
+              {error && <div className="error">오류: {error}</div>}
+              {!loading && !error && balance && balance.status === 'success' && (
+                <div className="account-info-summary">
+                  <div className="info-row">
+                    <span className="info-label">계좌번호:</span>
+                    <span className="info-value">{balance.account_no}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">총 평가금액:</span>
+                    <span className="info-value">
+                      {balance.total_eval_amount?.toLocaleString('ko-KR')} 원
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">총 수익률:</span>
+                    <span className={`info-value ${balance.total_return_rate >= 0 ? 'positive' : 'negative'}`}
+                      style={{ color: balance.total_return_rate >= 0 ? '#d32f2f' : '#1976D2' }}>
+                      {balance.total_return_rate > 0 ? '+' : ''}{balance.total_return_rate}%
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">가수도정산(D+2):</span>
+                    <span className="info-value">
+                      {balance.cash_balance?.toLocaleString('ko-KR')} 원
+                    </span>
+                  </div>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">총 평가금액:</span>
-                  <span className="info-value">
-                    {balance.total_eval_amount?.toLocaleString('ko-KR')} 원
-                  </span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">현금 잔액:</span>
-                  <span className="info-value">
-                    {balance.cash_balance?.toLocaleString('ko-KR')} 원
-                  </span>
+              )}
+              {!loading && !error && (!balance || balance.status !== 'success') && (
+                <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
+              )}
+            </div>
+
+            {/* Right: Holdings */}
+            {balance && balance.status === 'success' && balance.holdings && (
+              <div className="card holdings-card" style={{ flex: 1, minWidth: 0 }}>
+                <h2>보유 자산</h2>
+                <div className="holdings-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>종목명</th>
+                        <th>보유수량</th>
+                        <th>평가금액</th>
+                        <th>손익률</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {balance.holdings.map((holding, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <div style={{ fontWeight: 500 }}>{holding.stock_name}</div>
+                            <div style={{ fontSize: '11px', color: '#888' }}>{holding.stock_code}</div>
+                          </td>
+                          <td>{holding.quantity?.toLocaleString('ko-KR')}</td>
+                          <td>{holding.eval_amount?.toLocaleString('ko-KR')}</td>
+                          <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
+                            {holding.profit_loss_rate?.toFixed(2)}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            )}
-            {!loading && !error && (!balance || balance.status !== 'success') && (
-              <div className="no-data">계좌 정보를 불러올 수 없습니다.</div>
             )}
           </div>
 
-          {/* 보유 자산 */}
-          {balance && balance.status === 'success' && balance.holdings && balance.holdings.length > 0 && (
-            <div className="card">
-              <h2>보유 자산</h2>
-              <div className="holdings-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>종목명</th>
-                      <th>종목코드</th>
-                      <th>보유수량</th>
-                      <th>평균매수가</th>
-                      <th>현재가</th>
-                      <th>평가금액</th>
-                      <th>손익</th>
-                      <th>손익률</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {balance.holdings.map((holding, idx) => (
-                      <tr key={idx}>
-                        <td>{holding.stock_name}</td>
-                        <td>{holding.stock_code}</td>
-                        <td>{holding.quantity?.toLocaleString('ko-KR')} 주</td>
-                        <td>{holding.avg_buy_price?.toLocaleString('ko-KR')} 원</td>
-                        <td>{holding.current_price?.toLocaleString('ko-KR')} 원</td>
-                        <td>{holding.eval_amount?.toLocaleString('ko-KR')} 원</td>
-                        <td className={holding.profit_loss >= 0 ? 'positive' : 'negative'}>
-                          {holding.profit_loss?.toLocaleString('ko-KR')} 원
-                        </td>
-                        <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
-                          {holding.profit_loss_rate?.toFixed(2)}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </>
+          {/* Chart Section (Bottom) */}
+          <div className="card account-chart-card">
+            <h2>총 자산 추이 (일별)</h2>
+            {historyData.length > 0 ? (
+              <div ref={chartContainerRef} style={{ width: '100%', height: '250px' }} />
+            ) : (
+              <div className="no-data">데이터가 없습니다 (최근 30일)</div>
+            )}
+          </div>
+        </div>
       )}
 
     </div>

@@ -377,8 +377,18 @@ def get_balance_info_api(user_id: Optional[str] = None):
             # ord_psbl_tot_amt (주문가능총액)만 사용 -> inquire-balance 응답에 없음
             # prvs_rcdl_excc_amt (가수도정산금액/D+2예수금) 사용: 매도 정산 예정 금액 포함
             cash_balance = int(float(output2[0].get('prvs_rcdl_excc_amt') or 0))
+            
+            # 총 손익 및 수익률 계산
+            total_profit_loss = int(float(output2[0].get('evlu_pfls_smtl_amt', 0)))
+            total_purchase_amt = int(float(output2[0].get('pchs_amt_smtl_amt', 0)))
+            
+            total_return_rate = 0.0
+            if total_purchase_amt > 0:
+                total_return_rate = (total_profit_loss / total_purchase_amt) * 100
         else:
             cash_balance = 0
+            total_profit_loss = 0
+            total_return_rate = 0.0
         
         # 보유 주식 정보
         holdings = []
@@ -403,6 +413,8 @@ def get_balance_info_api(user_id: Optional[str] = None):
             "account_no": account_no,
             "total_eval_amount": total_eval_amt,
             "cash_balance": cash_balance,
+            "total_profit_loss": total_profit_loss,
+            "total_return_rate": round(total_return_rate, 2),
             "holdings": holdings,
             "asset_class_info": asset_class_info  # 자산군별 정보 추가
         }

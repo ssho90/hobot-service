@@ -12,7 +12,9 @@ from functools import wraps
 from service.macro_trading.collectors.fred_collector import get_fred_collector
 from service.macro_trading.collectors.news_collector import get_news_collector
 from service.macro_trading.config.config_loader import get_config
+from service.macro_trading.config.config_loader import get_config
 from service.macro_trading.ai_strategist import run_ai_analysis
+from service.macro_trading.account_service import save_daily_account_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -325,6 +327,30 @@ def setup_ai_analysis_scheduler():
         
     except Exception as e:
         logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}", exc_info=True)
+    except Exception as e:
+        logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
+def setup_account_snapshot_scheduler():
+    """
+    계좌 상태 스냅샷 스케줄을 설정합니다.
+    매일 09:00에 실행되도록 등록합니다.
+    """
+    try:
+        # 기존 'account_snapshot' 태그가 있는 스케줄 제거
+        existing_jobs = schedule.get_jobs()
+        for job in existing_jobs:
+            if 'account_snapshot' in job.tags:
+                schedule.cancel_job(job)
+                logger.debug(f"기존 계좌 스냅샷 스케줄 제거: {job}")
+        
+        # 매일 09:00 실행
+        schedule.every().day.at("09:00").do(save_daily_account_snapshot).tag('account_snapshot')
+        logger.info("계좌 스냅샷 스케줄 등록: 매일 09:00 KST")
+        
+    except Exception as e:
+        logger.error(f"계좌 스냅샷 스케줄 설정 실패: {e}", exc_info=True)
         raise
 
 
@@ -415,6 +441,12 @@ def start_all_schedulers():
         logger.info("AI 전략 분석 스케줄 설정 완료")
     except Exception as e:
         logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}")
+    
+    try:
+        setup_account_snapshot_scheduler()
+        logger.info("계좌 스냅샷 스케줄 설정 완료")
+    except Exception as e:
+        logger.error(f"계좌 스냅샷 스케줄 설정 실패: {e}")
     
     # 하나의 통합 스케줄러 스레드에서 모든 스케줄 실행
     try:
