@@ -28,6 +28,7 @@ const PortfolioManagementPage = () => {
   const [cryptoForm, setCryptoForm] = useState({
     market_status: 'BULL'
   });
+  const [isEditingCrypto, setIsEditingCrypto] = useState(false);
   const { getAuthHeaders } = useAuth();
 
   const fetchModelPortfolios = useCallback(async () => {
@@ -117,6 +118,7 @@ const PortfolioManagementPage = () => {
       setCryptoForm({
         market_status: cfg.market_status || 'BULL'
       });
+      setIsEditingCrypto(false);
     } catch (err) {
       setCryptoError(err.message || 'Crypto 설정을 불러오는데 실패했습니다.');
     } finally {
@@ -143,12 +145,23 @@ const PortfolioManagementPage = () => {
         throw new Error(data.message || 'Crypto 설정 저장에 실패했습니다.');
       }
       await fetchCryptoConfig();
+      setIsEditingCrypto(false);
       alert('Crypto 설정이 저장되었습니다.');
     } catch (err) {
       setCryptoError(err.message || 'Crypto 설정 저장에 실패했습니다.');
     } finally {
       setCryptoSaving(false);
     }
+  };
+
+  const handleCancelCryptoEdit = () => {
+    if (cryptoConfig) {
+      setCryptoForm({
+        market_status: cryptoConfig.market_status || 'BULL'
+      });
+    }
+    setIsEditingCrypto(false);
+    setCryptoError('');
   };
 
   const handleSaveConfig = async () => {
@@ -849,43 +862,70 @@ const PortfolioManagementPage = () => {
             ) : (
               <div className="settings-form">
                 <div className="settings-row">
-                  <span>시장 상태</span>
-                  <div className="radio-group">
-                    <label>
-                      <input
-                        type="radio"
-                        value="BULL"
-                        checked={cryptoForm.market_status === 'BULL'}
-                        onChange={(e) => setCryptoForm({ ...cryptoForm, market_status: e.target.value })}
-                      />
-                      상승장 (BULL)
-                    </label>
-                    <label style={{ marginLeft: '10px' }}>
-                      <input
-                        type="radio"
-                        value="BEAR"
-                        checked={cryptoForm.market_status === 'BEAR'}
-                        onChange={(e) => setCryptoForm({ ...cryptoForm, market_status: e.target.value })}
-                      />
-                      하락장 (BEAR)
-                    </label>
-                  </div>
-                </div>
-
-                <div className="settings-row">
                   <span>현재 전략 (System)</span>
                   <strong>{cryptoConfig?.strategy || 'STRATEGY_NULL'}</strong>
                 </div>
 
-                <div className="settings-actions">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSaveCryptoConfig}
-                    disabled={cryptoSaving}
-                  >
-                    {cryptoSaving ? '저장 중...' : '저장'}
-                  </button>
-                </div>
+                {!isEditingCrypto ? (
+                  <>
+                    <div className="settings-row">
+                      <span>시장 상태</span>
+                      <strong>
+                        {cryptoConfig?.market_status === 'BULL' ? '상승장 (BULL)' :
+                          cryptoConfig?.market_status === 'BEAR' ? '하락장 (BEAR)' : cryptoConfig?.market_status}
+                      </strong>
+                    </div>
+                    <div className="settings-actions">
+                      <button className="btn btn-primary" onClick={() => setIsEditingCrypto(true)}>
+                        수정
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="settings-row">
+                      <span>시장 상태</span>
+                      <div className="radio-group">
+                        <label>
+                          <input
+                            type="radio"
+                            value="BULL"
+                            checked={cryptoForm.market_status === 'BULL'}
+                            onChange={(e) => setCryptoForm({ ...cryptoForm, market_status: e.target.value })}
+                          />
+                          상승장 (BULL)
+                        </label>
+                        <label style={{ marginLeft: '10px' }}>
+                          <input
+                            type="radio"
+                            value="BEAR"
+                            checked={cryptoForm.market_status === 'BEAR'}
+                            onChange={(e) => setCryptoForm({ ...cryptoForm, market_status: e.target.value })}
+                          />
+                          하락장 (BEAR)
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="settings-actions">
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleSaveCryptoConfig}
+                        disabled={cryptoSaving}
+                      >
+                        {cryptoSaving ? '저장 중...' : '저장'}
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={handleCancelCryptoEdit}
+                        disabled={cryptoSaving}
+                        style={{ marginLeft: '10px' }}
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
