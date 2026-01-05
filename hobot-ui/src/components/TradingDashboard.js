@@ -293,7 +293,7 @@ const RebalancingStatusCard = ({ data, loading, error }) => {
         label: assetClassLabels[key],
         value: allocations?.[key] ?? 0,
         color: colors[key] || '#888',
-        isMobile: isMobileView // Closure access
+        isMobile: isMobile // Closure access
       }));
   };
 
