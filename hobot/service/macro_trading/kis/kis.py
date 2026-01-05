@@ -307,13 +307,13 @@ def get_balance_info_api(user_id: Optional[str] = None):
         output1 = balance_data.get('output1', [])  # 주식 잔고
         output2 = balance_data.get('output2', [])  # 계좌 총 평가
         
-        total_eval_amt = int(output2[0]['tot_evlu_amt']) if output2 else 0
+        total_eval_amt = int(float(output2[0]['tot_evlu_amt'])) if output2 else 0
         
         # 현금 잔액 (주문가능금액 사용)
         if output2:
             # ord_psbl_tot_amt (주문가능총액)만 사용 -> inquire-balance 응답에 없음
             # prvs_rcdl_excc_amt (가수도정산금액/D+2예수금) 사용: 매도 정산 예정 금액 포함
-            cash_balance = int(output2[0].get('prvs_rcdl_excc_amt') or 0)
+            cash_balance = int(float(output2[0].get('prvs_rcdl_excc_amt') or 0))
         else:
             cash_balance = 0
         
@@ -324,11 +324,11 @@ def get_balance_info_api(user_id: Optional[str] = None):
                 holdings.append({
                     "stock_code": item.get('pdno', ''),
                     "stock_name": item.get('prdt_name', ''),
-                    "quantity": int(item.get('hldg_qty', 0)),
-                    "avg_buy_price": int(item.get('pchs_avg_pric', 0)),
-                    "current_price": int(item.get('prpr', 0)),
-                    "eval_amount": int(item.get('evlu_amt', 0)),
-                    "profit_loss": int(item.get('evlu_pfls_amt', 0)),
+                    "quantity": int(float(item.get('hldg_qty', 0))),
+                    "avg_buy_price": int(float(item.get('pchs_avg_pric', 0))),
+                    "current_price": int(float(item.get('prpr', 0))),
+                    "eval_amount": int(float(item.get('evlu_amt', 0))),
+                    "profit_loss": int(float(item.get('evlu_pfls_amt', 0))),
                     "profit_loss_rate": float(item.get('evlu_pfls_rt', 0))
                 })
         

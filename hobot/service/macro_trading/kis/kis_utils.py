@@ -85,8 +85,8 @@ def get_balance_info(balance_data, ticker_name, current_price):
     output1 = balance_data.get('output1', []) # 주식 잔고
     output2 = balance_data.get('output2', []) # 계좌 총 평가
 
-    total_eval_amt = int(output2[0]['tot_evlu_amt']) if output2 else 0
-    cash_balance = int(output2[0]['dnca_tot_amt']) if output2 else 0
+    total_eval_amt = int(float(output2[0]['tot_evlu_amt'])) if output2 else 0
+    cash_balance = int(float(output2[0]['dnca_tot_amt'])) if output2 else 0
     
     stock_str = "보유 주식 없음"
     stock_quantity = 0
@@ -94,10 +94,10 @@ def get_balance_info(balance_data, ticker_name, current_price):
     if output1:
         for item in output1:
             if item['pdno'] == ticker_name: # 종목코드가 아닌 종목명으로 비교 (API 응답 기준)
-                stock_quantity = int(item['hldg_qty'])
-                avg_buy_price = int(item['pchs_avg_pric'])
-                eval_amt = int(item['evlu_amt'])
-                eval_profit_loss = int(item['evlu_pfls_amt'])
+                stock_quantity = int(float(item['hldg_qty']))
+                avg_buy_price = int(float(item['pchs_avg_pric']))
+                eval_amt = int(float(item['evlu_amt']))
+                eval_profit_loss = int(float(item['evlu_pfls_amt']))
                 eval_profit_loss_rate = float(item['evlu_pfls_rt'])
                 
                 stock_str = f"""
