@@ -1302,15 +1302,31 @@
     grid-template-columns: 1fr;
   }
 
-  /* Mobile padding adjustments */
-  .trading-dashboard,
+  /* Mobile padding adjustments - 최소화 */
+  .trading-dashboard {
+    padding: 6px;
+  }
+
   .rebalancing-status,
-  .card {
-    padding: 10px;
+  .card,
+  .rebalancing-status-card {
+    padding: 8px;
   }
 
   .mp-section,
   .submp-section {
-    padding: 12px;
+    padding: 8px;
+  }
+
+  .submp-asset-block {
+    padding: 8px;
+  }
+
+  .rebalance-sections {
+    gap: 12px;
+  }
+
+  .submp-grid {
+    gap: 8px;
   }
 }
