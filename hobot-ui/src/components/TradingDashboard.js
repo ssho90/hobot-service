@@ -222,17 +222,10 @@ const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebala
                     </span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">총 수익금:</span>
+                    <span className="info-label">총 손익:</span>
                     <span className={`info-value ${balance.total_profit_loss >= 0 ? 'positive' : 'negative'}`}
                       style={{ color: balance.total_profit_loss >= 0 ? '#d32f2f' : '#1976D2' }}>
-                      {balance.total_profit_loss > 0 ? '+' : ''}{balance.total_profit_loss?.toLocaleString('ko-KR')} 원
-                    </span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">총 수익률:</span>
-                    <span className={`info-value ${balance.total_return_rate >= 0 ? 'positive' : 'negative'}`}
-                      style={{ color: balance.total_return_rate >= 0 ? '#d32f2f' : '#1976D2' }}>
-                      {balance.total_return_rate > 0 ? '+' : ''}{balance.total_return_rate}%
+                      {balance.total_profit_loss > 0 ? '+' : ''}{balance.total_profit_loss?.toLocaleString('ko-KR')}원 ( {balance.total_return_rate > 0 ? '+' : ''}{balance.total_return_rate}% )
                     </span>
                   </div>
                   <div className="info-row">
