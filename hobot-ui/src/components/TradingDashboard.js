@@ -222,6 +222,13 @@ const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebala
                     </span>
                   </div>
                   <div className="info-row">
+                    <span className="info-label">총 수익금:</span>
+                    <span className={`info-value ${balance.total_profit_loss >= 0 ? 'positive' : 'negative'}`}
+                      style={{ color: balance.total_profit_loss >= 0 ? '#d32f2f' : '#1976D2' }}>
+                      {balance.total_profit_loss > 0 ? '+' : ''}{balance.total_profit_loss?.toLocaleString('ko-KR')} 원
+                    </span>
+                  </div>
+                  <div className="info-row">
                     <span className="info-label">총 수익률:</span>
                     <span className={`info-value ${balance.total_return_rate >= 0 ? 'positive' : 'negative'}`}
                       style={{ color: balance.total_return_rate >= 0 ? '#d32f2f' : '#1976D2' }}>
@@ -256,19 +263,21 @@ const MacroQuantTradingTab = ({ balance, loading, error, rebalanceStatus, rebala
                       </tr>
                     </thead>
                     <tbody>
-                      {balance.holdings.map((holding, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <div style={{ fontWeight: 500 }}>{holding.stock_name}</div>
-                            <div style={{ fontSize: '11px', color: '#888' }}>{holding.stock_code}</div>
-                          </td>
-                          <td>{holding.quantity?.toLocaleString('ko-KR')}</td>
-                          <td>{holding.eval_amount?.toLocaleString('ko-KR')}</td>
-                          <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
-                            {holding.profit_loss_rate?.toFixed(2)}%
-                          </td>
-                        </tr>
-                      ))}
+                      {[...balance.holdings]
+                        .sort((a, b) => b.eval_amount - a.eval_amount)
+                        .map((holding, idx) => (
+                          <tr key={idx}>
+                            <td>
+                              <div style={{ fontWeight: 500 }}>{holding.stock_name}</div>
+                              <div style={{ fontSize: '11px', color: '#888' }}>{holding.stock_code}</div>
+                            </td>
+                            <td>{holding.quantity?.toLocaleString('ko-KR')}</td>
+                            <td>{holding.eval_amount?.toLocaleString('ko-KR')}</td>
+                            <td className={holding.profit_loss_rate >= 0 ? 'positive' : 'negative'}>
+                              {holding.profit_loss_rate?.toFixed(2)}%
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
