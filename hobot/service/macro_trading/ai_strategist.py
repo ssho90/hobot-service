@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from langgraph.graph import StateGraph, START, END
 
-from service.llm import llm_gemini_pro
+from service.llm import llm_gemini_pro, llm_gemini_flash
 from service.database.db import get_db_connection
 from service.llm_monitoring import track_llm_call
 
@@ -446,7 +446,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
             news_text += "\n"
         
         # LLM 프롬프트 생성
-        prompt = f"""당신은 거시경제 전문가입니다. 다음은 지난 20일간 {', '.join(target_countries)} 국가의 경제 뉴스입니다.
+        prompt = f"""당신은 거시경제 전문가입니다. 다음은 최근 {', '.join(target_countries)} 국가의 경제 뉴스입니다.
 
 이 뉴스들을 분석하여:
 1. 주요 경제 지표의 변화 (GDP, 인플레이션, 고용, 금리 등)
@@ -468,10 +468,10 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
         
         # gemini-3.0-pro-preview 사용
         logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
-        llm = llm_gemini_pro(model="gemini-3-pro-preview")
+        llm = llm_gemini_flash(model="gemini-3-flash-preview")
         
         with track_llm_call(
-            model_name="gemini-3-pro-preview",
+            model_name="gemini-3-flash-preview",
             provider="Google",
             service_name="ai_strategist_news_summary",
             request_prompt=prompt
