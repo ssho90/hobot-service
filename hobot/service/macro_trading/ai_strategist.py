@@ -433,7 +433,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
         
         # 뉴스 데이터를 텍스트로 변환
         news_text = ""
-        for idx, news in enumerate(news_list[:150], 1):  # 최대 100개까지만 처리
+        for idx, news in enumerate(news_list[:100], 1):  # 최대 100개까지만 처리
             title = news.get('title_ko') or news.get('title', 'N/A')
             description = news.get('description_ko') or news.get('description', '')
             country = news.get('country_ko') or news.get('country', 'N/A')
@@ -442,7 +442,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
             news_text += f"[{idx}] [{country}] {published_at}\n"
             news_text += f"제목: {title}\n"
             if description:
-                news_text += f"내용: {description[:500]} ...\n"  # 최대 500자만
+                news_text += f"내용: {description[:550]} ...\n"  # 최대 550자만
             news_text += "\n"
         
         # LLM 프롬프트 생성
@@ -463,15 +463,15 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
 - 경제 흐름 및 트렌드: (전반적인 경제 동향 설명)
 - 주요 이벤트: (시장에 영향을 미칠 수 있는 중요한 사건들)
 
-한국어로 간결하게 요약해주세요 (500-800자 정도).
+한국어로 요약해주세요 (1500자 이내).
 """
         
         # gemini-3.0-pro-preview 사용
         logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
-        llm = llm_gemini_flash(model="gemini-3-flash-preview")
+        llm = llm_gemini_3_pro()
         
         with track_llm_call(
-            model_name="gemini-3-flash-preview",
+            model_name="gemini-3-pro-preview",
             provider="Google",
             service_name="ai_strategist_news_summary",
             request_prompt=prompt
