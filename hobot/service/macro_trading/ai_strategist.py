@@ -408,6 +408,9 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
             logger.warning(f"비농업 고용 데이터 수집 실패: {e}")
             inflation_employment_data["nonfarm_payroll"] = []
         
+        # Dashboard Data 수집
+        dashboard_data = calculator.get_macro_dashboard_indicators()
+        
         return {
             "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
             "real_interest_rate": signals.get("real_interest_rate"),
@@ -415,7 +418,8 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
             "net_liquidity": signals.get("net_liquidity"),
             "high_yield_spread": signals.get("high_yield_spread"),
             "additional_indicators": additional_indicators,
-            "inflation_employment_data": inflation_employment_data
+            "inflation_employment_data": inflation_employment_data,
+            "dashboard_data": dashboard_data
         }
     except Exception as e:
         logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
@@ -709,122 +713,135 @@ def get_previous_decision_with_sub_mp() -> Optional[Dict[str, Any]]:
 
 
 def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_mp_id: Optional[str] = None) -> str:
-    """MP 분석용 프롬프트 생성"""
+    # Dashboard Data 활용
+    dash = fred_signals.get('dashboard_data', {})
     
-    # FRED 시그널 요약
-    fred_summary = "=== FRED 정량 시그널 (가장 신뢰도 높음) ===\n"
-    if fred_signals:
-        yield_curve = fred_signals.get('yield_curve_spread_trend', {})
-        if yield_curve:
-            fred_summary += f"금리 곡선 국면: {yield_curve.get('regime_kr', 'N/A')}\n"
-            fred_summary += f"스프레드: {yield_curve.get('spread', 'N/A'):.2f}%\n"
-            fred_summary += f"금리 대세: {yield_curve.get('yield_regime_kr', 'N/A')}\n"
+    # 1. Growth
+    growth = dash.get('growth', {})
+    pmi = growth.get('ism_pmi', {})
+    unemp = growth.get('unemployment', {})
+    nfp = growth.get('nfp', {})
+    
+    # Format values safely
+    pmi_val = f"{pmi.get('value', 'N/A')}"
+    pmi_status = pmi.get('status', 'N/A')
+    pmi_trend = pmi.get('trend', 'N/A')
+    
+    new_orders = growth.get('ism_new_orders', 'N/A')
+    gdp_now = growth.get('gdp_now', 'N/A')
+    
+    unemp_curr = unemp.get('current', 'N/A')
+    unemp_past = unemp.get('past_3m', 'N/A')
+    unemp_diff = unemp.get('diff_trend', 'N/A')
+    sams_rule = unemp.get('sams_rule', 'N/A')
+    
+    nfp_val = nfp.get('value', 'N/A')
+    nfp_con = nfp.get('consensus', 'N/A')
+    nfp_surp = nfp.get('surprise', 'N/A')
+
+    # 2. Inflation
+    infl = dash.get('inflation', {})
+    pce = infl.get('core_pce_yoy', {})
+    cpi = infl.get('cpi_yoy', {})
+    exp_inf = infl.get('expected_inflation', 'N/A')
+    
+    pce_val = pce.get('value', 'N/A')
+    if isinstance(pce_val, (int, float)):
+        pce_val = f"{pce_val:.2f}"
+    pce_gap = pce.get('target_gap', 'N/A')
+    
+    cpi_val = cpi.get('value', 'N/A')
+    if isinstance(cpi_val, (int, float)):
+        cpi_val = f"{cpi_val:.2f}"
+    cpi_trend = cpi.get('trend', 'N/A')
+    
+    if isinstance(exp_inf, (int, float)):
+        exp_inf = f"{exp_inf:.2f}"
+
+    # 3. Liquidity
+    liq = dash.get('liquidity', {})
+    yc = liq.get('yield_curve', {})
+    soma = liq.get('soma', {})
+    net_liq = liq.get('net_liquidity', {})
+    hy = liq.get('hy_spread', {})
+    
+    yc_val = yc.get('value_bp', 'N/A')
+    if isinstance(yc_val, (int, float)):
+        yc_val = f"{yc_val:.0f}"
+    yc_status = yc.get('status', 'N/A')
+    
+    soma_val = soma.get('value', 'N/A')
+    if isinstance(soma_val, (int, float)):
+        soma_val = f"{soma_val:.0f}"
+    qt_speed = soma.get('qt_speed', 'N/A')
+    
+    nl_val = net_liq.get('value', 'N/A')
+    if isinstance(nl_val, (int, float)):
+        nl_val = f"{nl_val:.0f}"
+    nl_status = net_liq.get('status', 'N/A') # contains trend keyword
+    # Extract trend from status string if needed, or pass full status
+    # Request: "SOMA 감소에도 불구하고 유동성 [증가/감소] 중"
+    # Logic is already in quant_signals.py, here we check simple parsing or use regex if needed
+    # But quant_signals already returns formatted string for status likely. 
+    # Let's trust quant_signals output for status or reconstruct if needed.
+    # The quant_signals implementation: f"SOMA 감소에도 불구하고 유동성 {trend} 중"
+    nl_text = nl_status
+    
+    hy_val = hy.get('value', 'N/A')
+    if isinstance(hy_val, (int, float)):
+        hy_val = f"{hy_val:.2f}"
+    hy_eval = hy.get('evaluation', 'N/A')
+
+    # 4. Sentiment
+    sent = dash.get('sentiment', {})
+    vix = sent.get('vix', 'N/A')
+    if isinstance(vix, (int, float)):
+        vix = f"{vix:.2f}"
         
-        real_rate = fred_signals.get('real_interest_rate')
-        if real_rate is not None:
-            fred_summary += f"실질 금리 (DFII10): {real_rate:.2f}%\n"
-        
-        # 실질 금리 지난 12개월 데이터 추가 (DFII10 직접 조회)
-        try:
-            from service.macro_trading.collectors.fred_collector import get_fred_collector
-            collector = get_fred_collector()
-            dfii10_data = collector.get_latest_data("DFII10", days=365)
-            if dfii10_data is not None and len(dfii10_data) > 0:
-                # 최근 12개월 데이터 추출 (월별로 샘플링)
-                import pandas as pd
-                real_rate_monthly = dfii10_data.resample('M').last().tail(12)
-                if len(real_rate_monthly) > 0:
-                    fred_summary += "\n=== 실질 금리 지난 12개월 데이터 (DFII10) ===\n"
-                    for date_idx, value in real_rate_monthly.items():
-                        if pd.notna(value):
-                            date_str = date_idx.strftime("%Y-%m") if hasattr(date_idx, 'strftime') else str(date_idx)
-                            fred_summary += f"  {date_str}: {value:.2f}%\n"
-        except Exception as e:
-            logger.warning(f"실질 금리 시계열 데이터 조회 실패: {e}")
-        
-        taylor = fred_signals.get('taylor_rule_signal')
-        if taylor is not None:
-            fred_summary += f"테일러 준칙 신호: {taylor:.2f}%\n"
-        
-        net_liq = fred_signals.get('net_liquidity', {})
-        if net_liq:
-            trend = net_liq.get('ma_trend')
-            if trend == 1:
-                fred_summary += "연준 순유동성: 상승 추세 (유동성 공급 확대)\n"
-            elif trend == -1:
-                fred_summary += "연준 순유동성: 하락 추세 (유동성 공급 축소)\n"
-        
-        # 연준 순 유동성 지난 12개월 데이터 추가
-        try:
-            from service.macro_trading.signals.quant_signals import QuantSignalCalculator
-            calculator = QuantSignalCalculator()
-            net_liquidity_series = calculator.get_net_liquidity_series(days=365)
-            if net_liquidity_series is not None and len(net_liquidity_series) > 0:
-                # 최근 12개월 데이터 추출 (월별로 샘플링)
-                import pandas as pd
-                net_liquidity_monthly = net_liquidity_series.resample('M').last().tail(12)
-                if len(net_liquidity_monthly) > 0:
-                    fred_summary += "\n=== 연준 순 유동성 지난 12개월 데이터 ===\n"
-                    for date_idx, value in net_liquidity_monthly.items():
-                        if pd.notna(value):
-                            date_str = date_idx.strftime("%Y-%m") if hasattr(date_idx, 'strftime') else str(date_idx)
-                            # Billions로 변환하여 표시
-                            value_billions = value / 1000
-                            fred_summary += f"  {date_str}: {value_billions:.2f}B $\n"
-        except Exception as e:
-            logger.warning(f"연준 순 유동성 시계열 데이터 조회 실패: {e}")
-        
-        hy_spread = fred_signals.get('high_yield_spread', {})
-        if hy_spread:
-            signal_name = hy_spread.get('signal_name', 'N/A')
-            spread_val = hy_spread.get('spread', 'N/A')
-            fred_summary += f"하이일드 스프레드: {signal_name} ({spread_val}%)\n"
-        
-        # 물가 및 고용 지표 (지난 10개 데이터)
-        inflation_employment = fred_signals.get('inflation_employment_data', {})
-        if inflation_employment:
-            fred_summary += "\n=== 물가 지표 (지난 10개 데이터) ===\n"
-            
-            # PCEPI
-            pcepi = inflation_employment.get('pcepi', [])
-            if pcepi:
-                fred_summary += "PCEPI (Personal Consumption Expenditures Price Index):\n"
-                for item in pcepi:
-                    fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
-            else:
-                fred_summary += "PCEPI: 데이터 없음\n"
-            
-            # CPI
-            cpi = inflation_employment.get('cpi', [])
-            if cpi:
-                fred_summary += "\nCPI (Consumer Price Index):\n"
-                for item in cpi:
-                    fred_summary += f"  {item['date']}: {item['value']:.2f}\n"
-            else:
-                fred_summary += "\nCPI: 데이터 없음\n"
-            
-            fred_summary += "\n=== 고용 지표 (지난 10개 데이터) ===\n"
-            
-            # 실업률
-            unrate = inflation_employment.get('unemployment_rate', [])
-            if unrate:
-                fred_summary += "실업률 (Unemployment Rate, %):\n"
-                for item in unrate:
-                    fred_summary += f"  {item['date']}: {item['value']:.2f}%\n"
-            else:
-                fred_summary += "실업률: 데이터 없음\n"
-            
-            # 비농업 고용
-            payroll = inflation_employment.get('nonfarm_payroll', [])
-            if payroll:
-                fred_summary += "\n비농업 고용 (Nonfarm Payroll, Thousands):\n"
-                for item in payroll:
-                    fred_summary += f"  {item['date']}: {item['value']:,.0f}\n"
-            else:
-                fred_summary += "\n비농업 고용: 데이터 없음\n"
+    move = sent.get('move', {})
+    move_val = move.get('value', 'N/A')
+    if isinstance(move_val, (int, float)):
+        move_val = f"{move_val:.2f}"
+    move_status = move.get('status', 'N/A')
+    
+    cnn = sent.get('cnn_index', {})
+    cnn_val = cnn.get('value', 'N/A')
+    cnn_status = cnn.get('status', 'N/A')
+
+    # Construct the Analysis Prompt
+    fred_summary = f"""
+다음 매크로 경제 데이터를 바탕으로 시장 상황을 분석해줘.
+출력 형식은 아래 "매크로 경제 분석" 섹션의 템플릿을 그대로 유지하고, 대괄호 [] 로 표시된 부분을 실제 데이터와 분석 내용으로 채워줘.
+
+# 매크로 경제 데이터
+
+### 1. Growth (경기 성장 & 선행 지표)
+* **ISM 제조업 PMI:** {pmi_val} (기준선 50 {pmi_status.split()[-1] if '상회' in pmi_status or '하회' in pmi_status else pmi_status}, 추세: {pmi_trend})
+* **ISM 신규주문(New Orders):** {new_orders} (경기 선행 핵심 지표)
+* **GDPNow 예상치:** {gdp_now}%
+* **실업률:** {unemp_curr}% (3개월 전 {unemp_past}% 대비 {unemp_diff} - Sam's Rule {sams_rule})
+* **비농업 고용(NFP):** {nfp_val}K (컨센서스 대비 정보 없음)
+
+### 2. Inflation (물가 압력)
+* **Core PCE (YoY):** {pce_val}% (연준 목표 2%와 괴리: {pce_gap})
+* **Headline CPI (YoY):** {cpi_val}% (추세: {cpi_trend})
+* **기대 인플레이션(BEI 10Y):** {exp_inf}%
+
+### 3. Liquidity & Fed Policy (유동성 환경)
+* **금리 커브 (10Y-2Y):** {yc_val}bp (상태: {yc_status})
+* **SOMA (연준 자산):** {soma_val}B$ (QT 진행 속도: {qt_speed})
+* **Net Liquidity (순유동성):** {nl_val}B$ ({nl_text})
+* **하이일드 스프레드:** {hy_val}% (평가: {hy_eval})
+
+### 4. Sentiment & Volatility (심리)
+* **VIX (주식 공포지수):** {vix}
+* **MOVE (채권 공포지수):** {move_val} (채권 시장 변동성 {move_status})
+* **CNN Fear & Greed Index:** {cnn_val} (상태: {cnn_status})
+
+"""
     
     # 경제 뉴스 요약 (LLM으로 정제된 요약 사용)
-    news_summary = "\n=== 경제 뉴스 (비중 낮게 참고) ===\n"
+    news_summary = "### 5. Key News Context \n"
     if economic_news:
         target_countries = economic_news.get('target_countries', [])
         total_count = economic_news.get('total_count', 0)
@@ -899,7 +916,7 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
 
 ## 출력 형식 (JSON):
 {{
-    "analysis_summary": "분석 요약 (한국어, 200-300자)",
+    "analysis_summary": "분석 요약 (한국어, 400-500자)",
     "mp_id": "MP-4",
     "reasoning": "판단 근거 (한국어, 500-700자) - 왜 이 MP를 선택했는지 설명 (이전 MP와 비교하여 변경 이유 포함)"
 }}

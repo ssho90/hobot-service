@@ -593,3 +593,204 @@ class QuantSignalCalculator:
             logger.error(f"연준 순유동성 시계열 데이터 계산 실패: {e}", exc_info=True)
             return None
 
+    def get_macro_dashboard_indicators(self) -> Dict[str, Any]:
+        """
+        매크로 대시보드용 종합 지표 수집
+        (Growth, Inflation, Liquidity, Sentiment)
+        
+        Returns:
+            Dict[str, Any]: 대시보드 구성을 위한 데이터 딕셔너리
+        """
+        dashboard_data = {
+            "growth": {},
+            "inflation": {},
+            "liquidity": {},
+            "sentiment": {}
+        }
+        
+        # 1. Growth (경기 성장 & 선행 지표)
+        try:
+            # ISM Manufacturing PMI (NAPM)
+            napm = self.fred_collector.get_latest_data("NAPM", days=90)
+            if len(napm) > 0:
+                latest_napm = napm.iloc[-1]
+                # 추세 (3개월 이동평균 대비)
+                ma3 = napm.tail(3).mean()
+                trend = "상승중" if latest_napm > ma3 else "하락중"
+                dashboard_data["growth"]["ism_pmi"] = {
+                    "value": float(latest_napm),
+                    "trend": trend,
+                    "status": "기준선 50 상회" if latest_napm >= 50 else "기준선 50 하회"
+                }
+            
+            # ISM New Orders (NAPMNO)
+            napmno = self.fred_collector.get_latest_data("NAPMNO", days=90)
+            if len(napmno) > 0:
+                dashboard_data["growth"]["ism_new_orders"] = float(napmno.iloc[-1])
+            
+            # GDPNow (GDPNOW)
+            gdpnow = self.fred_collector.get_latest_data("GDPNOW", days=90)
+            if len(gdpnow) > 0:
+                dashboard_data["growth"]["gdp_now"] = float(gdpnow.iloc[-1])
+                
+            # 실업률 (UNRATE)
+            unrate = self.fred_collector.get_latest_data("UNRATE", days=365)
+            if len(unrate) > 0:
+                current_unrate = unrate.iloc[-1]
+                # 3개월 전 (대략 3번째 뒤의 값, or 날짜 비교)
+                # 월별 데이터이므로 tail(4)에서 맨 처음이 3개월 전
+                past_unrate = unrate.iloc[-4] if len(unrate) >= 4 else unrate.iloc[0]
+                
+                # Sam's Rule 유사 로직 (최근 3개월 이동평균이 지난 12개월 최저치보다 0.5%p 이상 상승 시 침체)
+                # 여기서는 단순 급등 여부만 판단
+                diff = current_unrate - past_unrate
+                sams_rule = "경고등 켜짐" if diff >= 0.5 else "경고등 꺼짐"
+                
+                dashboard_data["growth"]["unemployment"] = {
+                    "current": float(current_unrate),
+                    "past_3m": float(past_unrate),
+                    "diff_trend": "급등" if diff >= 0.5 else "안정/하락" if diff <= 0 else "상승",
+                    "sams_rule": sams_rule
+                }
+            
+            # 비농업 고용 (PAYEMS) - NFP Change
+            payems = self.fred_collector.get_latest_data("PAYEMS", days=90)
+            if len(payems) >= 2:
+                latest_nfp = payems.iloc[-1]
+                prev_nfp = payems.iloc[-2]
+                nfp_change = (latest_nfp - prev_nfp) # 단위: 천명
+                dashboard_data["growth"]["nfp"] = {
+                    "value": float(nfp_change),
+                    # 컨센서스는 외부 데이터 필요하므로 여기서는 생략하거나 0으로 처리
+                    "consensus": 0,
+                    "surprise": "N/A"
+                }
+
+        except Exception as e:
+            logger.error(f"Growth 지표 수집 실패: {e}")
+            
+        # 2. Inflation (물가 압력)
+        try:
+            # Core PCE (PCEPILFE) - YoY
+            pce_core = self.fred_collector.get_latest_data("PCEPILFE", days=400)
+            if len(pce_core) >= 13:
+                curr = pce_core.iloc[-1]
+                year_ago = pce_core.iloc[-13] # 1년 전
+                yoy = ((curr / year_ago) - 1) * 100
+                dashboard_data["inflation"]["core_pce_yoy"] = {
+                    "value": float(yoy),
+                    "target_gap": "큼" if abs(yoy - 2.0) > 1.0 else "작음"
+                }
+            
+            # Headline CPI (CPIAUCSL) - YoY
+            cpi = self.fred_collector.get_latest_data("CPIAUCSL", days=400)
+            if len(cpi) >= 13:
+                curr = cpi.iloc[-1]
+                year_ago = cpi.iloc[-13]
+                yoy = ((curr / year_ago) - 1) * 100
+                
+                # 추세 (최근 3개월 변화율 추이)
+                last_3m_change = cpi.pct_change().tail(3).mean()
+                trend = "상승중" if last_3m_change > 0.003 else "횡보중" if last_3m_change > -0.001 else "하락중"
+                
+                dashboard_data["inflation"]["cpi_yoy"] = {
+                    "value": float(yoy),
+                    "trend": trend
+                }
+            
+            # 기대 인플레이션 (T10YIE or BEI 10Y)
+            bei = self.fred_collector.get_latest_data("T10YIE", days=30)
+            if len(bei) > 0:
+                dashboard_data["inflation"]["expected_inflation"] = float(bei.iloc[-1])
+                
+        except Exception as e:
+            logger.error(f"Inflation 지표 수집 실패: {e}")
+            
+        # 3. Liquidity & Fed Policy
+        try:
+            # 금리 커브 (10Y-2Y)
+            dgs10 = self.fred_collector.get_latest_data("DGS10", days=30)
+            dgs2 = self.fred_collector.get_latest_data("DGS2", days=30)
+            if len(dgs10) > 0 and len(dgs2) > 0:
+                spread = dgs10.iloc[-1] - dgs2.iloc[-1]
+                # 상태 판단 (단순화)
+                status = "Bull Steepening - 경기 침체 대비 금리 인하 기대 반영" # 기본값, 실제로는 로직 필요
+                # QuantSignalCalculator의 기존 로직 활용 권장
+                yc_signal = self.get_yield_curve_spread_trend_following()
+                if yc_signal:
+                    status = yc_signal.get("regime_kr", status)
+                
+                dashboard_data["liquidity"]["yield_curve"] = {
+                    "value_bp": float(spread * 100),
+                    "status": status
+                }
+            
+            # SOMA (WALCL)
+            walcl = self.fred_collector.get_latest_data("WALCL", days=90)
+            if len(walcl) > 0:
+                latest_walcl = walcl.iloc[-1] / 1000 # B unit
+                # QT 속도 (최근 4주 변화)
+                if len(walcl) >= 5:
+                    change_4w = walcl.iloc[-1] - walcl.iloc[-5]
+                    qt_speed = "빠름" if change_4w < -50000 else "느림" if change_4w < 0 else "중단/증가"
+                else:
+                    qt_speed = "N/A"
+                
+                dashboard_data["liquidity"]["soma"] = {
+                    "value": float(latest_walcl),
+                    "qt_speed": qt_speed
+                }
+            
+            # Net Liquidity
+            net_liq = self.get_net_liquidity(days=30)
+            if net_liq:
+                # SOMA 감소에도 유동성 증가 여부 -> TGA/RRP 변화 확인 필요하나 여기서는 단순 추세만
+                trend = "증가" if net_liq.get("ma_trend") == 1 else "감소"
+                dashboard_data["liquidity"]["net_liquidity"] = {
+                    "value": net_liq.get("net_liquidity") / 1000, # B unit
+                    "status": f"SOMA 감소에도 불구하고 유동성 {trend} 중" # 텍스트 템플릿용
+                }
+            
+            # HY Spread
+            hy = self.get_high_yield_spread_signal()
+            if hy:
+                dashboard_data["liquidity"]["hy_spread"] = {
+                    "value": hy.get("spread"),
+                    "evaluation": f"{hy.get('signal_name')} - 시장이 위험을 {'무시' if hy.get('signal_name')=='Greed' else '반영'} 중"
+                }
+                
+        except Exception as e:
+            logger.error(f"Liquidity 지표 수집 실패: {e}")
+            
+        # 4. Sentiment
+        try:
+            # VIX
+            vix = self.fred_collector.get_latest_data("VIXCLS", days=30)
+            if len(vix) > 0:
+                dashboard_data["sentiment"]["vix"] = float(vix.iloc[-1])
+            
+            # MOVE (M04154USM223NNBR)
+            move = self.fred_collector.get_latest_data("M04154USM223NNBR", days=90)
+            if len(move) > 0:
+                latest_move = move.iloc[-1]
+                dashboard_data["sentiment"]["move"] = {
+                    "value": float(latest_move),
+                    "status": "안정" if latest_move < 100 else "불안" # 임의 기준
+                }
+            else:
+                 # 데이터 없으면 N/A 처리
+                 dashboard_data["sentiment"]["move"] = {
+                    "value": "N/A",
+                    "status": "N/A"
+                }
+
+            # CNN Fear & Greed (데이터 없음 - Placeholder)
+            dashboard_data["sentiment"]["cnn_index"] = {
+                "value": "N/A",
+                "status": "알 수 없음"
+            }
+            
+        except Exception as e:
+            logger.error(f"Sentiment 지표 수집 실패: {e}")
+            
+        return dashboard_data

@@ -119,6 +119,49 @@ FRED_INDICATORS = {
         "name": "10-Year Treasury Inflation-Indexed Security, Constant Maturity",
         "unit": "%",
         "frequency": "daily"
+    },
+    # 추가 매크로 지표 (Growth, Inflation, Liquidity, Sentiment)
+    "NAPM": {
+        "code": "NAPM",
+        "name": "ISM Manufacturing PMI",
+        "unit": "Index",
+        "frequency": "monthly"
+    },
+    "NAPMNO": {
+        "code": "NAPMNO",
+        "name": "ISM Manufacturing New Orders Index",
+        "unit": "Index",
+        "frequency": "monthly"
+    },
+    "GDPNOW": {
+        "code": "GDPNOW",
+        "name": "GDPNow",
+        "unit": "%",
+        "frequency": "quarterly"  # 실제로는 불규칙하지만 편의상
+    },
+    "PCEPILFE": {
+        "code": "PCEPILFE",
+        "name": "Core PCE Price Index",
+        "unit": "Index",
+        "frequency": "monthly"
+    },
+    "T10YIE": {
+        "code": "T10YIE",
+        "name": "10-Year Breakeven Inflation Rate",
+        "unit": "%",
+        "frequency": "daily"
+    },
+    "VIXCLS": {
+        "code": "VIXCLS",
+        "name": "CBOE Volatility Index: VIX",
+        "unit": "Index",
+        "frequency": "daily"
+    },
+    "M04154USM223NNBR": {
+        "code": "M04154USM223NNBR",
+        "name": "Merrill Lynch Option Volatility Estimate (MOVE Index)",
+        "unit": "Index",
+        "frequency": "monthly" # 데이터 가용성에 따라 조정 필요할 수 있음
     }
 }
 
