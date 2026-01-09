@@ -121,15 +121,22 @@ FRED_INDICATORS = {
         "frequency": "daily"
     },
     # 추가 매크로 지표 (Growth, Inflation, Liquidity, Sentiment)
-    "NAPM": {
-        "code": "NAPM",
-        "name": "ISM Manufacturing PMI",
+    # Philly Fed Manufacturing Index (ISM 대체)
+    "GACDISA066MSFRBPHI": {
+        "code": "GACDISA066MSFRBPHI",
+        "name": "Philly Fed Current Activity",
         "unit": "Index",
         "frequency": "monthly"
     },
-    "NAPMNO": {
-        "code": "NAPMNO",
-        "name": "ISM Manufacturing New Orders Index",
+    "GACDNOSA066MSFRBPHI": {
+        "code": "GACDNOSA066MSFRBPHI",
+        "name": "Philly Fed New Orders",
+        "unit": "Index",
+        "frequency": "monthly"
+    },
+    "GAFDISA066MSFRBPHI": {
+        "code": "GAFDISA066MSFRBPHI",
+        "name": "Philly Fed Future Activity (6M)",
         "unit": "Index",
         "frequency": "monthly"
     },

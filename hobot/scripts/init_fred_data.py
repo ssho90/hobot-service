@@ -32,9 +32,10 @@ def init_fred_data(days=365*3):
         
         logger.info(f"FRED 데이터 초기화 시작 (수집 기간: 최근 {days}일)")
         
-        # 수집할 신규 지표 목록
+        # 수집할 신규 지표 목록 (ISM -> Philly Fed 교체)
         target_indicators = [
-            "NAPM", "NAPMNO", "GDPNOW", "PCEPILFE", "T10YIE", "VIXCLS", "M04154USM223NNBR"
+            "GACDISA066MSFRBPHI", "GACDNOSA066MSFRBPHI", "GAFDISA066MSFRBPHI", 
+            "GDPNOW", "PCEPILFE", "T10YIE", "VIXCLS", "M04154USM223NNBR"
         ]
         
         # 기존 주요 지표들도 함께 업데이트

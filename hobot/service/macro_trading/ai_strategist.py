@@ -718,26 +718,25 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
     
     # 1. Growth
     growth = dash.get('growth', {})
-    pmi = growth.get('ism_pmi', {})
-    unemp = growth.get('unemployment', {})
-    nfp = growth.get('nfp', {})
     
-    # Format values safely
-    pmi_val = f"{pmi.get('value', 'N/A')}"
-    pmi_status = pmi.get('status', 'N/A')
-    pmi_trend = pmi.get('trend', 'N/A')
+    # Philly Fed Indicators
+    philly_curr = growth.get('philly_current', {})
+    philly_curr_val =  f"{philly_curr.get('value', 'N/A')}"
+    philly_curr_status = philly_curr.get('status', 'N/A')
     
-    new_orders = growth.get('ism_new_orders', 'N/A')
+    philly_new_orders = growth.get('philly_new_orders', 'N/A')
+    philly_future = growth.get('philly_future', 'N/A')
+    
     gdp_now = growth.get('gdp_now', 'N/A')
     
+    unemp = growth.get('unemployment', {})
     unemp_curr = unemp.get('current', 'N/A')
     unemp_past = unemp.get('past_3m', 'N/A')
     unemp_diff = unemp.get('diff_trend', 'N/A')
     sams_rule = unemp.get('sams_rule', 'N/A')
     
+    nfp = growth.get('nfp', {})
     nfp_val = nfp.get('value', 'N/A')
-    nfp_con = nfp.get('consensus', 'N/A')
-    nfp_surp = nfp.get('surprise', 'N/A')
 
     # 2. Inflation
     infl = dash.get('inflation', {})
@@ -778,13 +777,7 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
     nl_val = net_liq.get('value', 'N/A')
     if isinstance(nl_val, (int, float)):
         nl_val = f"{nl_val:.0f}"
-    nl_status = net_liq.get('status', 'N/A') # contains trend keyword
-    # Extract trend from status string if needed, or pass full status
-    # Request: "SOMA 감소에도 불구하고 유동성 [증가/감소] 중"
-    # Logic is already in quant_signals.py, here we check simple parsing or use regex if needed
-    # But quant_signals already returns formatted string for status likely. 
-    # Let's trust quant_signals output for status or reconstruct if needed.
-    # The quant_signals implementation: f"SOMA 감소에도 불구하고 유동성 {trend} 중"
+    nl_status = net_liq.get('status', 'N/A')
     nl_text = nl_status
     
     hy_val = hy.get('value', 'N/A')
@@ -816,8 +809,9 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
 # 매크로 경제 데이터
 
 ### 1. Growth (경기 성장 & 선행 지표)
-* **ISM 제조업 PMI:** {pmi_val} (기준선 50 {pmi_status.split()[-1] if '상회' in pmi_status or '하회' in pmi_status else pmi_status}, 추세: {pmi_trend})
-* **ISM 신규주문(New Orders):** {new_orders} (경기 선행 핵심 지표)
+* **Philly Fed 제조업 지수 (Current Activity):** {philly_curr_val} (설명: ISM PMI 대체재. 기준선 0 {philly_curr_status}. 현재 제조업 체감 경기)
+* **Philly Fed 신규 주문 (New Orders):** {philly_new_orders} (설명: ISM New Orders 대체재. 실제 공장에 들어오는 주문량. 가장 강력한 선행 지표)
+* **Philly Fed 6개월 전망 (Future Activity):** {philly_future} (설명: 기업들의 미래 기대 심리. 수치가 높으면 낙관적)
 * **GDPNow 예상치:** {gdp_now}%
 * **실업률:** {unemp_curr}% (3개월 전 {unemp_past}% 대비 {unemp_diff} - Sam's Rule {sams_rule})
 * **비농업 고용(NFP):** {nfp_val}K (컨센서스 대비 정보 없음)

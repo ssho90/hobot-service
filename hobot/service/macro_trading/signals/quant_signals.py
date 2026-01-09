@@ -609,24 +609,26 @@ class QuantSignalCalculator:
         }
         
         # 1. Growth (경기 성장 & 선행 지표)
+        # 1. Growth (경기 성장 & 선행 지표)
         try:
-            # ISM Manufacturing PMI (NAPM)
-            napm = self.fred_collector.get_latest_data("NAPM", days=90)
-            if len(napm) > 0:
-                latest_napm = napm.iloc[-1]
-                # 추세 (3개월 이동평균 대비)
-                ma3 = napm.tail(3).mean()
-                trend = "상승중" if latest_napm > ma3 else "하락중"
-                dashboard_data["growth"]["ism_pmi"] = {
-                    "value": float(latest_napm),
-                    "trend": trend,
-                    "status": "기준선 50 상회" if latest_napm >= 50 else "기준선 50 하회"
+            # Philly Fed Current Activity (GACDISA066MSFRBPHI) - ISM PMI 대체
+            philly_curr = self.fred_collector.get_latest_data("GACDISA066MSFRBPHI", days=90)
+            if len(philly_curr) > 0:
+                latest_curr = philly_curr.iloc[-1]
+                dashboard_data["growth"]["philly_current"] = {
+                    "value": float(latest_curr),
+                    "status": "확장" if latest_curr > 0 else "위축"
                 }
-            
-            # ISM New Orders (NAPMNO)
-            napmno = self.fred_collector.get_latest_data("NAPMNO", days=90)
-            if len(napmno) > 0:
-                dashboard_data["growth"]["ism_new_orders"] = float(napmno.iloc[-1])
+
+            # Philly Fed New Orders (GACDNOSA066MSFRBPHI) - ISM New Orders 대체
+            philly_new = self.fred_collector.get_latest_data("GACDNOSA066MSFRBPHI", days=90)
+            if len(philly_new) > 0:
+                dashboard_data["growth"]["philly_new_orders"] = float(philly_new.iloc[-1])
+
+            # Philly Fed Future Activity (GAFDISA066MSFRBPHI)
+            philly_future = self.fred_collector.get_latest_data("GAFDISA066MSFRBPHI", days=90)
+            if len(philly_future) > 0:
+                dashboard_data["growth"]["philly_future"] = float(philly_future.iloc[-1])
             
             # GDPNow (GDPNOW)
             gdpnow = self.fred_collector.get_latest_data("GDPNOW", days=90)
