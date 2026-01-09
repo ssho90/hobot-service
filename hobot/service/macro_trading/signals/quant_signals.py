@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 from datetime import date, timedelta
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 import logging
 
 from service.macro_trading.collectors.fred_collector import FREDCollector, get_fred_collector
