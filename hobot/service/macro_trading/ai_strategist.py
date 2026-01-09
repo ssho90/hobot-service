@@ -472,7 +472,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
         
         # gemini-3.0-pro-preview 사용
         logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
-        llm = llm_gemini_3_pro()
+        llm = llm_gemini_pro()
         
         with track_llm_call(
             model_name="gemini-3-pro-preview",
