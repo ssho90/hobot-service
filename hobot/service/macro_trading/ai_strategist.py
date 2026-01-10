@@ -596,7 +596,48 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
             # LLM으로 뉴스 요약 (include_summary가 True인 경우에만)
             news_summary = None
             if include_summary and news:
-                news_summary = summarize_news_with_llm(news, target_countries)
+                # 캐시 확인 (2시간 이내의 요약본이 있는지 확인)
+                try:
+                    cursor.execute("""
+                        SELECT summary, created_at 
+                        FROM memory_store 
+                        WHERE topic = 'economic_news_summary' 
+                        ORDER BY created_at DESC 
+                        LIMIT 1
+                    """)
+                    cached_row = cursor.fetchone()
+                    
+                    use_cache = False
+                    if cached_row:
+                        created_at = cached_row['created_at']
+                        # created_at이 문자열인 경우 datetime으로 변환
+                        if isinstance(created_at, str):
+                            created_at = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                            
+                        # 2시간 이내인지 확인
+                        if datetime.now() - created_at < timedelta(hours=2):
+                            news_summary = cached_row['summary']
+                            logger.info(f"캐시된 뉴스 요약 사용 (생성일: {created_at})")
+                            use_cache = True
+                    
+                    if not use_cache:
+                        logger.info("새로운 뉴스 요약 생성 중...")
+                        news_summary = summarize_news_with_llm(news, target_countries)
+                        
+                        # DB에 저장
+                        if news_summary:
+                            cursor.execute("""
+                                INSERT INTO memory_store (topic, summary, created_at)
+                                VALUES ('economic_news_summary', %s, %s)
+                            """, (news_summary, datetime.now()))
+                            conn.commit()
+                            logger.info("뉴스 요약 DB 저장 완료")
+                            
+                except Exception as e:
+                    logger.error(f"뉴스 요약 캐시 처리 중 오류: {e}")
+                    # 오류 발생 시 직접 요약 시도
+                    if not news_summary:
+                        news_summary = summarize_news_with_llm(news, target_countries)
             
             return {
                 "total_count": len(news),
