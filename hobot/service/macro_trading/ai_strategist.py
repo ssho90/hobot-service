@@ -772,7 +772,8 @@ def get_previous_decision_with_sub_mp() -> Optional[Dict[str, Any]]:
         return None
 
 
-def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_mp_id: Optional[str] = None) -> str:
+def _format_fred_dashboard_data(fred_signals: Dict) -> str:
+    """FRED 대시보드 데이터 포맷팅 (공통 함수)"""
     # Dashboard Data 활용
     dash = fred_signals.get('dashboard_data', {})
     
@@ -855,7 +856,6 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
     stlfsi_val = stlfsi.get('value', 'N/A')
     if isinstance(stlfsi_val, (int, float)):
         stlfsi_val = f"{stlfsi_val:.2f}"
-    stlfsi_status = stlfsi.get('status', 'N/A')
     
     cnn = sent.get('cnn_index', {})
     cnn_val = cnn.get('value', 'N/A')
@@ -863,9 +863,6 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
 
     # Construct the Analysis Prompt
     fred_summary = f"""
-다음 매크로 경제 데이터를 바탕으로 시장 상황을 분석해줘.
-출력 형식은 아래 "매크로 경제 분석" 섹션의 템플릿을 그대로 유지하고, 대괄호 [] 로 표시된 부분을 실제 데이터와 분석 내용으로 채워줘.
-
 # 매크로 경제 데이터
 
 ### 1. Growth (경기 성장 & 선행 지표)
@@ -891,10 +888,12 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
 * **VIX (주식 공포지수):** {vix}
 * **금융 스트레스 지수 (STLFSI4):** {stlfsi_val} (설명: MOVE 대체재. 0보다 크면 시장 긴장, 0 이하면 평온. 최신 버전 사용)
 * **CNN Fear & Greed Index:** {cnn_val} (상태: {cnn_status})
-
 """
-    
-    # 경제 뉴스 요약 (LLM으로 정제된 요약 사용)
+    return fred_summary
+
+
+def _format_economic_news_data(economic_news: Dict) -> str:
+    """경제 뉴스 데이터 포맷팅 (공통 함수)"""
     news_summary = "### 5. Key News Context \n"
     if economic_news:
         target_countries = economic_news.get('target_countries', [])
@@ -920,6 +919,16 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
             news_summary += "최근 뉴스 없음\n"
     else:
         news_summary += "최근 뉴스 없음\n"
+    
+    return news_summary
+
+
+def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_mp_id: Optional[str] = None) -> str:
+    # FRED 데이터 포맷팅
+    fred_summary = _format_fred_dashboard_data(fred_signals)
+    
+    # 경제 뉴스 포맷팅
+    news_summary = _format_economic_news_data(economic_news)
     
     # 이전 MP 정보
     previous_mp_info = ""
@@ -1001,22 +1010,11 @@ def create_sub_mp_analysis_prompt(
         previous_sub_mp: 이전 Sub-MP 정보 ({"stocks": "Eq-A", "bonds": "Bnd-L", "alternatives": "Alt-I", "cash": "Cash-N"} 형태)
     """
     
-    # FRED 시그널 요약 (간단히)
-    fred_summary = "=== FRED 정량 시그널 요약 ===\n"
-    if fred_signals:
-        yield_curve = fred_signals.get('yield_curve_spread_trend', {})
-        if yield_curve:
-            fred_summary += f"금리 곡선 국면: {yield_curve.get('regime_kr', 'N/A')}\n"
-            fred_summary += f"금리 대세: {yield_curve.get('yield_regime_kr', 'N/A')}\n"
-        
-        real_rate = fred_signals.get('real_interest_rate')
-        if real_rate is not None:
-            fred_summary += f"실질 금리: {real_rate:.2f}%\n"
-        
-        hy_spread = fred_signals.get('high_yield_spread', {})
-        if hy_spread:
-            signal_name = hy_spread.get('signal_name', 'N/A')
-            fred_summary += f"하이일드 스프레드: {signal_name}\n"
+    # FRED 데이터 포맷팅 (공통 함수 사용)
+    fred_summary = _format_fred_dashboard_data(fred_signals)
+    
+    # 경제 뉴스 포맷팅 (공통 함수 사용)
+    news_summary = _format_economic_news_data(economic_news)
     
     # 선택된 MP 정보
     portfolios = get_model_portfolios()
@@ -1116,6 +1114,8 @@ def create_sub_mp_analysis_prompt(
 {mp_info}
 
 {fred_summary}
+
+{news_summary}
 
 {sub_mp_info}
 
