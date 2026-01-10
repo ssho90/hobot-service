@@ -123,7 +123,7 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         current_prices=current_prices
     )
     
-    current_holdings_map = {h['stock_code']: int(h['holding_qty']) for h in current_state.get('holdings', [])}
+    current_holdings_map = {h['stock_code']: int(h['quantity']) for h in current_state.get('holdings', [])}
     
     net_trades = calculate_net_trades(current_holdings_map, target_quantities)
     filtered_trades = apply_minimum_trade_filter(net_trades, current_prices)
