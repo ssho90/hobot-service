@@ -631,7 +631,7 @@ class QuantSignalCalculator:
                 dashboard_data["growth"]["philly_future"] = float(philly_future.iloc[-1])
             
             # GDPNow (GDPNOW)
-            gdpnow = self.fred_collector.get_latest_data("GDPNOW", days=90)
+            gdpnow = self.fred_collector.get_latest_data("GDPNOW", days=365)
             if len(gdpnow) > 0:
                 dashboard_data["growth"]["gdp_now"] = float(gdpnow.iloc[-1])
                 
@@ -674,7 +674,7 @@ class QuantSignalCalculator:
         # 2. Inflation (물가 압력)
         try:
             # Core PCE (PCEPILFE) - YoY
-            pce_core = self.fred_collector.get_latest_data("PCEPILFE", days=400)
+            pce_core = self.fred_collector.get_latest_data("PCEPILFE", days=730)
             if len(pce_core) >= 13:
                 curr = pce_core.iloc[-1]
                 year_ago = pce_core.iloc[-13] # 1년 전
@@ -685,7 +685,7 @@ class QuantSignalCalculator:
                 }
             
             # Headline CPI (CPIAUCSL) - YoY
-            cpi = self.fred_collector.get_latest_data("CPIAUCSL", days=400)
+            cpi = self.fred_collector.get_latest_data("CPIAUCSL", days=730)
             if len(cpi) >= 13:
                 curr = cpi.iloc[-1]
                 year_ago = cpi.iloc[-13]
@@ -771,17 +771,17 @@ class QuantSignalCalculator:
             if len(vix) > 0:
                 dashboard_data["sentiment"]["vix"] = float(vix.iloc[-1])
             
-            # MOVE (STLFSI4로 대체 - St. Louis Fed Financial Stress Index)
-            move = self.fred_collector.get_latest_data("STLFSI4", days=90)
-            if len(move) > 0:
-                latest_move = move.iloc[-1]
-                dashboard_data["sentiment"]["move"] = {
-                    "value": float(latest_move),
-                    "status": "안정" if latest_move < 100 else "불안" # 임의 기준
+            # 금융 스트레스 지수 (STLFSI4) - MOVE 대체
+            stlfsi = self.fred_collector.get_latest_data("STLFSI4", days=90)
+            if len(stlfsi) > 0:
+                latest_stlfsi = stlfsi.iloc[-1]
+                dashboard_data["sentiment"]["stlfsi4"] = {
+                    "value": float(latest_stlfsi),
+                    "status": "긴장" if latest_stlfsi > 0 else "평온"
                 }
             else:
                  # 데이터 없으면 N/A 처리
-                 dashboard_data["sentiment"]["move"] = {
+                 dashboard_data["sentiment"]["stlfsi4"] = {
                     "value": "N/A",
                     "status": "N/A"
                 }

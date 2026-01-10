@@ -795,11 +795,11 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
     if isinstance(vix, (int, float)):
         vix = f"{vix:.2f}"
         
-    move = sent.get('move', {})
-    move_val = move.get('value', 'N/A')
-    if isinstance(move_val, (int, float)):
-        move_val = f"{move_val:.2f}"
-    move_status = move.get('status', 'N/A')
+    stlfsi = sent.get('stlfsi4', {})
+    stlfsi_val = stlfsi.get('value', 'N/A')
+    if isinstance(stlfsi_val, (int, float)):
+        stlfsi_val = f"{stlfsi_val:.2f}"
+    stlfsi_status = stlfsi.get('status', 'N/A')
     
     cnn = sent.get('cnn_index', {})
     cnn_val = cnn.get('value', 'N/A')
@@ -833,7 +833,7 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
 
 ### 4. Sentiment & Volatility (심리)
 * **VIX (주식 공포지수):** {vix}
-* **MOVE (채권 공포지수):** {move_val} (채권 시장 변동성 {move_status})
+* **금융 스트레스 지수 (STLFSI4):** {stlfsi_val} (설명: MOVE 대체재. 0보다 크면 시장 긴장, 0 이하면 평온. 최신 버전 사용)
 * **CNN Fear & Greed Index:** {cnn_val} (상태: {cnn_status})
 
 """

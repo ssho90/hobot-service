@@ -20,12 +20,12 @@ def test_ids():
     collector = get_fred_collector()
     
     ids_to_test = [
-        "GACDISA066MSFRBPHI", # Philly Current
-        "GACDNOSA066MSFRBPHI", # Philly New Orders
-        "GAFDISA066MSFRBPHI", # Philly Future
+        "GACDFSA066MSFRBPHI", # Philly Current
+        "NOCDFSA066MSFRBPHI", # Philly New Orders
+        "GAFDFSA066MSFRBPHI", # Philly Future
         "PCEPILFE", # Core PCE
         "CPIAUCSL", # CPI
-        "M04154USM223NNBR", # MOVE
+        "STLFSI4", # MOVE
         "GDPNOW", # GDPNow
     ]
     

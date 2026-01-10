@@ -8,8 +8,8 @@ import os
 
 # 프로젝트 루트 경로를 PYTHONPATH에 추가하여 모듈 import 가능하게 함
 current_dir = os.path.dirname(os.path.abspath(__file__))
-hobot_root = os.path.dirname(current_dir) # .../hobot
-sys.path.append(hobot_root)
+project_root = os.path.dirname(os.path.dirname(current_dir))
+sys.path.append(project_root)
 
 from service.macro_trading.collectors.fred_collector import FREDCollector, FRED_INDICATORS
 
