@@ -411,7 +411,7 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
         # Dashboard Data 수집
         dashboard_data = calculator.get_macro_dashboard_indicators()
         
-        return {
+        return_data = {
             "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
             "real_interest_rate": signals.get("real_interest_rate"),
             "taylor_rule_signal": signals.get("taylor_rule_signal"),
@@ -421,6 +421,10 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
             "inflation_employment_data": inflation_employment_data,
             "dashboard_data": dashboard_data
         }
+        
+        logger.info(f"FRED Signals Collected: {json.dumps(return_data, default=str, indent=2, ensure_ascii=False)}")
+        
+        return return_data
     except Exception as e:
         logger.error(f"FRED 시그널 수집 실패: {e}", exc_info=True)
         return None
