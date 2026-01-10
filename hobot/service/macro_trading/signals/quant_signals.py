@@ -611,8 +611,8 @@ class QuantSignalCalculator:
         # 1. Growth (경기 성장 & 선행 지표)
         # 1. Growth (경기 성장 & 선행 지표)
         try:
-            # Philly Fed Current Activity (GACDISA066MSFRBPHI) - ISM PMI 대체
-            philly_curr = self.fred_collector.get_latest_data("GACDISA066MSFRBPHI", days=90)
+            # Philly Fed Current Activity (GACDFSA066MSFRBPHI) - ISM PMI 대체
+            philly_curr = self.fred_collector.get_latest_data("GACDFSA066MSFRBPHI", days=90)
             if len(philly_curr) > 0:
                 latest_curr = philly_curr.iloc[-1]
                 dashboard_data["growth"]["philly_current"] = {
@@ -620,13 +620,13 @@ class QuantSignalCalculator:
                     "status": "확장" if latest_curr > 0 else "위축"
                 }
 
-            # Philly Fed New Orders (GACDNOSA066MSFRBPHI) - ISM New Orders 대체
-            philly_new = self.fred_collector.get_latest_data("GACDNOSA066MSFRBPHI", days=90)
+            # Philly Fed New Orders (NOCDFSA066MSFRBPHI) - ISM New Orders 대체
+            philly_new = self.fred_collector.get_latest_data("NOCDFSA066MSFRBPHI", days=90)
             if len(philly_new) > 0:
                 dashboard_data["growth"]["philly_new_orders"] = float(philly_new.iloc[-1])
 
-            # Philly Fed Future Activity (GAFDISA066MSFRBPHI)
-            philly_future = self.fred_collector.get_latest_data("GAFDISA066MSFRBPHI", days=90)
+            # Philly Fed Future Activity (GAFDFSA066MSFRBPHI)
+            philly_future = self.fred_collector.get_latest_data("GAFDFSA066MSFRBPHI", days=90)
             if len(philly_future) > 0:
                 dashboard_data["growth"]["philly_future"] = float(philly_future.iloc[-1])
             
@@ -771,8 +771,8 @@ class QuantSignalCalculator:
             if len(vix) > 0:
                 dashboard_data["sentiment"]["vix"] = float(vix.iloc[-1])
             
-            # MOVE (M04154USM223NNBR)
-            move = self.fred_collector.get_latest_data("M04154USM223NNBR", days=90)
+            # MOVE (STLFSI4로 대체 - St. Louis Fed Financial Stress Index)
+            move = self.fred_collector.get_latest_data("STLFSI4", days=90)
             if len(move) > 0:
                 latest_move = move.iloc[-1]
                 dashboard_data["sentiment"]["move"] = {

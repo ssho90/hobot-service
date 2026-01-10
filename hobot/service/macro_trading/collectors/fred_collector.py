@@ -122,20 +122,20 @@ FRED_INDICATORS = {
     },
     # 추가 매크로 지표 (Growth, Inflation, Liquidity, Sentiment)
     # Philly Fed Manufacturing Index (ISM 대체)
-    "GACDISA066MSFRBPHI": {
-        "code": "GACDISA066MSFRBPHI",
+    "GACDFSA066MSFRBPHI": {
+        "code": "GACDFSA066MSFRBPHI",
         "name": "Philly Fed Current Activity",
         "unit": "Index",
         "frequency": "monthly"
     },
-    "GACDNOSA066MSFRBPHI": {
-        "code": "GACDNOSA066MSFRBPHI",
+    "NOCDFSA066MSFRBPHI": {
+        "code": "NOCDFSA066MSFRBPHI",
         "name": "Philly Fed New Orders",
         "unit": "Index",
         "frequency": "monthly"
     },
-    "GAFDISA066MSFRBPHI": {
-        "code": "GAFDISA066MSFRBPHI",
+    "GAFDFSA066MSFRBPHI": {
+        "code": "GAFDFSA066MSFRBPHI",
         "name": "Philly Fed Future Activity (6M)",
         "unit": "Index",
         "frequency": "monthly"
@@ -164,11 +164,11 @@ FRED_INDICATORS = {
         "unit": "Index",
         "frequency": "daily"
     },
-    "M04154USM223NNBR": {
-        "code": "M04154USM223NNBR",
-        "name": "Merrill Lynch Option Volatility Estimate (MOVE Index)",
+    "STLFSI4": {
+        "code": "STLFSI4",
+        "name": "St. Louis Fed Financial Stress Index",
         "unit": "Index",
-        "frequency": "monthly" # 데이터 가용성에 따라 조정 필요할 수 있음
+        "frequency": "weekly" # 데이터 가용성에 따라 조정 필요할 수 있음
     }
 }
 

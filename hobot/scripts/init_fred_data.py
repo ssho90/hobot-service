@@ -34,8 +34,8 @@ def init_fred_data(days=365*3):
         
         # 수집할 신규 지표 목록 (ISM -> Philly Fed 교체)
         target_indicators = [
-            "GACDISA066MSFRBPHI", "GACDNOSA066MSFRBPHI", "GAFDISA066MSFRBPHI", 
-            "GDPNOW", "PCEPILFE", "T10YIE", "VIXCLS", "M04154USM223NNBR"
+            "GACDFSA066MSFRBPHI", "NOCDFSA066MSFRBPHI", "GAFDFSA066MSFRBPHI", 
+            "GDPNOW", "PCEPILFE", "T10YIE", "VIXCLS", "STLFSI4"
         ]
         
         # 기존 주요 지표들도 함께 업데이트
