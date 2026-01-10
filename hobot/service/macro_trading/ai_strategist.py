@@ -411,6 +411,21 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
         # Dashboard Data 수집
         dashboard_data = calculator.get_macro_dashboard_indicators()
         
+        # CNN Fear & Greed Index (fear_and_greed 패키지 사용)
+        try:
+            import fear_and_greed
+            index_data = fear_and_greed.get()
+            
+            dashboard_data["sentiment"]["cnn_index"] = {
+                "value": float(index_data.value),
+                "status": index_data.description
+            }
+            logger.info(f"CNN Fear & Greed Index 수집 성공: {index_data.value} ({index_data.description})")
+            
+        except Exception as e:
+            logger.warning(f"CNN Fear & Greed Index 수집 실패: {e}")
+            # 실패 시 기존 Placeholder 유지 (quant_signals.py에서 설정됨)
+        
         return_data = {
             "yield_curve_spread_trend": signals.get("yield_curve_spread_trend"),
             "real_interest_rate": signals.get("real_interest_rate"),
