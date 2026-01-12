@@ -245,6 +245,17 @@ async def get_current_strategy_platform(platform: str):
         logging.error(f"Error reading current strategy: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/upbit/account-summary")
+async def get_upbit_account_summary_api():
+    """업비트 계좌 요약 정보 조회 (자산, 평가금액, 수익률, 전략 등)"""
+    try:
+        from service.upbit.account_service import get_upbit_account_summary
+        result = get_upbit_account_summary()
+        return result
+    except Exception as e:
+        logging.error(f"Error fetching upbit account summary: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Macro Trading API
 @api_router.get("/macro-trading/fred-data")
 async def get_fred_data(

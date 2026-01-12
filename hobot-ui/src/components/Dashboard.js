@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import HobotStatus from './HobotStatus';
-import CurrentPosition from './CurrentPosition';
+import UpbitAccountSummary from './UpbitAccountSummary';
 import Tools from './Tools';
 import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
@@ -73,12 +72,9 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // trading-crypto 탭일 때만 폴링 시작
+    // trading-crypto 탭일 때만 초기 상태 업데이트 (폴링 제거)
     if (activeTab === 'trading-crypto') {
       fetchCurrentStrategy(activePlatform);
-      // 1분마다 상태 업데이트
-      const interval = setInterval(() => fetchCurrentStrategy(activePlatform), 60000);
-      return () => clearInterval(interval);
     }
   }, [activePlatform, activeTab]);
 
@@ -135,17 +131,7 @@ const Dashboard = () => {
               {/* Upbit 선택 시에만 Status, Position, Tools 표시 */}
               {activePlatform === 'upbit' && (
                 <>
-                  <div className="status-section">
-                    <div className="status-item">
-                      <HobotStatus platform={activePlatform} />
-                    </div>
-                    <div className="status-item">
-                      <CurrentPosition
-                        platform={activePlatform}
-                        currentStrategy={currentStrategy}
-                      />
-                    </div>
-                  </div>
+                  <UpbitAccountSummary platform={activePlatform} />
 
                   <div className="tools-section">
                     <Tools
