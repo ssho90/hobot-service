@@ -256,7 +256,37 @@ async def get_upbit_account_summary_api():
         logging.error(f"Error fetching upbit account summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# Macro Trading API
+@api_router.post("/upbit/operation/start")
+async def start_upbit_trading():
+    """트레이딩 시작 (Resume)"""
+    try:
+        from service.upbit.upbit_utils import write_current_strategy, get_resume_strategy
+        
+        # Resume 전략 가져오기
+        resume_strategy = get_resume_strategy()
+        
+        # DB에 기록
+        write_current_strategy(resume_strategy)
+        
+        return {"status": "success", "message": f"Trading resumed with strategy: {resume_strategy}", "strategy": resume_strategy}
+    except Exception as e:
+        logging.error(f"Error starting trading: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/upbit/operation/pause")
+async def pause_upbit_trading():
+    """트레이딩 일시정지 (Pause)"""
+    try:
+        from service.upbit.upbit_utils import write_current_strategy
+        
+        # Pause 기록
+        write_current_strategy("STRATEGY_PAUSE")
+        
+        return {"status": "success", "message": "Trading paused", "strategy": "STRATEGY_PAUSE"}
+    except Exception as e:
+        logging.error(f"Error pausing trading: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/fred-data")
 async def get_fred_data(
     indicator_code: str = Query(..., description="지표 코드 (DGS10, DGS2, FEDFUNDS, CPIAUCSL, PCEPI, GDP, UNRATE, PAYEMS, WALCL, WTREGEN, RRPONTSYD, BAMLH0A0HYM2, DFII10)"),
@@ -2621,24 +2651,17 @@ async def update_crypto_config(
         with get_db_connection() as conn:
             cursor = conn.cursor()
             
-            # 최신 설정 조회
-            cursor.execute("SELECT id FROM crypto_config ORDER BY updated_at DESC LIMIT 1")
+            # 최신 전략 조회 (History 유지를 위해)
+            cursor.execute("SELECT strategy FROM crypto_config ORDER BY updated_at DESC LIMIT 1")
             row = cursor.fetchone()
-            
-            if row:
-                # 기존 설정 업데이트
-                cursor.execute("""
-                    UPDATE crypto_config
-                    SET market_status = %s, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = %s
-                """, (request.market_status, row["id"]))
-            else:
-                # 설정이 없으면 새로 생성
-                new_id = uuid.uuid4().hex
-                cursor.execute("""
-                    INSERT INTO crypto_config (id, market_status, strategy)
-                    VALUES (%s, %s, 'STRATEGY_NULL')
-                """, (new_id, request.market_status))
+            current_strategy = row["strategy"] if row else 'STRATEGY_NULL'
+
+            # 항상 새로운 row 생성 (History 관리)
+            new_id = uuid.uuid4().hex
+            cursor.execute("""
+                INSERT INTO crypto_config (id, market_status, strategy)
+                VALUES (%s, %s, %s)
+            """, (new_id, request.market_status, current_strategy))
                 
             conn.commit()
             return {"status": "success", "message": "Crypto config updated"}

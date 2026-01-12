@@ -57,6 +57,40 @@ const UpbitAccountSummary = ({ platform = 'upbit' }) => {
         return 'neutral';
     };
 
+    const handleStart = async () => {
+        try {
+            const response = await fetch('/api/upbit/operation/start', { method: 'POST' });
+            if (response.ok) {
+                fetchData();
+                alert('자동매매를 시작합니다.');
+            } else {
+                alert('시작 실패');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('오류 발생');
+        }
+    };
+
+    const handlePause = async () => {
+        try {
+            const response = await fetch('/api/upbit/operation/pause', { method: 'POST' });
+            if (response.ok) {
+                fetchData();
+                alert('자동매매를 일시정지합니다.');
+            } else {
+                alert('일시정지 실패');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('오류 발생');
+        }
+    };
+
+    const handleChangePosition = () => {
+        alert('Change Position 기능은 추후 구현 예정입니다.');
+    };
+
     return (
         <div className="upbit-summary-container">
             {/* 계좌 정보 카드 */}
@@ -95,6 +129,15 @@ const UpbitAccountSummary = ({ platform = 'upbit' }) => {
                         {formatKrw(account_info.total_invest_amount)} 원
                     </span>
                 </div>
+
+                <div className="action-buttons-row" style={{ marginTop: '20px', display: 'flex', gap: '8px' }}>
+                    {account_info.strategy === 'STRATEGY_PAUSE' ? (
+                        <button className="btn btn-primary" onClick={handleStart} style={{ flex: 1 }}>Start</button>
+                    ) : (
+                        <button className="btn btn-warning" onClick={handlePause} style={{ flex: 1 }}>Pause</button>
+                    )}
+                    <button className="btn btn-secondary" onClick={handleChangePosition} style={{ flex: 1 }}>Change Position</button>
+                </div>
             </div>
 
             {/* 보유 자산 카드 */}
@@ -111,29 +154,31 @@ const UpbitAccountSummary = ({ platform = 'upbit' }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {assets.map((asset) => (
-                            <tr key={asset.currency}>
-                                <td>
-                                    <div className="asset-name-cell">
-                                        <span className="asset-name">{asset.currency}</span>
-                                        <span className="asset-ticker">{asset.ticker}</span>
-                                    </div>
-                                </td>
-                                <td className="text-right cell-value">
-                                    {asset.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-                                </td>
-                                <td className="text-right cell-value">
-                                    {formatKrw(asset.valuation)}
-                                </td>
-                                <td className={`text-right pnl-rate ${pnlColorClass(asset.pnl_rate)}`}>
-                                    {formatRate(asset.pnl_rate)}
-                                </td>
-                            </tr>
-                        ))}
-                        {assets.length === 0 && (
+                        {assets
+                            .filter(asset => asset.valuation >= 1000)
+                            .map((asset) => (
+                                <tr key={asset.currency}>
+                                    <td>
+                                        <div className="asset-name-cell">
+                                            <span className="asset-name">{asset.currency}</span>
+                                            <span className="asset-ticker">{asset.ticker}</span>
+                                        </div>
+                                    </td>
+                                    <td className="text-right cell-value">
+                                        {asset.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                                    </td>
+                                    <td className="text-right cell-value">
+                                        {formatKrw(asset.valuation)}
+                                    </td>
+                                    <td className={`text-right pnl-rate ${pnlColorClass(asset.pnl_rate)}`}>
+                                        {formatRate(asset.pnl_rate)}
+                                    </td>
+                                </tr>
+                            ))}
+                        {assets.filter(asset => asset.valuation >= 1000).length === 0 && (
                             <tr>
                                 <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
-                                    보유 자산이 없습니다.
+                                    보유 자산이 없습니다. (1,000원 미만 제외)
                                 </td>
                             </tr>
                         )}

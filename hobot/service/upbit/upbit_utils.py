@@ -13,24 +13,17 @@ def write_current_strategy(strategy):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             
-            # 최신 설정 조회
-            cursor.execute("SELECT id FROM crypto_config ORDER BY updated_at DESC LIMIT 1")
+            # 최신 설정 조회 (현재 Market Status 유지를 위해)
+            cursor.execute("SELECT market_status FROM crypto_config ORDER BY updated_at DESC LIMIT 1")
             row = cursor.fetchone()
+            market_status = row["market_status"] if row else 'BULL'
             
-            if row:
-                # 기존 설정 업데이트 (strategy만 변경, market_status 유지)
-                cursor.execute("""
-                    UPDATE crypto_config
-                    SET strategy = %s, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = %s
-                """, (strategy, row["id"]))
-            else:
-                # 설정이 없으면 새로 생성 (기본값 BULL)
-                new_id = uuid.uuid4().hex
-                cursor.execute("""
-                    INSERT INTO crypto_config (id, market_status, strategy)
-                    VALUES (%s, 'BULL', %s)
-                """, (new_id, strategy))
+            # 항상 새로운 row 생성 (History 관리)
+            new_id = uuid.uuid4().hex
+            cursor.execute("""
+                INSERT INTO crypto_config (id, market_status, strategy)
+                VALUES (%s, %s, %s)
+            """, (new_id, market_status, strategy))
             
             conn.commit()
             
@@ -38,6 +31,30 @@ def write_current_strategy(strategy):
     except Exception as e:
         print(f"Error writing current strategy: {e}")
         return f"[System] Error writing strategy: {e}"
+
+def get_resume_strategy():
+    """Pause 이전의 최신 전략을 가져옵니다. (없으면 NULL 반환)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            # PAUSE가 아닌 가장 최신 전략 조회
+            cursor.execute("""
+                SELECT strategy FROM crypto_config
+                WHERE strategy != 'STRATEGY_PAUSE'
+                ORDER BY updated_at DESC
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            
+            if row:
+                return row["strategy"]
+            
+        return "STRATEGY_NULL"
+    except Exception as e:
+        print(f"Error reading resume strategy: {e}")
+        return "STRATEGY_NULL"
 
 def read_current_strategy():
     try:
