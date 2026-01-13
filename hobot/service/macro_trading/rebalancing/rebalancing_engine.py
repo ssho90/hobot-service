@@ -129,6 +129,19 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
     filtered_trades = apply_minimum_trade_filter(net_trades, current_prices)
     
     logger.info(f"Net Trades Calculated: {len(filtered_trades)} trades")
+    
+    # DEBUG: Log details if no trades but Phase 2 said needed
+    if len(filtered_trades) == 0:
+        logger.info("[DEBUG] No trades generated. Dumping Quantities:")
+        for t, q in target_quantities.items():
+            c = current_holdings_map.get(t, 0)
+            if q != c:
+               logger.info(f"Ticker {t}: Target {q} vs Current {c} (Diff {q-c})")
+            else:
+               pass # Identical
+               
+        # Also check prices used
+        # logger.info(f"Prices used: {current_prices}")
 
     # 3.1.2 Feasibility Check
     from service.macro_trading.rebalancing.portfolio_calculator import verify_strategy_feasibility
