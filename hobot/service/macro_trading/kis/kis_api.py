@@ -375,7 +375,7 @@ class KISAPI:
             logging.error(f"KIS API 주문가능조회 실패 - status: {res.status_code}, response: {res.text}")
             return None
 
-    def _place_order(self, ticker, quantity, order_type, tr_id):
+    def _place_order(self, ticker, quantity, order_type, tr_id, price=0, order_dvsn="01"):
         """주문 실행 (공통 로직)"""
         try:
             cano, acnt_prdt_cd = self._parse_account_no()
@@ -391,9 +391,9 @@ class KISAPI:
             "CANO": cano,
             "ACNT_PRDT_CD": acnt_prdt_cd,
             "PDNO": ticker,
-            "ORD_DVSN": "01",  # 01: 시장가
+            "ORD_DVSN": order_dvsn,  # 01: 시장가, 00: 지정가
             "ORD_QTY": str(quantity),
-            "ORD_UNPR": "0", # 시장가는 0
+            "ORD_UNPR": str(price), 
         }
         
         res = self._request_with_token_refresh('POST', url, headers=headers, data=json.dumps(data))
@@ -407,13 +407,25 @@ class KISAPI:
         """시장가 매수"""
         # 실전투자: TTTC0802U, 모의투자: VTTC0802U
         tr_id = "VTTC0802U" if self.is_simulation else "TTTC0802U"
-        return self._place_order(ticker, quantity, "buy", tr_id)
+        return self._place_order(ticker, quantity, "buy", tr_id, price=0, order_dvsn="01")
 
     def sell_market_order(self, ticker, quantity):
         """시장가 매도"""
         # 실전투자: TTTC0801U, 모의투자: VTTC0801U
         tr_id = "VTTC0801U" if self.is_simulation else "TTTC0801U"
-        return self._place_order(ticker, quantity, "sell", tr_id)
+        return self._place_order(ticker, quantity, "sell", tr_id, price=0, order_dvsn="01")
+
+    def buy_limit_order(self, ticker, quantity, price):
+        """지정가 매수"""
+        # 실전투자: TTTC0802U, 모의투자: VTTC0802U
+        tr_id = "VTTC0802U" if self.is_simulation else "TTTC0802U"
+        return self._place_order(ticker, quantity, "buy", tr_id, price=price, order_dvsn="00")
+
+    def sell_limit_order(self, ticker, quantity, price):
+        """지정가 매도"""
+        # 실전투자: TTTC0801U, 모의투자: VTTC0801U
+        tr_id = "VTTC0801U" if self.is_simulation else "TTTC0801U"
+        return self._place_order(ticker, quantity, "sell", tr_id, price=price, order_dvsn="00")
 
     def get_current_price(self, ticker):
         """현재가 조회"""

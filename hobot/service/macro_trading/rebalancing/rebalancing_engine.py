@@ -210,16 +210,21 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
             "validation_result": validation_result
         }
 
-    # --- Phase 5 (Step 7): Execute Buy Orders ---
-    # execute_buy_phase(buy_orders)
+    # --- Phase 5: Execution ---
+    from service.macro_trading.rebalancing.order_executor import OrderExecutor
     
-    return {
-        "status": "success", 
-        "message": "Rebalancing Completed (Simulated)",
+    trading_plan = {
+        "status": "success",
+        "message": "Phase 4 Completed (Validation)",
         "sell_orders": sell_orders,
         "buy_orders": buy_orders,
         "validation_result": validation_result
     }
+    
+    executor = OrderExecutor(user_id)
+    execution_result = executor.execute_rebalancing_trades(trading_plan)
+    
+    return execution_result
 
 def check_rebalancing_needed(current_state, target_mp, target_sub_mp, thresholds):
     drift_details = calculate_detailed_drift(current_state, target_mp, target_sub_mp)
