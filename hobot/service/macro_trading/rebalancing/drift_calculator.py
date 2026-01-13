@@ -49,7 +49,9 @@ def calculate_sub_mp_drift(current_state: Dict[str, Any], target_sub_mp: Dict[st
 
 def calculate_detailed_drift(current_state, target_mp, target_sub_mp):
     """
-    MP와 Sub-MP를 통합하여 종목별 전체 비중(Global Weight) 기준 편차 계산
+    MP와 Sub-MP를 통합하여 편차 계산
+    - MP: Global Weight 기준 (전체 자산 대비)
+    - Sub-MP: Local Weight 기준 (자산군 자산 대비)
     """
     drifts = {
         "mp_drifts": {},
@@ -74,24 +76,43 @@ def calculate_detailed_drift(current_state, target_mp, target_sub_mp):
         if not etf_details:
             continue
             
+        # [Refactoring] Global Weight -> Local Weight
+        # 1. Calculate Asset Class Total Eval
+        # We can sum up the eval_amounts of holdings that belong to this asset class.
+        # Ideally rely on 'holdings_by_asset_class' if available, otherwise filter global holdings?
+        # current_state has 'holdings_by_asset_class' from asset_retriever.
+        
+        class_holdings = current_state.get('holdings_by_asset_class', {}).get(asset_class, [])
+        
+        # Calculate Class Total Value manually to ensure consistency with the holdings we see
+        # (Handling potential cache mismatch or cash inclusion)
+        class_total_eval = sum(float(h.get('eval_amount', 0)) for h in class_holdings)
+        
+        # Special case for 'cash' asset class: add cash_balance
+        if asset_class == 'cash':
+            class_total_eval += float(current_state.get('cash_balance', 0))
+            
         for etf in etf_details:
             ticker = etf.get('ticker')
-            # 자산군 내 비중 (0.0 ~ 1.0)
+            
+            # Local Target % (0.5 -> 50.0%)
             local_weight = float(etf.get('weight', 0))
+            local_target_pct = local_weight * 100
             
-            # 전체 포트폴리오 대비 목표 비중 (Global Target %)
-            # MP Weight(%) * Local Weight(0.0~1.0)
-            global_target_pct = float(mp_weight) * local_weight
-            
-            # 현재 실제 비중 (Global Actual %)
+            # Local Actual %
+            current_amt = 0.0
             if ticker == 'CASH':
                 current_amt = float(current_state.get('cash_balance', 0))
             else:
                 current_amt = current_map.get(ticker, 0)
                 
-            global_actual_pct = (current_amt / total_eval * 100) if total_eval > 0 else 0.0
+            if class_total_eval > 0:
+                local_actual_pct = (current_amt / class_total_eval * 100)
+            else:
+                local_actual_pct = 0.0
             
-            drift = global_target_pct - global_actual_pct
+            # Drift Calculation (Local Base)
+            drift = local_target_pct - local_actual_pct
             
             if asset_class not in sub_drifts:
                 sub_drifts[asset_class] = []
@@ -99,8 +120,8 @@ def calculate_detailed_drift(current_state, target_mp, target_sub_mp):
             sub_drifts[asset_class].append({
                 "ticker": ticker,
                 "name": etf.get('name'),
-                "target_pct": round(global_target_pct, 2),
-                "actual_pct": round(global_actual_pct, 2),
+                "target_pct": round(local_target_pct, 2), # Now Local
+                "actual_pct": round(local_actual_pct, 2), # Now Local
                 "drift": round(drift, 2)
             })
             
