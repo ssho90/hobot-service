@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import UpbitAccountSummary from './UpbitAccountSummary';
-import Tools from './Tools';
 import UserManagementPage from './UserManagementPage';
 import LogManagementPage from './LogManagementPage';
 import LLMMonitoringPage from './LLMMonitoringPage';
@@ -15,7 +14,6 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const { isSystemAdmin } = useAuth();
-  const [currentStrategy, setCurrentStrategy] = useState('');
   const [activeTab, setActiveTab] = useState('macro-dashboard');
   const [activePlatform, setActivePlatform] = useState('upbit');
 
@@ -51,33 +49,6 @@ const Dashboard = () => {
     }
   }, [isSystemAdmin]);
 
-  // CurrentStrategy.json 파일을 읽어서 상태 업데이트
-  const fetchCurrentStrategy = async (platform) => {
-    try {
-      const response = await fetch(`/api/current-strategy/${platform}`);
-      if (response.ok) {
-        const data = await response.text();
-        setCurrentStrategy(data.trim());
-      } else {
-        // JSON 형식으로 재시도
-        const jsonResponse = await fetch(`/api/current-strategy?platform=${platform}`);
-        if (jsonResponse.ok) {
-          const jsonData = await jsonResponse.json();
-          setCurrentStrategy(jsonData.strategy);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch current strategy:', error);
-    }
-  };
-
-  useEffect(() => {
-    // trading-crypto 탭일 때만 초기 상태 업데이트 (폴링 제거)
-    if (activeTab === 'trading-crypto') {
-      fetchCurrentStrategy(activePlatform);
-    }
-  }, [activePlatform, activeTab]);
-
   // Header에서 사용자 관리 클릭 시 admin 탭으로 전환
   useEffect(() => {
     const handleSwitchToAdmin = (event) => {
@@ -97,12 +68,6 @@ const Dashboard = () => {
       window.removeEventListener('switchToTab', handleSwitchToTab);
     };
   }, []);
-
-  const handleStrategyChange = (newStrategy) => {
-    setCurrentStrategy(newStrategy);
-    // API 호출도 업데이트
-    fetchCurrentStrategy(activePlatform);
-  };
 
   // activeTab 변경 시 Header에 알림
   useEffect(() => {
@@ -133,13 +98,6 @@ const Dashboard = () => {
                 <>
                   <UpbitAccountSummary platform={activePlatform} />
 
-                  <div className="tools-section">
-                    <Tools
-                      platform={activePlatform}
-                      currentStrategy={currentStrategy}
-                      onStrategyChange={handleStrategyChange}
-                    />
-                  </div>
                 </>
               )}
 
