@@ -125,8 +125,24 @@ class KISAPI:
         }
 
     def _refresh_access_token(self):
-        """접근 토큰 강제 재발급"""
-        logging.info("토큰 만료 감지 - 강제 재발급 시도")
+        """접근 토큰 강제 재발급 (Rate Limit Handling 포함)"""
+        logging.info("토큰 만료 감지 - 재발급 로직 시작")
+
+        # 1. 다른 프로세스/스레드가 이미 갱신했는지 파일 확인
+        token_data = self._load_token_from_file()
+        if token_data and token_data[1]:
+            try:
+                last_issued = datetime.fromisoformat(token_data[1])
+                elapsed = (datetime.now() - last_issued).total_seconds()
+                # 60초 이내에 발급된 토큰이 있다면 재사용 (KIS API 제한: 1분당 1회)
+                if elapsed < 65: # Buffer 5s
+                    logging.info(f"최근({elapsed:.1f}초 전) 발급된 토큰이 있어 재사용합니다.")
+                    self.access_token = token_data[0]
+                    return self.access_token
+            except Exception:
+                pass
+        
+        logging.info("최신 토큰이 없거나 만료됨 - 신규 발급 요청")
         
         headers = {"content-type": "application/json"}
         body = {
@@ -139,6 +155,21 @@ class KISAPI:
         
         try:
             res = requests.post(url, headers=headers, data=json.dumps(body))
+            
+            # Rate Limit (EGW00133) check
+            if res.status_code != 200:
+                err_resp = {}
+                try: 
+                    err_resp = res.json() 
+                except: 
+                    pass
+                    
+                if err_resp.get('error_code') == 'EGW00133':
+                    logging.warning("토큰 발급 빈도 제한(1분) 감지. 60초 대기 후 재시도합니다...")
+                    time.sleep(60)
+                    # Retry once
+                    res = requests.post(url, headers=headers, data=json.dumps(body))
+
             if res.status_code == 200:
                 token = res.json()["access_token"]
                 issued_date = datetime.now().isoformat()
