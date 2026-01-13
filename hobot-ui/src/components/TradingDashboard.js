@@ -101,10 +101,12 @@ const TradingDashboard = () => {
           headers: { ...headers, 'Content-Type': 'application/json' }
         });
         if (response.ok) {
-          const data = await response.json();
-          // 날짜 오름차순 정렬
-          const sorted = data.sort((a, b) => new Date(a.snapshot_date) - new Date(b.snapshot_date));
-          setHistoryData(sorted);
+          const result = await response.json();
+          if (result.status === 'success' && Array.isArray(result.data)) {
+            // 날짜 오름차순 정렬
+            const sorted = result.data.sort((a, b) => new Date(a.snapshot_date) - new Date(b.snapshot_date));
+            setHistoryData(sorted);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch history:", err);
