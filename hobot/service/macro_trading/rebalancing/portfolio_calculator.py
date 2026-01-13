@@ -79,10 +79,9 @@ def calculate_net_trades(
         
     return trades
 
-def apply_minimum_trade_filter(
     trades: List[Dict[str, Any]], 
     current_prices: Dict[str, float], 
-    min_amount: float = 10000.0
+    min_amount: float = 0.0 # Changed from 10000.0 to 0.0 to allow small rebalancing
 ) -> List[Dict[str, Any]]:
     """
     최소 거래 금액 미만의 주문 필터링
