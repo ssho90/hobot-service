@@ -65,7 +65,15 @@ def test_prompt_generation_real_data():
         
         # 3. 프롬프트 생성
         print("[*] Generating Prompt...")
-        news = {} # 뉴스는 빈 딕셔너리로 처리
+        news = { # 뉴스는 빈 딕셔너리로 처리
+            "nfp": {
+                "value": 175,
+                "diff_prev": 25,
+                "diff_year": -50,
+                "consensus": 160, # 참고용
+                "surprise": "상회" # 참고용
+            }
+        }
         prompt = create_mp_analysis_prompt(fred_signals, news)
         
         print("\nGenerated Prompt Result:")
@@ -83,7 +91,12 @@ def test_prompt_generation_real_data():
             print("❌ Missing Philly Fed Current Activity Indicator.")
             
         # 값 확인 (N/A가 아닌지)
-        if "N/A" in prompt:
+        if "비농업 고용(NFP): 175K (전월 대비 +25K, 전년 동월 대비 -50K)" in prompt:
+             print("✅ NFP comparison format correct.")
+        else:
+             print("❌ NFP comparison format incorrect.")
+
+        if "ISM 제조업 PMI" not in prompt:
             print("⚠️ Note: Some values are 'N/A'. This might be expected if DB is empty.")
         else:
             print("✅ All values seem to be populated (No 'N/A' found).")

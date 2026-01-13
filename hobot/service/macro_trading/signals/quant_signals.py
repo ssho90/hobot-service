@@ -656,14 +656,39 @@ class QuantSignalCalculator:
                 }
             
             # 비농업 고용 (PAYEMS) - NFP Change
-            payems = self.fred_collector.get_latest_data("PAYEMS", days=90)
-            if len(payems) >= 2:
+            # 1년 전 데이터 비교를 위해 충분한 기간 수집 (400일)
+            payems = self.fred_collector.get_latest_data("PAYEMS", days=400)
+            if len(payems) >= 13:
                 latest_nfp = payems.iloc[-1]
                 prev_nfp = payems.iloc[-2]
-                nfp_change = (latest_nfp - prev_nfp) # 단위: 천명
+                year_ago_nfp = payems.iloc[-13]
+                
+                nfp_change = (latest_nfp - prev_nfp) # 단위: 천명 (이번달 증가폭)
+                nfp_diff_prev = nfp_change # 이번달 증가폭이 곧 전월 대비 차이(Flow 개념이 아니라 Stock의 차이이므로)
+                # 요청사항: "1년 전의 지수와의 차이, 직전 지수와의 차이"
+                # PAYEMS는 'Total Nonfarm Payrolls' (Total Stock) 임.
+                # 직전 지수와의 차이 = 이번달 증감 (NFP Change)
+                # 1년 전 지수와의 차이 = YoY Growth (Total Stock의 차이)
+                
+                nfp_diff_year = latest_nfp - year_ago_nfp
+                
                 dashboard_data["growth"]["nfp"] = {
                     "value": float(nfp_change),
-                    # 컨센서스는 외부 데이터 필요하므로 여기서는 생략하거나 0으로 처리
+                    "diff_prev": float(nfp_diff_prev), # == value
+                    "diff_year": float(nfp_diff_year),
+                    "consensus": 0,
+                    "surprise": "N/A"
+                }
+            elif len(payems) >= 2:
+                 # 데이터가 부족한 경우 (최소 전월 대비는 계산)
+                latest_nfp = payems.iloc[-1]
+                prev_nfp = payems.iloc[-2]
+                nfp_change = latest_nfp - prev_nfp
+                
+                dashboard_data["growth"]["nfp"] = {
+                    "value": float(nfp_change),
+                    "diff_prev": float(nfp_change),
+                    "diff_year": "N/A",
                     "consensus": 0,
                     "surprise": "N/A"
                 }

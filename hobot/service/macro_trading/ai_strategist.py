@@ -798,6 +798,15 @@ def _format_fred_dashboard_data(fred_signals: Dict) -> str:
     
     nfp = growth.get('nfp', {})
     nfp_val = nfp.get('value', 'N/A')
+    nfp_diff_prev = nfp.get('diff_prev', 'N/A')
+    nfp_diff_year = nfp.get('diff_year', 'N/A')
+    
+    # NFP 포맷팅 (전월차, 전년차 포함)
+    nfp_str = f"{nfp_val}K"
+    if isinstance(nfp_diff_prev, (int, float)) and isinstance(nfp_diff_year, (int, float)):
+        nfp_str += f" (전월 대비 {nfp_diff_prev:+.0f}K, 전년 동월 대비 {nfp_diff_year:+.0f}K)"
+    elif isinstance(nfp_diff_prev, (int, float)):
+        nfp_str += f" (전월 대비 {nfp_diff_prev:+.0f}K)"
 
     # 2. Inflation
     infl = dash.get('inflation', {})
@@ -871,7 +880,7 @@ def _format_fred_dashboard_data(fred_signals: Dict) -> str:
 * **Philly Fed 6개월 전망 (Future Activity):** {philly_future} (설명: 기업들의 미래 기대 심리. 수치가 높으면 낙관적)
 * **GDPNow 예상치:** {gdp_now}%
 * **실업률:** {unemp_curr}% (3개월 전 {unemp_past}% 대비 {unemp_diff} - Sam's Rule {sams_rule})
-* **비농업 고용(NFP):** {nfp_val}K (컨센서스 대비 정보 없음)
+* **비농업 고용(NFP):** {nfp_str}
 
 ### 2. Inflation (물가 압력)
 * **Core PCE (YoY):** {pce_val}% (연준 목표 2%와 괴리: {pce_gap})
