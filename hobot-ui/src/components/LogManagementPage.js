@@ -20,19 +20,19 @@ const LogManagementPage = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       // 시간 필터 파라미터 구성
       let url = `/api/admin/logs?log_type=${selectedLogType}&lines=${lines}`;
-      
+
       // 백엔드 로그인 경우 특정 파일 선택
       if (selectedLogType === 'backend') {
         url += `&log_file=${encodeURIComponent(selectedBackendLogFile)}`;
       }
-      
+
       if (useTimeFilter && startTime && endTime) {
         url += `&start_time=${encodeURIComponent(startTime)}&end_time=${encodeURIComponent(endTime)}`;
       }
-      
+
       const response = await fetch(url, {
         headers: getAuthHeaders()
       });
@@ -150,10 +150,10 @@ const LogManagementPage = () => {
         </label>
       </div>
 
-      <div className="time-filter-section" style={{ 
-        marginBottom: '20px', 
-        padding: '16px', 
-        backgroundColor: '#f9fafb', 
+      <div className="time-filter-section" style={{
+        marginBottom: '20px',
+        padding: '16px',
+        backgroundColor: '#f9fafb',
         borderRadius: '8px',
         border: '1px solid #e5e7eb'
       }}>
@@ -173,7 +173,7 @@ const LogManagementPage = () => {
             <span>시간대 필터 사용</span>
           </label>
         </div>
-        
+
         {useTimeFilter && (
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -182,34 +182,36 @@ const LogManagementPage = () => {
                 id="start-time"
                 type="datetime-local"
                 value={startTime}
+                step="1"
                 onChange={(e) => setStartTime(e.target.value)}
-                style={{ 
-                  padding: '8px 12px', 
-                  borderRadius: '8px', 
-                  border: '1px solid #d1d5db', 
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
                   fontSize: '14px',
                   backgroundColor: '#ffffff'
                 }}
               />
             </div>
-            
+
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <label htmlFor="end-time" style={{ fontWeight: 600, minWidth: '80px' }}>종료 시간:</label>
               <input
                 id="end-time"
                 type="datetime-local"
                 value={endTime}
+                step="1"
                 onChange={(e) => setEndTime(e.target.value)}
-                style={{ 
-                  padding: '8px 12px', 
-                  borderRadius: '8px', 
-                  border: '1px solid #d1d5db', 
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
                   fontSize: '14px',
                   backgroundColor: '#ffffff'
                 }}
               />
             </div>
-            
+
             {/* UTC+9 시간대를 datetime-local 형식으로 변환하는 헬퍼 함수 */}
             {(() => {
               const formatDateTimeLocal = (date) => {
@@ -218,9 +220,10 @@ const LogManagementPage = () => {
                 const day = String(date.getUTCDate()).padStart(2, '0');
                 const hours = String(date.getUTCHours()).padStart(2, '0');
                 const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
+                const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
               };
-              
+
               const setTimeRange = (minutesAgo) => {
                 const now = new Date();
                 const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
@@ -228,7 +231,7 @@ const LogManagementPage = () => {
                 setEndTime(formatDateTimeLocal(kstTime));
                 setStartTime(formatDateTimeLocal(pastTime));
               };
-              
+
               return (
                 <>
                   <button
@@ -244,7 +247,7 @@ const LogManagementPage = () => {
                   >
                     최근 5분
                   </button>
-                  
+
                   <button
                     onClick={() => setTimeRange(15)}
                     style={{
@@ -258,7 +261,7 @@ const LogManagementPage = () => {
                   >
                     최근 15분
                   </button>
-                  
+
                   <button
                     onClick={() => setTimeRange(30)}
                     style={{
@@ -272,7 +275,7 @@ const LogManagementPage = () => {
                   >
                     최근 30분
                   </button>
-                  
+
                   <button
                     onClick={() => setTimeRange(60)}
                     style={{
@@ -286,7 +289,7 @@ const LogManagementPage = () => {
                   >
                     최근 1시간
                   </button>
-                  
+
                   <button
                     onClick={() => setTimeRange(24 * 60)}
                     style={{
