@@ -183,7 +183,7 @@ class OrderExecutor:
             resp = self.api.buy_limit_order(ticker, qty, limit_price)
             
             # Rate Limit Prevention
-            time.sleep(0.3)
+            time.sleep(0.5)
             
             rt_cd = resp.get('rt_cd')
             if rt_cd != '0':

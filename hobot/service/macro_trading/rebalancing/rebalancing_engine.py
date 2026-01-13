@@ -182,7 +182,9 @@ async def execute_rebalancing(user_id: str, max_phase: int = 5) -> Dict[str, Any
         current_cash=simulated_cash_balance,
         current_state=current_state,
         target_mp=target_mp,
-        current_prices=current_prices
+        target_sub_mp=target_sub_mp,
+        current_prices=current_prices,
+        thresholds=thresholds
     )
     
     validation_result = {
