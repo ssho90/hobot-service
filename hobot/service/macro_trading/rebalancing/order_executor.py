@@ -108,6 +108,9 @@ class OrderExecutor:
             logger.info(f"Placing SELL Limit Order: {ticker}, Qty: {qty}, Price: {limit_price}")
             resp = self.api.sell_limit_order(ticker, qty, limit_price)
             
+            # Rate Limit Prevention
+            time.sleep(0.3)
+            
             rt_cd = resp.get('rt_cd')
             if rt_cd != '0':
                 logger.error(f"Sell Order Failed for {ticker}: {resp.get('msg1')}")
@@ -178,6 +181,9 @@ class OrderExecutor:
             
             logger.info(f"Placing BUY Limit Order: {ticker}, Qty: {qty}, Price: {limit_price}")
             resp = self.api.buy_limit_order(ticker, qty, limit_price)
+            
+            # Rate Limit Prevention
+            time.sleep(0.3)
             
             rt_cd = resp.get('rt_cd')
             if rt_cd != '0':
