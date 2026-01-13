@@ -656,8 +656,8 @@ class QuantSignalCalculator:
                 }
             
             # 비농업 고용 (PAYEMS) - NFP Change
-            # 1년 전 데이터 비교를 위해 충분한 기간 수집 (400일)
-            payems = self.fred_collector.get_latest_data("PAYEMS", days=400)
+            # 1년 전 데이터 비교를 위해 충분한 기간 수집 (500일)
+            payems = self.fred_collector.get_latest_data("PAYEMS", days=500)
             if len(payems) >= 13:
                 latest_nfp = payems.iloc[-1]
                 prev_nfp = payems.iloc[-2]
