@@ -256,6 +256,17 @@ async def get_upbit_account_summary_api():
         logging.error(f"Error fetching upbit account summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/upbit/strategy/current")
+async def get_upbit_current_strategy():
+    """업비트 현재 전략 상태 및 시장 분석 결과 조회 (Simulation)"""
+    try:
+        from service.upbit.upbit import analyze_market_condition
+        analysis_result = analyze_market_condition()
+        return {"status": "success", "strategy": analysis_result}
+    except Exception as e:
+        logging.error(f"Error analyzing upbit strategy: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/upbit/operation/start")
 async def start_upbit_trading():
     """트레이딩 시작 (Resume)"""

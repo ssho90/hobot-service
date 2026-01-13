@@ -87,8 +87,23 @@ const UpbitAccountSummary = ({ platform = 'upbit' }) => {
         }
     };
 
-    const handleChangePosition = () => {
-        alert('Change Position 기능은 추후 구현 예정입니다.');
+    const handleCheckStrategy = async () => {
+        try {
+            const response = await fetch('/api/upbit/strategy/current');
+            if (response.ok) {
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(`Current Strategy State: ${result.strategy}`);
+                } else {
+                    alert('전략 확인 실패');
+                }
+            } else {
+                alert('API Error');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('오류 발생');
+        }
     };
 
     return (
@@ -136,7 +151,7 @@ const UpbitAccountSummary = ({ platform = 'upbit' }) => {
                     ) : (
                         <button className="btn btn-warning" onClick={handlePause} style={{ flex: 1 }}>Pause</button>
                     )}
-                    <button className="btn btn-secondary" onClick={handleChangePosition} style={{ flex: 1 }}>Change Position</button>
+                    <button className="btn btn-secondary" onClick={handleCheckStrategy} style={{ flex: 1 }}>Check Strategy</button>
                 </div>
             </div>
 

@@ -482,7 +482,61 @@ def health_check():
             # 잔고 조회 실패해도 헬스체크는 성공으로 처리
             return {"status": "success", "message": "Health check success (balance check failed)"}
 
-    except Exception as e:
         trace = traceback.format_exc()
         return {"status": "error", "message": str(e), "trace": trace}
+
+def analyze_market_condition():
+    """
+    현재 차트 데이터와 전략을 기반으로 매매 로직을 시뮬레이션하여 상태를 반환합니다.
+    매매는 실행하지 않으며, 판단 결과 문자열만 반환합니다.
+    """
+    try:
+        # 현재 매매 상태 체크 (DB)
+        current_strategy = read_current_strategy()
+        
+        # 1. No Position 상태일 때 (매수 조건 점검)
+        if current_strategy == "STRATEGY_NULL":
+            # EMA
+            if strategy_ema(current_strategy) == "buyCondition_ema":
+                return "Buy Signal Detected: STRATEGY_EMA"
+            
+            # EMA2
+            elif strategy_ema2(current_strategy) == "buyCondition_ema2":
+                return "Buy Signal Detected: STRATEGY_EMA2"
+
+            # BBRSI
+            bbrsi_result = strategy_bbrsi(current_strategy)
+            if bbrsi_result == "buyCondition_bbrsi_over":
+                 return "Buy Signal Detected: STRATEGY_BBRSI_OVER"
+            elif bbrsi_result == "buyCondition_bbrsi_under":
+                 return "Buy Signal Detected: STRATEGY_BBRSI_UNDER"
+            
+            return "No Buy Signal (Monitoring...)"
+
+        # 2. Position 보유 중일 때 (매도 조건 점검)
+        elif current_strategy == "STRATEGY_EMA":
+            if strategy_ema(current_strategy) == "sellCondition_ema":
+                return "Sell Signal Detected (Exit STRATEGY_EMA)"
+            return "Holding STRATEGY_EMA (No Sell Signal)"
+
+        elif current_strategy == "STRATEGY_EMA2":
+             if strategy_ema2(current_strategy) == "sellCondition_ema2":
+                return "Sell Signal Detected (Exit STRATEGY_EMA2)"
+             return "Holding STRATEGY_EMA2 (No Sell Signal)"
+
+        elif current_strategy == "STRATEGY_BBRSI_OVER":
+            if strategy_bbrsi(current_strategy) == "sellCondition_bbrsi_over":
+                return "Sell Signal Detected (Exit STRATEGY_BBRSI_OVER)"
+            return "Holding STRATEGY_BBRSI_OVER (No Sell Signal)"
+
+        elif current_strategy == "STRATEGY_BBRSI_UNDER":
+            if strategy_bbrsi(current_strategy) == "sellCondition_bbrsi_under":
+                return "Sell Signal Detected (Exit STRATEGY_BBRSI_UNDER)"
+            return "Holding STRATEGY_BBRSI_UNDER (No Sell Signal)"
+            
+        return f"Unknown Strategy State: {current_strategy}"
+
+    except Exception as e:
+        trace = traceback.format_exc()
+        return f"Analysis Error: {str(e)}"
     
