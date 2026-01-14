@@ -595,6 +595,13 @@ class NewsCollector:
             Translate the following Economic News fields into Korean.
             Return the result ONLY as a valid JSON object with keys: title_ko, description_ko, country_ko, category_ko.
             
+            Strictly follow these rules:
+            1. Provide ONLY the single best translation for each field.
+            2. Do NOT provide multiple options or alternatives.
+            3. Do NOT include any explanations, notes, or glossaries.
+            4. Identify the context (e.g., 'Manufacturers’ Mood' -> '제조업 체감 경기') and translate naturally for a financial news headline.
+            5. The values must contain ONLY the translated text.
+
             Origin Title: {title}
             Origin Description: {description}
             Origin Country: {country}
@@ -602,7 +609,7 @@ class NewsCollector:
             """
             
             messages = [
-                SystemMessage(content="You are a professional financial translator. Translate the given economic news into separate Korean fields perfectly. Output valid JSON only."),
+                SystemMessage(content="You are a professional financial translator. Provide ONLY the direct Korean translation for the given economic news fields. No explanations, no alternatives. Output valid JSON only."),
                 HumanMessage(content=prompt)
             ]
             
