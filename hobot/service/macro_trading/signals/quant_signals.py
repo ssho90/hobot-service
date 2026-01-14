@@ -721,7 +721,7 @@ class QuantSignalCalculator:
                 trend = "상승중" if last_3m_change > 0.003 else "횡보중" if last_3m_change > -0.001 else "하락중"
                 
                 dashboard_data["inflation"]["cpi_yoy"] = {
-                    "value": float(yoy),
+                    "value": round(float(yoy), 2),
                     "trend": trend
                 }
             

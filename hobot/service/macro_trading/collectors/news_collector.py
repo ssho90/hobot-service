@@ -489,14 +489,18 @@ class NewsCollector:
                     try:
                         cursor.execute("""
                             INSERT INTO economic_news
-                            (title, link, country, category, description, published_at, source)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            (title, title_ko, link, country, country_ko, category, category_ko, description, description_ko, published_at, source)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """, (
                             title,
+                            item.get('title_ko'),
                             link,
                             item.get('country'),
+                            item.get('country_ko'),
                             item.get('category'),
+                            item.get('category_ko'),
                             item.get('description'),
+                            item.get('description_ko'),
                             item.get('published_at'),
                             'TradingEconomics Stream'
                         ))
@@ -549,7 +553,20 @@ class NewsCollector:
                 logger.info(f"{hours}시간 이내의 뉴스가 없습니다")
                 return 0, 0
             
-            # 4. DB에 저장
+            # 4. 번역 (순차 처리)
+            logger.info("뉴스 번역 시작 (순차 처리)...")
+            for i, item in enumerate(recent_news):
+                try:
+                    logger.info(f"[{i+1}/{len(recent_news)}] 번역 중: {item.get('title')[:30]}...")
+                    translated = self._translate_item(item)
+                    item.update(translated)
+                    # API 속도 제한 고려하여 약간의 지연 (필요시)
+                    time.sleep(1) 
+                except Exception as e:
+                    logger.error(f"번역 실패 (건너뜀): {e}")
+                    # 번역 실패해도 원본 저장을 위해 계속 진행
+            
+            # 5. DB에 저장
             saved, skipped = self.save_to_db(recent_news)
             
             return saved, skipped
@@ -558,6 +575,56 @@ class NewsCollector:
             logger.error(f"뉴스 수집 실패: {e}")
             raise
 
+    def _translate_item(self, item: Dict) -> Dict:
+        """
+        뉴스 항목을 LLM을 사용하여 한국어로 번역 (순차 처리용)
+        """
+        try:
+            from service.llm import llm_gemini_flash
+            from langchain.schema import HumanMessage, SystemMessage
+            import json
+
+            llm = llm_gemini_flash()
+            
+            title = item.get('title', '')
+            description = item.get('description', '')
+            country = item.get('country', '')
+            category = item.get('category', '')
+            
+            prompt = f"""
+            Translate the following Economic News fields into Korean.
+            Return the result ONLY as a valid JSON object with keys: title_ko, description_ko, country_ko, category_ko.
+            
+            Origin Title: {title}
+            Origin Description: {description}
+            Origin Country: {country}
+            Origin Category: {category}
+            """
+            
+            messages = [
+                SystemMessage(content="You are a professional financial translator. Translate the given economic news into separate Korean fields perfectly. Output valid JSON only."),
+                HumanMessage(content=prompt)
+            ]
+            
+            response = llm.invoke(messages)
+            content = response.content.strip()
+            
+            # JSON 파싱 (마크다운 코드블럭 제거 처리)
+            if content.startswith("```json"):
+                content = content.replace("```json", "").replace("```", "")
+            elif content.startswith("```"):
+                content = content.replace("```", "")
+                
+            result = json.loads(content)
+            return {
+                "title_ko": result.get("title_ko"),
+                "description_ko": result.get("description_ko"),
+                "country_ko": result.get("country_ko"),
+                "category_ko": result.get("category_ko")
+            }
+        except Exception as e:
+            logger.error(f"LLM Translation Error: {e}")
+            return {}
 
 def get_news_collector() -> NewsCollector:
     """
