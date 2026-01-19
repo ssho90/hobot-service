@@ -112,6 +112,32 @@ const FileUploadPage = () => {
     //   handleSaveEdit 에서는 ...getAuthHeaders() 하고 Content-Type 덮어씀.
     //   FormData는 Content-Type 헤더를 브라우저가 설정해야 함.
 
+    const handleDownload = async (filename) => {
+        try {
+            const response = await fetch(`/api/admin/files/${encodeURIComponent(filename)}`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('파일 다운로드 실패');
+            }
+
+            // Blob으로 변환하여 다운로드 처리
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            alert('파일 다운로드 중 오류가 발생했습니다.');
+        }
+    };
+
     const handleDelete = async (filename) => {
         if (!window.confirm(`정말 ${filename} 파일을 삭제하시겠습니까?`)) {
             return;
@@ -199,7 +225,14 @@ const FileUploadPage = () => {
                                         <td>{file.last_modified}</td>
                                         <td>
                                             <button
-                                                className="btn-delete"
+                                                className="btn-sm"
+                                                style={{ marginRight: '8px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                                onClick={() => handleDownload(file.name)}
+                                            >
+                                                다운로드
+                                            </button>
+                                            <button
+                                                className="btn-delete btn-sm"
                                                 onClick={() => handleDelete(file.name)}
                                             >
                                                 삭제

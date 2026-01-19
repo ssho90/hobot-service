@@ -81,3 +81,12 @@ def delete_file(filename: str) -> Dict:
     except Exception as e:
         logger.error(f"Failed to delete file: {filename}, error: {str(e)}")
         raise e
+
+def get_file_path(filename: str) -> str:
+    """
+    파일의 절대 경로를 반환합니다. 파일이 없으면 None을 반환합니다.
+    """
+    file_path = os.path.join(UPLOAD_DIRECTORY, filename)
+    if os.path.exists(file_path):
+        return file_path
+    return None

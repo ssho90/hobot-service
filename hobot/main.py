@@ -6,7 +6,7 @@ load_dotenv(override=True)
 
 from fastapi import FastAPI, HTTPException, Query, APIRouter, Depends, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 import logging
@@ -3246,6 +3246,27 @@ async def delete_file(
     """파일 삭제"""
     try:
         return file_service.delete_file(filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/files/{filename}")
+async def download_file(
+    filename: str,
+    current_user: dict = Depends(require_admin)
+):
+    """파일 다운로드"""
+    try:
+        file_path = file_service.get_file_path(filename)
+        if not file_path:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        return FileResponse(
+            path=file_path,
+            filename=filename,
+            media_type='application/octet-stream'
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
