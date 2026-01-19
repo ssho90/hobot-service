@@ -13,6 +13,7 @@ pyupbit
 slack_sdk
 fastapi
 uvicorn[standard]
+python-multipart
 gunicorn
 PyJWT
 email-validator
