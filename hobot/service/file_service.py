@@ -106,23 +106,28 @@ def delete_file(filename: str) -> Dict:
 def get_file_path(filename: str) -> str:
     """
     파일의 절대 경로를 반환합니다. 파일이 없으면 None을 반환합니다.
-    NFC(Windows/Linux 표준)와 NFD(Mac 표준) 양쪽 모두를 검사합니다.
+    파일명 매칭 시 Unicode 정규화(NFC)를 거쳐 비교하여
+    서버(NFD/NFC)와 클라이언트(NFC) 간의 인코딩 차이를 해결합니다.
     """
-    # 1. 요청받은 그대로 확인
+    # 1. 우선 정확한 경로로 존재 여부 확인 (빠른 경로)
     file_path = os.path.join(UPLOAD_DIRECTORY, filename)
     if os.path.exists(file_path):
         return file_path
+
+    # 2. 존재하지 않는 경우, 디렉토리를 순회하며 NFC 정규화 후 비교
+    try:
+        if not os.path.exists(UPLOAD_DIRECTORY):
+            return None
+            
+        target_nfc = unicodedata.normalize('NFC', filename)
         
-    # 2. NFC로 정규화해서 확인
-    nfc_name = unicodedata.normalize('NFC', filename)
-    file_path = os.path.join(UPLOAD_DIRECTORY, nfc_name)
-    if os.path.exists(file_path):
-        return file_path
-        
-    # 3. NFD로 정규화해서 확인 (Mac에서 업로드된 기존 파일 대응)
-    nfd_name = unicodedata.normalize('NFD', filename)
-    file_path = os.path.join(UPLOAD_DIRECTORY, nfd_name)
-    if os.path.exists(file_path):
-        return file_path
+        for disk_filename in os.listdir(UPLOAD_DIRECTORY):
+            disk_nfc = unicodedata.normalize('NFC', disk_filename)
+            
+            if disk_nfc == target_nfc:
+                return os.path.join(UPLOAD_DIRECTORY, disk_filename)
+                
+    except Exception as e:
+        logger.error(f"Error while searching for file {filename}: {str(e)}")
         
     return None
