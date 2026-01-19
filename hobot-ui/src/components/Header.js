@@ -20,14 +20,14 @@ const Header = () => {
   const adminMenuRef = useRef(null);
   const tradingMenuRef = useRef(null);
   const sidebarRef = useRef(null);
-  
+
   // Dashboard의 activeTab 변경 추적
   useEffect(() => {
     const handleTabChange = (event) => {
       const tab = event.detail?.tab || null;
       setDashboardActiveTab(tab);
       // Admin 하위 탭이 활성화되면 하위 메뉴 열기
-      if (tab === 'admin-users' || tab === 'admin-logs' || tab === 'admin-llm-monitoring' || tab === 'admin-portfolio-management') {
+      if (tab === 'admin-users' || tab === 'admin-logs' || tab === 'admin-llm-monitoring' || tab === 'admin-portfolio-management' || tab === 'admin-files') {
         setShowAdminSubmenu(true);
       }
       // Trading 하위 탭이 활성화되면 하위 메뉴 열기
@@ -35,13 +35,13 @@ const Header = () => {
         setShowTradingSubmenu(true);
       }
     };
-    
+
     window.addEventListener('dashboardTabChange', handleTabChange);
     return () => {
       window.removeEventListener('dashboardTabChange', handleTabChange);
     };
   }, []);
-  
+
   const handleLogin = () => {
     setShowLoginModal(true);
   };
@@ -57,7 +57,7 @@ const Header = () => {
       }
     }
   };
-  
+
   const handleAdminSubmenuClick = (subTab) => {
     navigate('/dashboard?tab=admin');
     setShowAdminSubmenu(false);
@@ -66,15 +66,15 @@ const Header = () => {
       window.dispatchEvent(event);
     }, 100);
   };
-  
+
   // 현재 활성 탭 확인
   const getActiveTab = () => {
-      if (location.pathname === '/dashboard') {
-        if (dashboardActiveTab === 'trading-macro' || (dashboardActiveTab === 'trading-crypto' && isSystemAdmin())) return 'trading';
-        if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-portfolio-management') return 'admin';
-        if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
-        return 'macro-dashboard'; // 기본값
-      }
+    if (location.pathname === '/dashboard') {
+      if (dashboardActiveTab === 'trading-macro' || (dashboardActiveTab === 'trading-crypto' && isSystemAdmin())) return 'trading';
+      if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-portfolio-management' || dashboardActiveTab === 'admin-files') return 'admin';
+      if (dashboardActiveTab === 'macro-dashboard') return 'macro-dashboard';
+      return 'macro-dashboard'; // 기본값
+    }
     // 기본 화면(/)에서는 Macro Dashboard가 활성화
     if (location.pathname === '/') {
       return 'macro-dashboard';
@@ -95,8 +95,8 @@ const Header = () => {
         setShowTradingSubmenu(false);
       }
       // 사이드바 외부 클릭 시 닫기
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && 
-          !event.target.closest('.mobile-menu-btn')) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&
+        !event.target.closest('.mobile-menu-btn')) {
         setIsSidebarOpen(false);
       }
     };
@@ -179,181 +179,187 @@ const Header = () => {
   };
 
   const activeTab = getActiveTab();
-  
+
   return (
     <>
       <header className="top-header">
         <div className="header-left">
-          <button 
+          <button
             className="mobile-menu-btn"
             onClick={toggleSidebar}
             aria-label="메뉴 열기"
           >
             <span>☰</span>
           </button>
-          <div 
-            className="header-logo" 
+          <div
+            className="header-logo"
             onClick={() => navigate('/')}
             style={{ cursor: 'pointer' }}
           >
             <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
           </div>
           <nav className="header-tabs">
-          <button
-            className={`header-tab ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
-            onClick={() => {
-              navigate('/dashboard?tab=macro-dashboard');
-              setTimeout(() => {
-                const event = new CustomEvent('switchToTab', { detail: { tab: 'macro-dashboard' } });
-                window.dispatchEvent(event);
-              }, 100);
-            }}
-          >
-            Macro Dashboard
-          </button>
-          <div className="header-tab-container" ref={tradingMenuRef}>
             <button
-              className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
-              onClick={() => handleTabClick('trading')}
+              className={`header-tab ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
+              onClick={() => {
+                navigate('/dashboard?tab=macro-dashboard');
+                setTimeout(() => {
+                  const event = new CustomEvent('switchToTab', { detail: { tab: 'macro-dashboard' } });
+                  window.dispatchEvent(event);
+                }, 100);
+              }}
             >
-              Trading
-              <span className="tab-arrow">▼</span>
+              Macro Dashboard
             </button>
-            {showTradingSubmenu && (
-              <div className="admin-submenu">
-                <button
-                  className={`admin-submenu-item ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
-                  onClick={() => {
-                    navigate('/dashboard?tab=trading-macro');
-                    setShowTradingSubmenu(false);
-                    setTimeout(() => {
-                      const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-macro' } });
-                      window.dispatchEvent(event);
-                    }, 100);
-                  }}
-                >
-                  Macro Quant
-                </button>
-                {isSystemAdmin() && (
+            <div className="header-tab-container" ref={tradingMenuRef}>
+              <button
+                className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
+                onClick={() => handleTabClick('trading')}
+              >
+                Trading
+                <span className="tab-arrow">▼</span>
+              </button>
+              {showTradingSubmenu && (
+                <div className="admin-submenu">
                   <button
-                    className={`admin-submenu-item ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
+                    className={`admin-submenu-item ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
                     onClick={() => {
-                      navigate('/dashboard?tab=trading-crypto');
+                      navigate('/dashboard?tab=trading-macro');
                       setShowTradingSubmenu(false);
                       setTimeout(() => {
-                        const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-crypto' } });
+                        const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-macro' } });
                         window.dispatchEvent(event);
                       }, 100);
                     }}
                   >
-                    Crypto
+                    Macro Quant
                   </button>
-                )}
-              </div>
+                  {isSystemAdmin() && (
+                    <button
+                      className={`admin-submenu-item ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
+                      onClick={() => {
+                        navigate('/dashboard?tab=trading-crypto');
+                        setShowTradingSubmenu(false);
+                        setTimeout(() => {
+                          const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-crypto' } });
+                          window.dispatchEvent(event);
+                        }, 100);
+                      }}
+                    >
+                      Crypto
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {isSystemAdmin() && (
+              <>
+                <div className="header-tab-container" ref={adminMenuRef}>
+                  <button
+                    className={`header-tab ${activeTab === 'admin' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin')}
+                  >
+                    Admin
+                    <span className="tab-arrow">▼</span>
+                  </button>
+                  {showAdminSubmenu && (
+                    <div className="admin-submenu">
+                      <button
+                        className={`admin-submenu-item ${dashboardActiveTab === 'admin-users' ? 'active' : ''}`}
+                        onClick={() => handleAdminSubmenuClick('admin-users')}
+                      >
+                        사용자 관리
+                      </button>
+                      <button
+                        className={`admin-submenu-item ${dashboardActiveTab === 'admin-logs' ? 'active' : ''}`}
+                        onClick={() => handleAdminSubmenuClick('admin-logs')}
+                      >
+                        로그 관리
+                      </button>
+                      <button
+                        className={`admin-submenu-item ${dashboardActiveTab === 'admin-llm-monitoring' ? 'active' : ''}`}
+                        onClick={() => handleAdminSubmenuClick('admin-llm-monitoring')}
+                      >
+                        LLM 모니터링
+                      </button>
+                      <button
+                        className={`admin-submenu-item ${dashboardActiveTab === 'admin-portfolio-management' ? 'active' : ''}`}
+                        onClick={() => handleAdminSubmenuClick('admin-portfolio-management')}
+                      >
+                        리밸런싱 관리
+                      </button>
+                      <button
+                        className={`admin-submenu-item ${dashboardActiveTab === 'admin-files' ? 'active' : ''}`}
+                        onClick={() => handleAdminSubmenuClick('admin-files')}
+                      >
+                        파일 업로드
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
-          </div>
-          {isSystemAdmin() && (
+          </nav>
+        </div>
+        <div className="header-actions">
+          {user ? (
             <>
-              <div className="header-tab-container" ref={adminMenuRef}>
-                <button
-                  className={`header-tab ${activeTab === 'admin' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('admin')}
+              <div className="user-menu-container" ref={menuRef}>
+                <div
+                  className="user-menu"
+                  onClick={() => setShowMenu(!showMenu)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  Admin
-                  <span className="tab-arrow">▼</span>
-                </button>
-                {showAdminSubmenu && (
-                  <div className="admin-submenu">
+                  <div className="user-avatar">
+                    <span>{getInitials(user?.id)}</span>
+                  </div>
+                  <div className="user-info">
+                    <span className="user-name">{user?.id}</span>
+                    {user?.role === 'admin' && (
+                      <span className="user-role">Admin</span>
+                    )}
+                  </div>
+                  <span className="dropdown-arrow">▼</span>
+                </div>
+
+                {showMenu && (
+                  <div className="user-dropdown-menu">
                     <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-users' ? 'active' : ''}`}
-                      onClick={() => handleAdminSubmenuClick('admin-users')}
+                      className="dropdown-item"
+                      onClick={() => {
+                        navigate('/dashboard?tab=profile');
+                        setShowMenu(false);
+                        setTimeout(() => {
+                          const event = new CustomEvent('switchToTab', { detail: { tab: 'profile' } });
+                          window.dispatchEvent(event);
+                        }, 100);
+                      }}
                     >
-                      사용자 관리
+                      <span className="dropdown-icon">👤</span>
+                      <span>프로필</span>
                     </button>
+                    {isAdmin() && (
+                      <button
+                        className="dropdown-item"
+                        onClick={handleUserManagement}
+                      >
+                        <span className="dropdown-icon">👥</span>
+                        <span>사용자 관리</span>
+                      </button>
+                    )}
                     <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-logs' ? 'active' : ''}`}
-                      onClick={() => handleAdminSubmenuClick('admin-logs')}
+                      className="dropdown-item"
+                      onClick={handleLogout}
                     >
-                      로그 관리
-                    </button>
-                    <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-llm-monitoring' ? 'active' : ''}`}
-                      onClick={() => handleAdminSubmenuClick('admin-llm-monitoring')}
-                    >
-                      LLM 모니터링
-                    </button>
-                    <button
-                      className={`admin-submenu-item ${dashboardActiveTab === 'admin-portfolio-management' ? 'active' : ''}`}
-                      onClick={() => handleAdminSubmenuClick('admin-portfolio-management')}
-                    >
-                      리밸런싱 관리
+                      <span className="dropdown-icon">🚪</span>
+                      <span>로그아웃</span>
                     </button>
                   </div>
                 )}
               </div>
             </>
-          )}
-        </nav>
-      </div>
-      <div className="header-actions">
-        {user ? (
-          <>
-            <div className="user-menu-container" ref={menuRef}>
-              <div 
-                className="user-menu" 
-                onClick={() => setShowMenu(!showMenu)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="user-avatar">
-                  <span>{getInitials(user?.id)}</span>
-                </div>
-                <div className="user-info">
-                  <span className="user-name">{user?.id}</span>
-                  {user?.role === 'admin' && (
-                    <span className="user-role">Admin</span>
-                  )}
-                </div>
-                <span className="dropdown-arrow">▼</span>
-              </div>
-              
-              {showMenu && (
-                <div className="user-dropdown-menu">
-                  <button 
-                    className="dropdown-item"
-                    onClick={() => {
-                      navigate('/dashboard?tab=profile');
-                      setShowMenu(false);
-                      setTimeout(() => {
-                        const event = new CustomEvent('switchToTab', { detail: { tab: 'profile' } });
-                        window.dispatchEvent(event);
-                      }, 100);
-                    }}
-                  >
-                    <span className="dropdown-icon">👤</span>
-                    <span>프로필</span>
-                  </button>
-                  {isAdmin() && (
-                    <button 
-                      className="dropdown-item"
-                      onClick={handleUserManagement}
-                    >
-                      <span className="dropdown-icon">👥</span>
-                      <span>사용자 관리</span>
-                    </button>
-                  )}
-                  <button 
-                    className="dropdown-item"
-                    onClick={handleLogout}
-                  >
-                    <span className="dropdown-icon">🚪</span>
-                    <span>로그아웃</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-            <button 
+          ) : (
+            <button
               className="btn btn-secondary"
               onClick={handleLogin}
               style={{ padding: '8px 16px' }}
@@ -361,28 +367,28 @@ const Header = () => {
               로그인
             </button>
           )}
-      </div>
-      
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
-      />
+        </div>
+
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
       </header>
 
       {/* 모바일 사이드바 오버레이 */}
-      <div 
+      <div
         className={`sidebar-overlay ${isSidebarOpen ? 'show' : ''}`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
       {/* 모바일 사이드바 */}
-      <aside 
+      <aside
         ref={sidebarRef}
         className={`mobile-sidebar ${isSidebarOpen ? 'open' : ''}`}
       >
         <div className="mobile-sidebar-header">
-          <div 
-            className="mobile-sidebar-logo" 
+          <div
+            className="mobile-sidebar-logo"
             onClick={() => {
               navigate('/');
               setIsSidebarOpen(false);
@@ -391,7 +397,7 @@ const Header = () => {
           >
             <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
           </div>
-          <button 
+          <button
             className="mobile-sidebar-close"
             onClick={() => setIsSidebarOpen(false)}
             aria-label="메뉴 닫기"
@@ -493,6 +499,13 @@ const Header = () => {
                       <span className="mobile-nav-icon">💼</span>
                       <span>리밸런싱 관리</span>
                     </button>
+                    <button
+                      className={`mobile-nav-item mobile-nav-subitem ${dashboardActiveTab === 'admin-files' ? 'active' : ''}`}
+                      onClick={() => handleMobileAdminSubmenuClick('admin-files')}
+                    >
+                      <span className="mobile-nav-icon">📁</span>
+                      <span>파일 업로드</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -515,7 +528,7 @@ const Header = () => {
 
           {user && (
             <div className="mobile-sidebar-actions">
-              <button 
+              <button
                 className="mobile-action-btn"
                 onClick={() => {
                   navigate('/dashboard?tab=profile');
@@ -530,7 +543,7 @@ const Header = () => {
                 <span>프로필</span>
               </button>
               {isAdmin() && (
-                <button 
+                <button
                   className="mobile-action-btn"
                   onClick={() => {
                     handleUserManagement();
@@ -541,7 +554,7 @@ const Header = () => {
                   <span>사용자 관리</span>
                 </button>
               )}
-              <button 
+              <button
                 className="mobile-action-btn"
                 onClick={() => {
                   handleLogout();
@@ -555,7 +568,7 @@ const Header = () => {
           )}
 
           {!user && (
-            <button 
+            <button
               className="mobile-login-btn"
               onClick={() => {
                 handleLogin();
