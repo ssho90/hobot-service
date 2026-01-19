@@ -8,6 +8,8 @@ const FileUploadPage = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [error, setError] = useState('');
     const [uploadMessage, setUploadMessage] = useState('');
+    const [contentInput, setContentInput] = useState('');
+    const [pastedFile, setPastedFile] = useState(null);
     const fileInputRef = useRef(null);
     const { getAuthHeaders } = useAuth();
 
@@ -104,34 +106,38 @@ const FileUploadPage = () => {
         }
     }, [getAuthHeaders, fetchFiles]);
 
-    useEffect(() => {
-        const handlePaste = (e) => {
-            const items = e.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    const file = items[i].getAsFile();
-                    const now = new Date();
-                    const timestamp = now.toISOString().replace(/[:.]/g, '-');
-                    const newFile = new File([file], `clipboard_image_${timestamp}.png`, { type: file.type });
-                    handleUpload(newFile);
-                } else if (items[i].type === 'text/plain') {
-                    items[i].getAsString((text) => {
-                        if (!text.trim()) return;
-                        const now = new Date();
-                        const timestamp = now.toISOString().replace(/[:.]/g, '-');
-                        const blob = new Blob([text], { type: 'text/plain' });
-                        const file = new File([blob], `clipboard_text_${timestamp}.txt`, { type: 'text/plain' });
-                        handleUpload(file);
-                    });
-                }
+    const handleContentPaste = (e) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const file = items[i].getAsFile();
+                const now = new Date();
+                const timestamp = now.toISOString().replace(/[:.]/g, '-');
+                // 이미지 파일명 생성 (화면 표시용, 실제 업로드 시 handleUpload에서 다시 설정되거나 여기서 확정)
+                const newFile = new File([file], `clipboard_image_${timestamp}.png`, { type: file.type });
+                setPastedFile(newFile);
+                setContentInput(''); // 이미지가 붙여넣어지면 텍스트 초기화
+                break;
             }
-        };
+        }
+    };
 
-        window.addEventListener('paste', handlePaste);
-        return () => {
-            window.removeEventListener('paste', handlePaste);
-        };
-    }, [handleUpload]);
+    const handleContentUpload = () => {
+        if (pastedFile) {
+            handleUpload(pastedFile);
+            setPastedFile(null);
+        } else if (contentInput.trim()) {
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[:.]/g, '-');
+            const blob = new Blob([contentInput], { type: 'text/plain' });
+            const file = new File([blob], `memo_${timestamp}.txt`, { type: 'text/plain' });
+            handleUpload(file);
+            setContentInput('');
+        } else {
+            alert('업로드할 텍스트나 이미지가 없습니다.');
+        }
+    };
 
     // getAuthHeaders가 Content-Type: application/json을 포함하는지 확인이 어려우므로 
     // formData 전송을 위한 래퍼 함수 (필요시 수정)
@@ -212,6 +218,61 @@ const FileUploadPage = () => {
                     style={{ display: 'none' }}
                     onChange={handleFileInputChange}
                 />
+            </div>
+
+            <div className="card" style={{ marginBottom: '20px' }}>
+                <h3>텍스트/이미지 업로드</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {!pastedFile ? (
+                        <textarea
+                            className="content-input"
+                            placeholder="텍스트를 입력하거나 이미지를 붙여넣기(Ctrl+V) 하세요."
+                            value={contentInput}
+                            onChange={(e) => setContentInput(e.target.value)}
+                            onPaste={handleContentPaste}
+                            style={{
+                                width: '100%',
+                                minHeight: '100px',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                resize: 'vertical'
+                            }}
+                        />
+                    ) : (
+                        <div style={{ position: 'relative', display: 'inline-block', border: '1px solid #ddd', padding: '10px', borderRadius: '4px' }}>
+                            <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#666' }}>
+                                붙여넣은 이미지 (업로드 대기 중)
+                            </p>
+                            <img
+                                src={URL.createObjectURL(pastedFile)}
+                                alt="Paste Preview"
+                                style={{ maxWidth: '100%', maxHeight: '300px', display: 'block' }}
+                            />
+                            <button
+                                onClick={() => setPastedFile(null)}
+                                style={{
+                                    marginTop: '10px',
+                                    padding: '5px 10px',
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                이미지 취소
+                            </button>
+                        </div>
+                    )}
+                    <button
+                        className="btn-primary"
+                        onClick={handleContentUpload}
+                        style={{ alignSelf: 'flex-start', padding: '8px 16px' }}
+                    >
+                        내용 업로드
+                    </button>
+                </div>
             </div>
 
             {uploadMessage && (
