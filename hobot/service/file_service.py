@@ -11,13 +11,21 @@ os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
 logger = logging.getLogger(__name__)
 
+import unicodedata
+
+# ... existing imports ...
+
 def save_file(file: UploadFile) -> Dict:
     """
     업로드된 파일을 서버의 uploads 디렉토리에 저장합니다.
+    파일명은 NFC(단일 문자) 형태로 정규화하여 저장합니다.
     """
     try:
+        # 파일명 정규화 (NFD -> NFC)
+        filename = unicodedata.normalize('NFC', file.filename)
+        
         # 파일 경로 생성
-        file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
+        file_location = os.path.join(UPLOAD_DIRECTORY, filename)
         
         # 파일 저장
         with open(file_location, "wb") as buffer:
@@ -25,10 +33,10 @@ def save_file(file: UploadFile) -> Dict:
             
         file_size = os.path.getsize(file_location)
         
-        logger.info(f"File saved successfully: {file.filename} ({file_size} bytes)")
+        logger.info(f"File saved successfully: {filename} ({file_size} bytes)")
         
         return {
-            "filename": file.filename,
+            "filename": filename,
             "size": file_size,
             "path": file_location,
             "status": "success"
@@ -49,11 +57,22 @@ def list_files() -> List[Dict]:
             return []
             
         for filename in os.listdir(UPLOAD_DIRECTORY):
+            # 파일이 NFD로 저장되어 있을 경우를 대비해 목록 조회 시에도 NFC로 보여주는 것이 좋지만,
+            # 다운로드/삭제 시 파일명을 그대로 사용하기 위해 원본 파일명을 사용하거나,
+            # 별도의 매핑 로직이 필요함. 여기서는 있는 그대로 반환하되,
+            # get_file_path에서 NFD/NFC 모두 찾도록 처리함.
+            
             file_path = os.path.join(UPLOAD_DIRECTORY, filename)
             if os.path.isfile(file_path):
                 stats = os.stat(file_path)
+                
+                # 표시용 이름은 NFC로 변환하여 보기 좋게 표시 (선택사항)
+                display_name = unicodedata.normalize('NFC', filename)
+                
                 files_list.append({
-                    "name": filename,
+                    "name": display_name,         # 프론트엔드에 보여줄 이름 (NFC)
+                    "original_name": filename,    # 실제 파일시스템 이름 (삭제/다운로드 요청 시 사용) - *하지만 프론트엔드는 name만 씀*
+                    # 프론트엔드는 name만 쓰므로, 백엔드 get_file_path에서 유연하게 찾아야 함.
                     "size": stats.st_size,
                     "last_modified": datetime.fromtimestamp(stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
                 })
@@ -70,8 +89,10 @@ def delete_file(filename: str) -> Dict:
     지정된 파일을 삭제합니다.
     """
     try:
-        file_path = os.path.join(UPLOAD_DIRECTORY, filename)
-        if os.path.exists(file_path):
+        # 삭제 시에도 파일 찾기를 시도
+        file_path = get_file_path(filename)
+        
+        if file_path and os.path.exists(file_path):
             os.remove(file_path)
             logger.info(f"File deleted: {filename}")
             return {"status": "success", "message": f"File {filename} deleted successfully"}
@@ -85,8 +106,23 @@ def delete_file(filename: str) -> Dict:
 def get_file_path(filename: str) -> str:
     """
     파일의 절대 경로를 반환합니다. 파일이 없으면 None을 반환합니다.
+    NFC(Windows/Linux 표준)와 NFD(Mac 표준) 양쪽 모두를 검사합니다.
     """
+    # 1. 요청받은 그대로 확인
     file_path = os.path.join(UPLOAD_DIRECTORY, filename)
     if os.path.exists(file_path):
         return file_path
+        
+    # 2. NFC로 정규화해서 확인
+    nfc_name = unicodedata.normalize('NFC', filename)
+    file_path = os.path.join(UPLOAD_DIRECTORY, nfc_name)
+    if os.path.exists(file_path):
+        return file_path
+        
+    # 3. NFD로 정규화해서 확인 (Mac에서 업로드된 기존 파일 대응)
+    nfd_name = unicodedata.normalize('NFD', filename)
+    file_path = os.path.join(UPLOAD_DIRECTORY, nfd_name)
+    if os.path.exists(file_path):
+        return file_path
+        
     return None
