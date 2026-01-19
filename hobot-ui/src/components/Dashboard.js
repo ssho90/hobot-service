@@ -8,6 +8,7 @@ import PortfolioManagementPage from './PortfolioManagementPage';
 import MacroDashboard from './MacroDashboard';
 import TradingDashboard from './TradingDashboard';
 import ProfilePage from './ProfilePage';
+import FileUploadPage from './FileUploadPage';
 import Header from './Header';
 import PlatformSelector from './PlatformSelector';
 import './Dashboard.css';
@@ -26,7 +27,7 @@ const Dashboard = () => {
 
   // 시스템 어드민이 아니면 admin 탭 접근 불가
   useEffect(() => {
-    if ((activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-portfolio-management') && !isSystemAdmin()) {
+    if ((activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-portfolio-management' || activeTab === 'admin-files') && !isSystemAdmin()) {
       setActiveTab('news');
     }
   }, [activeTab, isSystemAdmin]);
@@ -129,6 +130,10 @@ const Dashboard = () => {
 
           {activeTab === 'admin-portfolio-management' && (
             <PortfolioManagementPage />
+          )}
+
+          {activeTab === 'admin-files' && (
+            <FileUploadPage />
           )}
 
           {activeTab === 'profile' && (

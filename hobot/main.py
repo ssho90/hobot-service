@@ -4,7 +4,7 @@ import json
 
 load_dotenv(override=True)
 
-from fastapi import FastAPI, HTTPException, Query, APIRouter, Depends, Header
+from fastapi import FastAPI, HTTPException, Query, APIRouter, Depends, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -16,6 +16,7 @@ from app import daily_news_summary
 from service.news.daily_news_agent import compiled
 from service.news import news_manager
 from service import auth
+from service import file_service
 # 서비스 시작 시 데이터베이스 초기화 (지연 초기화)
 # 실제 사용 시점에 자동으로 초기화됨
 from typing import Optional
@@ -3213,6 +3214,39 @@ async def get_llm_token_usage(
         raise
     except Exception as e:
         logging.error(f"LLM 토큰 사용량 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/admin/files/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_admin)
+):
+    """관리자 파일 업로드"""
+    try:
+        return file_service.save_file(file)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/files")
+async def list_files(
+    current_user: dict = Depends(require_admin)
+):
+    """업로드된 파일 목록 조회"""
+    try:
+        return {"files": file_service.list_files()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/admin/files/{filename}")
+async def delete_file(
+    filename: str,
+    current_user: dict = Depends(require_admin)
+):
+    """파일 삭제"""
+    try:
+        return file_service.delete_file(filename)
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 

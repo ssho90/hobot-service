@@ -5,7 +5,7 @@ import './Sidebar.css';
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const { isAdmin, isSystemAdmin } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState({});
-  
+
   // 시스템 어드민만 Trading 메뉴 접근 가능
   const menuItems = [];
   if (isSystemAdmin()) {
@@ -22,7 +22,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       { id: 'admin-users', label: '사용자 관리', icon: '👥' },
       { id: 'admin-logs', label: '로그 관리', icon: '📋' },
       { id: 'admin-llm-monitoring', label: 'LLM 모니터링', icon: '🤖' },
-      { id: 'admin-portfolio-management', label: '리밸런싱 관리', icon: '💼' }
+      { id: 'admin-portfolio-management', label: '리밸런싱 관리', icon: '💼' },
+      { id: 'admin-files', label: '파일 업로드', icon: '📁' }
     ]
   };
 
@@ -49,7 +50,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   const isActiveMenu = (itemId) => {
     if (itemId === 'admin') {
-      return activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-portfolio-management';
+      return activeTab === 'admin-users' || activeTab === 'admin-logs' || activeTab === 'admin-llm-monitoring' || activeTab === 'admin-portfolio-management' || activeTab === 'admin-files';
     }
     return activeTab === itemId;
   };
@@ -82,7 +83,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             >
               <span className="nav-icon">{adminMenu.icon}</span>
               <span className="nav-label">{adminMenu.label}</span>
-              <span className="nav-arrow" style={{ 
+              <span className="nav-arrow" style={{
                 marginLeft: 'auto',
                 transform: isMenuExpanded('admin') ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s ease'

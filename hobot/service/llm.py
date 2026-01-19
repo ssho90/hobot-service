@@ -44,7 +44,6 @@ def llm_gemini_3_pro(model="gemini-3-pro-preview", timeout=60):
 def llm_gemini_flash(model="gemini-3-flash-preview", timeout=60):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
-
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=0,

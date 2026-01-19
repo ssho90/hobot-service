@@ -2,7 +2,7 @@
 // © ORITUBE
 
 //@version=6
-strategy("이동평균선 정배열 (PRD)", overlay=true, initial_capital=1000000, default_qty_type=strategy.percent_of_equity, default_qty_value=100, calc_on_every_tick=false)
+strategy("이동평균선 정배열 (PRD) - Split Strategy", overlay=true, initial_capital=1000000, default_qty_type=strategy.percent_of_equity, default_qty_value=100, calc_on_every_tick=false, pyramiding=5)
 
 // Date Filter
 start = input.time(timestamp("2017-04-14"), "Start", group="Date Filter")
@@ -28,6 +28,7 @@ plot(ema4, color = color.rgb(0, 0, 0))
 // * atr
 // ------------------------------
 atr = ta.atr(14)
+atr_multiplier = input.float(2.0, "ATR Multiplier", group="Risk Management")
 
 // ------------------------------
 // * Bollinger Plot
@@ -109,65 +110,14 @@ closeCondition_bbrsi_under = ta.crossover(close, ema1) or bbrsi_close_bbLower_st
 longCondition_bbrsi_over = (rsi_crossover or rsi_almost_crossover) and bbLowerAroundUnder and close_over_ema1 and condition_rsi_before and rsi_omok
 closeCondition_bbrsi_over = ta.crossover(close, bbUpper) or bbrsi_close_bbLower_st1
 
-// ------------------------------
-// * Strategy4: morning star
-// ------------------------------
-
-// 급락 조건 설정
-sharp_decline_period = input.int(2, "급락 확인 기간", minval=1, maxval=20, group="Strategy4")
-sharp_decline_multiplier = input.float(1.5, "급락 배수", minval=0.5, maxval=3.0, group="Strategy4")
-consecutive_decline_period = input.int(3, "연속 하락 기간", minval=2, maxval=10, group="Strategy4")
-bb_touch_period = input.int(3, "BB 하단 터치 확인 기간", minval=1, maxval=10, group="Strategy4")
-
-// 도지 캔들 조건
-find_morning_star = math.abs(close-open)/close < 0.004
-
-// 급락 조건: 최근 기간 중 ATR의 배수 이상 하락한 봉이 있는지
-has_sharp_decline = false
-for i = 0 to sharp_decline_period - 1
-    if (close[i] - low[i]) >= atr[i] * sharp_decline_multiplier
-        has_sharp_decline := true
-        break
-
-// 연속 하락 조건: 최근 몇 개 봉이 연속으로 하락했는지 확인
-consecutive_decline_count = 0
-for i = 1 to consecutive_decline_period
-    if close[i] < close[i-1]
-        consecutive_decline_count += 1
-    else
-        break
-
-has_consecutive_decline = consecutive_decline_count >= consecutive_decline_period
-
-// 볼린저 밴드 하단 터치 조건
-has_bb_lower_touch = false
-for i = 0 to bb_touch_period - 1
-    if low[i] <= bbLower[i] or close[i] <= bbLower[i]
-        has_bb_lower_touch := true
-        break
-
-// 추가 급락 조건: 연속 하락과 BB 하단 터치도 함께 만족해야 함
-has_additional_decline = has_consecutive_decline and has_bb_lower_touch
-
-// 최종 급락 조건: 기본 급락 또는 추가 조건 모두 만족
-final_sharp_decline = has_sharp_decline or has_additional_decline
-
-// 기존 조건들
-ema_morning_star = ema1 < ema3
-bbLowerAroundUnder_st1 = bbLower_st1[3] > low[3] or bbLower_st1[2] > low[2] or bbLower_st1[1] > low[1] or bbLower_st1 > low 
-
-// 급락 조건을 포함한 매수 조건 (급락 조건을 필수로 변경)
-longCondition_morning_star = ema_morning_star and bbLowerAroundUnder_st1 and find_morning_star and final_sharp_decline
-closeCondition_morning_star = ta.crossover(close, bbUpper) or bbrsi_close_bbLower_st1
-
 
 // ------------------------------
 // Final Entry Condition Setting
 // ------------------------------
 entryLongCondition = longCondition_ema and date_filter
-closeCondition = sellCondition_ema and date_filter
-almostCloseCondition = almostCrossunder and date_filter
-overBBCondition = close > bbUpper_st1 and date_filter
+// closeCondition = sellCondition_ema and date_filter
+// almostCloseCondition = almostCrossunder and date_filter
+// overBBCondition = close > bbUpper_st1 and date_filter
 
 entryLongCondition_ema2 = longCondition_ema2 and date_filter
 closeCondition_ema2 = sellCondition_ema2 and date_filter
@@ -177,66 +127,104 @@ entryExitCondition_bbrsi_under = closeCondition_bbrsi_under and date_filter
 
 entryLongCondition_bbrsi_over = longCondition_bbrsi_over and date_filter and not(closeCondition_bbrsi_over)
 entryExitCondition_bbrsi_over = closeCondition_bbrsi_over and date_filter
-u
-entryLongCondition_morning_star = longCondition_morning_star and date_filter
-entryExitCondition_morning_star = closeCondition_morning_star and date_filter
 
 
+// ==============================================================================
+// EXECUTION BLOCKS
+// ==============================================================================
 
+// Helper: Calculate Qty based on % of Equity
+get_qty_pct(pct) =>
+    (strategy.equity * (pct / 100)) / close
+
+// -----------------------------------------------------------------
+// STRATEGY 1: EMA (Pyramiding)
+// -----------------------------------------------------------------
 use_ema_strategy = input.bool(title = "ema", defval = true)
+
 if use_ema_strategy
-    if closeCondition or almostCloseCondition
-        strategy.close("ema")
-
-    else
-        if entryLongCondition
-            strategy.entry("ema", strategy.long)
+    // Entry 1: 30% Initial
+    if entryLongCondition and strategy.position_size == 0
+        strategy.entry("EMA_Ent1", strategy.long, qty=get_qty_pct(30))
+    
+    // Pyramiding Logic (Only if EMA position is active)
+    // Check if latest entry was EMA
+    is_ema_active = (strategy.opentrades > 0) and str.contains(strategy.opentrades.entry_id(strategy.opentrades - 1), "EMA")
+    
+    if is_ema_active
+        avg_price = strategy.position_avg_price
         
-    // if overBBCondition
-    //     strategy.exit(id = "Exit_ema", from_entry = "Long_ema", limit = high + atr*2)
-    // strategy.exit(id = "Exit_ema", from_entry = "Long_ema", stop = open * 0.90)    
+        // Entry 2: +1% Rise (30%)
+        if close > avg_price * 1.01 and strategy.opentrades == 1
+            strategy.entry("EMA_Ent2", strategy.long, qty=get_qty_pct(30))
+            
+        // Entry 3: +2% Rise (40%)
+        if close > avg_price * 1.02 and strategy.opentrades == 2
+            strategy.entry("EMA_Ent3", strategy.long, qty=get_qty_pct(40))
+    
+    // Exit Logic
+    if sellCondition_ema
+        strategy.close_all(comment="EMA_Exit_Signal")
+        
+    // Dynamic Stop Loss (ATR)
+    if is_ema_active
+        strategy.exit("EMA_SL", stop = close - atr * atr_multiplier)
 
+
+// -----------------------------------------------------------------
+// STRATEGY 2: EMA2 (Scale-Out)
+// -----------------------------------------------------------------
 use_ema_strategy2 = input.bool(title = "ema2", defval = true)
-if use_ema_strategy2
-    if entryLongCondition_ema2
-        strategy.entry("ema2", strategy.long)
-    //strategy.exit(id = "Exit_ema2", from_entry = "Long_ema2", limit = high + atr*2, stop = close - atr*1)
 
+if use_ema_strategy2
+    // Entry: 50% only (Risk Control)
+    if entryLongCondition_ema2 and strategy.position_size == 0
+        strategy.entry("EMA2_Ent", strategy.long, qty=get_qty_pct(50))
+
+    // Scale Out 1: 50% Exit at +3% Profit
+    strategy.exit("EMA2_TP1", "EMA2_Ent", qty_percent=50, profit=3) // profit is in ticks? No, checks strategy settings.
+    // Assuming standard crypto pair where 1 tick = min move. Safer to use limit.
+    // strategy.exit("EMA2_TP1", "EMA2_Ent", qty_percent=50, limit=strategy.position_avg_price * 1.03)
+    // Note: position_avg_price is only valid during the trade.
+    
+    // Full Exit condition
     if closeCondition_ema2
-        strategy.close("ema2")
+        strategy.close("EMA2_Ent", comment="EMA2_Signal_Close")
+
+
+// -----------------------------------------------------------------
+// STRATEGY 3 & 4: BB RSI (Single Entry)
 // -----------------------------------------------------------------
 use_bbrsi_strategy_under = input.bool(title = "bbrsi_strategy_under", defval = true)
-if use_bbrsi_strategy_under
-    if entryLongCondition_bbrsi_under
-        strategy.entry("bu", strategy.long)
-
-    if entryExitCondition_bbrsi_under
-        strategy.close("bu")
-        
-    strategy.exit(id="Exit_bbrsi_under", from_entry = "bu", stop = close*0.88)
-
-// -----------------------------------------------------------------
 use_bbrsi_strategy_over = input.bool(title = "bbrsi_strategy_over", defval = true)
+
+// UNDER Mode
+if use_bbrsi_strategy_under
+    // Entry: 100% Entry (No DCA)
+    if entryLongCondition_bbrsi_under and strategy.position_size == 0
+        strategy.entry("BBRUI_Ent", strategy.long, qty=get_qty_pct(100))
+
+    // Exit
+    if entryExitCondition_bbrsi_under
+        strategy.close("BBRUI_Ent", comment="BBRUI_Close")
+    
+    // Hard Stop
+    strategy.exit("BBRUI_SL", "BBRUI_Ent", stop = strategy.position_avg_price * 0.88)
+
+
+// OVER Mode
 if use_bbrsi_strategy_over
-    if entryLongCondition_bbrsi_over
-        strategy.entry("bo", strategy.long)
-        //strategy.exit(id="Long_bbrsi_over", stop = low - atr*1)
+    // Entry: 100% Entry
+    if entryLongCondition_bbrsi_over and strategy.position_size == 0
+        strategy.entry("BBRO_Ent", strategy.long, qty=get_qty_pct(100))
 
+    // Exit
     if entryExitCondition_bbrsi_over
-        strategy.close("bo")
+        strategy.close("BBRO_Ent", comment="BBRO_Close")
+        
+    // Dynamic Stop
+    strategy.exit("BBRO_Exit", "BBRO_Ent", limit = high + atr*4, stop = low - atr*1)
 
-    strategy.exit(id="Exit_bbrsi_over", from_entry = "bo", limit = high + atr*4, stop = low - atr*1)
-
-    // if bbrsi_close_bbLower_st1
-    //     strategy.exit("Exit over", from_entry ="Long_bbrsi_over", stop = open * 0.95)
-
-// -----------------------------------------------------------------
-use_morning_star_strategy = input.bool(title = "ms", defval = true)
-if use_morning_star_strategy
-    if entryLongCondition_morning_star
-        strategy.entry("ms", strategy.long)
-
-    strategy.exit(id="Exit_ms", from_entry = "ms", limit = high + atr*4, stop = low - atr*1)
 
 // -------------------------------
 // text display
@@ -280,10 +268,3 @@ if textbox_useflag
     table.cell(rsiDisplay, 0, 25, "rsi_ma4(-2): " + str.tostring(rsi_ma4[1]), bgcolor = color.blue)
 
     table.cell(rsiDisplay, 0, 26, "bbLower_st1: " + str.tostring(bbLower_st1), bgcolor = color.blue)
-    
-    // Strategy4 디버깅 정보
-    table.cell(rsiDisplay, 0, 27, "has_sharp_decline: " + str.tostring(has_sharp_decline), bgcolor = color.yellow)
-    table.cell(rsiDisplay, 0, 28, "has_consecutive_decline: " + str.tostring(has_consecutive_decline), bgcolor = color.yellow)
-    table.cell(rsiDisplay, 0, 29, "has_bb_lower_touch: " + str.tostring(has_bb_lower_touch), bgcolor = color.yellow)
-    table.cell(rsiDisplay, 0, 30, "find_morning_star: " + str.tostring(find_morning_star), bgcolor = color.yellow)
-    

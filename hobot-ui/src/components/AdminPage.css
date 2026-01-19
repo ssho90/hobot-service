@@ -399,3 +399,32 @@
   border-color: #6366f1;
 }
 
+/* 파일 업로드 드롭존 스타일 */
+.upload-drop-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #f9fafb;
+}
+
+.upload-drop-zone:hover,
+.upload-drop-zone.active {
+  border-color: #6366f1;
+  background-color: #eef2ff;
+}
+
+.upload-drop-zone p {
+  color: #6b7280;
+  margin: 10px 0;
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
