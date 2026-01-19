@@ -1,44 +1,76 @@
 import os
 import shutil
-from fastapi import UploadFile
-from typing import List, Dict
+import json
+import uuid
 import logging
+import unicodedata
 from datetime import datetime
+from fastapi import UploadFile
+from typing import List, Dict, Optional
 
 # 파일 저장 경로 설정
 UPLOAD_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads")
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+METADATA_FILE = os.path.join(UPLOAD_DIRECTORY, "files.json")
 
 logger = logging.getLogger(__name__)
 
-import unicodedata
+def _load_metadata() -> Dict:
+    """메타데이터 파일 로드"""
+    if not os.path.exists(METADATA_FILE):
+        return {}
+    try:
+        with open(METADATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Failed to load metadata: {e}")
+        return {}
 
-# ... existing imports ...
+def _save_metadata(data: Dict):
+    """메타데이터 파일 저장"""
+    try:
+        with open(METADATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Failed to save metadata: {e}")
 
 def save_file(file: UploadFile) -> Dict:
     """
-    업로드된 파일을 서버의 uploads 디렉토리에 저장합니다.
-    파일명은 NFC(단일 문자) 형태로 정규화하여 저장합니다.
+    업로드된 파일을 Hash ID로 저장하고 메타데이터를 기록합니다.
     """
     try:
-        # 파일명 정규화 (NFD -> NFC)
-        filename = unicodedata.normalize('NFC', file.filename)
+        # Generate Hash ID (12 chars unique id)
+        file_id = uuid.uuid4().hex[:12]
+        ext = os.path.splitext(file.filename)[1]
+        saved_filename = f"{file_id}{ext}"
         
-        # 파일 경로 생성
-        file_location = os.path.join(UPLOAD_DIRECTORY, filename)
+        # 파일 경로
+        file_location = os.path.join(UPLOAD_DIRECTORY, saved_filename)
         
         # 파일 저장
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
         file_size = os.path.getsize(file_location)
+        original_name = unicodedata.normalize('NFC', file.filename)
         
-        logger.info(f"File saved successfully: {filename} ({file_size} bytes)")
+        # 메타데이터 저장
+        metadata = _load_metadata()
+        metadata[file_id] = {
+            "id": file_id,
+            "original_name": original_name,
+            "saved_filename": saved_filename,
+            "size": file_size,
+            "upload_date": datetime.now().isoformat()
+        }
+        _save_metadata(metadata)
+        
+        logger.info(f"File saved: {original_name} -> {saved_filename} (ID: {file_id})")
         
         return {
-            "filename": filename,
+            "id": file_id,
+            "name": original_name,
             "size": file_size,
-            "path": file_location,
             "status": "success"
         }
     except Exception as e:
@@ -49,85 +81,77 @@ def save_file(file: UploadFile) -> Dict:
 
 def list_files() -> List[Dict]:
     """
-    uploads 디렉토리의 파일 목록을 반환합니다.
+    메타데이터를 기반으로 파일 목록을 반환합니다.
     """
     try:
+        metadata = _load_metadata()
         files_list = []
-        if not os.path.exists(UPLOAD_DIRECTORY):
-            return []
-            
-        for filename in os.listdir(UPLOAD_DIRECTORY):
-            # 파일이 NFD로 저장되어 있을 경우를 대비해 목록 조회 시에도 NFC로 보여주는 것이 좋지만,
-            # 다운로드/삭제 시 파일명을 그대로 사용하기 위해 원본 파일명을 사용하거나,
-            # 별도의 매핑 로직이 필요함. 여기서는 있는 그대로 반환하되,
-            # get_file_path에서 NFD/NFC 모두 찾도록 처리함.
-            
-            file_path = os.path.join(UPLOAD_DIRECTORY, filename)
-            if os.path.isfile(file_path):
-                stats = os.stat(file_path)
-                
-                # 표시용 이름은 NFC로 변환하여 보기 좋게 표시 (선택사항)
-                display_name = unicodedata.normalize('NFC', filename)
-                
+        
+        for fid, data in metadata.items():
+            # 실제 파일 존재 여부 확인 (옵션)
+            file_path = os.path.join(UPLOAD_DIRECTORY, data.get("saved_filename", ""))
+            if os.path.exists(file_path):
+                # 표시용 날짜 포맷
+                try:
+                    dt = datetime.fromisoformat(data["upload_date"])
+                    date_str = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    date_str = data["upload_date"]
+                    
                 files_list.append({
-                    "name": display_name,         # 프론트엔드에 보여줄 이름 (NFC)
-                    "original_name": filename,    # 실제 파일시스템 이름 (삭제/다운로드 요청 시 사용) - *하지만 프론트엔드는 name만 씀*
-                    # 프론트엔드는 name만 쓰므로, 백엔드 get_file_path에서 유연하게 찾아야 함.
-                    "size": stats.st_size,
-                    "last_modified": datetime.fromtimestamp(stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+                    "id": fid,
+                    "name": data["original_name"],
+                    "size": data["size"],
+                    "last_modified": date_str
                 })
         
-        # 최신 수정일 순으로 정렬
+        # 최신순 정렬
         files_list.sort(key=lambda x: x["last_modified"], reverse=True)
         return files_list
     except Exception as e:
         logger.error(f"Failed to list files: {str(e)}")
         raise e
 
-def delete_file(filename: str) -> Dict:
+def delete_file(file_id: str) -> Dict:
     """
-    지정된 파일을 삭제합니다.
+    ID를 기반으로 파일을 삭제합니다.
     """
     try:
-        # 삭제 시에도 파일 찾기를 시도
-        file_path = get_file_path(filename)
-        
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
-            logger.info(f"File deleted: {filename}")
-            return {"status": "success", "message": f"File {filename} deleted successfully"}
-        else:
-            logger.warning(f"File not found for deletion: {filename}")
+        metadata = _load_metadata()
+        if file_id not in metadata:
+             # 이전 버전 호환성 혹은 직접 파일명으로 삭제 요청이 왔을 경우를 대비할 수도 있으나,
+             # 여기서는 ID 기반으로 완전히 전환함.
             return {"status": "error", "message": "File not found"}
+            
+        data = metadata[file_id]
+        saved_filename = data["saved_filename"]
+        file_path = os.path.join(UPLOAD_DIRECTORY, saved_filename)
+        
+        # 파일 삭제
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            
+        # 메타데이터 삭제
+        del metadata[file_id]
+        _save_metadata(metadata)
+        
+        logger.info(f"File deleted: {file_id}")
+        return {"status": "success", "message": "File deleted successfully"}
     except Exception as e:
-        logger.error(f"Failed to delete file: {filename}, error: {str(e)}")
+        logger.error(f"Failed to delete file: {file_id}, error: {str(e)}")
         raise e
 
-def get_file_path(filename: str) -> str:
+def get_file_info(file_id: str) -> Optional[Dict]:
     """
-    파일의 절대 경로를 반환합니다. 파일이 없으면 None을 반환합니다.
-    파일명 매칭 시 Unicode 정규화(NFC)를 거쳐 비교하여
-    서버(NFD/NFC)와 클라이언트(NFC) 간의 인코딩 차이를 해결합니다.
+    ID를 기반으로 파일 정보(경로, 원본명)를 반환합니다.
     """
-    # 1. 우선 정확한 경로로 존재 여부 확인 (빠른 경로)
-    file_path = os.path.join(UPLOAD_DIRECTORY, filename)
-    if os.path.exists(file_path):
-        return file_path
-
-    # 2. 존재하지 않는 경우, 디렉토리를 순회하며 NFC 정규화 후 비교
-    try:
-        if not os.path.exists(UPLOAD_DIRECTORY):
-            return None
-            
-        target_nfc = unicodedata.normalize('NFC', filename)
-        
-        for disk_filename in os.listdir(UPLOAD_DIRECTORY):
-            disk_nfc = unicodedata.normalize('NFC', disk_filename)
-            
-            if disk_nfc == target_nfc:
-                return os.path.join(UPLOAD_DIRECTORY, disk_filename)
-                
-    except Exception as e:
-        logger.error(f"Error while searching for file {filename}: {str(e)}")
-        
+    metadata = _load_metadata()
+    if file_id in metadata:
+        data = metadata[file_id]
+        file_path = os.path.join(UPLOAD_DIRECTORY, data["saved_filename"])
+        if os.path.exists(file_path):
+            return {
+                "path": file_path,
+                "original_name": data["original_name"]
+            }
     return None

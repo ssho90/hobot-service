@@ -142,9 +142,9 @@ const FileUploadPage = () => {
     //   handleSaveEdit 에서는 ...getAuthHeaders() 하고 Content-Type 덮어씀.
     //   FormData는 Content-Type 헤더를 브라우저가 설정해야 함.
 
-    const handleDownload = async (filename) => {
+    const handleDownload = async (file) => {
         try {
-            const response = await fetch(`/api/admin/files/${encodeURIComponent(filename)}`, {
+            const response = await fetch(`/api/admin/files/${file.id}`, {
                 method: 'GET',
                 headers: getAuthHeaders()
             });
@@ -158,7 +158,7 @@ const FileUploadPage = () => {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = filename;
+            link.download = file.name;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -168,13 +168,13 @@ const FileUploadPage = () => {
         }
     };
 
-    const handleDelete = async (filename) => {
-        if (!window.confirm(`정말 ${filename} 파일을 삭제하시겠습니까?`)) {
+    const handleDelete = async (file) => {
+        if (!window.confirm(`정말 ${file.name} 파일을 삭제하시겠습니까?`)) {
             return;
         }
 
         try {
-            const response = await fetch(`/api/admin/files/${encodeURIComponent(filename)}`, {
+            const response = await fetch(`/api/admin/files/${file.id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -249,7 +249,7 @@ const FileUploadPage = () => {
                                 </tr>
                             ) : (
                                 files.map((file) => (
-                                    <tr key={file.name}>
+                                    <tr key={file.id}>
                                         <td>{file.name}</td>
                                         <td>{formatFileSize(file.size)}</td>
                                         <td>{file.last_modified}</td>
@@ -257,13 +257,13 @@ const FileUploadPage = () => {
                                             <button
                                                 className="btn-sm"
                                                 style={{ marginRight: '8px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                onClick={() => handleDownload(file.name)}
+                                                onClick={() => handleDownload(file)}
                                             >
                                                 다운로드
                                             </button>
                                             <button
                                                 className="btn-delete btn-sm"
-                                                onClick={() => handleDelete(file.name)}
+                                                onClick={() => handleDelete(file)}
                                             >
                                                 삭제
                                             </button>

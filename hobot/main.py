@@ -3238,32 +3238,39 @@ async def list_files(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.delete("/admin/files/{filename}")
+@api_router.delete("/admin/files/{file_id}")
 async def delete_file(
-    filename: str,
+    file_id: str,
     current_user: dict = Depends(require_admin)
 ):
     """파일 삭제"""
     try:
-        return file_service.delete_file(filename)
+        return file_service.delete_file(file_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/admin/files/{filename}")
+@api_router.get("/admin/files/{file_id}")
 async def download_file(
-    filename: str,
+    file_id: str,
     current_user: dict = Depends(require_admin)
 ):
     """파일 다운로드"""
     try:
-        file_path = file_service.get_file_path(filename)
-        if not file_path:
+        file_info = file_service.get_file_info(file_id)
+        if not file_info:
             raise HTTPException(status_code=404, detail="File not found")
         
+        # 파일명을 URL 인코딩하여 Content-Disposition 헤더 설정
+        from urllib.parse import quote
+        encoded_filename = quote(file_info['original_name'].encode('utf-8'))
+        
         return FileResponse(
-            path=file_path,
-            filename=filename,
-            media_type='application/octet-stream'
+            path=file_info['path'],
+            filename=file_info['original_name'], # 기본 filename
+            media_type='application/octet-stream',
+            headers={
+                "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
+            }
         )
     except HTTPException:
         raise
