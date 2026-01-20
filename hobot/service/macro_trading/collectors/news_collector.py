@@ -406,12 +406,15 @@ class NewsCollector:
         
         for item in news_items:
             published_at = item.get('published_at')
-            if published_at and published_at >= cutoff_time:
+            
+            if not published_at:
+                # 날짜가 없는 경우 현재 시간으로 설정
+                published_at = datetime.now()
+                item['published_at'] = published_at
+                logger.debug(f"날짜 정보가 없는 뉴스, 현재 시간으로 설정: {item.get('title', 'Unknown')}")
+            
+            if published_at >= cutoff_time:
                 filtered.append(item)
-            elif not published_at:
-                # 날짜가 없는 경우 제외
-                logger.debug(f"날짜 정보가 없는 뉴스 제외: {item.get('title', 'Unknown')}")
-                continue
         
         logger.info(f"{hours}시간 이내 뉴스: {len(filtered)}개")
         return filtered
