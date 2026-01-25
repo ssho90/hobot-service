@@ -198,18 +198,47 @@ if use_ema_strategy2
 use_bbrsi_strategy_under = input.bool(title = "bbrsi_strategy_under", defval = true)
 use_bbrsi_strategy_over = input.bool(title = "bbrsi_strategy_over", defval = true)
 
+// New Entry Options
+use_limit_entry = input.bool(title = "Use Limit Entry (Catch Bottom)", defval = false, group="Entry Optimization", tooltip="Place limit order at bbLower to catch wicks")
+use_aggressive_entry = input.bool(title = "Use Aggressive Entry (No Rebound Wait)", defval = false, group="Entry Optimization", tooltip="Enter immediately if oversold and touching band")
+rsi_oversold_threshold = input.int(30, "RSI Oversold Level", group="Entry Optimization")
+
 // UNDER Mode
 if use_bbrsi_strategy_under
-    // Entry: 100% Entry (No DCA)
-    if entryLongCondition_bbrsi_under and strategy.position_size == 0
-        strategy.entry("BBRUI_Ent", strategy.long, qty=get_qty_pct(100))
+    // Conditions
+    is_oversold = rsi < rsi_oversold_threshold
+    is_touching_band = low <= bbLower_st1
+    
+    // 1. Limit Order Entry (Highest Priority for catching wicks)
+    if use_limit_entry and strategy.position_size == 0 and date_filter
+        // Place limit order for NEXT bar at CURRENT band level
+        // Optimistic approach: if next bar drops to this level, we buy.
+        strategy.entry("BBRUI_Ent_Lmt", strategy.long, qty=get_qty_pct(100), limit=bbLower_st1)
+    else
+        strategy.cancel("BBRUI_Ent_Lmt")
+
+    // 2. Aggressive Market Entry (If Limit not used or additional logic)
+    // If not using limit, but want to enter on the 'drop' candle without waiting for crossover
+    if use_aggressive_entry and not use_limit_entry and strategy.position_size == 0 and date_filter
+        if is_oversold and is_touching_band
+            strategy.entry("BBRUI_Ent_Agg", strategy.long, qty=get_qty_pct(100))
+    
+    // 3. Standard Rebound Entry (Original Logic)
+    if not use_limit_entry and not use_aggressive_entry and strategy.position_size == 0
+        if entryLongCondition_bbrsi_under
+            strategy.entry("BBRUI_Ent", strategy.long, qty=get_qty_pct(100))
 
     // Exit
     if entryExitCondition_bbrsi_under
-        strategy.close("BBRUI_Ent", comment="BBRUI_Close")
+        strategy.close_all(comment="BBRUI_Close")
     
     // Hard Stop
+    // Note: strategy.entry id might be different now, so we use close_all or generic exit if ID matches.
+    // Simplifying: Just apply exit to all long positions initiated by this strategy block is tricky if IDs differ.
+    // For simplicity, we create exits for all possible IDs or rely on Pyramiding=false for this strategy
     strategy.exit("BBRUI_SL", "BBRUI_Ent", stop = strategy.position_avg_price * 0.88)
+    strategy.exit("BBRUI_SL_Lmt", "BBRUI_Ent_Lmt", stop = strategy.position_avg_price * 0.88)
+    strategy.exit("BBRUI_SL_Agg", "BBRUI_Ent_Agg", stop = strategy.position_avg_price * 0.88)
 
 
 // OVER Mode
