@@ -54,7 +54,7 @@ const AboutPage = () => {
                     <section className="container mb-5 engine-section">
                         <h2 className="text-center mb-5 section-header">핵심 엔진 & 로직</h2>
                         <div className="row g-4">
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon data">
                                         <i className="bi bi-database-fill-gear"></i>
@@ -68,7 +68,7 @@ const AboutPage = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon ai">
                                         <i className="bi bi-cpu-fill"></i>
@@ -82,7 +82,7 @@ const AboutPage = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon logic">
                                         <i className="bi bi-shield-check"></i>
@@ -96,7 +96,7 @@ const AboutPage = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon exec">
                                         <i className="bi bi-graph-up-arrow"></i>
@@ -114,39 +114,41 @@ const AboutPage = () => {
                     </section>
 
                     {/* Live Dashboard Screenshots */}
-                    <section className="container mb-5 screenshot-section-wrapper">
-                        <h2 className="text-center mb-5 section-header">투명한 운용 현황</h2>
-                        <div className="screenshot-container">
-                            <div className="row g-5 align-items-center mb-5">
-                                <div className="col-lg-6">
-                                    <div className="screenshot-frame">
-                                        <img src="/assets/dashboard-account.jpg" alt="자산 현황 대시보드" className="dashboard-img" />
+                    <section className="screenshot-section-wrapper mb-5">
+                        <div className="container">
+                            <h2 className="text-center mb-5 section-header">투명한 운용 현황</h2>
+                            <div className="screenshot-container">
+                                <div className="row g-5 align-items-center mb-5">
+                                    <div className="col-lg-6">
+                                        <div className="screenshot-frame">
+                                            <img src="/assets/dashboard-account.jpg" alt="자산 현황 대시보드" className="dashboard-img" />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6">
+                                        <div className="screenshot-text">
+                                            <h3><i className="bi bi-pie-chart-fill me-2"></i> 실시간 자산 모니터링</h3>
+                                            <p>
+                                                총 자산의 평가 금액과 누적 수익률을 한눈에 확인할 수 있습니다.
+                                                보유 중인 모든 종목의 현재가와 수익 현황이 실시간으로 동기화됩니다.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-6">
-                                    <div className="screenshot-text">
-                                        <h3><i className="bi bi-pie-chart-fill me-2"></i> 실시간 자산 모니터링</h3>
-                                        <p>
-                                            총 자산의 평가 금액과 누적 수익률을 한눈에 확인할 수 있습니다.
-                                            보유 중인 모든 종목의 현재가와 수익 현황이 실시간으로 동기화됩니다.
-                                        </p>
+                                <div className="row g-5 align-items-center">
+                                    <div className="col-lg-6 order-lg-2">
+                                        <div className="screenshot-frame">
+                                            <img src="/assets/dashboard-rebalancing.jpg" alt="리밸런싱 현황" className="dashboard-img" />
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="row g-5 align-items-center">
-                                <div className="col-lg-6 order-lg-2">
-                                    <div className="screenshot-frame">
-                                        <img src="/assets/dashboard-rebalancing.jpg" alt="리밸런싱 현황" className="dashboard-img" />
-                                    </div>
-                                </div>
-                                <div className="col-lg-6 order-lg-1">
-                                    <div className="screenshot-text">
-                                        <h3><i className="bi bi-sliders me-2"></i> 정밀 리밸런싱 관리</h3>
-                                        <p>
-                                            AI가 산출한 목표 비중(Target)과 현재 비중(Actual)을 비교하여,
-                                            오차 범위 내에서 정밀하게 비중을 조절합니다.
-                                            주식/채권/대체/현금 등 자산군별 밸런스를 자동으로 유지합니다.
-                                        </p>
+                                    <div className="col-lg-6 order-lg-1">
+                                        <div className="screenshot-text">
+                                            <h3><i className="bi bi-sliders me-2"></i> 정밀 리밸런싱 관리</h3>
+                                            <p>
+                                                AI가 산출한 목표 비중(Target)과 현재 비중(Actual)을 비교하여,
+                                                오차 범위 내에서 정밀하게 비중을 조절합니다.
+                                                주식/채권/대체/현금 등 자산군별 밸런스를 자동으로 유지합니다.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -227,7 +229,7 @@ const AboutPage = () => {
                     <section className="container mb-5 engine-section">
                         <h2 className="text-center mb-5 section-header">Core Engine & Logic</h2>
                         <div className="row g-4">
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon data">
                                         <i className="bi bi-database-fill-gear"></i>
@@ -241,7 +243,7 @@ const AboutPage = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon ai">
                                         <i className="bi bi-cpu-fill"></i>
@@ -255,7 +257,7 @@ const AboutPage = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon logic">
                                         <i className="bi bi-shield-check"></i>
@@ -269,7 +271,7 @@ const AboutPage = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-3">
+                            <div className="col-md-6 col-lg-6">
                                 <div className="engine-card">
                                     <div className="engine-icon exec">
                                         <i className="bi bi-graph-up-arrow"></i>
@@ -286,39 +288,41 @@ const AboutPage = () => {
                         </div>
                     </section>
 
-                    <section className="container mb-5 screenshot-section-wrapper">
-                        <h2 className="text-center mb-5 section-header">Transparent Operations</h2>
-                        <div className="screenshot-container">
-                            <div className="row g-5 align-items-center mb-5">
-                                <div className="col-lg-6">
-                                    <div className="screenshot-frame">
-                                        <img src="/assets/dashboard-account.jpg" alt="Account Dashboard" className="dashboard-img" />
+                    <section className="screenshot-section-wrapper mb-5">
+                        <div className="container">
+                            <h2 className="text-center mb-5 section-header">Transparent Operations</h2>
+                            <div className="screenshot-container">
+                                <div className="row g-5 align-items-center mb-5">
+                                    <div className="col-lg-6">
+                                        <div className="screenshot-frame">
+                                            <img src="/assets/dashboard-account.jpg" alt="Account Dashboard" className="dashboard-img" />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6">
+                                        <div className="screenshot-text">
+                                            <h3><i className="bi bi-pie-chart-fill me-2"></i> Real-time Asset Monitoring</h3>
+                                            <p>
+                                                View total asset valuation and cumulative returns at a glance.
+                                                Real-time synchronization keeps track of current prices and profit status for all holdings.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-6">
-                                    <div className="screenshot-text">
-                                        <h3><i className="bi bi-pie-chart-fill me-2"></i> Real-time Asset Monitoring</h3>
-                                        <p>
-                                            View total asset valuation and cumulative returns at a glance.
-                                            Real-time synchronization keeps track of current prices and profit status for all holdings.
-                                        </p>
+                                <div className="row g-5 align-items-center">
+                                    <div className="col-lg-6 order-lg-2">
+                                        <div className="screenshot-frame">
+                                            <img src="/assets/dashboard-rebalancing.jpg" alt="Rebalancing Status" className="dashboard-img" />
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="row g-5 align-items-center">
-                                <div className="col-lg-6 order-lg-2">
-                                    <div className="screenshot-frame">
-                                        <img src="/assets/dashboard-rebalancing.jpg" alt="Rebalancing Status" className="dashboard-img" />
-                                    </div>
-                                </div>
-                                <div className="col-lg-6 order-lg-1">
-                                    <div className="screenshot-text">
-                                        <h3><i className="bi bi-sliders me-2"></i> Precision Rebalancing</h3>
-                                        <p>
-                                            Dynamically compares AI-derived Target weights with Actual weights,
-                                            adjusting positions within a precise tolerance range.
-                                            Automatically maintains balance across Equity, Bond, Alternative, and Cash assets.
-                                        </p>
+                                    <div className="col-lg-6 order-lg-1">
+                                        <div className="screenshot-text">
+                                            <h3><i className="bi bi-sliders me-2"></i> Precision Rebalancing</h3>
+                                            <p>
+                                                Dynamically compares AI-derived Target weights with Actual weights,
+                                                adjusting positions within a precise tolerance range.
+                                                Automatically maintains balance across Equity, Bond, Alternative, and Cash assets.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -256,8 +256,18 @@
 }
 
 .security-item {
+    background: white;
+    border-radius: 20px;
     padding: 30px 20px;
     transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f4f8;
+}
+
+.security-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .security-icon {
