@@ -19,114 +19,166 @@ const AboutPage = () => {
                         <div className="container">
                             <div className="hero-actions">
                                 <button className="hero-lang-btn" onClick={toggleLanguage}>
-                                    <i className="bi bi-translate"></i> {currentLang === 'KR' ? 'English' : '한국어'}
+                                    <i className="bi bi-translate"></i> English
                                 </button>
                             </div>
-                            <span className="hero-badge">AI-Powered Trading</span>
-                            <h1 className="hero-title display-4">AI 기반 거시경제 자동매매</h1>
+                            <span className="hero-badge">AI-Powered Asset Management</span>
+                            <h1 className="hero-title display-4">데이터 기반의 똑똑한 투자</h1>
                             <p className="hero-subtitle">
-                                데이터와 AI가 만나는 곳에서 시작되는<br />
-                                가장 스마트한 자산 관리 솔루션 Hobot
+                                Hobot은 글로벌 경제 지표와 뉴스를 실시간으로 분석하여<br />
+                                가장 안전하고 확실한 리밸런싱 전략을 제안합니다.
                             </p>
                         </div>
                     </section>
 
-                    <section className="container mb-5 feature-section">
+                    {/* System Overview */}
+                    <section className="container mb-5 intro-section">
+                        <div className="row justify-content-center">
+                            <div className="col-lg-10">
+                                <div className="text-center mb-5">
+                                    <h2 className="section-header">Hobot이란?</h2>
+                                    <p className="section-desc">
+                                        Hobot은 단순한 자동매매 프로그램이 아닙니다.
+                                        수천 개의 거시경제 데이터와 글로벌 뉴스를 LLM(Large Language Model)으로 분석하여
+                                        시장 국면을 판단하고, 최적의 자산 배분 비율을 찾아내는 <strong>지능형 퀀트 투자 시스템</strong>입니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Core Engine: Data & Logic */}
+                    <section className="container mb-5 engine-section">
+                        <h2 className="text-center mb-5 section-header">핵심 엔진 & 로직</h2>
                         <div className="row g-4">
-                            <div className="col-md-4">
-                                <div className="modern-card">
-                                    <div className="icon-wrapper">
-                                        <i className="bi bi-cpu feature-icon"></i>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon data">
+                                        <i className="bi bi-database-fill-gear"></i>
                                     </div>
-                                    <h5>AI 전략가</h5>
-                                    <p>Gemini Pro가 복잡한 거시경제 지표와 뉴스를 분석하여 최적의 전략을 도출합니다.</p>
+                                    <h4>데이터 수집</h4>
+                                    <ul className="engine-list">
+                                        <li>일별/월별 FRED 경제지표</li>
+                                        <li>미국/중국/유로존 뉴스</li>
+                                        <li>원자재/금리/환율/크립토</li>
+                                        <li>Fear & Greed Index</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div className="col-md-4">
-                                <div className="modern-card">
-                                    <div className="icon-wrapper">
-                                        <i className="bi bi-globe-americas feature-icon"></i>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon ai">
+                                        <i className="bi bi-cpu-fill"></i>
                                     </div>
-                                    <h5>글로벌 커버리지</h5>
-                                    <p>미국, 중국, 유로존의 경제 데이터와 원자재, 크립토 시장까지 실시간 모니터링합니다.</p>
+                                    <h4>AI 분석 & 판단</h4>
+                                    <ul className="engine-list">
+                                        <li>Gemini Pro 기반 분석</li>
+                                        <li>시장 국면 판별 (성장/물가)</li>
+                                        <li>최적 MP(Model Portfolio) 선정</li>
+                                        <li>리스크 시나리오 시뮬레이션</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div className="col-md-4">
-                                <div className="modern-card">
-                                    <div className="icon-wrapper">
-                                        <i className="bi bi-shield-lock feature-icon"></i>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon logic">
+                                        <i className="bi bi-shield-check"></i>
                                     </div>
-                                    <h5>리스크 관리</h5>
-                                    <p>Drift 감지 및 자동 방어 로직으로 변동성 높은 시장에서도 자산을 안전하게 보호합니다.</p>
+                                    <h4>검증 및 안전장치</h4>
+                                    <ul className="engine-list">
+                                        <li>3일 연속 신호 검증 (노이즈 제거)</li>
+                                        <li>목표 비중 괴리율(Drift) 체크</li>
+                                        <li>매매 충돌 방지 시스템</li>
+                                        <li>시장 급변 시 방어 로직</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon exec">
+                                        <i className="bi bi-graph-up-arrow"></i>
+                                    </div>
+                                    <h4>실행 (Execution)</h4>
+                                    <ul className="engine-list">
+                                        <li>슬리피지 최소화</li>
+                                        <li>5일 분할 리밸런싱</li>
+                                        <li>실시간 체결 확인</li>
+                                        <li>자동 에러 복구 및 알림</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    <section className="container mb-5 screenshot-section">
-                        <div className="row">
-                            <div className="col-lg-12">
-                                <h2 className="text-center mb-5 section-title">실제 운용 화면</h2>
-                            </div>
-                        </div>
-                        <div className="row g-5 align-items-center mb-5">
-                            <div className="col-lg-7">
-                                <div className="screenshot-wrapper">
-                                    <img src="/assets/dashboard-account.jpg" alt="자산 현황 대시보드" className="dashboard-img" />
+                    {/* Live Dashboard Screenshots */}
+                    <section className="container mb-5 screenshot-section-wrapper">
+                        <h2 className="text-center mb-5 section-header">투명한 운용 현황</h2>
+                        <div className="screenshot-container">
+                            <div className="row g-5 align-items-center mb-5">
+                                <div className="col-lg-6">
+                                    <div className="screenshot-frame">
+                                        <img src="/assets/dashboard-account.jpg" alt="자산 현황 대시보드" className="dashboard-img" />
+                                    </div>
+                                </div>
+                                <div className="col-lg-6">
+                                    <div className="screenshot-text">
+                                        <h3><i className="bi bi-pie-chart-fill me-2"></i> 실시간 자산 모니터링</h3>
+                                        <p>
+                                            총 자산의 평가 금액과 누적 수익률을 한눈에 확인할 수 있습니다.
+                                            보유 중인 모든 종목의 현재가와 수익 현황이 실시간으로 동기화됩니다.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="col-lg-5">
-                                <div className="screenshot-desc">
-                                    <h3>자산 현황 모니터링</h3>
-                                    <p>실시간 평가 금액과 수익률, 보유 자산의 상세 현황을 한눈에 파악할 수 있습니다. 일별 자산 추이 그래프를 통해 성과를 직관적으로 확인합니다.</p>
+                            <div className="row g-5 align-items-center">
+                                <div className="col-lg-6 order-lg-2">
+                                    <div className="screenshot-frame">
+                                        <img src="/assets/dashboard-rebalancing.jpg" alt="리밸런싱 현황" className="dashboard-img" />
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="row g-5 align-items-center">
-                            <div className="col-lg-5 order-2 order-lg-1">
-                                <div className="screenshot-desc">
-                                    <h3>정밀한 리밸런싱</h3>
-                                    <p>목표 비중(Target)과 실제 비중(Actual)의 괴리를 실시간으로 추적합니다. 자산군(MP) 및 개별 종목(Sub-MP) 단위로 정교한 비중 관리가 이루어집니다.</p>
-                                </div>
-                            </div>
-                            <div className="col-lg-7 order-1 order-lg-2">
-                                <div className="screenshot-wrapper">
-                                    <img src="/assets/dashboard-rebalancing.jpg" alt="리밸런싱 현황" className="dashboard-img" />
+                                <div className="col-lg-6 order-lg-1">
+                                    <div className="screenshot-text">
+                                        <h3><i className="bi bi-sliders me-2"></i> 정밀 리밸런싱 관리</h3>
+                                        <p>
+                                            AI가 산출한 목표 비중(Target)과 현재 비중(Actual)을 비교하여,
+                                            오차 범위 내에서 정밀하게 비중을 조절합니다.
+                                            주식/채권/대체/현금 등 자산군별 밸런스를 자동으로 유지합니다.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    <section className="container mb-5">
-                        <div className="row">
-                            <div className="col-lg-10 offset-lg-1">
-                                <div className="workflow-container">
-                                    <h2 className="text-center mb-5 section-title">Daily Workflow</h2>
-                                    <div className="workflow-timeline modern-timeline">
-                                        <div className="workflow-item">
-                                            <div className="time-badge">08:30</div>
-                                            <div className="workflow-content">
-                                                <h4>시장 정밀 분석</h4>
-                                                <p>장 시작 전, AI가 주요 경제 지표(FRED)와 글로벌 뉴스를 분석하여 시장 국면을 진단합니다.</p>
-                                            </div>
-                                        </div>
-                                        <div className="workflow-item">
-                                            <div className="time-badge warning">Verify</div>
-                                            <div className="workflow-content">
-                                                <h4>3일 신호 검증</h4>
-                                                <p>일시적 노이즈를 배제하기 위해 신호가 3일 이상 지속될 때만 포트폴리오 변경을 승인합니다.</p>
-                                                <span className="safety-tag"><i className="bi bi-shield-check"></i> 노이즈 필터링</span>
-                                            </div>
-                                        </div>
-                                        <div className="workflow-item">
-                                            <div className="time-badge success">09:40</div>
-                                            <div className="workflow-content">
-                                                <h4>안전한 분할 실행</h4>
-                                                <p>시장 충격 최소화를 위해 5일간 분할 매매를 수행하며, 돌발 변수에 실시간 대응합니다.</p>
-                                                <span className="safety-tag"><i className="bi bi-graph-up-arrow"></i> 5일 분할 진입</span>
-                                            </div>
-                                        </div>
+                    {/* Security */}
+                    <section className="container mb-5 security-section">
+                        <h2 className="text-center mb-5 section-header">엔터프라이즈급 보안</h2>
+                        <div className="row g-4 text-center">
+                            <div className="col-md-4">
+                                <div className="security-item">
+                                    <div className="security-icon">
+                                        <i className="bi bi-lock-fill"></i>
                                     </div>
+                                    <h5>데이터 암호화</h5>
+                                    <p>모든 API 키와 중요 정보는 AES-256 알고리즘으로 암호화되어 DB에 저장됩니다.</p>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="security-item">
+                                    <div className="security-icon">
+                                        <i className="bi bi-shield-lock-fill"></i>
+                                    </div>
+                                    <h5>SSL 보안 통신</h5>
+                                    <p>서버와 클라이언트 간의 모든 통신은 HTTPS(SSL/TLS)을 통해 안전하게 보호됩니다.</p>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="security-item">
+                                    <div className="security-icon">
+                                        <i className="bi bi-key-fill"></i>
+                                    </div>
+                                    <h5>접근 제어 (MFA)</h5>
+                                    <p>관리자 페이지 접근 시 다단계 인증(MFA) 및 엄격한 IP 접근 제어를 적용합니다.</p>
                                 </div>
                             </div>
                         </div>
@@ -139,114 +191,162 @@ const AboutPage = () => {
                         <div className="container">
                             <div className="hero-actions">
                                 <button className="hero-lang-btn" onClick={toggleLanguage}>
-                                    <i className="bi bi-translate"></i> {currentLang === 'KR' ? 'English' : '한국어'}
+                                    <i className="bi bi-translate"></i> 한국어
                                 </button>
                             </div>
-                            <span className="hero-badge">AI-Powered Trading</span>
-                            <h1 className="hero-title display-4">Intelligent Macro Trading</h1>
+                            <span className="hero-badge">AI-Powered Asset Management</span>
+                            <h1 className="hero-title display-4">Intelligent Data-Driven Investing</h1>
                             <p className="hero-subtitle">
-                                Where Data Meets AI.<br />
-                                The smartest way to manage your assets with Hobot.
+                                Hobot analyzes global economic indicators and news in real-time<br />
+                                to execute the safest and most strategic asset rebalancing.
                             </p>
                         </div>
                     </section>
 
-                    <section className="container mb-5 feature-section">
+                    <section className="container mb-5 intro-section">
+                        <div className="row justify-content-center">
+                            <div className="col-lg-10">
+                                <div className="text-center mb-5">
+                                    <h2 className="section-header">What is Hobot?</h2>
+                                    <p className="section-desc">
+                                        Hobot is not just a trading bot. It is an <strong>Intelligent Quant System</strong> that leverages Large Language Models (LLM)
+                                        to analyze thousands of macro data points and global news, determining the market regime and
+                                        optimizing asset allocation automatically.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="container mb-5 engine-section">
+                        <h2 className="text-center mb-5 section-header">Core Engine & Logic</h2>
                         <div className="row g-4">
-                            <div className="col-md-4">
-                                <div className="modern-card">
-                                    <div className="icon-wrapper">
-                                        <i className="bi bi-cpu feature-icon"></i>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon data">
+                                        <i className="bi bi-database-fill-gear"></i>
                                     </div>
-                                    <h5>AI Strategist</h5>
-                                    <p>Gemini Pro analyzes complex macro indicators and news to derive optimal strategies.</p>
+                                    <h4>Data Collection</h4>
+                                    <ul className="engine-list">
+                                        <li>Daily/Monthly FRED Data</li>
+                                        <li>Global News (US/CN/EU)</li>
+                                        <li>Commodities/Rates/Crypto</li>
+                                        <li>Fear & Greed Index</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div className="col-md-4">
-                                <div className="modern-card">
-                                    <div className="icon-wrapper">
-                                        <i className="bi bi-globe-americas feature-icon"></i>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon ai">
+                                        <i className="bi bi-cpu-fill"></i>
                                     </div>
-                                    <h5>Global Coverage</h5>
-                                    <p>Real-time monitoring of US, China, Eurozone data, plus commodities and crypto markets.</p>
+                                    <h4>AI Analysis</h4>
+                                    <ul className="engine-list">
+                                        <li>Gemini Pro Analysis</li>
+                                        <li>Regime Detection (Growth/CPI)</li>
+                                        <li>Optimal MP Selection</li>
+                                        <li>Risk Scenario Simulation</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div className="col-md-4">
-                                <div className="modern-card">
-                                    <div className="icon-wrapper">
-                                        <i className="bi bi-shield-lock feature-icon"></i>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon logic">
+                                        <i className="bi bi-shield-check"></i>
                                     </div>
-                                    <h5>Risk Management</h5>
-                                    <p>Drift detection and auto-defense logic keep your assets safe in volatile markets.</p>
+                                    <h4>Verification</h4>
+                                    <ul className="engine-list">
+                                        <li>3-Day Signal Verification</li>
+                                        <li>Drift Monitoring</li>
+                                        <li>Conflict Prevention</li>
+                                        <li>Defensive Logic</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="engine-card">
+                                    <div className="engine-icon exec">
+                                        <i className="bi bi-graph-up-arrow"></i>
+                                    </div>
+                                    <h4>Execution</h4>
+                                    <ul className="engine-list">
+                                        <li>Slippage Minimization</li>
+                                        <li>5-Day Split Entry</li>
+                                        <li>Real-time Confirmation</li>
+                                        <li>Auto-Recovery System</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    <section className="container mb-5 screenshot-section">
-                        <div className="row">
-                            <div className="col-lg-12">
-                                <h2 className="text-center mb-5 section-title">Live Dashboard</h2>
-                            </div>
-                        </div>
-                        <div className="row g-5 align-items-center mb-5">
-                            <div className="col-lg-7">
-                                <div className="screenshot-wrapper">
-                                    <img src="/assets/dashboard-account.jpg" alt="Account Dashboard" className="dashboard-img" />
+                    <section className="container mb-5 screenshot-section-wrapper">
+                        <h2 className="text-center mb-5 section-header">Transparent Operations</h2>
+                        <div className="screenshot-container">
+                            <div className="row g-5 align-items-center mb-5">
+                                <div className="col-lg-6">
+                                    <div className="screenshot-frame">
+                                        <img src="/assets/dashboard-account.jpg" alt="Account Dashboard" className="dashboard-img" />
+                                    </div>
+                                </div>
+                                <div className="col-lg-6">
+                                    <div className="screenshot-text">
+                                        <h3><i className="bi bi-pie-chart-fill me-2"></i> Real-time Asset Monitoring</h3>
+                                        <p>
+                                            View total asset valuation and cumulative returns at a glance.
+                                            Real-time synchronization keeps track of current prices and profit status for all holdings.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="col-lg-5">
-                                <div className="screenshot-desc">
-                                    <h3>Asset Monitoring</h3>
-                                    <p>View real-time valuation, returns, and detailed asset status at a glance. Daily asset trend graphs provide intuitive performance tracking.</p>
+                            <div className="row g-5 align-items-center">
+                                <div className="col-lg-6 order-lg-2">
+                                    <div className="screenshot-frame">
+                                        <img src="/assets/dashboard-rebalancing.jpg" alt="Rebalancing Status" className="dashboard-img" />
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="row g-5 align-items-center">
-                            <div className="col-lg-5 order-2 order-lg-1">
-                                <div className="screenshot-desc">
-                                    <h3>Precise Rebalancing</h3>
-                                    <p>Track the deviation between Target and Actual weights in real-time. Sophisticated weight management is performed at both the Asset Class (MP) and individual ticker (Sub-MP) levels.</p>
-                                </div>
-                            </div>
-                            <div className="col-lg-7 order-1 order-lg-2">
-                                <div className="screenshot-wrapper">
-                                    <img src="/assets/dashboard-rebalancing.jpg" alt="Rebalancing Status" className="dashboard-img" />
+                                <div className="col-lg-6 order-lg-1">
+                                    <div className="screenshot-text">
+                                        <h3><i className="bi bi-sliders me-2"></i> Precision Rebalancing</h3>
+                                        <p>
+                                            Dynamically compares AI-derived Target weights with Actual weights,
+                                            adjusting positions within a precise tolerance range.
+                                            Automatically maintains balance across Equity, Bond, Alternative, and Cash assets.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    <section className="container mb-5">
-                        <div className="row">
-                            <div className="col-lg-10 offset-lg-1">
-                                <div className="workflow-container">
-                                    <h2 className="text-center mb-5 section-title">Daily Workflow</h2>
-                                    <div className="workflow-timeline modern-timeline">
-                                        <div className="workflow-item">
-                                            <div className="time-badge">08:30</div>
-                                            <div className="workflow-content">
-                                                <h4>Market Analysis</h4>
-                                                <p>AI scans global indicators (FRED) and news to diagnose the market regime before opening.</p>
-                                            </div>
-                                        </div>
-                                        <div className="workflow-item">
-                                            <div className="time-badge warning">Verify</div>
-                                            <div className="workflow-content">
-                                                <h4>3-Day Verification</h4>
-                                                <p>Signals must persist for 3+ days to filter out temporary market noise.</p>
-                                                <span className="safety-tag"><i className="bi bi-shield-check"></i> Noise Filtering</span>
-                                            </div>
-                                        </div>
-                                        <div className="workflow-item">
-                                            <div className="time-badge success">09:40</div>
-                                            <div className="workflow-content">
-                                                <h4>Safe Execution</h4>
-                                                <p>Trades are split over 5 days to minimize impact, with real-time adaptation.</p>
-                                                <span className="safety-tag"><i className="bi bi-graph-up-arrow"></i> 5-Day Split Entry</span>
-                                            </div>
-                                        </div>
+                    <section className="container mb-5 security-section">
+                        <h2 className="text-center mb-5 section-header">Enterprise-Grade Security</h2>
+                        <div className="row g-4 text-center">
+                            <div className="col-md-4">
+                                <div className="security-item">
+                                    <div className="security-icon">
+                                        <i className="bi bi-lock-fill"></i>
                                     </div>
+                                    <h5>Data Encryption</h5>
+                                    <p>All API keys and critical credentials are stored using AES-256 encryption.</p>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="security-item">
+                                    <div className="security-icon">
+                                        <i className="bi bi-shield-lock-fill"></i>
+                                    </div>
+                                    <h5>SSL Secure Channel</h5>
+                                    <p>All client-server communications are protected via HTTPS (SSL/TLS).</p>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="security-item">
+                                    <div className="security-icon">
+                                        <i className="bi bi-key-fill"></i>
+                                    </div>
+                                    <h5>Access Control (MFA)</h5>
+                                    <p>Admin access is protected by Multi-Factor Authentication (MFA) and strict IP whitelisting.</p>
                                 </div>
                             </div>
                         </div>

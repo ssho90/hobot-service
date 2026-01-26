@@ -200,6 +200,13 @@ const Header = () => {
           </div>
           <nav className="header-tabs">
             <Link
+              to="/about"
+              className="header-tab"
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              About
+            </Link>
+            <Link
               to="/dashboard?tab=macro-dashboard"
               className={`header-tab ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
               onClick={(e) => {
@@ -213,13 +220,6 @@ const Header = () => {
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               Macro Dashboard
-            </Link>
-            <Link
-              to="/about"
-              className="header-tab"
-              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              About
             </Link>
             <div className="header-tab-container" ref={tradingMenuRef}>
               <button
@@ -460,14 +460,6 @@ const Header = () => {
 
         <nav className="mobile-sidebar-nav">
           <button
-            className={`mobile-nav-item ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
-            onClick={() => handleMobileNavClick('/dashboard?tab=macro-dashboard', 'macro-dashboard')}
-          >
-            <span className="mobile-nav-icon">📊</span>
-            <span>Macro Dashboard</span>
-          </button>
-
-          <button
             className="mobile-nav-item"
             onClick={() => {
               navigate('/about');
@@ -476,6 +468,14 @@ const Header = () => {
           >
             <span className="mobile-nav-icon">ℹ️</span>
             <span>About</span>
+          </button>
+
+          <button
+            className={`mobile-nav-item ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
+            onClick={() => handleMobileNavClick('/dashboard?tab=macro-dashboard', 'macro-dashboard')}
+          >
+            <span className="mobile-nav-icon">📊</span>
+            <span>Macro Dashboard</span>
           </button>
 
           <div className="mobile-nav-group">
