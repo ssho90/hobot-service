@@ -213,7 +213,7 @@ const Header = () => {
             </button>
             <button
               className="header-tab"
-              onClick={() => window.location.href = '/about'}
+              onClick={() => navigate('/about')}
             >
               About
             </button>
@@ -423,7 +423,10 @@ const Header = () => {
 
           <button
             className="mobile-nav-item"
-            onClick={() => window.location.href = '/about'}
+            onClick={() => {
+              navigate('/about');
+              setIsSidebarOpen(false);
+            }}
           >
             <span className="mobile-nav-icon">ℹ️</span>
             <span>About</span>

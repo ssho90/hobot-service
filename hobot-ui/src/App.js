@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import RegisterPage from './components/RegisterPage';
 import Dashboard from './components/Dashboard';
 import MainPage from './components/MainPage';
+import AboutPage from './components/AboutPage';
 import './App.css';
 
 // Protected Route 컴포넌트
@@ -42,25 +43,29 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route 
-        path="/register" 
+      <Route
+        path="/register"
         element={
-          user ? 
-            <Navigate to="/dashboard" replace /> : 
+          user ?
+            <Navigate to="/dashboard" replace /> :
             <RegisterPage />
-        } 
+        }
       />
-      <Route 
-        path="/dashboard" 
+      <Route
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/" 
-        element={<MainPage />} 
+      <Route
+        path="/"
+        element={<MainPage />}
+      />
+      <Route
+        path="/about"
+        element={<AboutPage />}
       />
     </Routes>
   );
