@@ -50,63 +50,78 @@ const AboutPage = () => {
                         </div>
                     </section>
 
-                    {/* Core Engine: Data & Logic */}
+                    {/* Core Engine: Data & Logic - Flowchart */}
                     <section className="container mb-5 engine-section">
                         <h2 className="text-center mb-5 section-header">핵심 엔진 & 로직</h2>
-                        <div className="row g-4">
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon data">
-                                        <i className="bi bi-database-fill-gear"></i>
-                                    </div>
+                        <div className="process-flow-container">
+                            {/* Step 1 */}
+                            <div className="process-step">
+                                <div className="step-number">01</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-database-fill-gear"></i>
+                                </div>
+                                <div className="step-content">
                                     <h4>데이터 수집</h4>
-                                    <ul className="engine-list">
-                                        <li>일별/월별 FRED 경제지표</li>
-                                        <li>미국/중국/유로존 뉴스</li>
-                                        <li>원자재/금리/환율/크립토</li>
-                                        <li>Fear & Greed Index</li>
-                                    </ul>
+                                    <p className="step-desc">거시경제 지표 (FRED, 뉴스) 수집</p>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon ai">
-                                        <i className="bi bi-cpu-fill"></i>
-                                    </div>
-                                    <h4>AI 분석 & 판단</h4>
-                                    <ul className="engine-list">
-                                        <li>Gemini Pro 기반 분석</li>
-                                        <li>시장 국면 판별 (성장/물가)</li>
-                                        <li>최적 MP(Model Portfolio) 선정</li>
-                                        <li>리스크 시나리오 시뮬레이션</li>
-                                    </ul>
+
+                            {/* Arrow */}
+                            <div className="process-arrow">
+                                <i className="bi bi-arrow-right-circle-fill"></i>
+                            </div>
+
+                            {/* Step 2 */}
+                            <div className="process-step">
+                                <div className="step-number">02</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-cpu-fill"></i>
+                                </div>
+                                <div className="step-content">
+                                    <h4>AI 분석</h4>
+                                    <p className="step-desc">AI가 목표 MP, Sub-MP 분석</p>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon logic">
-                                        <i className="bi bi-shield-check"></i>
-                                    </div>
+
+                            {/* Arrow */}
+                            <div className="process-arrow">
+                                <i className="bi bi-arrow-right-circle-fill"></i>
+                            </div>
+
+                            {/* Step 3 */}
+                            <div className="process-step">
+                                <div className="step-number">03</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-shield-check"></i>
+                                </div>
+                                <div className="step-content">
                                     <h4>검증 및 안전장치</h4>
-                                    <ul className="engine-list">
-                                        <li>3일 연속 신호 검증 (노이즈 제거)</li>
-                                        <li>목표 비중 괴리율(Drift) 체크</li>
-                                        <li>매매 충돌 방지 시스템</li>
-                                        <li>시장 급변 시 방어 로직</li>
+                                    <ul className="step-list">
+                                        <li>3일 연속 신호 검증</li>
+                                        <li>매매 충돌 방지 알고리즘</li>
+                                        <li>시장 급변 방어로직</li>
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon exec">
-                                        <i className="bi bi-graph-up-arrow"></i>
-                                    </div>
-                                    <h4>실행 (Execution)</h4>
-                                    <ul className="engine-list">
-                                        <li>슬리피지 최소화</li>
+
+                            {/* Arrow */}
+                            <div className="process-arrow">
+                                <i className="bi bi-arrow-right-circle-fill"></i>
+                            </div>
+
+                            {/* Step 4 */}
+                            <div className="process-step">
+                                <div className="step-number">04</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div className="step-content">
+                                    <h4>운용 및 실행</h4>
+                                    <ul className="step-list">
                                         <li>5일 분할 리밸런싱</li>
-                                        <li>실시간 체결 확인</li>
-                                        <li>자동 에러 복구 및 알림</li>
+                                        <li>슬리피지 최소화 알고리즘</li>
+                                        <li>실시간 체결 확인 알람</li>
+                                        <li>자동 에러 복구 및 알람</li>
                                     </ul>
                                 </div>
                             </div>
@@ -226,61 +241,77 @@ const AboutPage = () => {
                         </div>
                     </section>
 
+                    {/* Core Engine: Data & Logic - Flowchart */}
                     <section className="container mb-5 engine-section">
                         <h2 className="text-center mb-5 section-header">Core Engine & Logic</h2>
-                        <div className="row g-4">
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon data">
-                                        <i className="bi bi-database-fill-gear"></i>
-                                    </div>
+                        <div className="process-flow-container">
+                            {/* Step 1 */}
+                            <div className="process-step">
+                                <div className="step-number">01</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-database-fill-gear"></i>
+                                </div>
+                                <div className="step-content">
                                     <h4>Data Collection</h4>
-                                    <ul className="engine-list">
-                                        <li>Daily/Monthly FRED Data</li>
-                                        <li>Global News (US/CN/EU)</li>
-                                        <li>Commodities/Rates/Crypto</li>
-                                        <li>Fear & Greed Index</li>
-                                    </ul>
+                                    <p className="step-desc">Macro Indicators (FRED, News)</p>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon ai">
-                                        <i className="bi bi-cpu-fill"></i>
-                                    </div>
+
+                            {/* Arrow */}
+                            <div className="process-arrow">
+                                <i className="bi bi-arrow-right-circle-fill"></i>
+                            </div>
+
+                            {/* Step 2 */}
+                            <div className="process-step">
+                                <div className="step-number">02</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-cpu-fill"></i>
+                                </div>
+                                <div className="step-content">
                                     <h4>AI Analysis</h4>
-                                    <ul className="engine-list">
-                                        <li>Gemini Pro Analysis</li>
-                                        <li>Regime Detection (Growth/CPI)</li>
-                                        <li>Optimal MP Selection</li>
-                                        <li>Risk Scenario Simulation</li>
-                                    </ul>
+                                    <p className="step-desc">AI determines Target MP & Sub-MP</p>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon logic">
-                                        <i className="bi bi-shield-check"></i>
-                                    </div>
+
+                            {/* Arrow */}
+                            <div className="process-arrow">
+                                <i className="bi bi-arrow-right-circle-fill"></i>
+                            </div>
+
+                            {/* Step 3 */}
+                            <div className="process-step">
+                                <div className="step-number">03</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-shield-check"></i>
+                                </div>
+                                <div className="step-content">
                                     <h4>Verification</h4>
-                                    <ul className="engine-list">
+                                    <ul className="step-list">
                                         <li>3-Day Signal Verification</li>
-                                        <li>Drift Monitoring</li>
-                                        <li>Conflict Prevention</li>
-                                        <li>Defensive Logic</li>
+                                        <li>Conflict Prevention Algorithm</li>
+                                        <li>Market Defense Logic</li>
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-lg-6">
-                                <div className="engine-card">
-                                    <div className="engine-icon exec">
-                                        <i className="bi bi-graph-up-arrow"></i>
-                                    </div>
+
+                            {/* Arrow */}
+                            <div className="process-arrow">
+                                <i className="bi bi-arrow-right-circle-fill"></i>
+                            </div>
+
+                            {/* Step 4 */}
+                            <div className="process-step">
+                                <div className="step-number">04</div>
+                                <div className="step-icon">
+                                    <i className="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div className="step-content">
                                     <h4>Execution</h4>
-                                    <ul className="engine-list">
+                                    <ul className="step-list">
+                                        <li>5-Day Split Rebalancing</li>
                                         <li>Slippage Minimization</li>
-                                        <li>5-Day Split Entry</li>
-                                        <li>Real-time Confirmation</li>
+                                        <li>Real-time Execution Alerts</li>
                                         <li>Auto-Recovery System</li>
                                     </ul>
                                 </div>
