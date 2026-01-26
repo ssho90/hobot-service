@@ -25,7 +25,7 @@ const AboutPage = () => {
                             <span className="hero-badge">AI-Powered Asset Management</span>
                             <h1 className="hero-title display-4">데이터 기반의 똑똑한 투자</h1>
                             <p className="hero-subtitle">
-                                Hobot은 글로벌 경제 지표와 뉴스를 실시간으로 분석하여<br />
+                                Stockoverflow는 글로벌 경제 지표와 뉴스를 실시간으로 분석하여<br />
                                 가장 안전하고 확실한 리밸런싱 전략을 제안합니다.
                             </p>
                         </div>
@@ -36,11 +36,14 @@ const AboutPage = () => {
                         <div className="row justify-content-center">
                             <div className="col-lg-10">
                                 <div className="text-center mb-5">
-                                    <h2 className="section-header">Hobot이란?</h2>
+                                    <h2 className="section-header">왜 Stockoverflow인가요?</h2>
+                                    <p className="section-desc mb-4">
+                                        <strong>"수익률 극대화와 안정적 수익, 두 마리 토끼를 모두 잡습니다."</strong>
+                                    </p>
                                     <p className="section-desc">
-                                        Hobot은 단순한 자동매매 프로그램이 아닙니다.
-                                        수천 개의 거시경제 데이터와 글로벌 뉴스를 LLM(Large Language Model)으로 분석하여
-                                        시장 국면을 판단하고, 최적의 자산 배분 비율을 찾아내는 <strong>지능형 퀀트 투자 시스템</strong>입니다.
+                                        단순한 분산 투자가 아닙니다. Stockoverflow는 <strong>거시경제(Macro) 데이터</strong>를 기반으로 목표 비중을 정하므로,
+                                        시장의 상황에 맞게 <strong>능동적으로 포트폴리오를 재구성</strong>합니다.
+                                        상승장에서는 적극적인 투자로 수익을 극대화하고, 하락장에서는 안전자산 비중을 늘려 소중한 자산을 지켜냅니다.
                                     </p>
                                 </div>
                             </div>
@@ -197,7 +200,7 @@ const AboutPage = () => {
                             <span className="hero-badge">AI-Powered Asset Management</span>
                             <h1 className="hero-title display-4">Intelligent Data-Driven Investing</h1>
                             <p className="hero-subtitle">
-                                Hobot analyzes global economic indicators and news in real-time<br />
+                                Stockoverflow analyzes global economic indicators and news in real-time<br />
                                 to execute the safest and most strategic asset rebalancing.
                             </p>
                         </div>
@@ -207,11 +210,14 @@ const AboutPage = () => {
                         <div className="row justify-content-center">
                             <div className="col-lg-10">
                                 <div className="text-center mb-5">
-                                    <h2 className="section-header">What is Hobot?</h2>
+                                    <h2 className="section-header">Why Stockoverflow?</h2>
+                                    <p className="section-desc mb-4">
+                                        <strong>"Maximizing Returns & Ensuring Stability. You can have both."</strong>
+                                    </p>
                                     <p className="section-desc">
-                                        Hobot is not just a trading bot. It is an <strong>Intelligent Quant System</strong> that leverages Large Language Models (LLM)
-                                        to analyze thousands of macro data points and global news, determining the market regime and
-                                        optimizing asset allocation automatically.
+                                        It goes beyond simple diversification. By determining target weights based on <strong>Macroeconomic Data</strong>,
+                                        Stockoverflow <strong>actively reconfigures your portfolio</strong> to suit market conditions.
+                                        It aggressively captures growth in bull markets while shifting to safe assets in bear markets to protect your wealth.
                                     </p>
                                 </div>
                             </div>
@@ -357,7 +363,7 @@ const AboutPage = () => {
             <footer className="modern-footer">
                 <div className="container text-center">
                     <div className="footer-content">
-                        <p className="copyright">&copy; {new Date().getFullYear()} Hobot Macro Service. All rights reserved.</p>
+                        <p className="copyright">&copy; {new Date().getFullYear()} Stockoverflow Macro Service. All rights reserved.</p>
                         <div className="creator-info">
                             <span>Created by <strong>Seungho Shin</strong></span>
                             <span className="separator">•</span>
