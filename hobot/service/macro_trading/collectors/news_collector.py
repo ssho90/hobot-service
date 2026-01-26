@@ -584,7 +584,7 @@ class NewsCollector:
         """
         try:
             from service.llm import llm_gemini_flash
-            from langchain.schema import HumanMessage, SystemMessage
+            from langchain_core.messages import HumanMessage, SystemMessage
             import json
 
             llm = llm_gemini_flash()
