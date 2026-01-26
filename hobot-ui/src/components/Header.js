@@ -69,6 +69,9 @@ const Header = () => {
 
   // 현재 활성 탭 확인
   const getActiveTab = () => {
+    if (location.pathname === '/about') {
+      return 'about';
+    }
     if (location.pathname === '/dashboard') {
       if (dashboardActiveTab === 'trading-macro' || (dashboardActiveTab === 'trading-crypto' && isSystemAdmin())) return 'trading';
       if (dashboardActiveTab === 'admin-users' || dashboardActiveTab === 'admin-logs' || dashboardActiveTab === 'admin-llm-monitoring' || dashboardActiveTab === 'admin-portfolio-management' || dashboardActiveTab === 'admin-files') return 'admin';
@@ -201,7 +204,7 @@ const Header = () => {
           <nav className="header-tabs">
             <Link
               to="/about"
-              className="header-tab"
+              className={`header-tab ${activeTab === 'about' ? 'active' : ''}`}
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               About
@@ -460,7 +463,7 @@ const Header = () => {
 
         <nav className="mobile-sidebar-nav">
           <button
-            className="mobile-nav-item"
+            className={`mobile-nav-item ${activeTab === 'about' ? 'active' : ''}`}
             onClick={() => {
               navigate('/about');
               setIsSidebarOpen(false);

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from service.macro_trading.kis.kis_api import KISAPI
 from service.macro_trading.kis.user_credentials import get_user_kis_credentials
 from service.macro_trading.kis.kis import get_balance_info_api
+from service.macro_trading.utils.price_utils import adjust_to_tick_size
 
 logger = logging.getLogger("rebalancing")
 
@@ -105,6 +106,9 @@ class OrderExecutor:
             target_qty = max(0, current_qty - qty)
             target_holdings[ticker] = target_qty
             
+            # Adjust price to tick size
+            limit_price = adjust_to_tick_size(limit_price)
+            
             logger.info(f"Placing SELL Limit Order: {ticker}, Qty: {qty}, Price: {limit_price}")
             resp = self.api.sell_limit_order(ticker, qty, limit_price)
             
@@ -178,6 +182,9 @@ class OrderExecutor:
             ticker = order['ticker']
             qty = order['quantity']
             limit_price = order.get('limit_price', 0)
+            
+            # Adjust price to tick size
+            limit_price = adjust_to_tick_size(limit_price)
             
             logger.info(f"Placing BUY Limit Order: {ticker}, Qty: {qty}, Price: {limit_price}")
             resp = self.api.buy_limit_order(ticker, qty, limit_price)
