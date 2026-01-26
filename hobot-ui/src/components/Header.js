@@ -211,6 +211,12 @@ const Header = () => {
             >
               Macro Dashboard
             </button>
+            <button
+              className="header-tab"
+              onClick={() => window.location.href = '/about'}
+            >
+              About
+            </button>
             <div className="header-tab-container" ref={tradingMenuRef}>
               <button
                 className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
@@ -413,6 +419,14 @@ const Header = () => {
           >
             <span className="mobile-nav-icon">📊</span>
             <span>Macro Dashboard</span>
+          </button>
+
+          <button
+            className="mobile-nav-item"
+            onClick={() => window.location.href = '/about'}
+          >
+            <span className="mobile-nav-icon">ℹ️</span>
+            <span>About</span>
           </button>
 
           <div className="mobile-nav-group">
