@@ -161,6 +161,46 @@
     line-height: 1.6;
 }
 
+/* Screenshot Section */
+.screenshot-section {
+    padding: 40px 0;
+}
+
+.screenshot-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    border: 1px solid #edf2f7;
+    transition: transform 0.3s ease;
+}
+
+.screenshot-wrapper:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.screenshot-desc {
+    padding: 20px;
+}
+
+.screenshot-desc h3 {
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 16px;
+    font-size: 1.8rem;
+}
+
+.screenshot-desc p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #4a5568;
+}
+
 /* Workflow Section */
 .workflow-container {
     background: white;
@@ -330,6 +370,23 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .order-lg-1 {
+        order: 1;
+    }
+
+    .order-lg-2 {
+        order: 2;
+    }
+
+    .reverse-column-mobile .col-lg-5 {
+        order: 2;
+        margin-top: 20px;
+    }
+
+    .reverse-column-mobile .col-lg-7 {
+        order: 1;
+    }
+
     .hero-title {
         font-size: 2.5rem;
     }

@@ -63,6 +63,40 @@ const AboutPage = () => {
                         </div>
                     </section>
 
+                    <section className="container mb-5 screenshot-section">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <h2 className="text-center mb-5 section-title">실제 운용 화면</h2>
+                            </div>
+                        </div>
+                        <div className="row g-5 align-items-center mb-5">
+                            <div className="col-lg-7">
+                                <div className="screenshot-wrapper">
+                                    <img src="/assets/dashboard-account.jpg" alt="자산 현황 대시보드" className="dashboard-img" />
+                                </div>
+                            </div>
+                            <div className="col-lg-5">
+                                <div className="screenshot-desc">
+                                    <h3>자산 현황 모니터링</h3>
+                                    <p>실시간 평가 금액과 수익률, 보유 자산의 상세 현황을 한눈에 파악할 수 있습니다. 일별 자산 추이 그래프를 통해 성과를 직관적으로 확인합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row g-5 align-items-center">
+                            <div className="col-lg-5 order-2 order-lg-1">
+                                <div className="screenshot-desc">
+                                    <h3>정밀한 리밸런싱</h3>
+                                    <p>목표 비중(Target)과 실제 비중(Actual)의 괴리를 실시간으로 추적합니다. 자산군(MP) 및 개별 종목(Sub-MP) 단위로 정교한 비중 관리가 이루어집니다.</p>
+                                </div>
+                            </div>
+                            <div className="col-lg-7 order-1 order-lg-2">
+                                <div className="screenshot-wrapper">
+                                    <img src="/assets/dashboard-rebalancing.jpg" alt="리밸런싱 현황" className="dashboard-img" />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     <section className="container mb-5">
                         <div className="row">
                             <div className="col-lg-10 offset-lg-1">
@@ -144,6 +178,40 @@ const AboutPage = () => {
                                     </div>
                                     <h5>Risk Management</h5>
                                     <p>Drift detection and auto-defense logic keep your assets safe in volatile markets.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="container mb-5 screenshot-section">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <h2 className="text-center mb-5 section-title">Live Dashboard</h2>
+                            </div>
+                        </div>
+                        <div className="row g-5 align-items-center mb-5">
+                            <div className="col-lg-7">
+                                <div className="screenshot-wrapper">
+                                    <img src="/assets/dashboard-account.jpg" alt="Account Dashboard" className="dashboard-img" />
+                                </div>
+                            </div>
+                            <div className="col-lg-5">
+                                <div className="screenshot-desc">
+                                    <h3>Asset Monitoring</h3>
+                                    <p>View real-time valuation, returns, and detailed asset status at a glance. Daily asset trend graphs provide intuitive performance tracking.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row g-5 align-items-center">
+                            <div className="col-lg-5 order-2 order-lg-1">
+                                <div className="screenshot-desc">
+                                    <h3>Precise Rebalancing</h3>
+                                    <p>Track the deviation between Target and Actual weights in real-time. Sophisticated weight management is performed at both the Asset Class (MP) and individual ticker (Sub-MP) levels.</p>
+                                </div>
+                            </div>
+                            <div className="col-lg-7 order-1 order-lg-2">
+                                <div className="screenshot-wrapper">
+                                    <img src="/assets/dashboard-rebalancing.jpg" alt="Rebalancing Status" className="dashboard-img" />
                                 </div>
                             </div>
                         </div>
