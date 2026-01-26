@@ -143,6 +143,12 @@ async def daily_news(query: str = Query(default="오늘의 뉴스 중 중요한 
     res = post_message(news)
     return res
 
+@app.get("/about", response_class=HTMLResponse)
+async def about_page():
+    """About 페이지 (서비스 소개)"""
+    with open(os.path.join(current_dir, "about.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
 @api_router.get("/news")
 async def get_daily_news():
     """뉴스 파일에서 뉴스를 읽어옵니다. (브라우저용) - 자동 업데이트 없음"""
