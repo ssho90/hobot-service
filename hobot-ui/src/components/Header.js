@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './LoginModal';
 import './Header.css';
@@ -199,24 +199,28 @@ const Header = () => {
             <img src="/banner.png" alt="Stockoverflow" className="logo-image" />
           </div>
           <nav className="header-tabs">
-            <button
+            <Link
+              to="/dashboard?tab=macro-dashboard"
               className={`header-tab ${activeTab === 'macro-dashboard' ? 'active' : ''}`}
-              onClick={() => {
-                navigate('/dashboard?tab=macro-dashboard');
+              onClick={(e) => {
+                // e.preventDefault(); // Link navigation handles the URL update
+                // navigate('/dashboard?tab=macro-dashboard'); // Not needed if Link is used
                 setTimeout(() => {
                   const event = new CustomEvent('switchToTab', { detail: { tab: 'macro-dashboard' } });
                   window.dispatchEvent(event);
                 }, 100);
               }}
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               Macro Dashboard
-            </button>
-            <button
+            </Link>
+            <Link
+              to="/about"
               className="header-tab"
-              onClick={() => navigate('/about')}
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               About
-            </button>
+            </Link>
             <div className="header-tab-container" ref={tradingMenuRef}>
               <button
                 className={`header-tab ${activeTab === 'trading' ? 'active' : ''}`}
@@ -227,33 +231,35 @@ const Header = () => {
               </button>
               {showTradingSubmenu && (
                 <div className="admin-submenu">
-                  <button
+                  <Link
+                    to="/dashboard?tab=trading-macro"
                     className={`admin-submenu-item ${dashboardActiveTab === 'trading-macro' ? 'active' : ''}`}
                     onClick={() => {
-                      navigate('/dashboard?tab=trading-macro');
                       setShowTradingSubmenu(false);
                       setTimeout(() => {
                         const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-macro' } });
                         window.dispatchEvent(event);
                       }, 100);
                     }}
+                    style={{ textDecoration: 'none', display: 'block' }}
                   >
                     Macro Quant
-                  </button>
+                  </Link>
                   {isSystemAdmin() && (
-                    <button
+                    <Link
+                      to="/dashboard?tab=trading-crypto"
                       className={`admin-submenu-item ${dashboardActiveTab === 'trading-crypto' ? 'active' : ''}`}
                       onClick={() => {
-                        navigate('/dashboard?tab=trading-crypto');
                         setShowTradingSubmenu(false);
                         setTimeout(() => {
                           const event = new CustomEvent('switchToTab', { detail: { tab: 'trading-crypto' } });
                           window.dispatchEvent(event);
                         }, 100);
                       }}
+                      style={{ textDecoration: 'none', display: 'block' }}
                     >
                       Crypto
-                    </button>
+                    </Link>
                   )}
                 </div>
               )}
@@ -270,36 +276,76 @@ const Header = () => {
                   </button>
                   {showAdminSubmenu && (
                     <div className="admin-submenu">
-                      <button
+                      <Link
+                        to="/dashboard?tab=admin-users"
                         className={`admin-submenu-item ${dashboardActiveTab === 'admin-users' ? 'active' : ''}`}
-                        onClick={() => handleAdminSubmenuClick('admin-users')}
+                        onClick={() => {
+                          setShowAdminSubmenu(false);
+                          setTimeout(() => {
+                            const event = new CustomEvent('switchToAdmin', { detail: { tab: 'admin-users' } });
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }}
+                        style={{ textDecoration: 'none', display: 'block' }}
                       >
                         사용자 관리
-                      </button>
-                      <button
+                      </Link>
+                      <Link
+                        to="/dashboard?tab=admin-logs"
                         className={`admin-submenu-item ${dashboardActiveTab === 'admin-logs' ? 'active' : ''}`}
-                        onClick={() => handleAdminSubmenuClick('admin-logs')}
+                        onClick={() => {
+                          setShowAdminSubmenu(false);
+                          setTimeout(() => {
+                            const event = new CustomEvent('switchToAdmin', { detail: { tab: 'admin-logs' } });
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }}
+                        style={{ textDecoration: 'none', display: 'block' }}
                       >
                         로그 관리
-                      </button>
-                      <button
+                      </Link>
+                      <Link
+                        to="/dashboard?tab=admin-llm-monitoring"
                         className={`admin-submenu-item ${dashboardActiveTab === 'admin-llm-monitoring' ? 'active' : ''}`}
-                        onClick={() => handleAdminSubmenuClick('admin-llm-monitoring')}
+                        onClick={() => {
+                          setShowAdminSubmenu(false);
+                          setTimeout(() => {
+                            const event = new CustomEvent('switchToAdmin', { detail: { tab: 'admin-llm-monitoring' } });
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }}
+                        style={{ textDecoration: 'none', display: 'block' }}
                       >
                         LLM 모니터링
-                      </button>
-                      <button
+                      </Link>
+                      <Link
+                        to="/dashboard?tab=admin-portfolio-management"
                         className={`admin-submenu-item ${dashboardActiveTab === 'admin-portfolio-management' ? 'active' : ''}`}
-                        onClick={() => handleAdminSubmenuClick('admin-portfolio-management')}
+                        onClick={() => {
+                          setShowAdminSubmenu(false);
+                          setTimeout(() => {
+                            const event = new CustomEvent('switchToAdmin', { detail: { tab: 'admin-portfolio-management' } });
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }}
+                        style={{ textDecoration: 'none', display: 'block' }}
                       >
                         리밸런싱 관리
-                      </button>
-                      <button
+                      </Link>
+                      <Link
+                        to="/dashboard?tab=admin-files"
                         className={`admin-submenu-item ${dashboardActiveTab === 'admin-files' ? 'active' : ''}`}
-                        onClick={() => handleAdminSubmenuClick('admin-files')}
+                        onClick={() => {
+                          setShowAdminSubmenu(false);
+                          setTimeout(() => {
+                            const event = new CustomEvent('switchToAdmin', { detail: { tab: 'admin-files' } });
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }}
+                        style={{ textDecoration: 'none', display: 'block' }}
                       >
                         파일 업로드
-                      </button>
+                      </Link>
                     </div>
                   )}
                 </div>
