@@ -27,9 +27,13 @@ else
 fi
 
 # 가상환경 활성화 (있는 경우)
-if [ -d "venv" ]; then
+# 가상환경 활성화 (있는 경우)
+if [ -d "../.venv" ]; then
+    source ../.venv/bin/activate
+    echo "Virtual environment activated from ../.venv"
+elif [ -d "venv" ]; then
     source venv/bin/activate
-    echo "Virtual environment activated"
+    echo "Virtual environment activated from venv"
 fi
 
 # 의존성 설치
