@@ -17,6 +17,8 @@ from service.news.daily_news_agent import compiled
 from service.news import news_manager
 from service import auth
 from service import file_service
+from service.core.time_provider import TimeProvider
+from service import llm as llm_service
 # 서비스 시작 시 데이터베이스 초기화 (지연 초기화)
 # 실제 사용 시점에 자동으로 초기화됨
 from typing import Optional
@@ -148,6 +150,15 @@ async def about_page():
     """About 페이지 (서비스 소개)"""
     with open(os.path.join(current_dir, "about.html"), "r", encoding="utf-8") as f:
         return f.read()
+
+@app.get("/admin/test", response_class=HTMLResponse)
+async def admin_test_dashboard():
+    """테스트 관리자 대시보드 (페이지 로드 자체는 인증 불필요, API 호출 시 인증)"""
+    try:
+        with open(os.path.join(current_dir, "admin_dashboard.html"), "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Dashboard file not found."
 
 @api_router.get("/news")
 async def get_daily_news():
@@ -3283,6 +3294,118 @@ async def download_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# --- Test Environment API (Phase 1) ---
+
+class TimeTravelRequest(BaseModel):
+    date: str  # YYYY-MM-DD
+    time: str = "08:00" # HH:MM
+
+class TestPromptRequest(BaseModel):
+    prompt: str
+    model: str = "gemini-3-pro-preview" # Default model
+
+@api_router.get("/test/status")
+async def get_test_status(current_user: dict = Depends(require_admin)):
+    """테스트 환경 상태 조회 (가상 시간, 리밸런싱 진행 상태)"""
+    try:
+        current_time = TimeProvider.get_current_time()
+        
+        # 최근 리밸런싱 상태 조회
+        from service.database.db import get_db_connection
+        rebalancing_logs = []
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM rebalancing_state 
+                ORDER BY created_at DESC LIMIT 5
+            """)
+            rows = cursor.fetchall()
+            for row in rows:
+                if row.get('details'):
+                    if isinstance(row['details'], str):
+                        try:
+                            row['details'] = json.loads(row['details'])
+                        except:
+                            pass
+                else:
+                    row['details'] = {}
+                    
+                row['created_at'] = row['created_at'].isoformat() if row['created_at'] else None
+                row['updated_at'] = row['updated_at'].isoformat() if row['updated_at'] else None
+                row['target_date'] = row['target_date'].isoformat() if row['target_date'] else None
+                rebalancing_logs.append(row)
+
+        return {
+            "virtual_time": current_time.isoformat(),
+            "is_virtual": abs((current_time - datetime.now()).total_seconds()) > 5,
+            "rebalancing_logs": rebalancing_logs
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/test/time-travel")
+async def set_virtual_time(
+    req: TimeTravelRequest,
+    current_user: dict = Depends(require_admin)
+):
+    """가상 시간 설정 (Time Travel)"""
+    try:
+        target_dt = datetime.strptime(f"{req.date} {req.time}", "%Y-%m-%d %H:%M")
+        TimeProvider.set_virtual_time(target_dt)
+        return {"status": "success", "current_time": target_dt.isoformat()}
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format code. Use YYYY-MM-DD and HH:MM")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/test/time-travel/next-day")
+async def next_day_time_travel(
+    current_user: dict = Depends(require_admin)
+):
+    """다음 날 08:00로 시간 이동 (+1 Day)"""
+    try:
+        target_dt = TimeProvider.add_days(1, default_time="08:00")
+        return {"status": "success", "current_time": target_dt.isoformat(), "message": "Moved to next day 08:00"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/test/time-travel/reset")
+async def reset_virtual_time(
+    current_user: dict = Depends(require_admin)
+):
+    """실제 시간으로 복귀 (Reset)"""
+    try:
+        TimeProvider.reset_to_real_time()
+        return {"status": "success", "message": "Reset to real time", "current_time": datetime.now().isoformat()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/test/macro-prompt")
+async def test_macro_prompt(
+    req: TestPromptRequest,
+    current_user: dict = Depends(require_admin)
+):
+    """LLM 프롬프트 테스트 (Macro Prompt Lab)"""
+    try:
+        # 모델 선택
+        llm = None
+        if "gpt-4" in req.model:
+            llm = llm_service.llm_gpt4o()
+        else:
+            llm = llm_service.llm_gemini_pro(model=req.model)
+            
+        # 실행
+        response = llm.invoke(req.prompt)
+        
+        return {
+            "status": "success",
+            "model": req.model,
+            "response": response.content
+        }
+    except Exception as e:
+        logging.error(f"Macro Prompt Test Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 # API 라우터를 앱에 포함
 app.include_router(api_router)

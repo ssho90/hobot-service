@@ -453,6 +453,30 @@ def init_database():
         #         INDEX idx_display_order (display_order)
         #     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sub-MP별 ETF 상세 정보'
         # """)
+
+        # 가상 시간 (Time Travel) 상태 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS system_state (
+                `key` VARCHAR(50) PRIMARY KEY,
+                `value` JSON,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='시스템 가상 시간 및 설정'
+        """)
+
+        # 리밸런싱 진행 상태 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_state (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                target_date DATE NOT NULL COMMENT '대상 리밸런싱 날짜',
+                status VARCHAR(50) NOT NULL DEFAULT 'PENDING' COMMENT '진행 상태 (PENDING, IN_PROGRESS, COMPLETED, FAILED)',
+                current_phase VARCHAR(50) COMMENT '현재 단계 (ANALYSIS, SIGNAL, EXECUTION)',
+                details JSON COMMENT '실행 상세 로그',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_target_date (target_date),
+                INDEX idx_status (status)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 진행 상태'
+        """)
         
         conn.commit()
         

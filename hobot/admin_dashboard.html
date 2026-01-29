@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <title>Hobot Rebalancing Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.2/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .virtual-time-active {
+            color: #dc3545;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-gear-wide-connected"></i> Hobot Test Admin (Phase 1)</h2>
+            <div>
+                <span id="current-real-time" class="text-muted small me-3"></span>
+                <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Row 1: Time Travel & Status -->
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <i class="bi bi-clock-history"></i> System Time (Time Travel)
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 id="virtual-time-display" class="mb-3">Loading...</h3>
+                        <div id="is-virtual-badge" class="badge bg-secondary mb-3">Real Time</div>
+
+                        <div class="input-group mb-3">
+                            <input type="date" id="tt-date" class="form-control">
+                            <input type="time" id="tt-time" class="form-control" value="09:40">
+                            <button class="btn btn-primary" onclick="setTimeTravel()">Set</button>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-warning w-45" onclick="nextDay()">
+                                <i class="bi bi-fast-forward-fill"></i> +1 Day (08:00)
+                            </button>
+                            <button class="btn btn-outline-danger w-45" onclick="resetTime()">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-list-check"></i> Recent Rebalancing Logs
+                        <button class="btn btn-sm btn-light float-end py-0" onclick="fetchStatus()"><i
+                                class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0 small">
+                            <thead>
+                                <tr>
+                                    <th>Target Date</th>
+                                    <th>Phase</th>
+                                    <th>Status</th>
+                                    <th>Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-tbody">
+                                <tr>
+                                    <td colspan="4" class="text-center">No logs found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Macro Prompt Lab -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-robot"></i> Macro Prompt Editor (Lab)
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">System Prompt / Input Context</label>
+                                <textarea id="prompt-input" class="form-control mb-3" rows="10"
+                                    placeholder="Enter your macro analysis prompt here..."></textarea>
+
+                                <div class="d-flex align-items-center mb-3">
+                                    <select id="model-select" class="form-select w-auto me-2">
+                                        <option value="gemini-3-pro-preview">Gemini 1.5 Pro</option>
+                                        <option value="gemini-3-flash-preview">Gemini 1.5 Flash</option>
+                                        <option value="gpt-4o">GPT-4o</option>
+                                    </select>
+                                    <button class="btn btn-success" onclick="runPromptTest()" id="run-btn">
+                                        <i class="bi bi-play-fill"></i> Run Analysis
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">LLM Response</label>
+                                <div id="prompt-result" class="border p-3 bg-light"
+                                    style="height: 300px; overflow-y: auto;">
+                                    <span class="text-muted">Result will appear here...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        // Auth Check
+        function getAuthHeaders() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                // If not in localStorage, try looking for a cookie or just fail gracefully 
+                // assuming user might be logged in via session (if applicable)
+                // But Hobot uses Bearer.
+                alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+                // window.location.href = '/'; // Redirect to home/login
+                return {};
+            }
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch(`${API_BASE}/test/status`, {
+                    headers: getAuthHeaders()
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+
+                // Virtual Time
+                const vTime = new Date(data.virtual_time);
+                document.getElementById('virtual-time-display').innerText = vTime.toLocaleString('ko-KR');
+
+                const badge = document.getElementById('is-virtual-badge');
+                if (data.is_virtual) {
+                    badge.className = 'badge bg-danger mb-3 virtual-time-active';
+                    badge.innerText = 'Virtual Time Active';
+                } else {
+                    badge.className = 'badge bg-success mb-3';
+                    badge.innerText = 'Real Time';
+                }
+
+                // Default date picker to virtual date
+                const yyyy = vTime.getFullYear();
+                const mm = String(vTime.getMonth() + 1).padStart(2, '0');
+                const dd = String(vTime.getDate()).padStart(2, '0');
+                document.getElementById('tt-date').value = `${yyyy}-${mm}-${dd}`;
+
+                // Logs
+                const tbody = document.getElementById('logs-tbody');
+                tbody.innerHTML = '';
+                if (data.rebalancing_logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">No logs found</td></tr>';
+                } else {
+                    data.rebalancing_logs.forEach(log => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${log.target_date}</td>
+                            <td>${log.current_phase || '-'}</td>
+                            <td><span class="badge bg-${getStatusColor(log.status)}">${log.status}</span></td>
+                            <td>${new Date(log.updated_at).toLocaleString()}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+                // alert('Status loading failed: ' + e.message);
+            }
+        }
+
+        function getStatusColor(status) {
+            if (status === 'COMPLETED') return 'success';
+            if (status === 'FAILED') return 'danger';
+            if (status === 'IN_PROGRESS') return 'primary';
+            return 'secondary';
+        }
+
+        async function setTimeTravel() {
+            const date = document.getElementById('tt-date').value;
+            const time = document.getElementById('tt-time').value;
+            if (!date || !time) return alert('Date and Time required');
+
+            try {
+                const res = await fetch(`${API_BASE}/test/time-travel`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ date, time })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                fetchStatus();
+                alert('Time Travel Set!');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        async function nextDay() {
+            try {
+                const res = await fetch(`${API_BASE}/test/time-travel/next-day`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                if (!res.ok) throw new Error(await res.text());
+                fetchStatus();
+                alert('Moved to Next Day 08:00');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        async function resetTime() {
+            if (!confirm('Reset to real time?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/test/time-travel/reset`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                if (!res.ok) throw new Error(await res.text());
+                fetchStatus();
+                alert('Reset Complete');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        async function runPromptTest() {
+            const prompt = document.getElementById('prompt-input').value;
+            const model = document.getElementById('model-select').value;
+            if (!prompt) return alert('Enter a prompt');
+
+            const btn = document.getElementById('run-btn');
+            const resultDiv = document.getElementById('prompt-result');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Running...';
+            resultDiv.innerText = 'Processing...';
+
+            try {
+                const res = await fetch(`${API_BASE}/test/macro-prompt`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ prompt, model })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+
+                resultDiv.innerHTML = `<pre>${data.response}</pre>`;
+            } catch (e) {
+                resultDiv.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-play-fill"></i> Run Analysis';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.reload();
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStatus();
+            // Poll for time updates
+            setInterval(fetchStatus, 30000);
+        });
+    </script>
+</body>
+
+</html>

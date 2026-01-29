@@ -617,7 +617,22 @@ class NewsCollector:
             ]
             
             response = llm.invoke(messages)
-            content = response.content.strip()
+            
+            # Handle case where content is a list (e.g. multimodal)
+            if isinstance(response.content, list):
+                text_parts = []
+                for part in response.content:
+                    if isinstance(part, str):
+                        text_parts.append(part)
+                    elif isinstance(part, dict) and 'text' in part:
+                        text_parts.append(part['text'])
+                    else:
+                        text_parts.append(str(part))
+                content = "".join(text_parts)
+            else:
+                content = str(response.content)
+                
+            content = content.strip()
             
             # JSON 파싱 (마크다운 코드블럭 제거 처리)
             if content.startswith("```json"):
