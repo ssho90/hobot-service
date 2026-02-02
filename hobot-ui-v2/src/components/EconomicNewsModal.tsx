@@ -24,7 +24,7 @@ export const EconomicNewsModal: React.FC<EconomicNewsModalProps> = ({ isOpen, on
     const fetchNews = async (pageNum: number) => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:8991/api/macro-trading/economic-news?page=${pageNum}&limit=10`);
+            const response = await fetch(`/api/macro-trading/economic-news?page=${pageNum}&limit=10`);
             const data = await response.json();
             if (data.status === 'success' && data.data && data.pagination) {
                 setNews(data.data);

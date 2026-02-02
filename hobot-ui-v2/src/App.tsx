@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
     setIsUpdating(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8991/api/macro-trading/run-ai-analysis', {
+      const response = await fetch('/api/macro-trading/run-ai-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       try {
-        const response = await fetch('http://localhost:8991/api/auth/me', {
+        const response = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
 
     const fetchBriefing = async () => {
       try {
-        const response = await fetch('http://localhost:8991/api/macro-trading/briefing');
+        const response = await fetch('/api/macro-trading/briefing');
         const data = await response.json();
         if (data.status === 'success' && data.briefing) {
           setMarketBriefing(data);

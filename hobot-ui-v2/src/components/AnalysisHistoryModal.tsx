@@ -31,7 +31,7 @@ export const AnalysisHistoryModal: React.FC<AnalysisHistoryModalProps> = ({ isOp
     const fetchHistory = async (pageNum: number) => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:8991/api/macro-trading/strategy-decisions-history?page=${pageNum}&limit=5`);
+            const response = await fetch(`/api/macro-trading/strategy-decisions-history?page=${pageNum}&limit=5`);
             const data = await response.json();
             if (data.status === 'success') {
                 if (Array.isArray(data.data)) {
