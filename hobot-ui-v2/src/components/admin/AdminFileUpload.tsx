@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Upload, File, Download, Trash2, Image as ImageIcon, X, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, File as FileIcon, Download, Trash2, Image as ImageIcon, X, Loader2, AlertCircle } from 'lucide-react';
 
 interface UploadedFile {
     id: number;
@@ -268,7 +268,7 @@ export const AdminFileUpload: React.FC = () => {
                 {/* Right: File List */}
                 <div className="bg-white rounded-xl border border-zinc-200 p-6 flex flex-col h-[calc(100vh-12rem)] min-h-[500px] shadow-sm">
                     <h3 className="text-lg font-bold mb-4 flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-zinc-900"><File className="w-5 h-5 text-emerald-600" /> 파일 목록</span>
+                        <span className="flex items-center gap-2 text-zinc-900"><FileIcon className="w-5 h-5 text-emerald-600" /> 파일 목록</span>
                         <span className="text-xs font-normal text-zinc-500">Total: {files.length}</span>
                     </h3>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { X, FileText } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface BriefingSummaryModalProps {
     isOpen: boolean;
