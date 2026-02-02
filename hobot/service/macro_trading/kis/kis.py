@@ -408,10 +408,15 @@ def get_balance_info_api(user_id: Optional[str] = None):
         # 자산군별 정보 계산
         asset_class_info = calculate_asset_class_pnl(holdings, cash_balance)
         
+        # 순수 입금 금액 추정 (총 평가금액 - 총 평가손익)
+        # 단, 실현손익이 포함된 재투자 금액은 '입금'으로 간주될 수 있음 (거래내역 없이 정확한 원금 추적 불가)
+        net_invested_amount = total_eval_amt - total_profit_loss
+
         return {
             "status": "success",
             "account_no": account_no,
             "total_eval_amount": total_eval_amt,
+            "net_invested_amount": net_invested_amount,
             "cash_balance": cash_balance,
             "total_profit_loss": total_profit_loss,
             "total_return_rate": round(total_return_rate, 2),

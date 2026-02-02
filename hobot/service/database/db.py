@@ -330,6 +330,17 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='LLM 사용 로그'
         """)
         
+        # 시장 뉴스 요약 테이블 (원본 분석 및 브리핑용 요약)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS market_news_summaries (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                summary_text TEXT NOT NULL COMMENT 'LLM이 생성한 원본 뉴스 분석 결과',
+                briefing_text TEXT COMMENT 'Market Briefing용 2차 요약 (App Main 화면용)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                INDEX idx_created_at (created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='시장 뉴스 요약 및 브리핑'
+        """)
+
         # AI 전략 결정 이력 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS ai_strategy_decisions (
@@ -339,7 +350,6 @@ def init_database():
                 target_allocation JSON NOT NULL COMMENT '목표 자산 배분 (Stocks, Bonds, Alternatives, Cash)',
                 recommended_stocks JSON COMMENT '자산군별 추천 종목',
                 quant_signals JSON COMMENT '정량 시그널 데이터 (장단기 금리차, 실질 금리, 테일러 준칙 등)',
-                qual_sentiment JSON COMMENT '정성 분석 데이터 (연준 발표문 요약, 경제 이벤트 등)',
                 account_pnl JSON COMMENT '계좌 손익 데이터 (자산군별 손익률)',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',

@@ -44,7 +44,7 @@ def _load_model_portfolios_from_db() -> Dict[str, Dict]:
                 SELECT id, mp_id, name, description, strategy, 
                        stocks_allocation, bonds_allocation, 
                        alternatives_allocation, cash_allocation,
-                       display_order, is_active
+                       display_order, is_active, updated_at
                 FROM model_portfolios
                 WHERE is_active = TRUE
                 ORDER BY display_order, id
@@ -67,6 +67,7 @@ def _load_model_portfolios_from_db() -> Dict[str, Dict]:
                     'name': row['name'],
                     'description': row['description'],
                     'strategy': row['strategy'],
+                    'updated_at': row['updated_at'].strftime('%Y-%m-%d %H:%M:%S') if row.get('updated_at') else None,
                     'allocation': {
                         'Stocks': float(stocks_allocation) if stocks_allocation is not None else 0.0,
                         'Bonds': float(bonds_allocation) if bonds_allocation is not None else 0.0,
@@ -105,7 +106,7 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
             cursor = conn.cursor()
             # sub_portfolio_models 테이블 사용
             cursor.execute("""
-                SELECT id, sub_model_id, name, description, asset_class, display_order, is_active
+                SELECT id, sub_model_id, name, description, asset_class, display_order, is_active, updated_at
                 FROM sub_portfolio_models
                 WHERE is_active = TRUE
                 ORDER BY asset_class, display_order, id
@@ -153,6 +154,7 @@ def _load_sub_model_portfolios_from_db() -> Dict[str, Dict]:
                     'name': row['name'],
                     'description': row['description'],
                     'asset_class': row['asset_class'],
+                    'updated_at': row['updated_at'].strftime('%Y-%m-%d %H:%M:%S') if row.get('updated_at') else None,
                     'allocation': allocation,
                     'etf_details': etf_details
                 }
@@ -277,9 +279,12 @@ def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[s
         if not etf_details:
             continue
 
+        sub_mp_info = sub_portfolios.get(sub_mp_id, {})
         sub_mp_details[asset_key] = {
             "sub_mp_id": sub_mp_id,
-            "sub_mp_name": sub_portfolios.get(sub_mp_id, {}).get("name", ""),
+            "sub_mp_name": sub_mp_info.get("name", ""),
+            "sub_mp_description": sub_mp_info.get("description", ""),
+            "updated_at": sub_mp_info.get("updated_at"),
             "etf_details": etf_details,
         }
 
@@ -543,39 +548,114 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
         return None
 
 
+
+def generate_market_briefing(summary_text: str) -> str:
+    """
+    gemini-2.5-flash를 사용하여 Market Briefing용 2차 요약 생성
+    """
+    try:
+        if not summary_text:
+            return ""
+            
+        logger.info("Market Briefing용 2차 요약 생성 중...")
+        llm = llm_gemini_flash(model="gemini-2.5-flash")
+        
+        prompt = f"""당신은 글로벌 금융 시장 뉴스 에디터입니다. 
+아래의 거시경제 분석 리포트를 바탕으로, 일반 투자자가 Dashboard에서 빠르게 읽을 수 있는 3~4문장의 'Market Briefing'을 작성해주세요.
+
+[지침]
+1. 핵심 트렌드, 주요 지표 변화, 시장 이슈 위주로 요약하세요.
+2. 톤앤매너: 전문적이지만 이해하기 쉽게, 객관적인 어조 유지 (존댓말).
+3. 분량: 한국어 200~300자 내외.
+4. 첫 문장은 전체 시장 분위기를 한마디로 요약하는 것이 좋습니다.
+
+[분석 리포트]
+{summary_text}
+
+[Market Briefing]
+"""
+
+        with track_llm_call(
+            model_name="gemini-2.5-flash",
+            provider="Google",
+            service_name="market_briefing_generation",
+            request_prompt=prompt
+        ) as tracker:
+            response = llm.invoke(prompt)
+            tracker.set_response(response)
+            
+        if hasattr(response, 'content'):
+            return str(response.content)
+        elif hasattr(response, 'text'):
+            return response.text
+        return str(response)
+        
+    except Exception as e:
+        logger.error(f"Market Briefing 생성 실패: {e}", exc_info=True)
+        return ""
+
+
 def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optional[Dict[str, Any]]:
     """
-    경제 뉴스 수집 및 LLM 요약
-    지난 N일간 특정 국가의 뉴스를 수집하고, gemini-3.0-pro로 정제하여 요약합니다.
+    경제 뉴스 수집 및 요약 (캐싱 적용)
+    
+    1. 최근 12시간 내의 market_news_summaries가 있으면 그것을 반환 (뉴스 수집 생략)
+    2. 없으면 economic_news 테이블에서 뉴스 수집 후 LLM 요약 및 Briefing 생성하여 저장
     
     Args:
         days: 수집할 기간 (일 단위, 기본값: 20일)
         include_summary: LLM 요약 포함 여부 (기본값: True)
     """
     try:
-        # 지난 N일 기준으로 cutoff_time 설정
-        cutoff_time = datetime.now() - timedelta(days=days)
-        
         # AI 분석에 사용할 국가 목록
         target_countries = ['Crypto', 'Commodity', 'Euro Area', 'China', 'United States']
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            
+            # 1. 캐시 확인 (12시간 이내)
+            if include_summary:
+                try:
+                    cursor.execute("""
+                        SELECT summary_text, briefing_text, created_at 
+                        FROM market_news_summaries 
+                        WHERE created_at >= NOW() - INTERVAL 12 HOUR
+                        ORDER BY created_at DESC 
+                        LIMIT 1
+                    """)
+                    cached_row = cursor.fetchone()
+                    
+                    if cached_row:
+                        summary_text = cached_row['summary_text']
+                        briefing_text = cached_row['briefing_text']
+                        created_at = cached_row['created_at']
+                        
+                        logger.info(f"✅ 캐시된 뉴스 요약 사용 (생성일: {created_at})")
+                        
+                        # 뉴스 목록은 캐시 사용 시 빈 리스트로 반환 (성능 최적화)
+                        return {
+                            "total_count": 0,
+                            "days": days,
+                            "target_countries": target_countries,
+                            "news": [],
+                            "news_summary": summary_text,
+                            "briefing_text": briefing_text or "",  # Briefing text 추가 반환
+                            "cached": True
+                        }
+                except Exception as e:
+                    logger.warning(f"뉴스 요약 캐시 확인 중 오류 (무시하고 진행): {e}")
+
+            # 2. 캐시 없으면 뉴스 수집 및 요약 실행
+            logger.info("캐시된 요약 없음. 뉴스 수집 및 분석 시작...")
+            
+            # 지난 N일 기준으로 cutoff_time 설정
+            cutoff_time = datetime.now() - timedelta(days=days)
+            
             cursor.execute("""
                 SELECT 
-                    id,
-                    title,
-                    title_ko,
-                    link,
-                    country,
-                    country_ko,
-                    category,
-                    category_ko,
-                    description,
-                    description_ko,
-                    published_at,
-                    collected_at,
-                    source
+                    id, title, title_ko, link, country, country_ko, 
+                    category, category_ko, description, description_ko, 
+                    published_at, collected_at, source
                 FROM economic_news
                 WHERE published_at >= %s
                   AND country IN (%s, %s, %s, %s, %s)
@@ -586,68 +666,46 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
             
             # datetime 객체를 문자열로 변환
             for item in news:
-                if item.get('published_at'):
-                    item['published_at'] = item['published_at'].strftime('%Y-%m-%d %H:%M:%S')
-                if item.get('collected_at'):
-                    item['collected_at'] = item['collected_at'].strftime('%Y-%m-%d %H:%M:%S')
+                for date_field in ['published_at', 'collected_at']:
+                    if item.get(date_field):
+                        item[date_field] = item[date_field].strftime('%Y-%m-%d %H:%M:%S')
             
-            logger.info(f"경제 뉴스 수집 완료: 지난 {days}일간 {len(news)}개의 뉴스 (국가: {', '.join(target_countries)})")
+            logger.info(f"경제 뉴스 수집 완료: 지난 {days}일간 {len(news)}개의 뉴스")
             
-            # LLM으로 뉴스 요약 (include_summary가 True인 경우에만)
+            # LLM 요약 및 Briefing 생성
             news_summary = None
+            briefing_text = ""
+            
             if include_summary and news:
-                # 캐시 확인 (2시간 이내의 요약본이 있는지 확인)
-                try:
-                    cursor.execute("""
-                        SELECT summary, created_at 
-                        FROM memory_store 
-                        WHERE topic = 'economic_news_summary' 
-                        ORDER BY created_at DESC 
-                        LIMIT 1
-                    """)
-                    cached_row = cursor.fetchone()
+                news_summary = summarize_news_with_llm(news, target_countries)
+                
+                if news_summary:
+                    # Briefing 생성
+                    briefing_text = generate_market_briefing(news_summary)
                     
-                    use_cache = False
-                    if cached_row:
-                        created_at = cached_row['created_at']
-                        # created_at이 문자열인 경우 datetime으로 변환
-                        if isinstance(created_at, str):
-                            created_at = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
-                            
-                        # 2시간 이내인지 확인
-                        if datetime.now() - created_at < timedelta(hours=2):
-                            news_summary = cached_row['summary']
-                            logger.info(f"캐시된 뉴스 요약 사용 (생성일: {created_at})")
-                            use_cache = True
-                    
-                    if not use_cache:
-                        logger.info("새로운 뉴스 요약 생성 중...")
-                        news_summary = summarize_news_with_llm(news, target_countries)
-                        
-                        # DB에 저장
-                        if news_summary:
-                            cursor.execute("""
-                                INSERT INTO memory_store (topic, summary, created_at)
-                                VALUES ('economic_news_summary', %s, %s)
-                            """, (news_summary, datetime.now()))
-                            conn.commit()
-                            logger.info("뉴스 요약 DB 저장 완료")
-                            
-                except Exception as e:
-                    logger.error(f"뉴스 요약 캐시 처리 중 오류: {e}")
-                    # 오류 발생 시 직접 요약 시도
-                    if not news_summary:
-                        news_summary = summarize_news_with_llm(news, target_countries)
+                    # DB 저장
+                    try:
+                        cursor.execute("""
+                            INSERT INTO market_news_summaries (summary_text, briefing_text, created_at)
+                            VALUES (%s, %s, %s)
+                        """, (news_summary, briefing_text, datetime.now()))
+                        conn.commit()
+                        logger.info("✅ 뉴스 요약 및 Briefing DB 저장 완료")
+                    except Exception as e:
+                        logger.error(f"뉴스 요약 DB 저장 실패: {e}")
             
             return {
                 "total_count": len(news),
                 "days": days,
                 "target_countries": target_countries,
                 "news": news,
-                "news_summary": news_summary  # LLM 요약 결과 추가
+                "news_summary": news_summary,
+                "briefing_text": briefing_text,
+                "cached": False
             }
+            
     except Exception as e:
-        logger.error(f"경제 뉴스 수집 실패: {e}", exc_info=True)
+        logger.error(f"경제 뉴스 수집 및 분석 실패: {e}", exc_info=True)
         return None
 
 
@@ -1474,8 +1532,8 @@ def collect_news_node(state: AIAnalysisState) -> AIAnalysisState:
     """경제 뉴스 수집 노드 (LLM 요약 제외)"""
     try:
         logger.info("2단계: 경제 뉴스 수집 중...")
-        # LLM 요약 없이 뉴스만 수집
-        economic_news = collect_economic_news(days=20, include_summary=False)
+        # include_summary=True로 변경하여 collect_economic_news 내부의 캐싱/요약 로직 사용
+        economic_news = collect_economic_news(days=20, include_summary=True)
         if not economic_news:
             logger.warning("경제 뉴스 수집 실패 (None 반환)")
         return {
@@ -1495,6 +1553,15 @@ def summarize_news_node(state: AIAnalysisState) -> AIAnalysisState:
     """뉴스 LLM 요약 노드"""
     try:
         economic_news = state.get("economic_news")
+        
+        # 이미 요약된 정보가 있으면 스킵 (collect_economic_news에서 수행됨)
+        if economic_news and economic_news.get("news_summary"):
+            logger.info("✅ 이미 생성된 뉴스 요약이 있어 LLM 요약 과정을 생략합니다.")
+            return {
+                **state,
+                "news_summary": economic_news.get("news_summary")
+            }
+
         if not economic_news or not economic_news.get("news"):
             logger.warning("요약할 뉴스가 없습니다.")
             return {
@@ -1709,16 +1776,14 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                     target_allocation,
                     recommended_stocks,
                     quant_signals,
-                    qual_sentiment,
                     account_pnl
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s)
             """, (
                 datetime.now(),
                 analysis_summary_with_reasoning,
                 json.dumps(save_data),  # mp_id와 target_allocation을 함께 저장
                 json.dumps(decision.recommended_stocks.model_dump()) if decision.recommended_stocks else None,
                 json.dumps(fred_signals) if fred_signals else None,
-                json.dumps(economic_news) if economic_news else None,
                 None  # account_pnl은 더 이상 사용하지 않음
             ))
             

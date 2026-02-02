@@ -196,6 +196,15 @@ def collect_recent_news():
         raise
 
 
+def run_threaded(job_func):
+    """
+    작업을 별도 스레드에서 실행하는 래퍼 함수
+    스케줄러의 블로킹을 방지합니다.
+    """
+    job_thread = threading.Thread(target=job_func)
+    job_thread.start()
+
+
 def setup_fred_scheduler():
     """
     FRED 데이터 수집 스케줄을 설정합니다.
@@ -221,7 +230,7 @@ def setup_fred_scheduler():
         for time_str in schedule_times:
             try:
                 hour, minute = time_str.split(':')
-                schedule.every().day.at(f"{hour}:{minute}").do(collect_all_fred_data).tag('fred_data_collection')
+                schedule.every().day.at(f"{hour}:{minute}").do(run_threaded, collect_all_fred_data).tag('fred_data_collection')
                 logger.info(f"FRED 데이터 수집 스케줄 등록: 매일 {time_str} KST")
                 registered_count += 1
             except Exception as e:
@@ -265,7 +274,7 @@ def setup_news_scheduler():
     """
     try:
         # 1시간마다 실행
-        schedule.every().hour.do(collect_recent_news).tag('news_collection')
+        schedule.every().hour.do(run_threaded, collect_recent_news).tag('news_collection')
         logger.info("뉴스 수집 스케줄 등록: 매 1시간마다 실행")
         
     except Exception as e:
@@ -322,11 +331,9 @@ def setup_ai_analysis_scheduler():
                 logger.info(f"기존 AI 분석 스케줄 제거: {job}")
         
         # 매일 08:30에 실행
-        schedule.every().day.at("08:30").do(run_ai_strategy_analysis).tag('ai_analysis')
+        schedule.every().day.at("08:30").do(run_threaded, run_ai_strategy_analysis).tag('ai_analysis')
         logger.info("AI 전략 분석 스케줄 등록: 매일 08:30 KST")
         
-    except Exception as e:
-        logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}", exc_info=True)
     except Exception as e:
         logger.error(f"AI 전략 분석 스케줄 설정 실패: {e}", exc_info=True)
         raise
@@ -346,7 +353,7 @@ def setup_account_snapshot_scheduler():
                 logger.debug(f"기존 계좌 스냅샷 스케줄 제거: {job}")
         
         # 매일 09:00 실행
-        schedule.every().day.at("09:00").do(save_daily_account_snapshot).tag('account_snapshot')
+        schedule.every().day.at("09:00").do(run_threaded, save_daily_account_snapshot).tag('account_snapshot')
         logger.info("계좌 스냅샷 스케줄 등록: 매일 09:00 KST")
         
     except Exception as e:

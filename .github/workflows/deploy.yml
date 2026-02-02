@@ -135,7 +135,7 @@ jobs:
             
             # 프론트엔드
             DEPLOY_PATH="${DEPLOY_PATH:-/home/ec2-user/hobot-service}"
-            if [ -d "${DEPLOY_PATH}/hobot-ui/build" ]; then
+            if [ -d "${DEPLOY_PATH}/hobot-ui-v2/dist" ]; then
               echo "✅ Frontend build: exists"
             else
               echo "❌ Frontend build: not found"

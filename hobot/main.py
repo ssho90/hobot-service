@@ -660,9 +660,9 @@ async def get_net_liquidity_data(
 @api_router.get("/macro-trading/account-snapshots")
 async def get_account_snapshots(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
-    admin_user: dict = Depends(require_admin)
+    current_user: dict = Depends(get_current_user)
 ):
-    """계좌 스냅샷 조회 API (admin 전용)"""
+    """계좌 스냅샷 조회 API (본인 데이터)"""
     try:
         from service.database.db import get_db_connection
         from datetime import datetime, timedelta
@@ -684,9 +684,10 @@ async def get_account_snapshots(
                     created_at,
                     updated_at
                 FROM account_snapshots
-                WHERE snapshot_date >= %s AND snapshot_date <= %s
-                ORDER BY snapshot_date DESC
-            """, (start_date, end_date))
+                WHERE snapshot_date >= %s AND snapshot_date <= %s AND user_id = %s
+                ORDER BY snapshot_date ASC
+            """, (start_date, end_date, current_user['id']))
+            # Chart drawing is easier with ASC order
             
             rows = cursor.fetchall()
             
@@ -724,6 +725,7 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
         from service.macro_trading.ai_strategist import (
             get_model_portfolio_allocation,
             get_sub_mp_details,
+            get_model_portfolios,
         )
 
         def normalize_alloc(alloc: dict) -> dict:
@@ -757,6 +759,9 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
                 "data": None,
                 "message": "AI 전략 결정이 아직 없습니다.",
             }
+        
+        # decision_date 저장 (현재 MP의 마지막 결정 시점)
+        current_decision_date = decision_row["decision_date"]
 
         target_allocation_raw = decision_row["target_allocation"]
         if isinstance(target_allocation_raw, str):
@@ -765,10 +770,55 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
         mp_id = None
         target_alloc = None
         sub_mp_data = None
+        mp_info = {}
+
         if isinstance(target_allocation_raw, dict):
             if "mp_id" in target_allocation_raw:
                 mp_id = target_allocation_raw["mp_id"]
-                allocation_from_mp = get_model_portfolio_allocation(mp_id)
+                
+                # MP 정보 및 할당량 조회
+                all_mps = get_model_portfolios()
+                mp_data = all_mps.get(mp_id)
+                allocation_from_mp = None
+                
+                if mp_data:
+                    allocation_from_mp = mp_data.get("allocation")
+                    
+                    # 현재 MP가 연속으로 적용된 첫 날짜(started_at) 찾기
+                    # 가장 최근부터 역순으로 탐색하여 mp_id가 달라지는 시점 직후가 started_at
+                    mp_started_at = None
+                    with get_db_connection() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            """
+                            SELECT decision_date, target_allocation
+                            FROM ai_strategy_decisions
+                            ORDER BY decision_date DESC
+                            LIMIT 100
+                            """
+                        )
+                        history_rows = cursor.fetchall()
+                    
+                    if history_rows:
+                        for row in history_rows:
+                            row_alloc = row["target_allocation"]
+                            if isinstance(row_alloc, str):
+                                row_alloc = json.loads(row_alloc)
+                            row_mp_id = row_alloc.get("mp_id") if isinstance(row_alloc, dict) else None
+                            if row_mp_id == mp_id:
+                                mp_started_at = row["decision_date"]
+                            else:
+                                # mp_id가 달라지면 중단 (이전까지가 현재 MP의 연속 적용 기간)
+                                break
+                    
+                    mp_info = {
+                        "name": mp_data.get("name"),
+                        "description": mp_data.get("description"),
+                        "updated_at": mp_data.get("updated_at"),
+                        "started_at": mp_started_at.strftime("%Y-%m-%d %H:%M:%S") if mp_started_at else None,
+                        "decision_date": current_decision_date.strftime("%Y-%m-%d %H:%M:%S") if current_decision_date else None
+                    }
+                
                 target_alloc = allocation_from_mp or target_allocation_raw.get("target_allocation", target_allocation_raw)
                 sub_mp_data = target_allocation_raw.get("sub_mp")
             else:
@@ -863,13 +913,18 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
         asset_order = ["stocks", "bonds", "alternatives", "cash"]
         sub_mp_payload = []
         for key in asset_order:
-            sub_mp_payload.append(
-                {
-                    "asset_class": key,
-                    "target": build_target_items(key),
-                    "actual": build_actual_items(key),
-                }
-            )
+            detail = (sub_mp_details or {}).get(key)
+            item = {
+                "asset_class": key,
+                "target": build_target_items(key),
+                "actual": build_actual_items(key),
+            }
+            if detail:
+                item["sub_mp_name"] = detail.get("sub_mp_name")
+                item["sub_mp_description"] = detail.get("sub_mp_description")
+                item["updated_at"] = detail.get("updated_at")
+            
+            sub_mp_payload.append(item)
 
         # ... (previous code)
 
@@ -929,6 +984,7 @@ async def get_rebalancing_status(current_user: dict = Depends(get_current_user))
                 "mp": {
                     "target_allocation": target_alloc_norm,
                     "actual_allocation": actual_alloc,
+                    **mp_info,
                 },
                 "sub_mp": sub_mp_payload,
                 "rebalancing_status": {
@@ -1078,6 +1134,91 @@ async def get_ai_overview():
 
                 sub_mp_details = get_sub_mp_details(sub_mp_data)
             
+            # MP 메타데이터 조회
+            mp_info = None
+            if mp_id:
+                from service.macro_trading.ai_strategist import get_model_portfolios
+                all_mps = get_model_portfolios()
+                mp_data = all_mps.get(mp_id)
+                if mp_data:
+                    # 현재 MP가 연속으로 적용된 첫 날짜(started_at) 찾기
+                    mp_started_at = None
+                    with get_db_connection() as conn2:
+                        cursor2 = conn2.cursor()
+                        cursor2.execute(
+                            """
+                            SELECT decision_date, target_allocation
+                            FROM ai_strategy_decisions
+                            ORDER BY decision_date DESC
+                            LIMIT 100
+                            """
+                        )
+                        history_rows = cursor2.fetchall()
+                    
+                    if history_rows:
+                        for hist_row in history_rows:
+                            row_alloc = hist_row["target_allocation"]
+                            if isinstance(row_alloc, str):
+                                row_alloc = json.loads(row_alloc)
+                            row_mp_id = row_alloc.get("mp_id") if isinstance(row_alloc, dict) else None
+                            if row_mp_id == mp_id:
+                                mp_started_at = hist_row["decision_date"]
+                            else:
+                                # mp_id가 달라지면 중단 (이전까지가 현재 MP의 연속 적용 기간)
+                                break
+                    
+                    mp_info = {
+                        "name": mp_data.get("name"),
+                        "description": mp_data.get("description"),
+                        "updated_at": mp_started_at.strftime("%Y-%m-%d %H:%M:%S") if mp_started_at else mp_data.get("updated_at"),
+                        "started_at": mp_started_at.strftime("%Y-%m-%d %H:%M:%S") if mp_started_at else None
+                    }
+            
+            # Sub-MP별 started_at 계산 (각 Sub-MP가 연속으로 적용된 첫 날짜)
+            if sub_mp_details and sub_mp_data:
+                # 이력 조회 (이미 위에서 조회한 history_rows 재사용 또는 새로 조회)
+                with get_db_connection() as conn3:
+                    cursor3 = conn3.cursor()
+                    cursor3.execute(
+                        """
+                        SELECT decision_date, target_allocation
+                        FROM ai_strategy_decisions
+                        ORDER BY decision_date DESC
+                        LIMIT 100
+                        """
+                    )
+                    sub_mp_history_rows = cursor3.fetchall()
+                
+                if sub_mp_history_rows:
+                    # 각 자산군별로 Sub-MP started_at 계산
+                    for asset_key in ["stocks", "bonds", "alternatives", "cash"]:
+                        if asset_key not in sub_mp_details:
+                            continue
+                        
+                        current_sub_mp_id = sub_mp_data.get(asset_key)
+                        if not current_sub_mp_id:
+                            continue
+                        
+                        sub_mp_started_at = None
+                        for hist_row in sub_mp_history_rows:
+                            row_alloc = hist_row["target_allocation"]
+                            if isinstance(row_alloc, str):
+                                row_alloc = json.loads(row_alloc)
+                            
+                            row_sub_mp = row_alloc.get("sub_mp", {}) if isinstance(row_alloc, dict) else {}
+                            row_sub_mp_id = row_sub_mp.get(asset_key)
+                            
+                            if row_sub_mp_id == current_sub_mp_id:
+                                sub_mp_started_at = hist_row["decision_date"]
+                            else:
+                                # Sub-MP ID가 달라지면 중단
+                                break
+                        
+                        # sub_mp_details에 started_at 추가
+                        if sub_mp_started_at:
+                            sub_mp_details[asset_key]["updated_at"] = sub_mp_started_at.strftime("%Y-%m-%d %H:%M:%S")
+                            sub_mp_details[asset_key]["started_at"] = sub_mp_started_at.strftime("%Y-%m-%d %H:%M:%S")
+            
             recommended_stocks = row.get('recommended_stocks')
             if recommended_stocks:
                 if isinstance(recommended_stocks, str):
@@ -1106,6 +1247,7 @@ async def get_ai_overview():
                     "analysis_summary": analysis_summary,
                     "reasoning": reasoning,
                     "mp_id": mp_id,
+                    "mp_info": mp_info,
                     "target_allocation": target_allocation,
                     "sub_mp": sub_mp_details,
                     "sub_mp_reasoning": sub_mp_reasoning,
@@ -1160,7 +1302,6 @@ async def get_latest_strategy_decision():
                     analysis_summary,
                     target_allocation,
                     quant_signals,
-                    qual_sentiment,
                     account_pnl,
                     created_at
                 FROM ai_strategy_decisions
@@ -1198,9 +1339,7 @@ async def get_latest_strategy_decision():
             if quant_signals and isinstance(quant_signals, str):
                 quant_signals = json.loads(quant_signals)
             
-            qual_sentiment = row.get('qual_sentiment')
-            if qual_sentiment and isinstance(qual_sentiment, str):
-                qual_sentiment = json.loads(qual_sentiment)
+
             
             account_pnl = row.get('account_pnl')
             if account_pnl and isinstance(account_pnl, str):
@@ -1215,7 +1354,7 @@ async def get_latest_strategy_decision():
                     "mp_id": mp_id,
                     "target_allocation": target_allocation,
                     "quant_signals": quant_signals,
-                    "qual_sentiment": qual_sentiment,
+
                     "account_pnl": account_pnl,
                     "created_at": row['created_at'].strftime("%Y-%m-%d %H:%M:%S") if row['created_at'] else None
                 }
@@ -1446,102 +1585,7 @@ async def get_quantitative_signals(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@api_router.get("/macro-trading/economic-news")
-async def get_economic_news(
-    hours: int = Query(default=24, ge=1, le=168, description="조회할 시간 범위 (시간, 기본값: 24시간, 최대: 168시간)")
-):
-    """최근 경제 뉴스 조회 API
-    
-    economic_news 테이블에서 최근 N시간 내의 뉴스를 조회하여 반환합니다.
-    
-    Args:
-        hours: 조회할 시간 범위 (기본값: 24시간)
-    
-    Returns:
-        {
-            "status": "success",
-            "timestamp": "2024-12-19 10:30:00",
-            "hours": 24,
-            "total_count": 10,
-            "news": [
-                {
-                    "id": 1,
-                    "title": "US Stocks Rebound, Still Post Weekly Losses",
-                    "link": "https://tradingeconomics.com/united-states/stock-market",
-                    "country": "United States",
-                    "category": "Stock Market",
-                    "description": "US stocks sharply rebounded...",
-                    "published_at": "2024-12-19 08:00:00",
-                    "collected_at": "2024-12-19 10:00:00",
-                    "source": "TradingEconomics Stream"
-                },
-                ...
-            ]
-        }
-    """
-    try:
-        from service.database.db import get_db_connection
-        from datetime import datetime, timedelta
-        
-        cutoff_time = datetime.now() - timedelta(hours=hours)
-        
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT 
-                    id,
-                    title,
-                    title_ko,
-                    link,
-                    country,
-                    country_ko,
-                    category,
-                    category_ko,
-                    description,
-                    description_ko,
-                    published_at,
-                    collected_at,
-                    source,
-                    created_at
-                FROM economic_news
-                WHERE published_at >= %s
-                ORDER BY published_at DESC
-            """, (cutoff_time,))
-            
-            rows = cursor.fetchall()
-            
-            news_list = []
-            for row in rows:
-                news_item = {
-                    "id": row.get("id"),
-                    "title": row.get("title"),
-                    "title_ko": row.get("title_ko"),
-                    "link": row.get("link"),
-                    "country": row.get("country"),
-                    "country_ko": row.get("country_ko"),
-                    "category": row.get("category"),
-                    "category_ko": row.get("category_ko"),
-                    "description": row.get("description"),
-                    "description_ko": row.get("description_ko"),
-                    "published_at": row.get("published_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("published_at") else None,
-                    "collected_at": row.get("collected_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("collected_at") else None,
-                    "source": row.get("source"),
-                    "created_at": row.get("created_at").strftime("%Y-%m-%d %H:%M:%S") if row.get("created_at") else None
-                }
-                news_list.append(news_item)
-            
-            return {
-                "status": "success",
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "hours": hours,
-                "total_count": len(news_list),
-                "news": news_list
-            }
-            
-    except Exception as e:
-        logging.error(f"Error fetching economic news: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 class TranslateRequest(BaseModel):
@@ -1549,6 +1593,114 @@ class TranslateRequest(BaseModel):
     target_lang: str = "ko"  # "ko" or "en"
     news_id: Optional[int] = None  # 뉴스 ID (DB 저장용)
     field_type: Optional[str] = None  # 필드 타입: "title", "description", "country", "category"
+
+@api_router.get("/macro-trading/briefing")
+async def get_market_briefing():
+    """최신 Market Briefing 조회 (Headlines 포함)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT briefing_text, summary_text, created_at 
+                FROM market_news_summaries 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            
+            # Headlines 조회 (최신 3개)
+            cursor.execute("""
+                SELECT title, link, published_at, source
+                FROM economic_news
+                ORDER BY published_at DESC
+                LIMIT 3
+            """)
+            headlines = []
+            for h in cursor.fetchall():
+                 headlines.append({
+                     "title": h['title'],
+                     "link": h['link'],
+                     "published_at": h['published_at'].strftime("%Y-%m-%d %H:%M:%S") if h['published_at'] else None,
+                     "source": h['source']
+                 })
+            
+            if row and row.get('briefing_text'):
+                return {
+                    "status": "success",
+                    "briefing": row['briefing_text'],
+                    "summary_text": row.get('summary_text'),
+                    "created_at": row['created_at'].strftime("%Y-%m-%d %H:%M:%S"),
+                    "headlines": headlines
+                }
+            return {
+                "status": "success",
+                "briefing": None,
+                "headlines": headlines,
+                "message": "생성된 브리핑이 없습니다."
+            }
+    except Exception as e:
+        import logging
+        logging.error(f"Market Briefing 조회 실패: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/macro-trading/economic-news")
+async def get_economic_news(page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100)):
+    """경제 뉴스 목록 조회 (페이지네이션)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        offset = (page - 1) * limit
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 총 개수 조회
+            cursor.execute("SELECT COUNT(*) as count FROM economic_news")
+            total_count = cursor.fetchone()['count']
+            
+            # 뉴스 조회
+            cursor.execute("""
+                SELECT id, title, link, description, published_at, source, title_ko, description_ko
+                FROM economic_news
+                ORDER BY published_at DESC
+                LIMIT %s OFFSET %s
+            """, (limit, offset))
+            
+            rows = cursor.fetchall()
+            news_list = []
+            for row in rows:
+                news_list.append({
+                    "id": row['id'],
+                    "title": row.get('title_ko') or row['title'],
+                    "original_title": row['title'],
+                    "link": row.get('link'),
+                    "description": row.get('description_ko') or row.get('description'),
+                    "published_at": row['published_at'].strftime("%Y-%m-%d %H:%M:%S") if row['published_at'] else None,
+                    "source": row.get('source')
+                })
+            
+            import math
+            total_pages = math.ceil(total_count / limit)
+            
+            return {
+                "status": "success",
+                "data": news_list,
+                "pagination": {
+                    "page": page,
+                    "limit": limit,
+                    "total_count": total_count,
+                    "total_pages": total_pages
+                }
+            }
+            
+    except Exception as e:
+        import logging
+        logging.error(f"경제 뉴스 조회 실패: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @api_router.post("/macro-trading/translate")
 async def translate_text(request: TranslateRequest):

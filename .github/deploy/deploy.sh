@@ -263,7 +263,7 @@ deploy_backend() {
 # 프론트엔드 빌드
 build_frontend() {
   log_info "Building frontend..."
-  cd "${DEPLOY_PATH}/hobot-ui"
+  cd "${DEPLOY_PATH}/hobot-ui-v2"
   
   npm install
   export NODE_OPTIONS="--max-old-space-size=1536"
@@ -291,7 +291,7 @@ build_frontend() {
   done
   
   # 빌드 디렉토리 확인
-  if [ ! -d "build" ]; then
+  if [ ! -d "dist" ]; then
     log_error "Frontend build directory not found"
     log_info "Build log contents:"
     tail -100 ../hobot/logs/frontend-build.log >&2 || true
@@ -299,16 +299,16 @@ build_frontend() {
   fi
   
   # 빌드 결과 확인
-  if [ ! -f "build/index.html" ]; then
+  if [ ! -f "dist/index.html" ]; then
     log_error "build/index.html not found. Build may have failed."
     tail -100 ../hobot/logs/frontend-build.log >&2 || true
     log_error "Frontend build incomplete"
   fi
   
-  if [ ! -d "build/static" ]; then
-    log_error "build/static directory not found. Build may have failed."
-    tail -100 ../hobot/logs/frontend-build.log >&2 || true
-    log_error "Frontend build incomplete"
+  if [ ! -d "dist/assets" ]; then
+    log_warn "dist/assets directory not found. This might be normal if no assets were generated, but check logs."
+    # tail -100 ../hobot/logs/frontend-build.log >&2 || true
+    # log_error "Frontend build incomplete"
   fi
   
   # 권한 설정 (홈 디렉토리부터 실행 권한 부여)
@@ -318,14 +318,14 @@ build_frontend() {
   # 여기서는 확실한 해결을 위해 경로상 실행 권한을 부여함
   chmod 755 /home/ec2-user
   chmod 755 /home/ec2-user/hobot-service
-  chmod 755 /home/ec2-user/hobot-service/hobot-ui
+  chmod 755 /home/ec2-user/hobot-service/hobot-ui-v2
   
-  sudo chown -R "$(whoami):$(whoami)" build
-  sudo chmod -R 755 build
+  sudo chown -R "$(whoami):$(whoami)" dist
+  sudo chmod -R 755 dist
   
   # SELinux가 켜져있는 경우를 대비해 컨텍스트 설정 (오류 무시)
   if command -v chcon &> /dev/null; then
-      sudo chcon -R -t httpd_sys_content_t build 2>/dev/null || true
+      sudo chcon -R -t httpd_sys_content_t dist 2>/dev/null || true
   fi
   
   # nginx 사용자에게 권한 부여 확인
@@ -497,7 +497,7 @@ setup_nginx() {
 
 # 프론트엔드 배포
 deploy_frontend() {
-  if [ ! -d "${DEPLOY_PATH}/hobot-ui" ]; then
+  if [ ! -d "${DEPLOY_PATH}/hobot-ui-v2" ]; then
     log_warn "Frontend directory not found, skipping..."
     return
   fi
