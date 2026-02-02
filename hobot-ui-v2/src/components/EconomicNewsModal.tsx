@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, ExternalLink, Clock, Newspaper } from 'lucide-react';
+import { getTimeAgo } from '../utils/formatters';
 
 interface NewsItem {
     id: number;
@@ -44,18 +45,6 @@ export const EconomicNewsModal: React.FC<EconomicNewsModalProps> = ({ isOpen, on
     }, [isOpen, page]);
 
     if (!isOpen) return null;
-
-    const getTimeAgo = (dateString: string) => {
-        if (!dateString) return '';
-        const now = new Date();
-        const date = new Date(dateString);
-        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-        if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

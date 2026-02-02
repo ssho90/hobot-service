@@ -1,64 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useBalance, useRebalancing } from '../hooks/useMacroData';
+import { formatCurrency, formatPercent, safeNumber } from '../utils/formatters';
 import { Wallet, TrendingUp, TrendingDown, RefreshCw, PieChart, BarChart3, AlertCircle, Loader2 } from 'lucide-react';
 import { TotalAssetTrendChart } from './TotalAssetTrendChart';
-
-interface HoldingItem {
-    stock_code: string;
-    stock_name: string;
-    quantity: number;
-    avg_price: number;
-    current_price: number;
-    profit_loss: number;
-    profit_loss_rate: number;
-    eval_amount: number;
-}
-
-interface BalanceData {
-    total_eval_amount: number;
-    total_purchase_amount: number;
-    net_invested_amount?: number; // Backend added field
-    total_profit_loss: number;
-    total_profit_loss_rate: number;
-    total_return_rate?: number; // Backend added field
-    holdings: HoldingItem[];
-    status?: string;
-}
-
-interface AllocationItem {
-    name: string;
-    ticker: string;
-    weight_percent: number;
-}
-
-interface AssetClassAllocation {
-    asset_class: string;
-    sub_mp_name?: string;
-    sub_mp_description?: string;
-    updated_at?: string;
-    target: AllocationItem[];
-    actual: AllocationItem[];
-}
-
-interface MPData {
-    name?: string;
-    description?: string;
-    updated_at?: string;
-    started_at?: string;  // MP가 처음 적용된 날짜
-    decision_date?: string;  // 가장 최근 AI 결정 날짜
-    target_allocation: Record<string, number>;
-    actual_allocation: Record<string, number>;
-}
-
-interface RebalancingData {
-    mp: MPData;
-    sub_mp: AssetClassAllocation[];
-    rebalancing_status: {
-        needed: boolean;
-        reasons: string[];
-        thresholds: { mp: number; sub_mp: number };
-    };
-}
 
 // Color palette for charts
 const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#06b6d4'];
@@ -89,18 +34,12 @@ const StackedBar = ({ items, total = 100 }: { items: { label: string; value: num
 };
 
 export const TradingDashboard: React.FC = () => {
-    const { getAuthHeaders, isAuthenticated, loading: authLoading } = useAuth();
-
-    // State
-    const [balance, setBalance] = useState<BalanceData | null>(null);
-    const [rebalancing, setRebalancing] = useState<RebalancingData | null>(null);
+    const { isAuthenticated, loading: authLoading } = useAuth();
     const [activeTab, setActiveTab] = useState<'account' | 'rebalancing'>('account');
-
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [refreshing, setRefreshing] = useState(false);
-
-    const [initialized, setInitialized] = useState(false);
+    const { data: balance, loading: balanceLoading, error: balanceError, refreshing: balanceRefreshing, refresh: refreshBalance } = useBalance();
+    const { data: rebalancing, loading: rebalancingLoading, error: rebalancingError, refreshing: rebalancingRefreshing, refresh: refreshRebalancing } = useRebalancing({
+        enabled: activeTab === 'rebalancing'
+    });
 
     // UI Toggle States
     const [showMpDetails, setShowMpDetails] = useState(false);
@@ -109,108 +48,17 @@ export const TradingDashboard: React.FC = () => {
     const toggleSubMpDetails = (assetClass: string) => {
         setShowSubMpDetails(prev => ({ ...prev, [assetClass]: !prev[assetClass] }));
     };
+    const loading = authLoading || (activeTab === 'account' ? balanceLoading : rebalancingLoading);
+    const error = activeTab === 'account' ? balanceError : rebalancingError;
+    const refreshing = activeTab === 'account' ? balanceRefreshing : rebalancingRefreshing;
 
-    useEffect(() => {
-        if (authLoading || initialized) return;
-        setInitialized(true);
-
-        if (!isAuthenticated) return;
-
-        const fetchData = async () => {
-            setLoading(true);
-            setError(null);
-
-            try {
-                const headers = getAuthHeaders();
-
-                // Fetch KIS Balance
-                try {
-                    const balanceRes = await fetch('/api/kis/balance', {
-                        headers: { ...headers, 'Content-Type': 'application/json' }
-                    });
-
-                    if (balanceRes.ok) {
-                        const balanceData = await balanceRes.json();
-                        if (balanceData.status === 'error') {
-                            console.warn('KIS Balance returned error:', balanceData);
-                        } else {
-                            setBalance(balanceData);
-                        }
-                    } else if (balanceRes.status === 401) {
-                        setError('KIS API 인증정보가 없습니다.');
-                    }
-                } catch (e) {
-                    console.error('Balance fetch error:', e);
-                }
-
-                // Fetch Rebalancing Status
-                try {
-                    const rebalanceRes = await fetch('/api/macro-trading/rebalancing-status', {
-                        headers: { ...headers, 'Content-Type': 'application/json' }
-                    });
-
-                    if (rebalanceRes.ok) {
-                        const resJson = await rebalanceRes.json();
-                        // Handle wrapper { status: "success", data: { ... } }
-                        if (resJson.data) {
-                            setRebalancing(resJson.data);
-                        } else {
-                            setRebalancing(resJson);
-                        }
-                    }
-                } catch (e) {
-                    console.error('Rebalancing fetch error:', e);
-                }
-            } catch (err) {
-                console.error('Error fetching trading data:', err);
-                setError('데이터를 불러오는데 실패했습니다.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [authLoading, isAuthenticated, getAuthHeaders, initialized]);
-
-    const handleRefresh = async () => {
-        if (!isAuthenticated) return;
-
-        setRefreshing(true);
-        const headers = getAuthHeaders();
-
-        try {
-            // Refresh logic similar to initial fetch
-            const balanceRes = await fetch('/api/kis/balance', { headers: { ...headers, 'Content-Type': 'application/json' } });
-            if (balanceRes.ok) {
-                const data = await balanceRes.json();
-                setBalance(data);
-            }
-
-            const rebalanceRes = await fetch('/api/macro-trading/rebalancing-status', { headers: { ...headers, 'Content-Type': 'application/json' } });
-            if (rebalanceRes.ok) {
-                const data = await rebalanceRes.json();
-                if (data.data) setRebalancing(data.data);
-                else setRebalancing(data);
-            }
-        } catch (err) {
-            console.error('Error refreshing:', err);
-        } finally {
-            setRefreshing(false);
+    const handleRefresh = () => {
+        if (!isAuthenticated || refreshing) return;
+        if (activeTab === 'rebalancing') {
+            refreshRebalancing();
+        } else {
+            refreshBalance();
         }
-    };
-
-    const safeNumber = (value: string | number | undefined | null): number => {
-        const num = Number(value);
-        return isNaN(num) ? 0 : num;
-    };
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(safeNumber(value));
-    };
-
-    const formatPercent = (value: number) => {
-        const num = safeNumber(value);
-        return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`;
     };
 
     const isRecentUpdate = (dateStr?: string) => {
@@ -239,7 +87,7 @@ export const TradingDashboard: React.FC = () => {
         return `${Math.floor(days / 365)}년`;
     };
 
-    if (authLoading || loading) {
+    if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />

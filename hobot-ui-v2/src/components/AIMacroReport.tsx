@@ -1,49 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Brain, PieChart, RefreshCw, Loader2, AlertCircle, TrendingUp, Landmark, Gem, CheckCircle2, FileText, Info } from 'lucide-react';
-
-interface ETFDetail {
-  category: string;
-  ticker: string;
-  name: string;
-  weight: number;
-}
-
-interface SubMPCategory {
-  sub_mp_id: string;
-  sub_mp_name: string;
-  sub_mp_description?: string;
-  updated_at?: string;
-  started_at?: string;  // Sub-MP가 연속 적용된 첫 날짜
-  etf_details: ETFDetail[];
-}
-
-interface SubMP {
-  stocks?: SubMPCategory;
-  bonds?: SubMPCategory;
-  alternatives?: SubMPCategory;
-  cash?: SubMPCategory;
-}
-
-interface OverviewData {
-  mp_id: string;
-  mp_info?: {
-    name: string;
-    description: string;
-    updated_at: string;
-    started_at?: string;  // MP가 연속 적용된 첫 날짜
-  };
-  analysis_summary: string;
-  reasoning: string;
-  sub_mp_reasoning: string;
-  target_allocation: {
-    Stocks: number;
-    Bonds: number;
-    Alternatives: number;
-    Cash: number;
-  };
-  sub_mp: SubMP;
-  decision_date: string;
-}
+import { useOverview } from '../hooks/useMacroData';
+import type { SubMPCategory } from '../hooks/useMacroData';
 
 const mpToRegime: Record<string, string> = {
   'MP-1': 'Expansion (Goldilocks)',
@@ -54,10 +12,7 @@ const mpToRegime: Record<string, string> = {
 };
 
 export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const [data, setData] = useState<OverviewData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const { data, loading, error, refreshing, refresh } = useOverview();
   const [showMpDetails, setShowMpDetails] = useState(false);
   const [showSubMpDetails, setShowSubMpDetails] = useState<Record<string, boolean>>({});
 
@@ -85,36 +40,8 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
     return `${diffDays}d`;
   };
 
-  const fetchOverview = useCallback(async () => {
-    try {
-      setError(null);
-      const response = await fetch('/api/macro-trading/overview');
-      if (response.ok) {
-        const result = await response.json();
-        if (result.status === 'success' && result.data) {
-          setData(result.data);
-        } else {
-          setError('API 응답 형식 오류');
-        }
-      } else {
-        setError(`API 오류: ${response.status}`);
-      }
-    } catch (err) {
-      console.error('Error fetching overview:', err);
-      setError('API 연결 실패');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchOverview();
-  }, [fetchOverview]);
-
   const handleRefresh = () => {
-    setRefreshing(true);
-    fetchOverview();
+    refresh();
   };
 
   const formatLastUpdated = (dateStr: string) => {
