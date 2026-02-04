@@ -36,6 +36,11 @@ export JWT_SECRET_KEY="${JWT_SECRET_KEY}"
 # KIS Encryption Master Key
 export ENCRYPTION_MASTER_KEY="${ENCRYPTION_MASTER_KEY}"
 
+# Neo4j Database Configuration
+export NEO4J_URI="${NEO4J_URI}"
+export NEO4J_USER="${NEO4J_USER}"
+export NEO4J_PASSWORD="${NEO4J_PASSWORD}"
+
 # 유틸리티 함수 (모든 로그는 stderr로 출력하여 변수 할당에 영향을 주지 않도록)
 log_info() {
   local msg="$*"
@@ -204,6 +209,11 @@ JWT_SECRET_KEY=${JWT_SECRET_KEY}
 
 # KIS Encryption Master Key
 ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
+
+# Neo4j Database Configuration
+NEO4J_URI=${NEO4J_URI}
+NEO4J_USER=${NEO4J_USER}
+NEO4J_PASSWORD=${NEO4J_PASSWORD}
 EOF
   chmod 600 "${DEPLOY_PATH}/hobot/.env"
   log_success ".env file created"

@@ -63,6 +63,10 @@ jobs:
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           # KIS Encryption Master Key
           ENCRYPTION_MASTER_KEY: ${{ secrets.ENCRYPTION_MASTER_KEY }}
+          # Neo4j Database Configuration
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         run: |
           # 배포 스크립트 전송 및 실행
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
@@ -95,6 +99,9 @@ jobs:
             export DB_CHARSET="${DB_CHARSET}"
             export JWT_SECRET_KEY="${JWT_SECRET_KEY}"
             export ENCRYPTION_MASTER_KEY="${ENCRYPTION_MASTER_KEY}"
+            export NEO4J_URI="${NEO4J_URI}"
+            export NEO4J_USER="${NEO4J_USER}"
+            export NEO4J_PASSWORD="${NEO4J_PASSWORD}"
             
             chmod +x /tmp/deploy.sh
             /tmp/deploy.sh "${DEPLOY_PATH}" "${{ github.repository }}" "${GH_TOKEN}"

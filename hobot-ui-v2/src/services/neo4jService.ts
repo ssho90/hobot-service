@@ -1,89 +1,82 @@
-import neo4j, { Driver, Session } from 'neo4j-driver';
+// Neo4j API calls through backend proxy
+// All database connections are managed on the backend for security
 
-const NEO4J_URI = import.meta.env.VITE_NEO4J_URI || 'bolt://52.78.104.1:7687';
-const NEO4J_USER = import.meta.env.VITE_NEO4J_USER || 'neo4j';
-const NEO4J_PASSWORD = import.meta.env.VITE_NEO4J_PASSWORD || 'ssh8991!';
+export interface GraphNode {
+    id: string;
+    labels: string[];
+    properties: Record<string, any>;
+    val: number;
+}
 
-let driver: Driver | null = null;
+export interface GraphLink {
+    source: string;
+    target: string;
+    type: string;
+    [key: string]: any;
+}
 
-export const getDriver = (): Driver => {
-    if (!driver) {
-        driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD));
-    }
-    return driver;
-};
+export interface GraphData {
+    nodes: GraphNode[];
+    links: GraphLink[];
+    raw: any[];
+}
 
-export const runCypherQuery = async (query: string, params: Record<string, any> = {}) => {
-    const driver = getDriver();
-    const session: Session = driver.session();
-
+export const runCypherQuery = async (
+    query: string, 
+    params: Record<string, any> = {}
+): Promise<GraphData> => {
     try {
-        const result = await session.run(query, params);
-
-        // Process results for graph visualization (ForceGraph2D format: { nodes, links })
-        const nodes: any[] = [];
-        const links: any[] = [];
-        const nodeIds = new Set();
-        const linkIds = new Set();
-
-        result.records.forEach((record) => {
-            record.keys.forEach((key) => {
-                const value = record.get(key);
-
-                if (value && typeof value === 'object') {
-                    if (value.labels) {
-                        // It's a Node
-                        const id = value.elementId || value.identity.toString();
-                        if (!nodeIds.has(id)) {
-                            nodes.push({
-                                id,
-                                labels: value.labels,
-                                properties: value.properties || {},
-                                val: 1 // Default size
-                            });
-                            nodeIds.add(id);
-                        }
-                    } else if (value.type && value.startNodeElementId && value.endNodeElementId) {
-                        // It's a Relationship (neo4j v5)
-                        const id = value.elementId || value.identity.toString();
-                        if (!linkIds.has(id)) {
-                            links.push({
-                                source: value.startNodeElementId,
-                                target: value.endNodeElementId,
-                                type: value.type,
-                                ...value.properties
-                            });
-                            linkIds.add(id);
-                        }
-                    } else if (value.type && value.start && value.end) {
-                        // It's a Relationship (neo4j v4)
-                        const id = value.identity.toString();
-                        if (!linkIds.has(id)) {
-                            links.push({
-                                source: value.start.toString(),
-                                target: value.end.toString(),
-                                type: value.type,
-                                ...value.properties
-                            });
-                            linkIds.add(id);
-                        }
-                    }
-                }
-            });
+        const response = await fetch('/api/neo4j/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query, params }),
         });
 
-        return { nodes, links, raw: result.records };
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || `API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.data) {
+            return {
+                nodes: result.data.nodes || [],
+                links: result.data.links || [],
+                raw: result.data.raw || []
+            };
+        }
+
+        throw new Error('API 응답 형식 오류');
     } catch (error) {
         console.error('Neo4j Query Error:', error);
         throw error;
-    } finally {
-        await session.close();
     }
 };
 
-export const closeDriver = async () => {
-    if (driver) {
-        await driver.close();
-        driver = null;
+export const checkNeo4jHealth = async (): Promise<{ status: string; message: string }> => {
+    try {
+        const response = await fetch('/api/neo4j/health');
+        
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Neo4j Health Check Error:', error);
+        return { status: 'error', message: error instanceof Error ? error.message : 'Connection failed' };
     }
+};
+
+// Legacy exports for compatibility (no-op since backend handles connections)
+export const getDriver = () => {
+    console.warn('getDriver() is deprecated. Neo4j connections are now managed by the backend.');
+    return null;
+};
+
+export const closeDriver = async () => {
+    console.warn('closeDriver() is deprecated. Neo4j connections are now managed by the backend.');
 };

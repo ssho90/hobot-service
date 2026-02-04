@@ -3854,6 +3854,118 @@ async def gemini_market_analysis(request: GeminiMarketAnalysisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================
+# Neo4j API Proxy (Frontend에서 사용)
+# ============================================
+class Neo4jQueryRequest(BaseModel):
+    query: str
+    params: Optional[dict] = None
+
+# Neo4j driver singleton
+_neo4j_driver = None
+
+def get_neo4j_driver():
+    global _neo4j_driver
+    if _neo4j_driver is None:
+        from neo4j import GraphDatabase
+        uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+        user = os.getenv("NEO4J_USER", "neo4j")
+        password = os.getenv("NEO4J_PASSWORD", "")
+        _neo4j_driver = GraphDatabase.driver(uri, auth=(user, password))
+    return _neo4j_driver
+
+@api_router.post("/neo4j/query")
+async def neo4j_run_query(request: Neo4jQueryRequest):
+    """Neo4j Cypher 쿼리 실행"""
+    try:
+        driver = get_neo4j_driver()
+        
+        with driver.session() as session:
+            result = session.run(request.query, request.params or {})
+            
+            nodes = []
+            links = []
+            node_ids = set()
+            link_ids = set()
+            raw_records = []
+            
+            for record in result:
+                # Store raw record data
+                raw_record = {}
+                for key in record.keys():
+                    value = record[key]
+                    if hasattr(value, 'items'):
+                        raw_record[key] = dict(value.items()) if hasattr(value, 'items') else str(value)
+                    else:
+                        raw_record[key] = value
+                raw_records.append(raw_record)
+                
+                # Process for graph visualization
+                for key in record.keys():
+                    value = record[key]
+                    
+                    if value is None:
+                        continue
+                    
+                    # Check if it's a Node
+                    if hasattr(value, 'labels') and hasattr(value, 'element_id'):
+                        node_id = value.element_id
+                        if node_id not in node_ids:
+                            nodes.append({
+                                "id": node_id,
+                                "labels": list(value.labels),
+                                "properties": dict(value.items()) if hasattr(value, 'items') else {},
+                                "val": 1
+                            })
+                            node_ids.add(node_id)
+                    
+                    # Check if it's a Relationship
+                    elif hasattr(value, 'type') and hasattr(value, 'element_id'):
+                        link_id = value.element_id
+                        if link_id not in link_ids:
+                            # Get start and end node IDs
+                            start_id = value.start_node.element_id if hasattr(value, 'start_node') else None
+                            end_id = value.end_node.element_id if hasattr(value, 'end_node') else None
+                            
+                            if start_id and end_id:
+                                link_data = {
+                                    "source": start_id,
+                                    "target": end_id,
+                                    "type": value.type
+                                }
+                                # Add relationship properties
+                                if hasattr(value, 'items'):
+                                    link_data.update(dict(value.items()))
+                                links.append(link_data)
+                                link_ids.add(link_id)
+            
+            return {
+                "status": "success",
+                "data": {
+                    "nodes": nodes,
+                    "links": links,
+                    "raw": raw_records
+                }
+            }
+    except Exception as e:
+        logging.error(f"Neo4j query error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/neo4j/health")
+async def neo4j_health_check():
+    """Neo4j 연결 상태 확인"""
+    try:
+        driver = get_neo4j_driver()
+        with driver.session() as session:
+            result = session.run("RETURN 1 as test")
+            result.single()
+        return {"status": "success", "message": "Neo4j connection is healthy"}
+    except Exception as e:
+        logging.error(f"Neo4j health check error: {e}", exc_info=True)
+        return {"status": "error", "message": str(e)}
+
+
 # API 라우터를 앱에 포함
 app.include_router(api_router)
 

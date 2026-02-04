@@ -21,6 +21,7 @@ email-validator
 langchain_google_genai
 pytz
 google
+google-genai
 
 langchain-opentutorial
 
@@ -50,3 +51,6 @@ webdriver-manager  # ChromeDriver 자동 관리 (선택적)
 fear_and_greed
 
 python-multipart
+
+# Neo4j
+neo4j
