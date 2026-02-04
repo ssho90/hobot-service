@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3010",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -13,8 +13,10 @@
     "@google/genai": "^1.39.0",
     "axios": "^1.13.4",
     "lucide-react": "^0.563.0",
+    "neo4j-driver": "^6.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-force-graph-2d": "^1.29.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.0",
     "recharts": "^3.7.0",

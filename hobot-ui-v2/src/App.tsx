@@ -12,6 +12,7 @@ const AdminLogManagement = lazy(() => import('./components/admin/AdminLogManagem
 const AdminLLMMonitoring = lazy(() => import('./components/admin/AdminLLMMonitoring').then((module) => ({ default: module.AdminLLMMonitoring })));
 const AdminRebalancing = lazy(() => import('./components/admin/AdminRebalancing').then((module) => ({ default: module.AdminRebalancing })));
 const AdminFileUpload = lazy(() => import('./components/admin/AdminFileUpload').then((module) => ({ default: module.AdminFileUpload })));
+const OntologyPage = lazy(() => import('./components/OntologyPage'));
 
 const PageLoader: React.FC = () => (
   <div className="flex flex-1 items-center justify-center py-16">
@@ -40,6 +41,7 @@ const AppLayout: React.FC = () => {
           <Route path="/admin/llm" element={<AdminLLMMonitoring />} />
           <Route path="/admin/rebalancing" element={<AdminRebalancing />} />
           <Route path="/admin/files" element={<AdminFileUpload />} />
+          <Route path="/ontology" element={<OntologyPage />} />
           <Route path="/" element={<Dashboard />} />
         </Routes>
       </Suspense>

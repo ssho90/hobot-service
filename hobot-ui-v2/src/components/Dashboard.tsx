@@ -3,6 +3,7 @@ import { Search, RefreshCw, Clock, ExternalLink, Newspaper } from 'lucide-react'
 import { TickerTape } from './TickerTape';
 import { AIMacroReport } from './AIMacroReport';
 import { MacroIndicators } from './MacroIndicators';
+import { BitcoinCycleChart } from './BitcoinCycleChart';
 import { GeminiAnalyst } from './GeminiAnalyst';
 import { AnalysisHistoryModal } from './AnalysisHistoryModal';
 import { BriefingSummaryModal } from './BriefingSummaryModal';
@@ -232,6 +233,9 @@ const Dashboard: React.FC = () => {
 
             {/* MacroIndicators - 전체 너비 */}
             <MacroIndicators />
+
+            {/* Bitcoin Cycle - 하단 섹션 */}
+            <BitcoinCycleChart />
           </div>
         ) : (
           <div className="h-[700px] animate-in fade-in zoom-in-95 duration-300">

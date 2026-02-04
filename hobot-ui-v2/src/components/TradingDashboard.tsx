@@ -215,7 +215,7 @@ export const TradingDashboard: React.FC = () => {
                         </div>
 
                         {/* ============ TOTAL ASSET TREND CHART START ============ */}
-                        <TotalAssetTrendChart />
+                        <TotalAssetTrendChart currentTotalValue={balance.total_eval_amount} />
                         {/* ============ TOTAL ASSET TREND CHART END ============ */}
 
                         <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">

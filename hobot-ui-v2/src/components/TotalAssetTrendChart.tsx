@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Loader2, AlertCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -17,9 +17,25 @@ interface ChartData {
     pnl: number;
 }
 
-export const TotalAssetTrendChart: React.FC = () => {
+interface TotalAssetTrendChartProps {
+    currentTotalValue?: number;
+}
+
+const getKstNow = (): Date => {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    return new Date(utcMs + 9 * 60 * 60 * 1000);
+};
+
+const isBeforeSnapshotTimeKst = (kstNow: Date): boolean => {
+    const hour = kstNow.getUTCHours();
+    const minute = kstNow.getUTCMinutes();
+    return hour < 15 || (hour === 15 && minute < 30);
+};
+
+export const TotalAssetTrendChart: React.FC<TotalAssetTrendChartProps> = ({ currentTotalValue }) => {
     const { getAuthHeaders } = useAuth();
-    const [data, setData] = useState<ChartData[]>([]);
+    const [snapshots, setSnapshots] = useState<ChartData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [days, setDays] = useState(30);
@@ -44,7 +60,7 @@ export const TotalAssetTrendChart: React.FC = () => {
                         value: item.total_value,
                         pnl: item.pnl_total
                     }));
-                    setData(chartData);
+                    setSnapshots(chartData);
                 } else {
                     setError('데이터 형식이 올바르지 않습니다.');
                 }
@@ -62,6 +78,27 @@ export const TotalAssetTrendChart: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    const data = useMemo(() => {
+        const chartData = [...snapshots];
+        const hasCurrentValue = typeof currentTotalValue === 'number' && Number.isFinite(currentTotalValue);
+        if (!hasCurrentValue) {
+            return chartData;
+        }
+
+        const kstNow = getKstNow();
+        const kstDate = kstNow.toISOString().slice(0, 10);
+        const hasTodaySnapshot = chartData.some((item) => item.date === kstDate);
+        if (!hasTodaySnapshot && isBeforeSnapshotTimeKst(kstNow)) {
+            chartData.push({
+                date: kstDate,
+                value: currentTotalValue,
+                pnl: 0
+            });
+        }
+
+        return chartData;
+    }, [snapshots, currentTotalValue]);
 
     if (loading && data.length === 0) {
         return (

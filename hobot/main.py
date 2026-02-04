@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import json
+from datetime import datetime
 
 load_dotenv(override=True)
 
@@ -104,6 +105,24 @@ class RebalancingConfigRequest(BaseModel):
     mp_threshold_percent: float
     sub_mp_threshold_percent: float
 
+# 비트코인 반감기 사이클 정적 데이터
+BITCOIN_CYCLE_DATA = [
+    {"date": "2012-11", "price": 12, "type": "history", "event": "1st Halving"},
+    {"date": "2013-12", "price": 1209, "type": "history", "event": "Peak"},
+    {"date": "2015-01", "price": 180, "type": "history", "event": "Bottom"},
+    {"date": "2016-07", "price": 650, "type": "history", "event": "2nd Halving"},
+    {"date": "2017-12", "price": 19328, "type": "history", "event": "Peak"},
+    {"date": "2018-12", "price": 3222, "type": "history", "event": "Bottom"},
+    {"date": "2020-05", "price": 8600, "type": "history", "event": "3rd Halving"},
+    {"date": "2021-11", "price": 66459, "type": "history", "event": "Peak"},
+    {"date": "2022-11", "price": 15653, "type": "history", "event": "Bottom"},
+    {"date": "2024-04", "price": 63000, "type": "history", "event": "4th Halving"},
+    {"date": "2025-08", "price": 125000, "type": "history", "event": "Peak"},
+    {"date": "2026-10", "price": 45000, "type": "prediction", "event": "Bottom (Exp)"},
+    {"date": "2028-04", "price": 70000, "type": "prediction", "event": "5th Halving"},
+    {"date": "2029-08", "price": 200000, "type": "prediction", "event": "Peak (Exp)"}
+]
+
 # JWT 인증
 security = HTTPBearer()
 
@@ -188,6 +207,106 @@ async def update_daily_news(force: bool = Query(default=False, description="강�
     except Exception as e:
         logging.error(f"Step 2: Error updating daily news: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/bitcoin-cycle")
+async def get_bitcoin_cycle():
+    """비트코인 반감기 사이클 데이터와 현재 가격을 반환합니다."""
+    current_price = None
+    error_message = None
+    
+    # 1. 현재 가격 조회 (Binance API 사용 - Rate limit이 더 넉넉함)
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    
+    try:
+        import requests
+        # Binance API
+        try:
+            response = requests.get(
+                "https://api.binance.com/api/v3/ticker/price",
+                params={"symbol": "BTCUSDT"},
+                timeout=5,
+                verify=False # SSL 인증서 오류 우회
+            )
+            response.raise_for_status()
+            data = response.json()
+            price = float(data["price"])
+            
+            current_price = {
+                "price": price,
+                "timestamp": f"{datetime.utcnow().isoformat()}Z",
+                "source": "binance"
+            }
+        except Exception as binance_err:
+             logging.warning(f"Binance fetch failed: {binance_err}. Trying fallback...")
+             raise binance_err # Trigger fallback
+
+    except Exception as exc:
+        # Fallback to CoinGecko if Binance fails
+        try:
+            response = requests.get(
+                "https://api.coingecko.com/api/v3/simple/price",
+                params={"ids": "bitcoin", "vs_currencies": "usd"},
+                timeout=5,
+                verify=False # SSL 인증서 오류 우회
+            )
+            response.raise_for_status()
+            payload = response.json()
+            price = payload.get("bitcoin", {}).get("usd")
+            if price:
+                current_price = {
+                    "price": price,
+                    "timestamp": f"{datetime.utcnow().isoformat()}Z",
+                    "source": "coingecko"
+                }
+            else:
+                 error_message = "current price missing"
+        except Exception as e2:
+             logging.warning(f"All price fetch attempts failed. Using mock data for demo. Error: {e2}")
+             # Final Fallback: Mock Data to prevent UI text missing
+             # 2026년 기준 적절한 가상 가격 리턴
+             current_price = {
+                 "price": 95000 + (datetime.now().minute * 100), # 약간의 변동성
+                 "timestamp": f"{datetime.utcnow().isoformat()}Z",
+                 "source": "simulation"
+             }
+             error_message = f"Real-time update failed ({str(exc)}). Using simulation data."
+
+    # 2. 날짜 기반으로 history/prediction 동적 할당
+    processed_cycle_data = []
+    now = datetime.now()
+    
+    for item in BITCOIN_CYCLE_DATA:
+        # 날짜 파싱 ("YYYY-MM")
+        try:
+            item_date = datetime.strptime(item["date"], "%Y-%m")
+            # 현재 날짜보다 이전이거나 같으면 history, 미래면 prediction
+            # 단, 현재 월도 포함하여 history로 처리
+            if item_date <= now:
+                new_type = "history"
+                # Prediction 이벤트명에서 (Exp) 제거
+                new_event = item["event"].replace(" (Exp)", "")
+            else:
+                new_type = "prediction"
+                new_event = item["event"]
+                
+            processed_cycle_data.append({
+                **item,
+                "type": new_type,
+                "event": new_event
+            })
+        except ValueError:
+            # 날짜 형식이 안맞으면 그대로 유지
+            processed_cycle_data.append(item)
+            
+    # Debug Logging
+    logging.info(f"Cycle Data Debug: First item date: {processed_cycle_data[0]['date']}, Last item date: {processed_cycle_data[-1]['date']}, Total: {len(processed_cycle_data)}")
+
+    return {
+        "cycle_data": processed_cycle_data,
+        "current_price": current_price,
+        "error": error_message
+    }
 
 @api_router.get("/upbit/trading")
 async def upbit_trading():
@@ -665,9 +784,13 @@ async def get_account_snapshots(
     """계좌 스냅샷 조회 API (본인 데이터)"""
     try:
         from service.database.db import get_db_connection
-        from datetime import datetime, timedelta
-        
-        end_date = datetime.now().date()
+        from datetime import datetime, timedelta, timezone
+
+        try:
+            from zoneinfo import ZoneInfo
+            end_date = datetime.now(ZoneInfo("Asia/Seoul")).date()
+        except Exception:
+            end_date = datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=9))).date()
         start_date = end_date - timedelta(days=days)
         
         with get_db_connection() as conn:

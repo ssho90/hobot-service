@@ -1684,4 +1684,3 @@ const EconomicNewsTab = () => {
 };
 
 export default MacroDashboard;
-

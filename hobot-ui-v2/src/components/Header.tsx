@@ -16,6 +16,7 @@ export const Header: React.FC = () => {
     { path: '/about', label: 'About' },
     { path: '/', label: 'Dashboard' },
     { path: '/trading', label: 'Trading' },
+    { path: '/ontology', label: 'Ontology' },
   ];
 
   const adminItems = [

@@ -342,7 +342,7 @@ def setup_ai_analysis_scheduler():
 def setup_account_snapshot_scheduler():
     """
     계좌 상태 스냅샷 스케줄을 설정합니다.
-    매일 09:00에 실행되도록 등록합니다.
+    매일 15:30(KST)에 실행되도록 등록합니다.
     """
     try:
         # 기존 'account_snapshot' 태그가 있는 스케줄 제거
@@ -352,9 +352,9 @@ def setup_account_snapshot_scheduler():
                 schedule.cancel_job(job)
                 logger.debug(f"기존 계좌 스냅샷 스케줄 제거: {job}")
         
-        # 매일 09:00 실행
-        schedule.every().day.at("09:00").do(run_threaded, save_daily_account_snapshot).tag('account_snapshot')
-        logger.info("계좌 스냅샷 스케줄 등록: 매일 09:00 KST")
+        # 매일 15:30 실행
+        schedule.every().day.at("15:30").do(run_threaded, save_daily_account_snapshot).tag('account_snapshot')
+        logger.info("계좌 스냅샷 스케줄 등록: 매일 15:30 KST")
         
     except Exception as e:
         logger.error(f"계좌 스냅샷 스케줄 설정 실패: {e}", exc_info=True)
@@ -486,4 +486,3 @@ if __name__ == "__main__":
             print(f"  {indicator}: {count}개")
     except Exception as e:
         print(f"오류 발생: {e}")
-

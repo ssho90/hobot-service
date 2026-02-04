@@ -1,15 +1,33 @@
 import json
 import logging
 import traceback
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from service.database.db import get_db_connection
 from service.macro_trading.kis.kis import get_balance_info_api
 
 logger = logging.getLogger(__name__)
 
+try:
+    from zoneinfo import ZoneInfo
+    _KST = ZoneInfo("Asia/Seoul")
+except Exception:
+    _KST = None
+
+
+def _get_kst_now() -> datetime:
+    if _KST is not None:
+        return datetime.now(_KST)
+    utc_now = datetime.now(timezone.utc)
+    return utc_now.astimezone(timezone(timedelta(hours=9)))
+
+
+def _get_kst_date() -> date:
+    return _get_kst_now().date()
+
+
 def save_daily_account_snapshot():
     """
-    매일 아침 9시 계좌 상태를 스냅샷으로 저장
+    매일 15:30(KST) 계좌 상태를 스냅샷으로 저장
     """
     try:
         logger.info("Daily account snapshot started")
@@ -61,7 +79,7 @@ def save_daily_account_snapshot():
                 for ac, info in asset_class_info.items():
                     pnl_by_asset[ac] = info.get('profit_loss_rate', 0.0)
 
-                snapshot_date = date.today()
+                snapshot_date = _get_kst_date()
 
                 # 4. DB 저장
                 with get_db_connection() as conn:
