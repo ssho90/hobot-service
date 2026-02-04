@@ -3682,6 +3682,178 @@ async def test_macro_prompt(
         logging.error(f"Macro Prompt Test Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+# ============================================
+# Gemini API Proxy (Frontend에서 사용)
+# ============================================
+class GeminiMarketAnalysisRequest(BaseModel):
+    query: str
+
+class GeminiCypherRequest(BaseModel):
+    question: str
+    schema_override: Optional[str] = None
+
+class GeminiExplainRequest(BaseModel):
+    question: str
+    cypher: str
+    results: list
+
+# Default Graph DB schema for Cypher generation
+GRAPH_SCHEMA = """
+Graph Database Schema:
+- Node Labels: Resource, VNet, Subnet, Subscription, Environment
+- Relationships: 
+  - (Resource)-[:BELONGS_TO]->(Subscription)
+  - (VNet)-[:BELONGS_TO]->(Subscription)
+  - (Subnet)-[:PART_OF]->(VNet)
+  - (Resource)-[:DEPLOYED_IN]->(Subnet)
+  - (Resource)-[:IN_ENVIRONMENT]->(Environment)
+  - (VNet)-[:IN_ENVIRONMENT]->(Environment)
+- Common Node Properties: name, id, type, status, region, createdAt
+- Resource types may include: VM, Storage, Database, LoadBalancer, etc.
+"""
+
+@api_router.post("/gemini/generate-cypher")
+async def gemini_generate_cypher(request: GeminiCypherRequest):
+    """Gemini API를 통한 Cypher 쿼리 생성"""
+    try:
+        from google import genai
+        from google.genai import types
+        
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="GOOGLE_API_KEY is not configured")
+        
+        client = genai.Client(api_key=api_key)
+        schema = request.schema_override or GRAPH_SCHEMA
+        
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=f"""{schema}
+
+User Question: {request.question}
+
+Generate a Cypher query to answer this question. 
+IMPORTANT: 
+- Return ONLY the Cypher query, no explanation
+- Use LIMIT 50 for safety unless specific count is requested
+- Match the schema labels and relationships exactly""",
+            config=types.GenerateContentConfig(
+                system_instruction="You are a Cypher query expert. Generate only valid Neo4j Cypher queries based on the given schema. Return ONLY the query, no markdown formatting, no explanations.",
+            ),
+        )
+        
+        cypher = response.text.strip() if response.text else ""
+        # Clean up markdown formatting if present
+        cypher = cypher.replace('```cypher\n', '').replace('```\n', '').replace('```', '').strip()
+        
+        return {
+            "status": "success",
+            "data": {
+                "cypher": cypher
+            }
+        }
+    except Exception as e:
+        logging.error(f"Gemini Cypher generation error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/gemini/explain-results")
+async def gemini_explain_results(request: GeminiExplainRequest):
+    """Gemini API를 통한 쿼리 결과 설명"""
+    try:
+        from google import genai
+        from google.genai import types
+        
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="GOOGLE_API_KEY is not configured")
+        
+        client = genai.Client(api_key=api_key)
+        results_str = json.dumps(request.results[:20], indent=2, ensure_ascii=False)
+        
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=f"""User asked: "{request.question}"
+
+Cypher query used: {request.cypher}
+
+Query results (JSON):
+{results_str}
+
+Please provide a clear, human-readable answer to the user's question based on these results. 
+- Be concise but informative
+- Highlight key findings
+- Use bullet points for multiple items if appropriate
+- If no results, say so clearly
+- 한국어로 답변해줘""",
+            config=types.GenerateContentConfig(
+                system_instruction="You are a helpful assistant that explains graph database query results in plain language. Be concise and focus on answering the user's original question.",
+            ),
+        )
+        
+        return {
+            "status": "success",
+            "data": {
+                "explanation": response.text if response.text else "결과를 설명할 수 없습니다."
+            }
+        }
+    except Exception as e:
+        logging.error(f"Gemini explain results error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/gemini/market-analysis")
+async def gemini_market_analysis(request: GeminiMarketAnalysisRequest):
+    """Gemini API를 통한 시장 분석 - Google Search Grounding 사용"""
+    try:
+        from google import genai
+        from google.genai import types
+        
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="GOOGLE_API_KEY is not configured")
+        
+        client = genai.Client(api_key=api_key)
+        
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=request.query,
+            config=types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                system_instruction="You are a senior financial market analyst for 'StockOverflow'. Provide concise, data-backed insights. When asked about specific stocks or market trends, use Google Search to find the latest information. Summarize key reasons for price movements. Keep the tone professional but accessible. 한국어로 답변해줘.",
+            ),
+        )
+        
+        text = response.text if response.text else "분석을 생성할 수 없습니다."
+        
+        # Extract grounding chunks for sources
+        sources = []
+        if response.candidates and len(response.candidates) > 0:
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'grounding_metadata') and candidate.grounding_metadata:
+                grounding_metadata = candidate.grounding_metadata
+                if hasattr(grounding_metadata, 'grounding_chunks') and grounding_metadata.grounding_chunks:
+                    for chunk in grounding_metadata.grounding_chunks:
+                        if hasattr(chunk, 'web') and chunk.web:
+                            web = chunk.web
+                            if hasattr(web, 'uri') and hasattr(web, 'title'):
+                                sources.append({
+                                    "uri": web.uri,
+                                    "title": web.title
+                                })
+        
+        return {
+            "status": "success",
+            "data": {
+                "text": text,
+                "sources": sources
+            }
+        }
+    except Exception as e:
+        logging.error(f"Gemini market analysis error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # API 라우터를 앱에 포함
 app.include_router(api_router)
 

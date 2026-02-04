@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { runCypherQuery } from '../services/neo4jService';
 import { generateCypherFromNaturalLanguage, explainQueryResults } from '../services/geminiService';
-import { Play, Loader2, Database, X, MessageSquare, Send, Code, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { Loader2, Database, X, MessageSquare, Send, Code, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
 interface ChatMessage {
     id: string;
