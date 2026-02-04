@@ -233,7 +233,7 @@ export const BitcoinCycleChart: React.FC = () => {
         const match = item.date.match(/^(\d{4})/);
         if (match) return match[1];
       }
-      if (Number.isFinite(item.timestamp)) return new Date(item.timestamp).getUTCFullYear().toString();
+      if (item.timestamp !== null && Number.isFinite(item.timestamp)) return new Date(item.timestamp).getUTCFullYear().toString();
       return '';
     });
 
@@ -305,9 +305,9 @@ export const BitcoinCycleChart: React.FC = () => {
   };
   const xAxisDomain: [number, number] = [0, Math.max(chartData.length - 1, 0)];
   const xAxisTicks = indexTicks.length > 0 ? indexTicks : undefined;
-  const formatHoverDate = (item: { date?: string; timestamp?: number }) => {
+  const formatHoverDate = (item: { date?: string; timestamp?: number | null }) => {
     if (typeof item.date === 'string' && item.date.length > 0) return item.date;
-    if (Number.isFinite(item.timestamp)) return formatMonthLabel(item.timestamp as number);
+    if (item.timestamp !== null && item.timestamp !== undefined && Number.isFinite(item.timestamp)) return formatMonthLabel(item.timestamp);
     return '';
   };
   const resolveHoverPoint = (state: any) => {

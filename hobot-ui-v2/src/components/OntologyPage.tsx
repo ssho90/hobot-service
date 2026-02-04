@@ -1,204 +1,404 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { runCypherQuery } from '../services/neo4jService';
-import { Play, Loader2, Database, X } from 'lucide-react';
+import { generateCypherFromNaturalLanguage, explainQueryResults } from '../services/geminiService';
+import { Play, Loader2, Database, X, MessageSquare, Send, Code, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+
+interface ChatMessage {
+    id: string;
+    type: 'user' | 'assistant';
+    content: string;
+    cypher?: string;
+    timestamp: Date;
+}
 
 const OntologyPage: React.FC = () => {
-    const [query, setQuery] = useState('MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100');
+    // Chat state
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [userInput, setUserInput] = useState('');
+    const [chatLoading, setChatLoading] = useState(false);
+    const [showCypher, setShowCypher] = useState<string | null>(null);
+    const chatEndRef = useRef<HTMLDivElement>(null);
+
+    // Graph state
     const [graphData, setGraphData] = useState<{ nodes: any[]; links: any[] }>({ nodes: [], links: [] });
     const [selectedNode, setSelectedNode] = useState<any | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+    const [graphLoading, setGraphLoading] = useState(false);
+    const [graphError, setGraphError] = useState<string | null>(null);
+    const graphContainerRef = useRef<HTMLDivElement>(null);
+    const [graphDimensions, setGraphDimensions] = useState({ width: 800, height: 400 });
 
+    // Graph panel collapse state
+    const [graphCollapsed, setGraphCollapsed] = useState(false);
+
+    // Load initial graph data
     useEffect(() => {
-        // Initial load
-        handleRunQuery();
+        loadDefaultGraph();
+    }, []);
 
-        // Resize observer for responsive graph
+    // Resize observer for graph
+    useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
             if (entries[0]) {
-                setDimensions({
+                setGraphDimensions({
                     width: entries[0].contentRect.width,
                     height: entries[0].contentRect.height,
                 });
             }
         });
 
-        if (containerRef.current) {
-            resizeObserver.observe(containerRef.current);
+        if (graphContainerRef.current) {
+            resizeObserver.observe(graphContainerRef.current);
         }
 
         return () => resizeObserver.disconnect();
-    }, []);
+    }, [graphCollapsed]);
 
-    const handleRunQuery = async () => {
-        setLoading(true);
-        setError(null);
-        setSelectedNode(null); // Clear selection on new query
+    // Auto-scroll chat to bottom
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [chatMessages]);
+
+    const loadDefaultGraph = async () => {
+        setGraphLoading(true);
+        setGraphError(null);
         try {
-            const result = await runCypherQuery(query);
+            const result = await runCypherQuery('MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100');
             setGraphData({ nodes: result.nodes, links: result.links });
         } catch (err: any) {
-            setError(err.message || 'An error occurred while executing the query.');
+            setGraphError(err.message || 'Failed to load graph data.');
         } finally {
-            setLoading(false);
+            setGraphLoading(false);
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!userInput.trim() || chatLoading) return;
+
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: userInput.trim(),
+            timestamp: new Date(),
+        };
+
+        setChatMessages(prev => [...prev, userMessage]);
+        setUserInput('');
+        setChatLoading(true);
+
+        try {
+            // Step 1: Convert natural language to Cypher
+            const { cypher, error: cypherError } = await generateCypherFromNaturalLanguage(userMessage.content);
+
+            if (cypherError || !cypher) {
+                throw new Error(cypherError || 'Failed to generate Cypher query');
+            }
+
+            // Step 2: Execute Cypher query
+            const result = await runCypherQuery(cypher);
+
+            // Step 3: Explain results in natural language
+            const explanation = await explainQueryResults(
+                userMessage.content,
+                cypher,
+                result.raw?.map(r => r.toObject()) || []
+            );
+
+            const assistantMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'assistant',
+                content: explanation,
+                cypher: cypher,
+                timestamp: new Date(),
+            };
+
+            setChatMessages(prev => [...prev, assistantMessage]);
+        } catch (err: any) {
+            const errorMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'assistant',
+                content: `죄송합니다. 질문을 처리하는 중 오류가 발생했습니다: ${err.message}`,
+                timestamp: new Date(),
+            };
+            setChatMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setChatLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
         }
     };
 
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 text-gray-900 font-sans">
-            {/* Toolbar */}
-            <div className="bg-white border-b border-gray-200 p-4 shadow-sm z-10">
-                <div className="flex flex-col md:flex-row gap-4 max-w-7xl mx-auto">
-                    <div className="flex-1 relative">
-                        <textarea
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg p-3 pr-12 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm resize-none h-24 md:h-16"
-                            placeholder="Enter Cypher Query..."
-                        />
-                        {/* Optional: Add query templates here if needed */}
+            {/* Top Section: Natural Language Query Interface */}
+            <div className={`flex flex-col bg-white border-b border-gray-200 shadow-sm transition-all duration-300 ${graphCollapsed ? 'flex-1' : 'h-1/2'}`}>
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-white">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-indigo-600" />
+                        <h2 className="font-semibold text-gray-800">Graph DB 자연어 질의</h2>
                     </div>
-                    <button
-                        onClick={handleRunQuery}
-                        disabled={loading}
-                        className={`px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors self-end md:self-auto h-12 md:h-16
-              ${loading
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
-                            }`}
-                    >
-                        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <Play className="w-5 h-5" />}
-                        {loading ? 'Running...' : 'Run Query'}
-                    </button>
+                    <span className="text-xs text-gray-500">자연어로 질문하면 Cypher 쿼리로 변환하여 답변합니다</span>
                 </div>
-                {error && (
-                    <div className="mt-2 text-red-600 text-sm bg-red-50 p-2 rounded border border-red-100 animate-in fade-in slide-in-from-top-1">
-                        Error: {error}
-                    </div>
-                )}
-            </div>
 
-            {/* Main Content */}
-            <div className="flex-1 relative overflow-hidden flex" ref={containerRef}>
-                {/* Graph Area */}
-                <div className="flex-1 bg-gray-50 relative">
-                    {(graphData.nodes.length === 0 && !loading && !error) ? (
-                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 flex-col gap-4">
-                            <Database className="w-16 h-16 opacity-20" />
-                            <p>No data to visualize. Run a query to see the graph.</p>
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {chatMessages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
+                            <MessageSquare className="w-12 h-12 opacity-30" />
+                            <p className="text-sm">그래프 데이터베이스에 대해 자연어로 질문해보세요</p>
+                            <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                                {[
+                                    '전체 리소스 개수는?',
+                                    'VNet과 연결된 Subnet 목록을 보여줘',
+                                    '어떤 환경(Environment)들이 있어?',
+                                ].map((example) => (
+                                    <button
+                                        key={example}
+                                        onClick={() => setUserInput(example)}
+                                        className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-indigo-100 text-gray-600 hover:text-indigo-700 rounded-full transition-colors"
+                                    >
+                                        {example}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     ) : (
-                        <ForceGraph2D
-                            width={dimensions.width - (selectedNode ? 384 : 0)} // Subtract 96 (tokens) * 4 = 384px when panel is open
-                            height={dimensions.height}
-                            graphData={graphData}
-                            nodeLabel={(node: any) => {
-                                const props = node.properties || {};
-                                return `${node.labels?.join(', ') || 'Node'}\n${props.name || props.title || ''}`;
-                            }}
-                            nodeAutoColorBy="labels"
-                            linkDirectionalArrowLength={3.5}
-                            linkDirectionalArrowRelPos={1}
-                            linkLabel="type"
-                            linkColor={() => '#999'}
-                            linkWidth={1.5}
-                            onNodeClick={(node) => setSelectedNode(node)}
-                            nodeCanvasObjectMode={() => 'after'}
-                            nodeCanvasObject={(node: any, ctx, globalScale) => {
-                                const props = node.properties || {};
-                                const label = props.name || props.title || (node.labels && node.labels[0]) || node.id;
-                                const fontSize = 12 / globalScale;
-                                ctx.font = `${fontSize}px Sans-Serif`;
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'top';
-                                ctx.fillStyle = '#000';
-                                // Draw text below the node (node radius is typically 4-5)
-                                ctx.fillText(label, node.x, node.y + 6);
-                            }}
-                            linkCanvasObjectMode={() => 'after'}
-                            linkCanvasObject={(link: any, ctx, globalScale) => {
-                                const label = link.type;
-                                if (!label) return;
+                        chatMessages.map((msg) => (
+                            <div
+                                key={msg.id}
+                                className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                            >
+                                <div
+                                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.type === 'user'
+                                            ? 'bg-indigo-600 text-white rounded-br-md'
+                                            : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                                        }`}
+                                >
+                                    <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
 
-                                // Calculate middle point of the link
-                                const start = link.source;
-                                const end = link.target;
-                                if (typeof start !== 'object' || typeof end !== 'object') return;
+                                    {/* Show Cypher Query Toggle */}
+                                    {msg.cypher && (
+                                        <div className="mt-2 pt-2 border-t border-gray-200/30">
+                                            <button
+                                                onClick={() => setShowCypher(showCypher === msg.id ? null : msg.id)}
+                                                className="flex items-center gap-1 text-xs opacity-70 hover:opacity-100 transition-opacity"
+                                            >
+                                                <Code className="w-3 h-3" />
+                                                {showCypher === msg.id ? 'Cypher 쿼리 숨기기' : 'Cypher 쿼리 보기'}
+                                            </button>
+                                            {showCypher === msg.id && (
+                                                <pre className="mt-2 p-2 bg-gray-800 text-green-400 rounded text-xs overflow-x-auto font-mono">
+                                                    {msg.cypher}
+                                                </pre>
+                                            )}
+                                        </div>
+                                    )}
 
-                                const textPos = {
-                                    x: (start.x + end.x) / 2,
-                                    y: (start.y + end.y) / 2,
-                                };
-
-                                // Draw background for better readability
-                                const fontSize = 10 / globalScale;
-                                ctx.font = `${fontSize}px Sans-Serif`;
-                                const textWidth = ctx.measureText(label).width;
-                                const bgPadding = 2 / globalScale;
-
-                                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-                                ctx.fillRect(
-                                    textPos.x - textWidth / 2 - bgPadding,
-                                    textPos.y - fontSize / 2 - bgPadding,
-                                    textWidth + bgPadding * 2,
-                                    fontSize + bgPadding * 2
-                                );
-
-                                // Draw text
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.fillStyle = '#666';
-                                ctx.fillText(label, textPos.x, textPos.y);
-                            }}
-                        />
+                                    <span className="text-[10px] opacity-50 mt-1 block">
+                                        {msg.timestamp.toLocaleTimeString()}
+                                    </span>
+                                </div>
+                            </div>
+                        ))
                     )}
+                    {chatLoading && (
+                        <div className="flex justify-start">
+                            <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                <span className="text-sm text-gray-500">분석 중...</span>
+                            </div>
+                        </div>
+                    )}
+                    <div ref={chatEndRef} />
                 </div>
 
-                {/* Right Properties Panel */}
-                {selectedNode && (
-                    <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto shadow-xl z-20 flex flex-col">
-                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h2 className="font-bold text-lg text-gray-800">Node Properties</h2>
-                            <button
-                                onClick={() => setSelectedNode(null)}
-                                className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-200 rounded"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="p-4 space-y-6">
-                            {/* Primary Info */}
-                            <div>
-                                <div className="inline-block px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800 mb-2">
-                                    {selectedNode.labels ? selectedNode.labels.join(', ') : 'Node'}
-                                </div>
-                                <div className="text-sm text-gray-500 font-mono break-all">
-                                    ID: {selectedNode.id}
-                                </div>
-                            </div>
-
-                            {/* Properties Table */}
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-700 mb-3 border-b pb-1">Properties</h3>
-                                <div className="space-y-3">
-                                    {Object.entries(selectedNode.properties || {}).map(([key, value]: [string, any]) => (
-                                        <div key={key} className="grid grid-cols-3 gap-2 text-sm border-b border-gray-50 pb-2 last:border-0">
-                                            <div className="font-medium text-gray-600 break-words">{key}</div>
-                                            <div className="col-span-2 text-gray-900 break-words font-mono text-xs bg-gray-50 p-1.5 rounded">
-                                                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                {/* Input Area */}
+                <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+                    <div className="flex gap-2 max-w-4xl mx-auto">
+                        <input
+                            type="text"
+                            value={userInput}
+                            onChange={(e) => setUserInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="그래프 DB에 대해 질문하세요... (예: 어떤 리소스들이 있어?)"
+                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
+                            disabled={chatLoading}
+                        />
+                        <button
+                            onClick={handleSendMessage}
+                            disabled={!userInput.trim() || chatLoading}
+                            className={`px-4 py-3 rounded-xl font-medium flex items-center gap-2 transition-all ${!userInput.trim() || chatLoading
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
+                                }`}
+                        >
+                            {chatLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <Send className="w-5 h-5" />
+                            )}
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
+
+            {/* Divider with collapse toggle */}
+            <button
+                onClick={() => setGraphCollapsed(!graphCollapsed)}
+                className="flex items-center justify-center gap-2 py-1.5 bg-gray-100 hover:bg-gray-200 border-y border-gray-200 transition-colors text-gray-600 text-sm"
+            >
+                {graphCollapsed ? (
+                    <>
+                        <ChevronUp className="w-4 h-4" />
+                        그래프 보기
+                    </>
+                ) : (
+                    <>
+                        <ChevronDown className="w-4 h-4" />
+                        그래프 숨기기
+                    </>
+                )}
+            </button>
+
+            {/* Bottom Section: Graph Visualization */}
+            {!graphCollapsed && (
+                <div className="flex-1 flex overflow-hidden">
+                    {/* Graph Area */}
+                    <div className="flex-1 relative" ref={graphContainerRef}>
+                        {graphLoading ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                            </div>
+                        ) : graphError ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                                <div className="text-center text-red-500">
+                                    <p>{graphError}</p>
+                                    <button
+                                        onClick={loadDefaultGraph}
+                                        className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"
+                                    >
+                                        다시 시도
+                                    </button>
+                                </div>
+                            </div>
+                        ) : graphData.nodes.length === 0 ? (
+                            <div className="absolute inset-0 flex items-center justify-center text-gray-400 flex-col gap-4 bg-gray-50">
+                                <Database className="w-16 h-16 opacity-20" />
+                                <p>그래프 데이터가 없습니다.</p>
+                            </div>
+                        ) : (
+                            <ForceGraph2D
+                                width={graphDimensions.width - (selectedNode ? 320 : 0)}
+                                height={graphDimensions.height}
+                                graphData={graphData}
+                                nodeLabel={(node: any) => {
+                                    const props = node.properties || {};
+                                    return `${node.labels?.join(', ') || 'Node'}\n${props.name || props.title || ''}`;
+                                }}
+                                nodeAutoColorBy="labels"
+                                linkDirectionalArrowLength={3.5}
+                                linkDirectionalArrowRelPos={1}
+                                linkLabel="type"
+                                linkColor={() => '#999'}
+                                linkWidth={1.5}
+                                onNodeClick={(node) => setSelectedNode(node)}
+                                nodeCanvasObjectMode={() => 'after'}
+                                nodeCanvasObject={(node: any, ctx, globalScale) => {
+                                    const props = node.properties || {};
+                                    const label = props.name || props.title || (node.labels && node.labels[0]) || node.id;
+                                    const fontSize = 12 / globalScale;
+                                    ctx.font = `${fontSize}px Sans-Serif`;
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'top';
+                                    ctx.fillStyle = '#000';
+                                    ctx.fillText(label, node.x, node.y + 6);
+                                }}
+                                linkCanvasObjectMode={() => 'after'}
+                                linkCanvasObject={(link: any, ctx, globalScale) => {
+                                    const label = link.type;
+                                    if (!label) return;
+
+                                    const start = link.source;
+                                    const end = link.target;
+                                    if (typeof start !== 'object' || typeof end !== 'object') return;
+
+                                    const textPos = {
+                                        x: (start.x + end.x) / 2,
+                                        y: (start.y + end.y) / 2,
+                                    };
+
+                                    const fontSize = 10 / globalScale;
+                                    ctx.font = `${fontSize}px Sans-Serif`;
+                                    const textWidth = ctx.measureText(label).width;
+                                    const bgPadding = 2 / globalScale;
+
+                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                                    ctx.fillRect(
+                                        textPos.x - textWidth / 2 - bgPadding,
+                                        textPos.y - fontSize / 2 - bgPadding,
+                                        textWidth + bgPadding * 2,
+                                        fontSize + bgPadding * 2
+                                    );
+
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillStyle = '#666';
+                                    ctx.fillText(label, textPos.x, textPos.y);
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Right Properties Panel */}
+                    {selectedNode && (
+                        <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto shadow-xl flex flex-col">
+                            <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                <h2 className="font-bold text-sm text-gray-800">Node Properties</h2>
+                                <button
+                                    onClick={() => setSelectedNode(null)}
+                                    className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-200 rounded"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <div className="p-3 space-y-4 text-sm">
+                                <div>
+                                    <div className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 mb-1">
+                                        {selectedNode.labels ? selectedNode.labels.join(', ') : 'Node'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 font-mono break-all">
+                                        ID: {selectedNode.id}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-xs font-semibold text-gray-700 mb-2 border-b pb-1">Properties</h3>
+                                    <div className="space-y-2">
+                                        {Object.entries(selectedNode.properties || {}).map(([key, value]: [string, any]) => (
+                                            <div key={key} className="grid grid-cols-3 gap-1 text-xs border-b border-gray-50 pb-1 last:border-0">
+                                                <div className="font-medium text-gray-600 break-words">{key}</div>
+                                                <div className="col-span-2 text-gray-900 break-words font-mono bg-gray-50 p-1 rounded">
+                                                    {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {Object.keys(selectedNode.properties || {}).length === 0 && (
+                                            <p className="text-gray-400 text-xs">No properties</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

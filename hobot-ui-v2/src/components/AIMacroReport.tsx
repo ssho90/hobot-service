@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Brain, PieChart, RefreshCw, Loader2, AlertCircle, TrendingUp, Landmark, Gem, CheckCircle2, FileText, Info } from 'lucide-react';
 import { useOverview } from '../hooks/useMacroData';
-import type { SubMPCategory } from '../hooks/useMacroData';
+import type { SubMPCategory, OverviewData } from '../hooks/useMacroData';
 
 const mpToRegime: Record<string, string> = {
   'MP-1': 'Expansion (Goldilocks)',
