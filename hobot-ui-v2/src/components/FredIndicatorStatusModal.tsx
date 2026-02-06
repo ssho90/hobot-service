@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Search, Database, RefreshCw, Activity } from 'lucide-react';
+import { X, Search, Database, RefreshCw } from 'lucide-react';
 import { ChartCard } from './ChartCard';
 import { ExpandedChartModal } from './ExpandedChartModal';
 
@@ -146,9 +146,6 @@ export const FredIndicatorStatusModal: React.FC<FredIndicatorStatusModalProps> =
                                 else if (ind.frequency === 'monthly') color = "#f59e0b"; // amber
                                 else if (ind.frequency === 'weekly') color = "#8b5cf6"; // purple
 
-                                // Icon selection
-                                const icon = <Activity className={`h-4 w-4 ${ind.frequency === 'daily' ? 'text-emerald-500' : 'text-blue-500'}`} />;
-
                                 return (
                                     <ChartCard
                                         key={ind.code}
@@ -156,7 +153,6 @@ export const FredIndicatorStatusModal: React.FC<FredIndicatorStatusModalProps> =
                                         subtitle={`${ind.code} • ${ind.frequency}`}
                                         data={mapSparklineToData(ind.sparkline)}
                                         color={color}
-                                        icon={icon}
                                         frequency={ind.frequency}
                                         latestValue={ind.latest_value || undefined}
                                         unit={ind.unit}

@@ -1,19 +1,18 @@
-# Fix Frontend Build Errors
+# Fix Frontend Build Errors (Round 2)
 
 ## User Request
-- Fix TypeScript errors reported in `frontend-build.log`.
+- Fix TypeScript errors in `FredIndicatorStatusModal.tsx`:
+  - `Property 'icon' does not exist on type...`
 
-## Diagnosed & Fixed Issues
-1.  **MacroIndicators.tsx**:
-    - Removed unused imports: `Briefcase`, `BarChart3`, `TrendingUp`, `Activity`.
-    - Removed unused variable `icon`.
-    - Removed duplicate `frequency` prop in JSX.
-2.  **ChartCard.tsx**:
-    - Removed unused `icon` prop (from interface and destructuring).
-    - Fixed `formatter` type to accept `number | undefined`.
-3.  **ExpandedChartModal.tsx**:
-    - Removed unused imports: `Activity`, `TrendingUp`, `BarChart3`.
-    - Fixed `formatter` type to accept `number | undefined`.
+## Diagnosis
+- Previous fix for `MacroIndicators.tsx` removed `icon` from `ChartCard` props definition and usage.
+- `FredIndicatorStatusModal.tsx` also uses `ChartCard` and was still passing `icon`.
+- Additionally, a previous attempt to fix `FredIndicatorStatusModal.tsx` broke the JSX syntax by accidentally removing the component tag.
+
+## Solution
+- **Repair**: Restored correct `ChartCard` usage in `FredIndicatorStatusModal.tsx`.
+- **Align Props**: Removed `icon` prop passing to match `ChartCard` interface.
+- **Cleanup**: Removed unused `Activity` import.
 
 ## Status
-- **Complete**. All reported errors have been addressed. The build should now pass without unused variable warnings or Type mismatch errors in Recharts.
+- **Complete**. `ChartCard` usage is now consistent across all components, and syntax errors are resolved.
