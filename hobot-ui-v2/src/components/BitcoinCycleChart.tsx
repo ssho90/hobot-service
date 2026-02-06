@@ -153,8 +153,8 @@ export const BitcoinCycleChart: React.FC = () => {
     // 1. Binance
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { signal: controller.signal });
+      const timeoutId = setTimeout(() => controller.abort(), 1500); // Reduced timeout for faster fallback
+      const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT&_=${Date.now()}`, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
@@ -167,8 +167,8 @@ export const BitcoinCycleChart: React.FC = () => {
     // 2. Coinbase
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot', { signal: controller.signal });
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const res = await fetch(`https://api.coinbase.com/v2/prices/BTC-USD/spot?_=${Date.now()}`, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
@@ -181,8 +181,8 @@ export const BitcoinCycleChart: React.FC = () => {
     // 3. CoinGecko (Backup)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd', { signal: controller.signal });
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&_=${Date.now()}`, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();

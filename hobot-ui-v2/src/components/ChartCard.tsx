@@ -11,7 +11,6 @@ interface ChartCardProps {
   subtitle: string;
   data: SparklineData[];
   color: string;
-  icon: React.ReactNode;
   onExpand?: () => void;
   frequency?: string;
   latestValue?: number;
@@ -38,7 +37,6 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   subtitle,
   data,
   color,
-  icon,
   onExpand,
   frequency,
   latestValue,
@@ -110,7 +108,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
                 contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', fontSize: '12px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 itemStyle={{ color: '#334155' }}
                 labelStyle={{ display: 'none' }}
-                formatter={(value: number) => [value?.toLocaleString() || '', 'Value']}
+                formatter={(value: number | undefined) => [value?.toLocaleString() || '', 'Value']}
               />
               <Area
                 type="monotone"

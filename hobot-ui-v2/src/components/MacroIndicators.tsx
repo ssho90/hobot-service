@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Users, AlertTriangle, LineChart, Activity, Briefcase, BarChart3, TrendingUp, List, RefreshCw } from 'lucide-react';
+import { DollarSign, Users, AlertTriangle, LineChart, List, RefreshCw } from 'lucide-react';
 import { FredIndicatorStatusModal } from './FredIndicatorStatusModal';
 import { ChartCard } from './ChartCard';
 import { ExpandedChartModal } from './ExpandedChartModal';
@@ -126,8 +126,6 @@ export const MacroIndicators: React.FC = () => {
             if (ind.frequency === 'weekly') color = "#8b5cf6";
 
             // Determine icon
-            const icon = <Activity className="h-4 w-4" />;
-
             return (
               <ChartCard
                 key={ind.code}
@@ -135,7 +133,6 @@ export const MacroIndicators: React.FC = () => {
                 subtitle={`${ind.code} • ${ind.frequency}`}
                 data={mapSparklineToData(ind.sparkline)}
                 color={color}
-                icon={icon}
                 frequency={ind.frequency}
                 latestValue={ind.latest_value || undefined}
                 unit={ind.unit}

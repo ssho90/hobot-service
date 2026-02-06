@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Activity, TrendingUp, BarChart3 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ExpandedChartModalProps {
@@ -75,7 +75,7 @@ export const ExpandedChartModal: React.FC<ExpandedChartModalProps> = ({
                                     contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     itemStyle={{ color: '#334155' }}
                                     labelFormatter={(label) => new Date(label).toLocaleDateString()}
-                                    formatter={(value: number) => [value.toLocaleString(), unit || 'Value']}
+                                    formatter={(value: number | undefined) => [value?.toLocaleString() || '', unit || 'Value']}
                                 />
                                 <Area
                                     type="monotone"

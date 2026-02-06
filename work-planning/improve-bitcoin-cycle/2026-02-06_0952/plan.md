@@ -1,19 +1,15 @@
-# Fix Bitcoin Cycle Chart: UI Polish
+# Fix Bitcoin Cycle Chart: Optimized Fallback
 
 ## User Request
-- "Current Price라는 텍스트 없애고 빨간 점만 남겨놔" (Remove 'Current Price' text, leave only red dot).
-- The user observed that the Current Price dot had a text label rendered next to it on the chart.
-
-## Diagnosis
-- The `PulseDot` component (used for the Red Dot `Scatter`) renders a `<text>` element if the data point has a `label` property.
-- I had added `label: 'Current Price'` to `currentPoint` in the previous step (to assist with Tooltip identification), unknowingly triggering the on-chart text rendering.
+- "바이낸스 한번 트라이하고 안되면 바로 다음 차선책을 사용해." (Try Binance once, if fail, immediately fallback).
 
 ## Solution
-- **Remove `label`**: Removed `label: 'Current Price'` from `currentPoint`.
-- **Tooltip Continuity**: The `CustomTooltip` logic uses `isCurrent` (which is still true) to identify the point, so the Tooltip will *still* correctly display "Current Price" even without the `label` property.
+- **Reduced Timeout**: Decreased fetch timeout from 3000ms to **1500ms** for each provider. This ensures faster failover.
+- **Cache Busting**: Added timestamp query param `?_=${Date.now()}` to all fetch URLs to bypass browser caching of failed/stale responses.
 
 ## Plan
-- [x] Remove `label` from `currentPoint` definition.
+- [x] Update `fetchLivePrice` timeouts.
+- [x] Add cache busting query params.
 
 ## Status
-- **Complete**. The chart will now display a clean pulsating red dot without adjacent text, while the hover tooltip remains informative.
+- **Complete**. The system now aggressively switches to backup providers (Coinbase/CoinGecko) if Binance hangs or fails, ensuring the live price is loaded as quickly as possible.
