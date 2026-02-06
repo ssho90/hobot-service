@@ -4,6 +4,7 @@ import { useBalance, useRebalancing } from '../hooks/useMacroData';
 import { formatCurrency, formatPercent, safeNumber } from '../utils/formatters';
 import { Wallet, TrendingUp, TrendingDown, RefreshCw, PieChart, BarChart3, AlertCircle, Loader2 } from 'lucide-react';
 import { TotalAssetTrendChart } from './TotalAssetTrendChart';
+import { RebalancingTestModal } from './RebalancingTestModal';
 
 // Color palette for charts
 const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#06b6d4'];
@@ -44,6 +45,7 @@ export const TradingDashboard: React.FC = () => {
     // UI Toggle States
     const [showMpDetails, setShowMpDetails] = useState(false);
     const [showSubMpDetails, setShowSubMpDetails] = useState<Record<string, boolean>>({});
+    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
     const toggleSubMpDetails = (assetClass: string) => {
         setShowSubMpDetails(prev => ({ ...prev, [assetClass]: !prev[assetClass] }));
@@ -280,7 +282,10 @@ export const TradingDashboard: React.FC = () => {
                                     </p>
                                 </div>
                             </div>
-                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                            <button
+                                onClick={() => setIsTestModalOpen(true)}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                            >
                                 Rebalancing Test
                             </button>
                         </div>
@@ -397,74 +402,101 @@ export const TradingDashboard: React.FC = () => {
                                     Sub-MP Details
                                 </h3>
                                 <div className="space-y-8">
-                                    {rebalancing.sub_mp.map((section) => (
-                                        <div key={section.asset_class} className="p-5 border border-zinc-200 rounded-xl bg-slate-50">
-                                            <div className="flex items-center gap-2 mb-4">
-                                                <div className="w-2 h-2 rounded-full bg-zinc-400"></div>
-                                                <h4 className="text-md font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
-                                                    {section.asset_class}
-                                                    {section.sub_mp_name && (
-                                                        <span className="text-xs font-normal text-zinc-500 bg-white px-2 py-0.5 rounded-full border border-zinc-200 normal-case">
-                                                            {section.sub_mp_name}
-                                                        </span>
-                                                    )}
-                                                    {isRecentUpdate(section.updated_at) && (
-                                                        <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" title="최근 24시간 내 업데이트됨"></span>
-                                                    )}
-                                                </h4>
-                                                <button
-                                                    onClick={() => toggleSubMpDetails(section.asset_class)}
-                                                    className="ml-auto p-1 text-zinc-400 hover:text-zinc-700 transition-colors"
-                                                    title="상세 정보 보기"
-                                                >
-                                                    <AlertCircle className="w-4 h-4" />
-                                                </button>
-                                            </div>
+                                    {rebalancing.sub_mp.map((section) => {
+                                        // Normalize name to handle "(합성)" suffix difference
+                                        // This ensures "TIGER CD금리투자KIS" and "TIGER CD금리투자KIS(합성)" are treated as the same
+                                        const normalizeName = (name: string) => name.replace(/\(합성\)/g, '').trim();
 
-                                            {showSubMpDetails[section.asset_class] && (section.sub_mp_description || section.updated_at) && (
-                                                <div className="mb-4 bg-white p-3 rounded-lg border border-zinc-200 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    {section.sub_mp_description && <p className="text-xs text-zinc-600 mb-2 leading-relaxed">{section.sub_mp_description}</p>}
-                                                    {section.updated_at && (
-                                                        <p className="text-[10px] text-zinc-500 flex items-center gap-2">
-                                                            Updated: {section.updated_at}
-                                                            {isRecentUpdate(section.updated_at) && (
-                                                                <span className="px-1 py-0.5 bg-blue-100 text-blue-600 text-[9px] font-bold rounded border border-blue-200">NEW</span>
-                                                            )}
-                                                        </p>
-                                                    )}
+                                        // Collect all unique normalized names to ensure consistent coloring
+                                        const allNames = Array.from(new Set([
+                                            ...section.target.map(i => normalizeName(i.name)),
+                                            ...section.actual.map(i => normalizeName(i.name))
+                                        ])).sort();
+
+                                        const getColor = (name: string) => {
+                                            const normalized = normalizeName(name);
+                                            const index = allNames.indexOf(normalized);
+                                            return COLORS[index % COLORS.length];
+                                        };
+
+                                        // Sort items by normalized name
+                                        const sortedTarget = [...section.target].sort((a, b) =>
+                                            normalizeName(a.name).localeCompare(normalizeName(b.name))
+                                        );
+                                        const sortedActual = [...section.actual].sort((a, b) =>
+                                            normalizeName(a.name).localeCompare(normalizeName(b.name))
+                                        );
+
+                                        return (
+                                            <div key={section.asset_class} className="p-5 border border-zinc-200 rounded-xl bg-slate-50">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <div className="w-2 h-2 rounded-full bg-zinc-400"></div>
+                                                    <h4 className="text-md font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
+                                                        {section.asset_class}
+                                                        {section.sub_mp_name && (
+                                                            <span className="text-xs font-normal text-zinc-500 bg-white px-2 py-0.5 rounded-full border border-zinc-200 normal-case">
+                                                                {section.sub_mp_name}
+                                                            </span>
+                                                        )}
+                                                        {isRecentUpdate(section.updated_at) && (
+                                                            <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" title="최근 24시간 내 업데이트됨"></span>
+                                                        )}
+                                                    </h4>
+                                                    <button
+                                                        onClick={() => toggleSubMpDetails(section.asset_class)}
+                                                        className="ml-auto p-1 text-zinc-400 hover:text-zinc-700 transition-colors"
+                                                        title="상세 정보 보기"
+                                                    >
+                                                        <AlertCircle className="w-4 h-4" />
+                                                    </button>
                                                 </div>
-                                            )}
 
-                                            <div className="space-y-5">
-                                                <div>
-                                                    <div className="flex justify-between text-xs text-zinc-500 mb-1.5 px-0.5">
-                                                        <span className="font-semibold text-blue-600/80">TARGET</span>
+                                                {showSubMpDetails[section.asset_class] && (section.sub_mp_description || section.updated_at) && (
+                                                    <div className="mb-4 bg-white p-3 rounded-lg border border-zinc-200 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                        {section.sub_mp_description && <p className="text-xs text-zinc-600 mb-2 leading-relaxed">{section.sub_mp_description}</p>}
+                                                        {section.updated_at && (
+                                                            <p className="text-[10px] text-zinc-500 flex items-center gap-2">
+                                                                Updated: {section.updated_at}
+                                                                {isRecentUpdate(section.updated_at) && (
+                                                                    <span className="px-1 py-0.5 bg-blue-100 text-blue-600 text-[9px] font-bold rounded border border-blue-200">NEW</span>
+                                                                )}
+                                                            </p>
+                                                        )}
                                                     </div>
-                                                    <StackedBar items={section.target.map((item, i) => ({
-                                                        label: item.name,
-                                                        value: item.weight_percent,
-                                                        color: COLORS[i % COLORS.length]
-                                                    }))} />
-                                                </div>
+                                                )}
 
-                                                <div>
-                                                    <div className="flex justify-between text-xs text-zinc-500 mb-1.5 px-0.5">
-                                                        <span className="font-semibold text-emerald-600/80">ACTUAL</span>
+                                                <div className="space-y-5">
+                                                    <div>
+                                                        <div className="flex justify-between text-xs text-zinc-500 mb-1.5 px-0.5">
+                                                            <span className="font-semibold text-blue-600/80">TARGET</span>
+                                                        </div>
+                                                        <StackedBar items={sortedTarget.map((item) => ({
+                                                            label: normalizeName(item.name),
+                                                            value: item.weight_percent,
+                                                            color: getColor(item.name)
+                                                        }))} />
                                                     </div>
-                                                    <StackedBar items={section.actual.map((item, i) => ({
-                                                        label: item.name,
-                                                        value: item.weight_percent,
-                                                        color: COLORS[i % COLORS.length]
-                                                    }))} />
+
+                                                    <div>
+                                                        <div className="flex justify-between text-xs text-zinc-500 mb-1.5 px-0.5">
+                                                            <span className="font-semibold text-emerald-600/80">ACTUAL</span>
+                                                        </div>
+                                                        <StackedBar items={sortedActual.map((item) => ({
+                                                            label: normalizeName(item.name),
+                                                            value: item.weight_percent,
+                                                            color: getColor(item.name)
+                                                        }))} />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
                     </div>
                 )}
+                <RebalancingTestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
             </div>
         </div>
     );

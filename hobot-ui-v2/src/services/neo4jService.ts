@@ -22,8 +22,9 @@ export interface GraphData {
 }
 
 export const runCypherQuery = async (
-    query: string, 
-    params: Record<string, any> = {}
+    query: string,
+    params: Record<string, any> = {},
+    database: string = 'architecture'
 ): Promise<GraphData> => {
     try {
         const response = await fetch('/api/neo4j/query', {
@@ -31,7 +32,7 @@ export const runCypherQuery = async (
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ query, params }),
+            body: JSON.stringify({ query, params, database }),
         });
 
         if (!response.ok) {
@@ -40,7 +41,7 @@ export const runCypherQuery = async (
         }
 
         const result = await response.json();
-        
+
         if (result.status === 'success' && result.data) {
             return {
                 nodes: result.data.nodes || [],
@@ -56,10 +57,10 @@ export const runCypherQuery = async (
     }
 };
 
-export const checkNeo4jHealth = async (): Promise<{ status: string; message: string }> => {
+export const checkNeo4jHealth = async (database: string = 'architecture'): Promise<{ status: string; message: string }> => {
     try {
-        const response = await fetch('/api/neo4j/health');
-        
+        const response = await fetch(`/api/neo4j/health?database=${database}`);
+
         if (!response.ok) {
             throw new Error(`API error: ${response.status}`);
         }

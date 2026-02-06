@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { BarChart3, Filter, Search, Check, Copy, X, BrainCircuit, Activity } from 'lucide-react';
+import { BarChart3, Filter, Search, Check, Copy, X, BrainCircuit, Activity, Users } from 'lucide-react';
 
 interface LLMLog {
   id: string;
@@ -14,6 +14,7 @@ interface LLMLog {
   duration_ms: number;
   request_prompt?: string;
   response_prompt?: string;
+  user_id?: string;
 }
 
 interface TokenUsage {
@@ -28,9 +29,29 @@ interface TokenUsage {
   avg_duration_ms?: number;
 }
 
+interface UserUsage {
+  user_id: string;
+  request_count: number;
+  total_prompt_tokens: number;
+  total_completion_tokens: number;
+  total_tokens: number;
+  avg_duration_ms: number;
+  last_used_at: string;
+  first_used_at: string;
+}
+
+interface UserUsageSummary {
+  total_users: number;
+  total_requests: number;
+  total_tokens_used: number;
+}
+
 export const AdminLLMMonitoring: React.FC = () => {
   const [logs, setLogs] = useState<LLMLog[]>([]);
   const [tokenUsage, setTokenUsage] = useState<TokenUsage[]>([]);
+  const [userUsage, setUserUsage] = useState<UserUsage[]>([]);
+  const [userUsageSummary, setUserUsageSummary] = useState<UserUsageSummary | null>(null);
+  const [llmUsers, setLlmUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedLog, setSelectedLog] = useState<LLMLog | null>(null);
@@ -39,11 +60,13 @@ export const AdminLLMMonitoring: React.FC = () => {
   const [filters, setFilters] = useState({
     model_name: 'All',
     service_name: 'All',
+    user_id: 'All',
     start_date: '',
     end_date: ''
   });
   const [timeRange, setTimeRange] = useState('1hour');
   const [groupBy, setGroupBy] = useState('day');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users'>('overview');
   const [copyFeedback, setCopyFeedback] = useState('');
   const { getAuthHeaders } = useAuth();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -108,6 +131,18 @@ export const AdminLLMMonitoring: React.FC = () => {
     }
   }, [getAuthHeaders]);
 
+  const fetchLlmUsers = useCallback(async () => {
+    try {
+      const response = await fetch('/api/llm-monitoring/users', { headers: getAuthHeaders() });
+      if (response.ok) {
+        const data = await response.json();
+        setLlmUsers(data.users || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch LLM users', err);
+    }
+  }, [getAuthHeaders]);
+
   const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
@@ -150,30 +185,57 @@ export const AdminLLMMonitoring: React.FC = () => {
     }
   }, [groupBy, filters, getAuthHeaders]);
 
+  const fetchUserUsage = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.start_date) params.append('start_date', filters.start_date);
+      if (filters.end_date) params.append('end_date', filters.end_date);
+      if (filters.user_id !== 'All') params.append('user_id', filters.user_id);
+
+      const response = await fetch(`/api/llm-monitoring/user-usage?${params}`, { headers: getAuthHeaders() });
+      if (response.ok) {
+        const data = await response.json();
+        setUserUsage(data.data || []);
+        setUserUsageSummary(data.summary || null);
+      }
+    } catch {
+      console.error('Failed to fetch user usage');
+    }
+  }, [filters, getAuthHeaders]);
+
   // --- Effects ---
   useEffect(() => {
     fetchOptions();
+    fetchLlmUsers();
     const range = calculateDateRange('1hour');
     setFilters(prev => ({ ...prev, ...range }));
-  }, [fetchOptions, calculateDateRange]);
+  }, [fetchOptions, fetchLlmUsers, calculateDateRange]);
 
   useEffect(() => {
-    if (filters.start_date && filters.end_date) { // Try to fetch even if not initialized once filters are set
-      fetchLogs();
-      fetchTokenUsage();
+    if (filters.start_date && filters.end_date) {
+      if (activeTab === 'overview') {
+        fetchLogs();
+        fetchTokenUsage();
+      } else {
+        fetchUserUsage();
+      }
       if (!isInitialized) setIsInitialized(true);
     }
-  }, [filters.model_name, filters.service_name, filters.start_date, filters.end_date, groupBy, fetchLogs, fetchTokenUsage, isInitialized]);
+  }, [filters.model_name, filters.service_name, filters.user_id, filters.start_date, filters.end_date, groupBy, activeTab, fetchLogs, fetchTokenUsage, fetchUserUsage, isInitialized]);
 
   const handleTimeRangeChange = (range: string) => {
     setTimeRange(range);
     setFilters(prev => ({ ...prev, ...calculateDateRange(range) }));
   };
 
+  const handleTabChange = (tab: 'overview' | 'users') => {
+    setActiveTab(tab);
+  };
+
   // Safe check for logs before mapping
   const renderLogRows = () => {
     if (!logs || logs.length === 0) {
-      return <tr><td colSpan={6} className="px-4 py-8 text-center text-zinc-600">로그가 없습니다.</td></tr>;
+      return <tr><td colSpan={7} className="px-4 py-8 text-center text-zinc-600">로그가 없습니다.</td></tr>;
     }
     return logs.map(log => (
       <tr key={log.id} className="hover:bg-slate-50 transition-colors">
@@ -183,6 +245,7 @@ export const AdminLLMMonitoring: React.FC = () => {
           <div className="text-xs text-zinc-500">{log.provider}</div>
         </td>
         <td className="px-4 py-3 text-zinc-500">{log.service_name || '-'}</td>
+        <td className="px-4 py-3 text-zinc-600">{log.user_id || '-'}</td>
         <td className="px-4 py-3 text-right font-mono text-xs">
           <span className="text-zinc-500">{log.prompt_tokens}</span> /
           <span className="text-zinc-500"> {log.completion_tokens}</span> /
@@ -220,6 +283,23 @@ export const AdminLLMMonitoring: React.FC = () => {
     ));
   };
 
+  const renderUserUsageRows = () => {
+    if (!userUsage || userUsage.length === 0) {
+      return <tr><td colSpan={7} className="px-4 py-8 text-center text-zinc-600">사용자별 데이터가 없습니다.</td></tr>;
+    }
+    return userUsage.map((item, i) => (
+      <tr key={i} className="hover:bg-slate-50 transition-colors">
+        <td className="px-4 py-3 font-medium text-zinc-800">{item.user_id}</td>
+        <td className="px-4 py-3 text-right text-zinc-600">{formatNumber(item.request_count)}</td>
+        <td className="px-4 py-3 text-right text-zinc-600">{formatNumber(item.total_prompt_tokens)}</td>
+        <td className="px-4 py-3 text-right text-zinc-600">{formatNumber(item.total_completion_tokens)}</td>
+        <td className="px-4 py-3 text-right font-bold text-emerald-600">{formatNumber(item.total_tokens)}</td>
+        <td className="px-4 py-3 text-right text-zinc-500">{item.avg_duration_ms ? Math.round(item.avg_duration_ms) + 'ms' : '-'}</td>
+        <td className="px-4 py-3 text-xs text-zinc-500">{formatDate(item.last_used_at)}</td>
+      </tr>
+    ));
+  };
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-zinc-900">
@@ -232,6 +312,32 @@ export const AdminLLMMonitoring: React.FC = () => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => handleTabChange('overview')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+            activeTab === 'overview'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          전체 현황
+        </button>
+        <button
+          onClick={() => handleTabChange('users')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+            activeTab === 'users'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          사용자별 현황
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="bg-white rounded-xl border border-zinc-200 p-6 mb-8 shadow-sm">
         <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-zinc-700">
@@ -242,7 +348,7 @@ export const AdminLLMMonitoring: React.FC = () => {
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Time Range</label>
             <div className="flex bg-slate-50 rounded-lg border border-zinc-200 p-1 overflow-x-auto custom-scrollbar">
-              {['5min', '15min', '30min', '1hour', '1day', '1week'].map(range => (
+              {['5min', '15min', '30min', '1hour', '1day', '1week', '1month'].map(range => (
                 <button
                   key={range}
                   onClick={() => handleTimeRangeChange(range)}
@@ -257,29 +363,47 @@ export const AdminLLMMonitoring: React.FC = () => {
             </div>
           </div>
 
-          <div className="min-w-[150px]">
-            <label className="block text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Model</label>
-            <select
-              value={filters.model_name}
-              onChange={(e) => setFilters({ ...filters, model_name: e.target.value })}
-              className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900"
-            >
-              <option value="All">All Models</option>
-              {models.map(m => <option key={m} value={m}>{m}</option>)}
-            </select>
-          </div>
+          {activeTab === 'overview' && (
+            <>
+              <div className="min-w-[150px]">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Model</label>
+                <select
+                  value={filters.model_name}
+                  onChange={(e) => setFilters({ ...filters, model_name: e.target.value })}
+                  className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900"
+                >
+                  <option value="All">All Models</option>
+                  {models.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
 
-          <div className="min-w-[150px]">
-            <label className="block text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Service</label>
-            <select
-              value={filters.service_name}
-              onChange={(e) => setFilters({ ...filters, service_name: e.target.value })}
-              className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900"
-            >
-              <option value="All">All Services</option>
-              {services.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
+              <div className="min-w-[150px]">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Service</label>
+                <select
+                  value={filters.service_name}
+                  onChange={(e) => setFilters({ ...filters, service_name: e.target.value })}
+                  className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900"
+                >
+                  <option value="All">All Services</option>
+                  {services.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'users' && (
+            <div className="min-w-[150px]">
+              <label className="block text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">User</label>
+              <select
+                value={filters.user_id}
+                onChange={(e) => setFilters({ ...filters, user_id: e.target.value })}
+                className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900"
+              >
+                <option value="All">All Users</option>
+                {llmUsers.map(u => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3">
@@ -287,14 +411,21 @@ export const AdminLLMMonitoring: React.FC = () => {
             onClick={() => {
               const range = calculateDateRange('1hour');
               setTimeRange('1hour');
-              setFilters({ model_name: 'All', service_name: 'All', ...range });
+              setFilters({ model_name: 'All', service_name: 'All', user_id: 'All', ...range });
             }}
             className="px-4 py-2 text-sm text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-all"
           >
             초기화
           </button>
           <button
-            onClick={() => { fetchLogs(); fetchTokenUsage(); }}
+            onClick={() => { 
+              if (activeTab === 'overview') {
+                fetchLogs(); 
+                fetchTokenUsage(); 
+              } else {
+                fetchUserUsage();
+              }
+            }}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm"
           >
             조회 적용
@@ -302,71 +433,120 @@ export const AdminLLMMonitoring: React.FC = () => {
         </div>
       </div>
 
-      {/* Token Usage Stats */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-6 mb-8 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold flex items-center gap-2 text-zinc-900">
-            <BarChart3 className="w-5 h-5 text-emerald-600" /> 토큰 사용량 통계
+      {activeTab === 'overview' ? (
+        <>
+          {/* Token Usage Stats */}
+          <div className="bg-white rounded-xl border border-zinc-200 p-6 mb-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-zinc-900">
+                <BarChart3 className="w-5 h-5 text-emerald-600" /> 토큰 사용량 통계
+              </h2>
+              <select
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value)}
+                className="bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-emerald-500 outline-none text-zinc-700"
+              >
+                <option value="day">일자별</option>
+                <option value="model">모델별</option>
+                <option value="service">서비스별</option>
+              </select>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-zinc-500 uppercase bg-slate-50 border-b border-zinc-200">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">{groupBy === 'day' ? 'Date' : groupBy === 'model' ? 'Model' : 'Service'}</th>
+                    {groupBy === 'model' && <th className="px-4 py-3 font-medium">Provider</th>}
+                    <th className="px-4 py-3 font-medium text-right">Prompt Tokens</th>
+                    <th className="px-4 py-3 font-medium text-right">Completion Tokens</th>
+                    <th className="px-4 py-3 font-medium text-right text-zinc-900">Total Tokens</th>
+                    <th className="px-4 py-3 font-medium text-right">Requests</th>
+                    {groupBy !== 'day' && <th className="px-4 py-3 font-medium text-right">Avg Latency</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {renderTokenUsageRows()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Logs Table */}
+          <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
+            <h2 className="text-lg font-bold flex items-center gap-2 mb-6 text-zinc-900">
+              <Activity className="w-5 h-5 text-blue-600" /> 상세 로그
+            </h2>
+
+            {loading ? (
+              <div className="text-center py-12 text-zinc-500 animate-pulse">데이터를 불러오는 중...</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-zinc-500 uppercase bg-slate-50 border-b border-zinc-200">
+                    <tr>
+                      <th className="px-4 py-3">Time</th>
+                      <th className="px-4 py-3">Model</th>
+                      <th className="px-4 py-3">Service</th>
+                      <th className="px-4 py-3">User</th>
+                      <th className="px-4 py-3 text-right">Tokens (P/C/T)</th>
+                      <th className="px-4 py-3 text-right">Latency</th>
+                      <th className="px-4 py-3 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {renderLogRows()}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        /* User Usage Tab */
+        <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
+          <h2 className="text-lg font-bold flex items-center gap-2 mb-6 text-zinc-900">
+            <Users className="w-5 h-5 text-purple-600" /> 사용자별 LLM 사용량
           </h2>
-          <select
-            value={groupBy}
-            onChange={(e) => setGroupBy(e.target.value)}
-            className="bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-emerald-500 outline-none text-zinc-700"
-          >
-            <option value="day">일자별</option>
-            <option value="model">모델별</option>
-            <option value="service">서비스별</option>
-          </select>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-zinc-500 uppercase bg-slate-50 border-b border-zinc-200">
-              <tr>
-                <th className="px-4 py-3 font-medium">{groupBy === 'day' ? 'Date' : groupBy === 'model' ? 'Model' : 'Service'}</th>
-                {groupBy === 'model' && <th className="px-4 py-3 font-medium">Provider</th>}
-                <th className="px-4 py-3 font-medium text-right">Prompt Tokens</th>
-                <th className="px-4 py-3 font-medium text-right">Completion Tokens</th>
-                <th className="px-4 py-3 font-medium text-right text-zinc-900">Total Tokens</th>
-                <th className="px-4 py-3 font-medium text-right">Requests</th>
-                {groupBy !== 'day' && <th className="px-4 py-3 font-medium text-right">Avg Latency</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {renderTokenUsageRows()}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {/* Summary Cards */}
+          {userUsageSummary && (
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                <div className="text-xs text-blue-600 font-medium uppercase tracking-wider mb-1">전체 사용자</div>
+                <div className="text-2xl font-bold text-blue-800">{formatNumber(userUsageSummary.total_users)}</div>
+              </div>
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border border-emerald-200">
+                <div className="text-xs text-emerald-600 font-medium uppercase tracking-wider mb-1">전체 요청 수</div>
+                <div className="text-2xl font-bold text-emerald-800">{formatNumber(userUsageSummary.total_requests)}</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                <div className="text-xs text-purple-600 font-medium uppercase tracking-wider mb-1">전체 토큰</div>
+                <div className="text-2xl font-bold text-purple-800">{formatNumber(userUsageSummary.total_tokens_used)}</div>
+              </div>
+            </div>
+          )}
 
-      {/* Logs Table */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
-        <h2 className="text-lg font-bold flex items-center gap-2 mb-6 text-zinc-900">
-          <Activity className="w-5 h-5 text-blue-600" /> 상세 로그
-        </h2>
-
-        {loading ? (
-          <div className="text-center py-12 text-zinc-500 animate-pulse">데이터를 불러오는 중...</div>
-        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-zinc-500 uppercase bg-slate-50 border-b border-zinc-200">
                 <tr>
-                  <th className="px-4 py-3">Time</th>
-                  <th className="px-4 py-3">Model</th>
-                  <th className="px-4 py-3">Service</th>
-                  <th className="px-4 py-3 text-right">Tokens (P/C/T)</th>
-                  <th className="px-4 py-3 text-right">Latency</th>
-                  <th className="px-4 py-3 text-center">Action</th>
+                  <th className="px-4 py-3 font-medium">User ID</th>
+                  <th className="px-4 py-3 font-medium text-right">요청 횟수</th>
+                  <th className="px-4 py-3 font-medium text-right">Prompt Tokens</th>
+                  <th className="px-4 py-3 font-medium text-right">Completion Tokens</th>
+                  <th className="px-4 py-3 font-medium text-right text-zinc-900">Total Tokens</th>
+                  <th className="px-4 py-3 font-medium text-right">Avg Latency</th>
+                  <th className="px-4 py-3 font-medium">마지막 사용</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800">
-                {renderLogRows()}
+              <tbody className="divide-y divide-zinc-100">
+                {renderUserUsageRows()}
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Modal */}
       {selectedLog && (
@@ -382,6 +562,26 @@ export const AdminLLMMonitoring: React.FC = () => {
             </div>
 
             <div className="overflow-y-auto p-6 space-y-6">
+              {/* Log metadata */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-zinc-500">Model:</span>
+                  <span className="ml-2 font-medium">{selectedLog.model_name}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500">Service:</span>
+                  <span className="ml-2 font-medium">{selectedLog.service_name || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500">User:</span>
+                  <span className="ml-2 font-medium">{selectedLog.user_id || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500">Tokens:</span>
+                  <span className="ml-2 font-medium">{selectedLog.total_tokens}</span>
+                </div>
+              </div>
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-zinc-700 uppercase tracking-wider">Request Prompt</h4>

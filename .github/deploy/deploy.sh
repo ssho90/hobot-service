@@ -40,6 +40,7 @@ export ENCRYPTION_MASTER_KEY="${ENCRYPTION_MASTER_KEY}"
 export NEO4J_URI="${NEO4J_URI}"
 export NEO4J_USER="${NEO4J_USER}"
 export NEO4J_PASSWORD="${NEO4J_PASSWORD}"
+export NEO4J_NEWS_URI="${NEO4J_NEWS_URI}"
 
 # 유틸리티 함수 (모든 로그는 stderr로 출력하여 변수 할당에 영향을 주지 않도록)
 log_info() {
@@ -214,6 +215,7 @@ ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
 NEO4J_URI=${NEO4J_URI}
 NEO4J_USER=${NEO4J_USER}
 NEO4J_PASSWORD=${NEO4J_PASSWORD}
+NEO4J_NEWS_URI=${NEO4J_NEWS_URI}
 EOF
   chmod 600 "${DEPLOY_PATH}/hobot/.env"
   log_success ".env file created"

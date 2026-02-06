@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { runCypherQuery } from '../services/neo4jService';
-import { generateCypherFromNaturalLanguage, explainQueryResults } from '../services/geminiService';
-import { Loader2, Database, X, MessageSquare, Send, Code, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { generateCypherFromNaturalLanguage, explainQueryResults, getOntologyQueryLimit, type QueryLimitInfo } from '../services/geminiService';
+import { Loader2, Database, X, MessageSquare, Send, Code, ChevronDown, ChevronUp, Sparkles, Lock, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface ChatMessage {
     id: string;
@@ -12,13 +13,18 @@ interface ChatMessage {
     timestamp: Date;
 }
 
-const OntologyPage: React.FC = () => {
+const OntologyPage: React.FC<{ mode?: 'architecture' | 'news' }> = ({ mode = 'architecture' }) => {
+    const { isAuthenticated } = useAuth();
+
     // Chat state
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [userInput, setUserInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
     const [showCypher, setShowCypher] = useState<string | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
+
+    // Query limit state
+    const [queryLimit, setQueryLimit] = useState<QueryLimitInfo | null>(null);
 
     // Graph state
     const [graphData, setGraphData] = useState<{ nodes: any[]; links: any[] }>({ nodes: [], links: [] });
@@ -31,10 +37,34 @@ const OntologyPage: React.FC = () => {
     // Graph panel collapse state
     const [graphCollapsed, setGraphCollapsed] = useState(false);
 
+    // Reset state when mode changes
+    useEffect(() => {
+        setChatMessages([]);
+        setGraphData({ nodes: [], links: [] });
+        setSelectedNode(null);
+        setGraphError(null);
+        loadDefaultGraph();
+    }, [mode]);
+
     // Load initial graph data
     useEffect(() => {
-        loadDefaultGraph();
+        // Initial load is handled by the mode change effect above to prevent double loading
+        // loadDefaultGraph(); 
     }, []);
+
+    // Fetch query limit when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchQueryLimit();
+        } else {
+            setQueryLimit(null);
+        }
+    }, [isAuthenticated]);
+
+    const fetchQueryLimit = async () => {
+        const limit = await getOntologyQueryLimit();
+        setQueryLimit(limit);
+    };
 
     // Resize observer for graph
     useEffect(() => {
@@ -63,7 +93,12 @@ const OntologyPage: React.FC = () => {
         setGraphLoading(true);
         setGraphError(null);
         try {
-            const result = await runCypherQuery('MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100');
+            // For News graph, we might want a different default query or Limit
+            const query = mode === 'architecture'
+                ? 'MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100'
+                : 'MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100'; // Adjust for news if needed
+
+            const result = await runCypherQuery(query, {}, mode);
             setGraphData({ nodes: result.nodes, links: result.links });
         } catch (err: any) {
             setGraphError(err.message || 'Failed to load graph data.');
@@ -73,7 +108,20 @@ const OntologyPage: React.FC = () => {
     };
 
     const handleSendMessage = async () => {
+        if (!isAuthenticated) return;
         if (!userInput.trim() || chatLoading) return;
+
+        // Check if user has remaining queries (non-admin)
+        if (queryLimit && !queryLimit.is_unlimited && queryLimit.remaining <= 0) {
+            const errorMessage: ChatMessage = {
+                id: Date.now().toString(),
+                type: 'assistant',
+                content: `일일 질의 한도(${queryLimit.daily_limit}회)를 초과했습니다. 내일 다시 시도해주세요.`,
+                timestamp: new Date(),
+            };
+            setChatMessages(prev => [...prev, errorMessage]);
+            return;
+        }
 
         const userMessage: ChatMessage = {
             id: Date.now().toString(),
@@ -88,20 +136,29 @@ const OntologyPage: React.FC = () => {
 
         try {
             // Step 1: Convert natural language to Cypher
-            const { cypher, error: cypherError } = await generateCypherFromNaturalLanguage(userMessage.content);
+            // Note: We need to pass 'mode' to backend to use correct schema. 
+            const { cypher, error: cypherError, remaining_queries } = await generateCypherFromNaturalLanguage(userMessage.content, mode);
+
+            // Update remaining queries
+            if (remaining_queries !== undefined && queryLimit) {
+                setQueryLimit({
+                    ...queryLimit,
+                    remaining: remaining_queries
+                });
+            }
 
             if (cypherError || !cypher) {
                 throw new Error(cypherError || 'Failed to generate Cypher query');
             }
 
             // Step 2: Execute Cypher query
-            const result = await runCypherQuery(cypher);
+            const result = await runCypherQuery(cypher, {}, mode);
 
             // Step 3: Explain results in natural language
             const explanation = await explainQueryResults(
                 userMessage.content,
                 cypher,
-                result.raw?.map(r => r.toObject()) || []
+                result.raw || []
             );
 
             const assistantMessage: ChatMessage = {
@@ -133,6 +190,18 @@ const OntologyPage: React.FC = () => {
         }
     };
 
+    const canQuery = isAuthenticated && (queryLimit?.is_unlimited || (queryLimit?.remaining ?? 0) > 0);
+
+    const examples = mode === 'architecture' ? [
+        '전체 리소스 개수는?',
+        'VNet과 연결된 Subnet 목록을 보여줘',
+        '어떤 환경(Environment)들이 있어?',
+    ] : [
+        '최근 1주일간 가장 많이 언급된 기업은?',
+        '특정 키워드와 연관된 뉴스를 찾아줘',
+        '뉴스 기사 간의 연결 관계를 보여줘',
+    ];
+
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 text-gray-900 font-sans">
             {/* Top Section: Natural Language Query Interface */}
@@ -141,9 +210,28 @@ const OntologyPage: React.FC = () => {
                 <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-white">
                     <div className="flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-indigo-600" />
-                        <h2 className="font-semibold text-gray-800">Graph DB 자연어 질의</h2>
+                        <h2 className="font-semibold text-gray-800">
+                            {mode === 'architecture' ? 'Architecture Graph' : 'News Graph'} 자연어 질의
+                        </h2>
                     </div>
-                    <span className="text-xs text-gray-500">자연어로 질문하면 Cypher 쿼리로 변환하여 답변합니다</span>
+                    <div className="flex items-center gap-3">
+                        {isAuthenticated && queryLimit && !queryLimit.is_unlimited && (
+                            <span className={`text-xs px-2 py-1 rounded-full ${queryLimit.remaining > 5
+                                ? 'bg-green-100 text-green-700'
+                                : queryLimit.remaining > 0
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
+                                남은 질의: {queryLimit.remaining}/{queryLimit.daily_limit}
+                            </span>
+                        )}
+                        {isAuthenticated && queryLimit?.is_unlimited && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                                무제한
+                            </span>
+                        )}
+                        <span className="text-xs text-gray-500">자연어로 질문하면 Cypher 쿼리로 변환하여 답변합니다</span>
+                    </div>
                 </div>
 
                 {/* Chat Messages */}
@@ -152,21 +240,25 @@ const OntologyPage: React.FC = () => {
                         <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
                             <MessageSquare className="w-12 h-12 opacity-30" />
                             <p className="text-sm">그래프 데이터베이스에 대해 자연어로 질문해보세요</p>
-                            <div className="flex flex-wrap gap-2 mt-2 justify-center">
-                                {[
-                                    '전체 리소스 개수는?',
-                                    'VNet과 연결된 Subnet 목록을 보여줘',
-                                    '어떤 환경(Environment)들이 있어?',
-                                ].map((example) => (
-                                    <button
-                                        key={example}
-                                        onClick={() => setUserInput(example)}
-                                        className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-indigo-100 text-gray-600 hover:text-indigo-700 rounded-full transition-colors"
-                                    >
-                                        {example}
-                                    </button>
-                                ))}
-                            </div>
+                            {isAuthenticated && canQuery && (
+                                <div className="flex flex-wrap gap-2 mt-2 justify-center">
+                                    {examples.map((example) => (
+                                        <button
+                                            key={example}
+                                            onClick={() => setUserInput(example)}
+                                            className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-indigo-100 text-gray-600 hover:text-indigo-700 rounded-full transition-colors"
+                                        >
+                                            {example}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {!isAuthenticated && (
+                                <div className="flex items-center gap-2 mt-4 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg">
+                                    <Lock className="w-4 h-4" />
+                                    <span className="text-sm">로그인 후 이용 가능합니다</span>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         chatMessages.map((msg) => (
@@ -176,8 +268,8 @@ const OntologyPage: React.FC = () => {
                             >
                                 <div
                                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.type === 'user'
-                                            ? 'bg-indigo-600 text-white rounded-br-md'
-                                            : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                                        ? 'bg-indigo-600 text-white rounded-br-md'
+                                        : 'bg-gray-100 text-gray-800 rounded-bl-md'
                                         }`}
                                 >
                                     <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
@@ -221,21 +313,33 @@ const OntologyPage: React.FC = () => {
                 {/* Input Area */}
                 <div className="p-4 border-t border-gray-100 bg-gray-50/50">
                     <div className="flex gap-2 max-w-4xl mx-auto">
-                        <input
-                            type="text"
-                            value={userInput}
-                            onChange={(e) => setUserInput(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="그래프 DB에 대해 질문하세요... (예: 어떤 리소스들이 있어?)"
-                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
-                            disabled={chatLoading}
-                        />
+                        {!isAuthenticated ? (
+                            <div className="flex-1 flex items-center justify-center px-4 py-3 border border-amber-200 bg-amber-50 rounded-xl text-amber-700 text-sm">
+                                <Lock className="w-4 h-4 mr-2" />
+                                회원가입해야 사용 가능합니다.
+                            </div>
+                        ) : !canQuery ? (
+                            <div className="flex-1 flex items-center justify-center px-4 py-3 border border-red-200 bg-red-50 rounded-xl text-red-700 text-sm">
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                일일 질의 한도를 초과했습니다. 내일 다시 시도해주세요.
+                            </div>
+                        ) : (
+                            <input
+                                type="text"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="그래프 DB에 대해 질문하세요... (예: 어떤 리소스들이 있어?)"
+                                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
+                                disabled={chatLoading}
+                            />
+                        )}
                         <button
                             onClick={handleSendMessage}
-                            disabled={!userInput.trim() || chatLoading}
-                            className={`px-4 py-3 rounded-xl font-medium flex items-center gap-2 transition-all ${!userInput.trim() || chatLoading
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
+                            disabled={!canQuery || !userInput.trim() || chatLoading}
+                            className={`px-4 py-3 rounded-xl font-medium flex items-center gap-2 transition-all ${!canQuery || !userInput.trim() || chatLoading
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
                                 }`}
                         >
                             {chatLoading ? (

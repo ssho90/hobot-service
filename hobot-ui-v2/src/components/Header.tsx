@@ -16,7 +16,12 @@ export const Header: React.FC = () => {
     { path: '/about', label: 'About' },
     { path: '/', label: 'Dashboard' },
     { path: '/trading', label: 'Trading' },
-    { path: '/ontology', label: 'Ontology' },
+    // { path: '/ontology', label: 'Ontology' }, // Moved to dropdown
+  ];
+
+  const ontologyItems = [
+    { path: '/ontology/architecture', label: 'Architecture Graph' },
+    { path: '/ontology/news', label: 'News Graph' },
   ];
 
   const adminItems = [
@@ -58,6 +63,32 @@ export const Header: React.FC = () => {
                   {item.label}
                 </Link>
               ))}
+
+              {/* Ontology Dropdown */}
+              <div className="relative group">
+                <button className={`flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-all ${location.pathname.startsWith('/ontology')
+                  ? 'text-white bg-zinc-800'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                  } `}>
+                  Ontology
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div className="absolute left-0 mt-0 w-48 bg-black border border-zinc-800 rounded-xl shadow-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left">
+                  <div className="py-1">
+                    {ontologyItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
               {/* Admin Dropdown */}
               {isAdmin && (

@@ -71,12 +71,7 @@ FRED_INDICATORS = {
         "unit": "Index",
         "frequency": "monthly"
     },
-    "GDP": {
-        "code": "GDP",
-        "name": "Gross Domestic Product",
-        "unit": "Billions of Dollars",
-        "frequency": "quarterly"
-    },
+
     "UNRATE": {
         "code": "UNRATE",
         "name": "Unemployment Rate",
@@ -169,6 +164,19 @@ FRED_INDICATORS = {
         "name": "St. Louis Fed Financial Stress Index",
         "unit": "Index",
         "frequency": "weekly" # 데이터 가용성에 따라 조정 필요할 수 있음
+    },
+    "T10Y2Y": {
+        "code": "T10Y2Y",
+        "name": "10-Year Minus 2-Year Treasury Constant Maturity",
+        "unit": "%",
+        "frequency": "daily"
+    },
+    "NETLIQ": {
+        "code": "NETLIQ",
+        "name": "Net Liquidity (Fed Balance Sheet - TGA - RRP)",
+        "unit": "Millions of Dollars",
+        "frequency": "daily",
+        "is_derived": True
     }
 }
 
@@ -446,6 +454,15 @@ class FREDCollector:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 
+                # 1. 기존 데이터 날짜 조회 (Batch Check)
+                cursor.execute(
+                    "SELECT date FROM fred_data WHERE indicator_code = %s",
+                    (indicator_code,)
+                )
+                existing_dates = {row['date'] for row in cursor.fetchall()}
+                
+                # 2. 저장할 데이터 준비
+                insert_data = []
                 for date_idx, value in data.items():
                     # pandas Timestamp를 date로 변환
                     if isinstance(date_idx, pd.Timestamp):
@@ -456,34 +473,36 @@ class FREDCollector:
                         data_date = pd.to_datetime(date_idx).date()
                     
                     # 이미 존재하는 데이터는 건너뛰기
-                    if self.check_data_exists(indicator_code, data_date):
+                    if data_date in existing_dates:
                         skipped_count += 1
                         continue
-                    
-                    try:
-                        cursor.execute(
-                            """
-                            INSERT INTO fred_data 
-                            (indicator_code, indicator_name, date, value, unit, source)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                            """,
-                            (
-                                indicator_code,
-                                indicator_name,
-                                data_date,
-                                float(value),
-                                unit,
-                                "FRED"
-                            )
-                        )
-                        saved_count += 1
-                    except Exception as e:
-                        logger.warning(f"데이터 저장 실패 ({indicator_code}, {data_date}): {e}")
-                        continue
+                        
+                    insert_data.append((
+                        indicator_code,
+                        indicator_name,
+                        data_date,
+                        float(value),
+                        unit,
+                        "FRED"
+                    ))
                 
-                conn.commit()
+                # 3. Bulk Insert
+                if insert_data:
+                    cursor.executemany(
+                        """
+                        INSERT INTO fred_data 
+                        (indicator_code, indicator_name, date, value, unit, source)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        """,
+                        insert_data
+                    )
+                    saved_count = len(insert_data)
+                    conn.commit()
+                else:
+                    saved_count = 0
+                
                 logger.info(
-                    f"{indicator_code} 저장 완료: {saved_count}개 저장, {skipped_count}개 건너뜀"
+                    f"{indicator_code} 저장 완료: {saved_count}개 저장, {skipped_count}개 건너뜀 (Batch)"
                 )
                 return saved_count
                 
@@ -521,6 +540,9 @@ class FREDCollector:
         
         for idx, (indicator_code, indicator_info) in enumerate(FRED_INDICATORS.items(), 1):
             try:
+                if indicator_info.get("is_derived"):
+                    continue
+                    
                 logger.info(
                     f"[{idx}/{total_indicators}] {indicator_code} ({indicator_info['name']}) 수집 시작..."
                 )
@@ -587,6 +609,9 @@ class FREDCollector:
                 # 오류 발생 시에도 다음 요청 전 딜레이
                 if idx < total_indicators:
                     time.sleep(request_delay)
+        
+        # 파생 지표 계산 및 저장
+        self.calculate_derived_indicators()
         
         return results
     
@@ -717,6 +742,192 @@ class FREDCollector:
         except Exception as e:
             logger.error(f"{indicator_code} 최신 데이터 조회 실패: {e}")
             raise FREDAPIError(f"데이터 조회 실패: {e}") from e
+
+    def calculate_derived_indicators(self):
+        """
+        기존 수집된 데이터를 바탕으로 파생 지표(Net Liquidity 등)를 계산하여 저장합니다.
+        """
+        logger.info("파생 지표 계산 시작...")
+        
+        # 1. Net Liquidity = WALCL - WTREGEN - RRPONTSYD
+        try:
+            days = 730 # 최근 2년
+            walcl = self.get_latest_data("WALCL", days=days)       # Weekly
+            wtregen = self.get_latest_data("WTREGEN", days=days)   # Daily
+            rrp = self.get_latest_data("RRPONTSYD", days=days)     # Daily
+            
+            if walcl.empty or wtregen.empty or rrp.empty:
+                logger.warning("Net Liquidity 계산을 위한 데이터가 부족합니다.")
+            else:
+                # DataFrame으로 병합
+                df = pd.DataFrame({
+                    "WALCL": walcl,
+                    "WTREGEN": wtregen,
+                    "RRP": rrp
+                })
+                
+                # WALCL(주간)을 일별로 보간 (Forward Fill - 매주 수요일 값이 다음 화요일까지 유지된다고 가정)
+                df["WALCL"] = df["WALCL"].ffill()
+                
+                # 나머지 누락값도 전일 값으로 채움 (휴일 등)
+                df = df.ffill().dropna()
+                
+                # 계산
+                net_liquidity = df["WALCL"] - df["WTREGEN"] - df["RRP"]
+                
+                # 저장
+                saved = self.save_to_db(
+                    "NETLIQ", 
+                    net_liquidity, 
+                    indicator_name="Net Liquidity (Fed Balance Sheet - TGA - RRP)",
+                    unit="Millions of Dollars"
+                )
+                logger.info(f"Net Liquidity 계산 및 저장 완료: {saved}건")
+                
+        except Exception as e:
+            logger.error(f"Net Liquidity 계산 실패: {e}")
+
+
+    def get_indicators_status(self) -> List[Dict]:
+        """
+        모든 지표의 상태(메타데이터, 최신 데이터 값, 데이터 날짜, 수집 시각) 및 Sparkline 데이터를 반환합니다.
+
+        Returns:
+            List[Dict]: 지표 상태 목록
+        """
+        status_list = []
+        
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                
+                # 1. 최신 상태 조회 (created_at 포함)
+                try:
+                    query = """
+                        SELECT 
+                            t1.indicator_code, 
+                            t1.date, 
+                            t1.value,
+                            t1.created_at
+                        FROM fred_data t1
+                        INNER JOIN (
+                            SELECT indicator_code, MAX(date) as max_date
+                            FROM fred_data
+                            GROUP BY indicator_code
+                        ) t2 ON t1.indicator_code = t2.indicator_code AND t1.date = t2.max_date
+                    """
+                    cursor.execute(query)
+                    
+                    db_results = {}
+                    for row in cursor.fetchall():
+                        db_results[row['indicator_code']] = {
+                            'date': row['date'], 
+                            'value': row['value'], 
+                            'created_at': row['created_at']
+                        }
+                        
+                except Exception as e:
+                    logger.warning(f"상세 상태 조회 실패, 기본 정보만 조회: {e}")
+                    # Fallback (구형 테이블 구조 대응)
+                    query = """
+                        SELECT 
+                            t1.indicator_code, 
+                            t1.date, 
+                            t1.value
+                        FROM fred_data t1
+                        INNER JOIN (
+                            SELECT indicator_code, MAX(date) as max_date
+                            FROM fred_data
+                            GROUP BY indicator_code
+                        ) t2 ON t1.indicator_code = t2.indicator_code AND t1.date = t2.max_date
+                    """
+                    cursor.execute(query)
+                    db_results = {}
+                    for row in cursor.fetchall():
+                        db_results[row['indicator_code']] = {
+                            'date': row['date'], 
+                            'value': row['value'], 
+                            'created_at': None
+                        }
+
+                # 2. Sparkline 데이터 조회 (각 지표별 최근 60개)
+                # 성능을 위해 윈도우 함수 사용
+                sparkline_data = {}
+                try:
+                   # MySQL 8.0+ 지원 (ROW_NUMBER)
+                   sparkline_query = """
+                        WITH RankedData AS (
+                            SELECT 
+                                indicator_code, 
+                                date, 
+                                value,
+                                ROW_NUMBER() OVER (PARTITION BY indicator_code ORDER BY date DESC) as rn
+                            FROM fred_data
+                            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR) -- 최근 2년 데이터 중에서만 검색하여 속도 최적화
+                        )
+                        SELECT indicator_code, date, value
+                        FROM RankedData
+                        WHERE rn <= 60
+                        ORDER BY indicator_code, date ASC
+                   """
+                   cursor.execute(sparkline_query)
+                   for row in cursor.fetchall():
+                       code = row['indicator_code']
+                       if code not in sparkline_data:
+                           sparkline_data[code] = []
+                       sparkline_data[code].append({
+                           'date': row['date'],
+                           'value': row['value']
+                       })
+                except Exception as e:
+                    logger.warning(f"Sparkline 데이터 조회 실패 (MySQL 버전을 확인하세요): {e}")
+                    # 윈도우 함수 미지원 시 Loop로 조회 (Fallback)
+                    for code in FRED_INDICATORS.keys():
+                        cursor.execute("""
+                            SELECT date, value 
+                            FROM fred_data 
+                            WHERE indicator_code = %s 
+                            ORDER BY date DESC 
+                            LIMIT 60
+                        """, (code,))
+                        rows = cursor.fetchall()
+                        # 날짜 오름차순 정렬
+                        sparkline_data[code] = [{'date': r['date'], 'value': r['value']} for r in sorted(rows, key=lambda x: x['date'])]
+
+                
+                for code, info in FRED_INDICATORS.items():
+                    result = db_results.get(code, {})
+                    history = sparkline_data.get(code, [])
+                    
+                    status_list.append({
+                        "code": code,
+                        "name": info.get("name", ""),
+                        "frequency": info.get("frequency", ""),
+                        "unit": info.get("unit", ""),
+                        "last_updated": result.get('date'), 
+                        "latest_value": result.get('value'),
+                        "last_collected_at": result.get('created_at'),
+                        "description": f"{info.get('name', '')} ({info.get('unit', '')})",
+                        "sparkline": history
+                    })
+                    
+        except Exception as e:
+            logger.error(f"지표 상태 조회 실패: {e}")
+            for code, info in FRED_INDICATORS.items():
+                status_list.append({
+                    "code": code,
+                    "name": info.get("name", ""),
+                    "frequency": info.get("frequency", ""),
+                    "unit": info.get("unit", ""),
+                    "last_updated": None,
+                    "latest_value": None,
+                    "last_collected_at": None,
+                    "description": f"{info.get('name', '')} ({info.get('unit', '')})",
+                    "sparkline": [],
+                    "error": str(e)
+                })
+        
+        return status_list
 
 
 def get_fred_collector() -> FREDCollector:

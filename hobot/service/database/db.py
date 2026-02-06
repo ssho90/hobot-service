@@ -322,13 +322,22 @@ def init_database():
                 total_tokens INT DEFAULT 0 COMMENT '총 토큰 수',
                 service_name VARCHAR(100) COMMENT '서비스명 (어떤 기능에서 호출했는지)',
                 duration_ms INT COMMENT '응답 시간 (밀리초)',
+                user_id VARCHAR(100) COMMENT '사용자 ID (인증된 사용자의 경우)',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
                 INDEX idx_model_name (model_name) COMMENT '모델명 인덱스',
                 INDEX idx_provider (provider) COMMENT '제공자 인덱스',
                 INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스 (일자별 조회용)',
-                INDEX idx_service_name (service_name) COMMENT '서비스명 인덱스'
+                INDEX idx_service_name (service_name) COMMENT '서비스명 인덱스',
+                INDEX idx_user_id (user_id) COMMENT '사용자 ID 인덱스'
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='LLM 사용 로그'
         """)
+        
+        # llm_usage_logs 테이블에 user_id 컬럼 추가 (마이그레이션)
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD COLUMN user_id VARCHAR(100) COMMENT '사용자 ID (인증된 사용자의 경우)'")
+            cursor.execute("ALTER TABLE llm_usage_logs ADD INDEX idx_user_id (user_id)")
+        except Exception:
+            pass  # 이미 존재하는 경우 무시
         
         # 시장 뉴스 요약 테이블 (원본 분석 및 브리핑용 요약)
         cursor.execute("""

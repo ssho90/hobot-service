@@ -40,7 +40,8 @@ def log_llm_usage(
     completion_tokens: int = 0,
     total_tokens: int = 0,
     service_name: Optional[str] = None,
-    duration_ms: Optional[int] = None
+    duration_ms: Optional[int] = None,
+    user_id: Optional[str] = None
 ):
     """
     LLM 사용 로그를 데이터베이스에 저장
@@ -55,6 +56,7 @@ def log_llm_usage(
         total_tokens: 총 토큰 수
         service_name: 서비스명 (어떤 기능에서 호출했는지)
         duration_ms: 응답 시간 (밀리초)
+        user_id: 사용자 ID (인증된 사용자의 경우)
     """
     try:
         # 현재 UTC 시간을 가져온 후 UTC+9로 변환
@@ -80,8 +82,8 @@ def log_llm_usage(
                 INSERT INTO llm_usage_logs (
                     model_name, provider, request_prompt, response_prompt,
                     prompt_tokens, completion_tokens, total_tokens,
-                    service_name, duration_ms, created_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    service_name, duration_ms, user_id, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 model_name,
                 provider,
@@ -92,13 +94,14 @@ def log_llm_usage(
                 total_tokens,
                 service_name,
                 duration_ms,
+                user_id,
                 now_kst_naive  # UTC+9 시간을 naive datetime으로 저장
             ))
             conn.commit()
             logger.info(f"LLM 사용 로그 DB 저장 성공: service_name={service_name}, model_name={model_name}, "
-                       f"total_tokens={total_tokens}, created_at={now_kst_naive}")
+                       f"user_id={user_id}, total_tokens={total_tokens}, created_at={now_kst_naive}")
     except Exception as e:
-        logger.error(f"LLM 사용 로그 저장 실패 (service_name={service_name}, model_name={model_name}): {e}", exc_info=True)
+        logger.error(f"LLM 사용 로그 저장 실패 (service_name={service_name}, model_name={model_name}, user_id={user_id}): {e}", exc_info=True)
         # 예외를 다시 발생시키지 않음 (로그 저장 실패가 전체 프로세스를 중단시키지 않도록)
 
 
@@ -173,7 +176,8 @@ class LLMCallTracker:
         tracker = LLMCallTracker(
             model_name="gemini-2.5-pro",
             provider="Google",
-            service_name="ai_strategist"
+            service_name="ai_strategist",
+            user_id="user123"
         )
         
         with tracker:
@@ -188,12 +192,14 @@ class LLMCallTracker:
         model_name: str,
         provider: str,
         service_name: Optional[str] = None,
-        request_prompt: Optional[str] = None
+        request_prompt: Optional[str] = None,
+        user_id: Optional[str] = None
     ):
         self.model_name = model_name
         self.provider = provider
         self.service_name = service_name
         self.request_prompt = request_prompt
+        self.user_id = user_id
         self.response_prompt = None
         self.prompt_tokens = 0
         self.completion_tokens = 0
@@ -212,7 +218,7 @@ class LLMCallTracker:
         # 에러가 발생해도 로그는 저장
         try:
             logger.info(f"LLM 사용 로그 저장 시도: service_name={self.service_name}, model_name={self.model_name}, "
-                       f"tokens={self.total_tokens}, duration={self.duration_ms}ms")
+                       f"user_id={self.user_id}, tokens={self.total_tokens}, duration={self.duration_ms}ms")
             log_llm_usage(
                 model_name=self.model_name,
                 provider=self.provider,
@@ -222,12 +228,13 @@ class LLMCallTracker:
                 completion_tokens=self.completion_tokens,
                 total_tokens=self.total_tokens,
                 service_name=self.service_name,
-                duration_ms=self.duration_ms
+                duration_ms=self.duration_ms,
+                user_id=self.user_id
             )
-            logger.info(f"LLM 사용 로그 저장 완료: service_name={self.service_name}, model_name={self.model_name}")
+            logger.info(f"LLM 사용 로그 저장 완료: service_name={self.service_name}, model_name={self.model_name}, user_id={self.user_id}")
         except Exception as e:
             # 로그 저장 실패 시에도 에러를 기록하되, 원래 예외는 전파하지 않음
-            logger.error(f"LLM 사용 로그 저장 실패 (service_name={self.service_name}, model_name={self.model_name}): {e}", exc_info=True)
+            logger.error(f"LLM 사용 로그 저장 실패 (service_name={self.service_name}, model_name={self.model_name}, user_id={self.user_id}): {e}", exc_info=True)
         
         return False
     
@@ -341,16 +348,17 @@ def track_llm_call(
     model_name: str,
     provider: str,
     service_name: Optional[str] = None,
-    request_prompt: Optional[str] = None
+    request_prompt: Optional[str] = None,
+    user_id: Optional[str] = None
 ) -> LLMCallTracker:
     """
     LLM 호출 추적을 위한 컨텍스트 매니저 생성 헬퍼 함수
     
     사용 예:
-        with track_llm_call("gemini-2.5-pro", "Google", "ai_strategist", prompt) as tracker:
+        with track_llm_call("gemini-2.5-pro", "Google", "ai_strategist", prompt, "user123") as tracker:
             llm = llm_gemini_pro()
             response = llm.invoke(prompt)
             tracker.set_response(response)
     """
-    return LLMCallTracker(model_name, provider, service_name, request_prompt)
+    return LLMCallTracker(model_name, provider, service_name, request_prompt, user_id)
 

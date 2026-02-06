@@ -91,21 +91,30 @@ const PulseDot: React.FC<{ cx?: number; cy?: number; payload?: { label?: string 
 
 const CustomTooltip: React.FC<any> = ({ active, payload }) => {
   if (!active || !payload || payload.length === 0) return null;
+
+  // Prioritize payload that has isCurrent flag or label 'Current Price'
   const target =
-    payload.find((item: any) => item.payload?.label) ||
+    payload.find((item: any) => item.payload?.isCurrent || item.payload?.label === 'Current Price') ||
     payload.find((item: any) => item.payload?.event) ||
     payload[0];
+
   const data = target.payload || {};
-  const tooltipDate = Number.isFinite(data.timestamp)
+
+  const dateLabel = Number.isFinite(data.timestamp)
     ? formatMonthLabel(data.timestamp)
     : typeof data.date === 'string'
       ? data.date
       : '';
+
+  const priceLabel = typeof data.price === 'number' ? `$${formatPrice(data.price)}` : '';
+
   return (
-    <div className="rounded-lg bg-zinc-900 text-white text-xs px-3 py-2 shadow-xl z-50">
-      <div className="font-semibold mb-1 text-zinc-300">{data.label ? 'Current Price' : data.event || 'Cycle Point'}</div>
-      <div className="text-white font-mono text-sm mb-1">${formatPrice(data.price)}</div>
-      {tooltipDate && <div className="text-zinc-500">{tooltipDate}</div>}
+    <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg shadow-xl text-xs z-50">
+      <div className="font-semibold mb-1 text-zinc-300">
+        {data.isCurrent || data.label === 'Current Price' ? 'Current Price' : data.event || 'Cycle Point'}
+      </div>
+      <div className="text-xl font-bold text-white mb-1">{priceLabel}</div>
+      <div className="text-zinc-500">{dateLabel}</div>
     </div>
   );
 };
@@ -135,10 +144,56 @@ export const BitcoinCycleChart: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const initialLoadRef = useRef(true);
   const [hoverPoint, setHoverPoint] = useState<{
-    xIndex: number;
+    xValue: number;
     price: number;
     dateLabel: string;
   } | null>(null);
+
+  const fetchLivePrice = async () => {
+    // 1. Binance
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        return parseFloat(data.price);
+      }
+    } catch (e) {
+      console.warn('Binance fetch failed, trying fallback...');
+    }
+
+    // 2. Coinbase
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot', { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        return parseFloat(data.data.amount);
+      }
+    } catch (e) {
+      console.warn('Coinbase fetch failed, trying fallback...');
+    }
+
+    // 3. CoinGecko (Backup)
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd', { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        return data.bitcoin.usd;
+      }
+    } catch (e) {
+      console.warn('All live price fetches failed');
+    }
+
+    return null;
+  };
 
   const fetchCycleData = async () => {
     try {
@@ -146,18 +201,30 @@ export const BitcoinCycleChart: React.FC = () => {
         setLoading(true);
       }
       setError(null);
-      const response = await fetch('/api/bitcoin-cycle');
-      if (!response.ok) {
+
+      // Fetch internal cycle data and live price in parallel
+      const [cycleRes, livePrice] = await Promise.all([
+        fetch('/api/bitcoin-cycle'),
+        fetchLivePrice()
+      ]);
+
+      if (!cycleRes.ok) {
         throw new Error('비트코인 사이클 데이터를 불러오는데 실패했습니다.');
       }
-      const result: ApiResponse = await response.json();
+      const result: ApiResponse = await cycleRes.json();
       if (!result.cycle_data) {
         throw new Error('사이클 데이터가 존재하지 않습니다.');
       }
 
       setCycleData(result.cycle_data);
 
-      if (result.current_price && typeof result.current_price.price === 'number') {
+      if (typeof livePrice === 'number') {
+        // Use live price if available
+        setCurrentPrice({ price: livePrice, timestamp: Date.now() });
+        setLastUpdated(new Date());
+        setPriceWarning(null);
+      } else if (result.current_price && typeof result.current_price.price === 'number') {
+        // Fallback to internal API price
         const timestamp = result.current_price.timestamp
           ? new Date(result.current_price.timestamp).getTime()
           : Date.now();
@@ -169,7 +236,7 @@ export const BitcoinCycleChart: React.FC = () => {
         setPriceWarning('현재 가격을 불러오지 못했습니다.');
       }
 
-      if (result.error) {
+      if (result.error && !livePrice) {
         setPriceWarning('현재 가격을 불러오지 못했습니다.');
       }
     } catch (err: any) {
@@ -188,7 +255,7 @@ export const BitcoinCycleChart: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const { chartData, indexLabels, indexTicks, hoverTargets } = useMemo(() => {
+  const { chartData, indexTicks, hoverTargets } = useMemo(() => {
     const nowTimestamp = Date.now();
     const withTimestamps = cycleData.map((item, originalIndex) => ({
       ...item,
@@ -228,30 +295,27 @@ export const BitcoinCycleChart: React.FC = () => {
       };
     });
 
-    const labels = normalized.map((item) => {
-      if (typeof item.date === 'string') {
-        const match = item.date.match(/^(\d{4})/);
-        if (match) return match[1];
-      }
-      if (item.timestamp !== null && Number.isFinite(item.timestamp)) return new Date(item.timestamp).getUTCFullYear().toString();
-      return '';
-    });
-
     const ticks: number[] = [];
-    let lastYear = '';
-    labels.forEach((year, index) => {
-      if (!year) return;
-      if (year !== lastYear) {
-        ticks.push(index);
-        lastYear = year;
+    if (normalized.length > 0) {
+      const minTime = normalized[0].timestamp as number;
+      const maxTime = normalized[normalized.length - 1].timestamp as number;
+      const minYear = new Date(minTime).getFullYear();
+      const maxYear = new Date(maxTime).getFullYear();
+
+      for (let y = minYear; y <= maxYear; y++) {
+        ticks.push(new Date(Date.UTC(y, 0, 1)).getTime());
       }
-    });
+    }
 
     return {
       chartData: normalized,
-      indexLabels: labels,
-      indexTicks: ticks,
-      hoverTargets: normalized.filter((item) => item.isHoverTarget)
+      indexTicks: ticks,   // These are now timestamps
+      // Ensure hoverTargets (invisible scatter) have explicit x mapped to timestamp for correct positioning
+      hoverTargets: normalized.filter((item) => item.isHoverTarget).map(d => ({
+        ...d,
+        x: d.timestamp,
+        y: d.price
+      }))
     };
   }, [cycleData]);
 
@@ -267,91 +331,112 @@ export const BitcoinCycleChart: React.FC = () => {
 
   const yTicks = [10, 100, 1000, 10000, 100000, 1000000]; // Fixed ticks for clean log scale
 
+  // Current point logic is much simpler on a time scale axis
+  // Explicitly map to x, y for Scatter to ensure correct positioning on number/time axis
   const currentPoint = currentPrice && chartData.length > 0
     ? [{
+      x: currentPrice.timestamp, // Explicit x for Scatter
+      y: currentPrice.price,     // Explicit y for Scatter
       timestamp: currentPrice.timestamp,
-      xIndex: (() => {
-        const timestamps = chartData.map((item) => item.timestamp);
-        const validTimestamps = timestamps.filter((value): value is number => Number.isFinite(value));
-        if (validTimestamps.length !== chartData.length) {
-          return Math.max(chartData.length - 1, 0);
-        }
-        const first = validTimestamps[0];
-        const last = validTimestamps[validTimestamps.length - 1];
-        if (currentPrice.timestamp <= first) return 0;
-        if (currentPrice.timestamp >= last) return Math.max(chartData.length - 1, 0);
-
-        for (let i = 0; i < validTimestamps.length - 1; i += 1) {
-          const start = validTimestamps[i];
-          const end = validTimestamps[i + 1];
-          if (currentPrice.timestamp >= start && currentPrice.timestamp <= end && end > start) {
-            const ratio = (currentPrice.timestamp - start) / (end - start);
-            return i + ratio;
-          }
-        }
-
-        return Math.max(chartData.length - 1, 0);
-      })(),
       price: currentPrice.price,
       isCurrent: true
     }]
     : [];
 
-  const xAxisKey = 'xIndex';
-  const xAxisScale = 'linear';
+  const xAxisKey = 'timestamp';
+  const xAxisScale = 'time'; // Recharts treats this as linear for numbers but good for semantics
   const xTickFormatter = (value: number) => {
-    const idx = Math.round(value);
-    return indexLabels[idx] ?? '';
+    return new Date(value).getFullYear().toString();
   };
-  const xAxisDomain: [number, number] = [0, Math.max(chartData.length - 1, 0)];
+
+  // Domain is auto on time axis usually, or we can enforce
+  const xAxisDomain: [number | 'auto', number | 'auto'] = ['auto', 'auto'];
   const xAxisTicks = indexTicks.length > 0 ? indexTicks : undefined;
+
   const formatHoverDate = (item: { date?: string; timestamp?: number | null }) => {
     if (typeof item.date === 'string' && item.date.length > 0) return item.date;
     if (item.timestamp !== null && item.timestamp !== undefined && Number.isFinite(item.timestamp)) return formatMonthLabel(item.timestamp);
     return '';
   };
+
   const resolveHoverPoint = (state: any) => {
-    if (!state || !Number.isFinite(state.chartX) || !Number.isFinite(state.chartY)) {
+    if (!state || !state.activePayload || state.activePayload.length === 0) {
       return null;
     }
 
-    const yAxis = state.yAxisMap && Object.values(state.yAxisMap)[0];
-    const xAxis = state.xAxisMap && Object.values(state.xAxisMap)[0];
-    if (!yAxis || !xAxis) return null;
+    // Try to find a target point (Peak/Bottom or Current) in the active payload
+    const targetPayload = state.activePayload.find((p: any) => {
+      const data = p.payload;
+      return data.isHoverTarget || data.isCurrent;
+    });
 
-    const mouseValue = yAxis.scale.invert ? yAxis.scale.invert(state.chartY) : null;
-    const mouseIndex = xAxis.scale.invert ? xAxis.scale.invert(state.chartX) : null;
-    if (!Number.isFinite(mouseValue) || !Number.isFinite(mouseIndex)) return null;
-
-    const candidates = [...hoverTargets, ...currentPoint].map((item) => ({
-      xIndex: Number(item.xIndex),
-      price: Number(item.price),
-      dateLabel: formatHoverDate(item),
-      isCurrent: Boolean((item as any).isCurrent)
-    }));
-
-    if (candidates.length === 0) return null;
-
-    let best = candidates[0];
-    let bestScore = Number.POSITIVE_INFINITY;
-    for (const candidate of candidates) {
-      const dx = Math.abs(candidate.xIndex - mouseIndex);
-      const dy = Math.abs(Math.log(candidate.price) - Math.log(mouseValue));
-      const score = dx + dy;
-      if (score < bestScore) {
-        bestScore = score;
-        best = candidate;
-      }
+    if (targetPayload) {
+      const data = targetPayload.payload;
+      return {
+        xValue: Number(data.timestamp), // Now we use timestamp as xValue
+        price: Number(data.price),
+        dateLabel: formatHoverDate(data)
+      };
     }
 
-    // Require the cursor to be reasonably close to a target point.
-    if (bestScore > 0.6) return null;
+    return null;
+  };
 
-    return {
-      xIndex: best.xIndex,
-      price: best.price,
-      dateLabel: best.isCurrent ? 'Current' : best.dateLabel
-    };
+  const CustomXReferenceLabel = (props: any) => {
+    const { viewBox, value } = props;
+    const { x, y, height } = viewBox;
+    return (
+      <g>
+        <rect
+          x={x - 30}
+          y={y + height}
+          width={60}
+          height={20}
+          rx={4}
+          fill="#374151"
+        />
+        <text
+          x={x}
+          y={y + height + 14}
+          textAnchor="middle"
+          fill="#ffffff"
+          fontSize={11}
+          fontWeight="bold"
+        >
+          {value}
+        </text>
+      </g>
+    );
+  };
+
+  const CustomYReferenceLabel = (props: any) => {
+    const { viewBox, value } = props;
+    // Ensure we don't draw if coordinates are invalid (sometimes happens on initial render)
+    if (!viewBox || !Number.isFinite(viewBox.x) || !Number.isFinite(viewBox.y)) return null;
+
+    const { x, y } = viewBox;
+    return (
+      <g>
+        <rect
+          x={x - 50}
+          y={y - 10}
+          width={50}
+          height={20}
+          rx={4}
+          fill="#374151"
+        />
+        <text
+          x={x - 25}
+          y={y + 4}
+          textAnchor="middle"
+          fill="#ffffff"
+          fontSize={11}
+          fontWeight="bold"
+        >
+          {value}
+        </text>
+      </g>
+    );
   };
 
   return (
@@ -416,28 +501,16 @@ export const BitcoinCycleChart: React.FC = () => {
                 {hoverPoint && (
                   <>
                     <ReferenceLine
-                      x={hoverPoint.xIndex}
-                      stroke="#cbd5f5"
-                      strokeDasharray="2 2"
-                      ifOverflow="extendDomain"
-                      label={{
-                        position: 'bottom',
-                        value: hoverPoint.dateLabel,
-                        fill: '#6b7280',
-                        fontSize: 11
-                      }}
+                      x={hoverPoint.xValue}
+                      stroke="#9ca3af"
+                      strokeDasharray="3 3"
+                      label={<CustomXReferenceLabel value={hoverPoint.dateLabel} />}
                     />
                     <ReferenceLine
                       y={hoverPoint.price}
-                      stroke="#cbd5f5"
-                      strokeDasharray="2 2"
-                      ifOverflow="extendDomain"
-                      label={{
-                        position: 'left',
-                        value: formatAxisPrice(hoverPoint.price),
-                        fill: '#6b7280',
-                        fontSize: 11
-                      }}
+                      stroke="#9ca3af"
+                      strokeDasharray="3 3"
+                      label={<CustomYReferenceLabel value={formatAxisPrice(hoverPoint.price)} />}
                     />
                   </>
                 )}
@@ -446,7 +519,7 @@ export const BitcoinCycleChart: React.FC = () => {
                 {halvingEvents.map((event, idx) => (
                   <ReferenceLine
                     key={idx}
-                    x={event.xIndex}
+                    x={event.timestamp!}
                     stroke="#e5e7eb"
                     strokeDasharray="3 3"
                     label={{
@@ -497,6 +570,16 @@ export const BitcoinCycleChart: React.FC = () => {
                     zAxisId={0}
                   />
                 )}
+
+                {/* Invisible Scatter for Peak/Bottom targets to aid simple interaction if needed, 
+                    though onMouseMove handles the math. It ensures data existence in chart context. */}
+                <Scatter
+                  data={hoverTargets}
+                  dataKey="price"
+                  fillOpacity={0} // Invisible
+                  legendType="none"
+                  isAnimationActive={false}
+                />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

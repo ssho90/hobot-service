@@ -41,7 +41,9 @@ const AppLayout: React.FC = () => {
           <Route path="/admin/llm" element={<AdminLLMMonitoring />} />
           <Route path="/admin/rebalancing" element={<AdminRebalancing />} />
           <Route path="/admin/files" element={<AdminFileUpload />} />
-          <Route path="/ontology" element={<OntologyPage />} />
+          <Route path="/ontology/architecture" element={<OntologyPage mode="architecture" />} />
+          <Route path="/ontology/news" element={<OntologyPage mode="news" />} />
+          <Route path="/ontology" element={<Navigate to="/ontology/architecture" replace />} />
           <Route path="/" element={<Dashboard />} />
         </Routes>
       </Suspense>

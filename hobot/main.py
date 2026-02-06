@@ -776,6 +776,35 @@ async def get_net_liquidity_data(
         logging.error(f"Error fetching net liquidity data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/macro-trading/fred-indicators")
+async def get_fred_indicators_status():
+    """FRED 지표 목록 및 상태 조회 API"""
+    try:
+        from service.macro_trading.collectors.fred_collector import get_fred_collector
+        from datetime import date, datetime
+        
+        collector = get_fred_collector()
+        indicators = collector.get_indicators_status()
+        
+        # Serialize date/datetime objects to strings
+        for ind in indicators:
+            if isinstance(ind.get('last_updated'), (date, datetime)):
+                ind['last_updated'] = ind['last_updated'].isoformat()
+            if isinstance(ind.get('last_collected_at'), (date, datetime)):
+                ind['last_collected_at'] = ind['last_collected_at'].isoformat()
+            
+            # Sparkline date serialization
+            if 'sparkline' in ind and isinstance(ind['sparkline'], list):
+                for point in ind['sparkline']:
+                    if isinstance(point.get('date'), (date, datetime)):
+                        point['date'] = point['date'].isoformat()
+                
+        return {"data": indicators, "count": len(indicators)}
+        
+    except Exception as e:
+        logging.error(f"Error fetching FRED indicators status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/macro-trading/account-snapshots")
 async def get_account_snapshots(
     days: int = Query(default=30, description="조회할 일수 (기본값: 30일)"),
@@ -3509,6 +3538,127 @@ async def get_llm_token_usage(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/llm-monitoring/user-usage")
+async def get_llm_user_usage(
+    start_date: Optional[str] = Query(default=None, description="시작 날짜 (YYYY-MM-DD 또는 YYYY-MM-DD HH:MM:SS)"),
+    end_date: Optional[str] = Query(default=None, description="종료 날짜 (YYYY-MM-DD 또는 YYYY-MM-DD HH:MM:SS)"),
+    user_id: Optional[str] = Query(default=None, description="특정 사용자 ID 필터"),
+    admin_user: dict = Depends(require_admin)
+):
+    """사용자별 LLM 사용량 조회 (Admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # WHERE 조건 구성
+            conditions = ["user_id IS NOT NULL"]  # 사용자 ID가 있는 것만
+            params = []
+            
+            if start_date:
+                if ' ' in start_date or 'T' in start_date:
+                    conditions.append("created_at >= %s")
+                else:
+                    conditions.append("DATE(created_at) >= %s")
+                params.append(start_date)
+            
+            if end_date:
+                if ' ' in end_date or 'T' in end_date:
+                    conditions.append("created_at <= %s")
+                else:
+                    conditions.append("DATE(created_at) <= %s")
+                params.append(end_date)
+            
+            if user_id:
+                conditions.append("user_id = %s")
+                params.append(user_id)
+            
+            where_clause = "WHERE " + " AND ".join(conditions)
+            
+            # 사용자별 집계 쿼리
+            query = f"""
+                SELECT 
+                    user_id,
+                    COUNT(*) as request_count,
+                    SUM(prompt_tokens) as total_prompt_tokens,
+                    SUM(completion_tokens) as total_completion_tokens,
+                    SUM(total_tokens) as total_tokens,
+                    AVG(duration_ms) as avg_duration_ms,
+                    MAX(created_at) as last_used_at,
+                    MIN(created_at) as first_used_at
+                FROM llm_usage_logs
+                {where_clause}
+                GROUP BY user_id
+                ORDER BY total_tokens DESC
+            """
+            
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            
+            # datetime 객체를 문자열로 변환
+            for result in results:
+                if result.get('last_used_at'):
+                    result['last_used_at'] = result['last_used_at'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(result['last_used_at'], 'strftime') else str(result['last_used_at'])
+                if result.get('first_used_at'):
+                    result['first_used_at'] = result['first_used_at'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(result['first_used_at'], 'strftime') else str(result['first_used_at'])
+                if result.get('avg_duration_ms'):
+                    result['avg_duration_ms'] = round(float(result['avg_duration_ms']), 2)
+            
+            # 전체 요약 통계
+            summary_query = f"""
+                SELECT 
+                    COUNT(DISTINCT user_id) as total_users,
+                    COUNT(*) as total_requests,
+                    SUM(total_tokens) as total_tokens_used
+                FROM llm_usage_logs
+                {where_clause}
+            """
+            cursor.execute(summary_query, params)
+            summary = cursor.fetchone()
+            
+            return {
+                "status": "success",
+                "start_date": start_date,
+                "end_date": end_date,
+                "summary": {
+                    "total_users": summary.get('total_users', 0) if summary else 0,
+                    "total_requests": summary.get('total_requests', 0) if summary else 0,
+                    "total_tokens_used": summary.get('total_tokens_used', 0) if summary else 0
+                },
+                "data": results
+            }
+    except Exception as e:
+        logging.error(f"사용자별 LLM 사용량 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/llm-monitoring/users")
+async def get_llm_users(admin_user: dict = Depends(require_admin)):
+    """LLM을 사용한 사용자 목록 조회 (Admin 전용)"""
+    try:
+        from service.database.db import get_db_connection
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT DISTINCT user_id 
+                FROM llm_usage_logs 
+                WHERE user_id IS NOT NULL 
+                ORDER BY user_id
+            """)
+            results = cursor.fetchall()
+            users = [r['user_id'] for r in results]
+            
+            return {
+                "status": "success",
+                "users": users
+            }
+    except Exception as e:
+        logging.error(f"LLM 사용자 목록 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/admin/files/upload")
 async def upload_file(
     file: UploadFile = File(...),
@@ -3690,6 +3840,7 @@ class GeminiMarketAnalysisRequest(BaseModel):
 
 class GeminiCypherRequest(BaseModel):
     question: str
+    database: Optional[str] = "architecture"  # "architecture" or "news"
     schema_override: Optional[str] = None
 
 class GeminiExplainRequest(BaseModel):
@@ -3710,11 +3861,103 @@ Graph Database Schema:
   - (VNet)-[:IN_ENVIRONMENT]->(Environment)
 - Common Node Properties: name, id, type, status, region, createdAt
 - Resource types may include: VM, Storage, Database, LoadBalancer, etc.
+- Resource types may include: VM, Storage, Database, LoadBalancer, etc.
 """
 
+NEWS_GRAPH_SCHEMA = """
+Graph Database Schema:
+- Node Labels: News, Person, Organization, Location, Topic, Stock, Country
+- Relationships: 
+  - (News)-[:MENTIONS]->(Person)
+  - (News)-[:MENTIONS]->(Organization)
+  - (News)-[:MENTIONS]->(Location)
+  - (News)-[:ABOUT]->(Topic)
+  - (News)-[:RELATES_TO]->(Stock)
+  - (News)-[:PUBLISHED_IN]->(Country)
+- Common Node Properties: name, title, date, sentiment, importance
+"""
+
+# Rate limiting for ontology queries (DB-based)
+ONTOLOGY_DAILY_LIMIT = 20  # Regular users can make 20 queries per day
+
+def check_ontology_rate_limit(user: dict) -> tuple[bool, int]:
+    """Check if user has exceeded their daily query limit using DB logs. Returns (is_allowed, remaining_count)"""
+    # Admin users have no limit
+    if user.get("role") == "admin":
+        return True, -1  # -1 means unlimited
+    
+    user_id = user.get("id") or user.get("username")
+    
+    try:
+        from service.database.db import get_db_connection
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            query = """
+                SELECT COUNT(*) as count 
+                FROM llm_usage_logs 
+                WHERE user_id = %s 
+                AND DATE(created_at) = CURRENT_DATE()
+                AND service_name IN ('architecture_graph_cypher', 'news_graph_cypher', 'ontology_generate_cypher')
+            """
+            cursor.execute(query, (user_id,))
+            result = cursor.fetchone()
+            count = result['count'] if result else 0
+            
+            remaining = max(0, ONTOLOGY_DAILY_LIMIT - count)
+            
+            if count >= ONTOLOGY_DAILY_LIMIT:
+                return False, 0
+                
+            return True, remaining
+    except Exception as e:
+        logging.error(f"Rate limit check failed: {e}")
+        # DB 에러 시 일단 허용하되 로그 남김 (또는 차단)
+        # 여기서는 보수적으로 0 리턴하여 차단할 수도 있지만, 장애 시 서비스 가용성을 위해 허용할 수도 있음.
+        # 요구사항이 '제한'이므로 에러 시 차단하는 것이 안전할 수 있으나, DB connection fail일 경우 사용자 경험 저하.
+        # Fallback to allow if DB fails? Or deny?
+        # Deny for now as strict requirement.
+        return False, 0
+
+def increment_ontology_query_count(user: dict):
+    """
+    Increment count is no longer needed as we count directly from llm_usage_logs.
+    This function is kept for backward compatibility if needed, or removed.
+    For this implementation, the usage log IS the count increment.
+    """
+    pass
+
+@api_router.get("/ontology/query-limit")
+async def get_ontology_query_limit(current_user: dict = Depends(get_current_user)):
+    """Get remaining query count for the current user"""
+    is_allowed, remaining = check_ontology_rate_limit(current_user)
+    is_admin = current_user.get("role") == "admin"
+    
+    return {
+        "status": "success",
+        "data": {
+            "daily_limit": ONTOLOGY_DAILY_LIMIT if not is_admin else -1,
+            "remaining": remaining,
+            "is_unlimited": is_admin
+        }
+    }
+
 @api_router.post("/gemini/generate-cypher")
-async def gemini_generate_cypher(request: GeminiCypherRequest):
-    """Gemini API를 통한 Cypher 쿼리 생성"""
+async def gemini_generate_cypher(request: GeminiCypherRequest, current_user: dict = Depends(get_current_user)):
+    """Gemini API를 통한 Cypher 쿼리 생성 (인증 필요, 일반 사용자 하루 20회 제한)"""
+    import time
+    from service.llm_monitoring import log_llm_usage
+    
+    # Check rate limit
+    is_allowed, remaining = check_ontology_rate_limit(current_user)
+    if not is_allowed:
+        raise HTTPException(
+            status_code=429, 
+            detail=f"일일 질의 한도({ONTOLOGY_DAILY_LIMIT}회)를 초과했습니다. 내일 다시 시도해주세요."
+        )
+    
+    start_time = time.time()
+    user_id = current_user.get("id") or current_user.get("username")
+    
     try:
         from google import genai
         from google.genai import types
@@ -3724,11 +3967,12 @@ async def gemini_generate_cypher(request: GeminiCypherRequest):
             raise HTTPException(status_code=500, detail="GOOGLE_API_KEY is not configured")
         
         client = genai.Client(api_key=api_key)
-        schema = request.schema_override or GRAPH_SCHEMA
+        if request.database == "news":
+            schema = request.schema_override or NEWS_GRAPH_SCHEMA
+        else:
+            schema = request.schema_override or GRAPH_SCHEMA
         
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=f"""{schema}
+        prompt = f"""{schema}
 
 User Question: {request.question}
 
@@ -3736,7 +3980,11 @@ Generate a Cypher query to answer this question.
 IMPORTANT: 
 - Return ONLY the Cypher query, no explanation
 - Use LIMIT 50 for safety unless specific count is requested
-- Match the schema labels and relationships exactly""",
+- Match the schema labels and relationships exactly"""
+        
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction="You are a Cypher query expert. Generate only valid Neo4j Cypher queries based on the given schema. Return ONLY the query, no markdown formatting, no explanations.",
             ),
@@ -3746,20 +3994,61 @@ IMPORTANT:
         # Clean up markdown formatting if present
         cypher = cypher.replace('```cypher\n', '').replace('```\n', '').replace('```', '').strip()
         
+        # Log LLM usage with user_id
+        duration_ms = int((time.time() - start_time) * 1000)
+        try:
+            # Extract token usage if available
+            prompt_tokens = 0
+            completion_tokens = 0
+            total_tokens = 0
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                usage = response.usage_metadata
+                prompt_tokens = getattr(usage, 'prompt_token_count', 0) or 0
+                completion_tokens = getattr(usage, 'candidates_token_count', 0) or 0
+                total_tokens = getattr(usage, 'total_token_count', 0) or (prompt_tokens + completion_tokens)
+            
+            log_llm_usage(
+                model_name='gemini-2.0-flash',
+                provider='Google',
+                request_prompt=prompt[:2000],  # Truncate for storage
+                response_prompt=cypher[:2000],
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=total_tokens,
+                service_name=f'{request.database}_graph_cypher', # 'architecture_graph_cypher' or 'news_graph_cypher'
+                duration_ms=duration_ms,
+                user_id=user_id
+            )
+        except Exception as log_err:
+            logging.warning(f"Failed to log LLM usage: {log_err}")
+        
+        # Query count is tracked via usage logs now
+        # increment_ontology_query_count(current_user)
+        _, new_remaining = check_ontology_rate_limit(current_user)
+        
         return {
             "status": "success",
             "data": {
-                "cypher": cypher
+                "cypher": cypher,
+                "remaining_queries": new_remaining
             }
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logging.error(f"Gemini Cypher generation error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/gemini/explain-results")
-async def gemini_explain_results(request: GeminiExplainRequest):
-    """Gemini API를 통한 쿼리 결과 설명"""
+async def gemini_explain_results(request: GeminiExplainRequest, current_user: dict = Depends(get_current_user)):
+    """Gemini API를 통한 쿼리 결과 설명 (인증 필요)"""
+    import time
+    from service.llm_monitoring import log_llm_usage
+    
+    start_time = time.time()
+    user_id = current_user.get("id") or current_user.get("username")
+    
     try:
         from google import genai
         from google.genai import types
@@ -3771,9 +4060,7 @@ async def gemini_explain_results(request: GeminiExplainRequest):
         client = genai.Client(api_key=api_key)
         results_str = json.dumps(request.results[:20], indent=2, ensure_ascii=False)
         
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=f"""User asked: "{request.question}"
+        prompt = f"""User asked: "{request.question}"
 
 Cypher query used: {request.cypher}
 
@@ -3785,16 +4072,49 @@ Please provide a clear, human-readable answer to the user's question based on th
 - Highlight key findings
 - Use bullet points for multiple items if appropriate
 - If no results, say so clearly
-- 한국어로 답변해줘""",
+- 한국어로 답변해줘"""
+        
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction="You are a helpful assistant that explains graph database query results in plain language. Be concise and focus on answering the user's original question.",
             ),
         )
         
+        explanation = response.text if response.text else "결과를 설명할 수 없습니다."
+        
+        # Log LLM usage with user_id
+        duration_ms = int((time.time() - start_time) * 1000)
+        try:
+            prompt_tokens = 0
+            completion_tokens = 0
+            total_tokens = 0
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                usage = response.usage_metadata
+                prompt_tokens = getattr(usage, 'prompt_token_count', 0) or 0
+                completion_tokens = getattr(usage, 'candidates_token_count', 0) or 0
+                total_tokens = getattr(usage, 'total_token_count', 0) or (prompt_tokens + completion_tokens)
+            
+            log_llm_usage(
+                model_name='gemini-2.0-flash',
+                provider='Google',
+                request_prompt=prompt[:2000],
+                response_prompt=explanation[:2000],
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=total_tokens,
+                service_name='ontology_explain_results',
+                duration_ms=duration_ms,
+                user_id=user_id
+            )
+        except Exception as log_err:
+            logging.warning(f"Failed to log LLM usage: {log_err}")
+        
         return {
             "status": "success",
             "data": {
-                "explanation": response.text if response.text else "결과를 설명할 수 없습니다."
+                "explanation": explanation
             }
         }
     except Exception as e:
@@ -3860,25 +4180,48 @@ async def gemini_market_analysis(request: GeminiMarketAnalysisRequest):
 class Neo4jQueryRequest(BaseModel):
     query: str
     params: Optional[dict] = None
+    database: Optional[str] = "architecture"  # "architecture" or "news"
 
-# Neo4j driver singleton
+# Neo4j driver singletons
 _neo4j_driver = None
+_neo4j_news_driver = None
 
-def get_neo4j_driver():
-    global _neo4j_driver
-    if _neo4j_driver is None:
-        from neo4j import GraphDatabase
-        uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-        user = os.getenv("NEO4J_USER", "neo4j")
-        password = os.getenv("NEO4J_PASSWORD", "")
-        _neo4j_driver = GraphDatabase.driver(uri, auth=(user, password))
-    return _neo4j_driver
+def get_neo4j_driver(database: str = "architecture"):
+    global _neo4j_driver, _neo4j_news_driver
+    
+    # Common credentials
+    user = os.getenv("NEO4J_USER", "neo4j")
+    password = os.getenv("NEO4J_PASSWORD", "")
+
+    if database == "news":
+        if _neo4j_news_driver is None:
+            from neo4j import GraphDatabase
+            # News Graph URL
+            uri = os.getenv("NEO4J_NEWS_URI")
+            logging.info(f"[Neo4j] Initializing News Graph Driver. URI: {uri}")
+            
+            if not uri:
+                 # Fallback/Log or Error if critical, but for now log warning
+                 logging.warning("NEO4J_NEWS_URI not set. logic might fail.")
+                 # Default to localhost if not set in dev, but in prod it should be set
+                 uri = "bolt://localhost:7687" 
+
+            _neo4j_news_driver = GraphDatabase.driver(uri, auth=(user, password))
+        return _neo4j_news_driver
+    else:
+        # Default / Architecture
+        if _neo4j_driver is None:
+            from neo4j import GraphDatabase
+            uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+            logging.info(f"[Neo4j] Initializing Architecture Graph Driver. URI: {uri}")
+            _neo4j_driver = GraphDatabase.driver(uri, auth=(user, password))
+        return _neo4j_driver
 
 @api_router.post("/neo4j/query")
 async def neo4j_run_query(request: Neo4jQueryRequest):
     """Neo4j Cypher 쿼리 실행"""
     try:
-        driver = get_neo4j_driver()
+        driver = get_neo4j_driver(request.database)
         
         with driver.session() as session:
             result = session.run(request.query, request.params or {})
@@ -3953,14 +4296,14 @@ async def neo4j_run_query(request: Neo4jQueryRequest):
 
 
 @api_router.get("/neo4j/health")
-async def neo4j_health_check():
+async def neo4j_health_check(database: str = Query("architecture")):
     """Neo4j 연결 상태 확인"""
     try:
-        driver = get_neo4j_driver()
+        driver = get_neo4j_driver(database)
         with driver.session() as session:
             result = session.run("RETURN 1 as test")
             result.single()
-        return {"status": "success", "message": "Neo4j connection is healthy"}
+        return {"status": "success", "message": f"Neo4j ({database}) connection is healthy"}
     except Exception as e:
         logging.error(f"Neo4j health check error: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}

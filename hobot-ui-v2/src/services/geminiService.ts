@@ -1,5 +1,6 @@
 // Gemini API calls through backend proxy
 // All API keys are managed on the backend for security
+// Authentication required for ontology queries
 
 export interface GraphQueryResult {
   cypher: string;
@@ -7,21 +8,83 @@ export interface GraphQueryResult {
   rawData?: any[];
 }
 
+export interface QueryLimitInfo {
+  daily_limit: number;
+  remaining: number;
+  is_unlimited: boolean;
+}
+
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('token');
+  if (!token) return {};
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+};
+
+export const getOntologyQueryLimit = async (): Promise<QueryLimitInfo | null> => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    const response = await fetch('/api/ontology/query-limit', {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const result = await response.json();
+    if (result.status === 'success' && result.data) {
+      return result.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to get query limit:', error);
+    return null;
+  }
+};
+
 export const generateCypherFromNaturalLanguage = async (
   question: string,
+  database: 'architecture' | 'news' = 'architecture',
   schemaOverride?: string
-): Promise<{ cypher: string; error?: string }> => {
+): Promise<{ cypher: string; error?: string; remaining_queries?: number }> => {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return {
+        cypher: '',
+        error: '로그인이 필요합니다.'
+      };
+    }
+
     const response = await fetch('/api/gemini/generate-cypher', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        question, 
-        schema_override: schemaOverride 
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        question,
+        database,
+        schema_override: schemaOverride
       }),
     });
+
+    if (response.status === 401) {
+      return {
+        cypher: '',
+        error: '로그인이 필요합니다.'
+      };
+    }
+
+    if (response.status === 429) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        cypher: '',
+        error: errorData.detail || '일일 질의 한도를 초과했습니다.'
+      };
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -29,9 +92,12 @@ export const generateCypherFromNaturalLanguage = async (
     }
 
     const result = await response.json();
-    
+
     if (result.status === 'success' && result.data) {
-      return { cypher: result.data.cypher || '' };
+      return {
+        cypher: result.data.cypher || '',
+        remaining_queries: result.data.remaining_queries
+      };
     }
 
     return {
@@ -53,20 +119,27 @@ export const explainQueryResults = async (
   results: any[]
 ): Promise<string> => {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return '로그인이 필요합니다.';
+    }
+
     const response = await fetch('/api/gemini/explain-results', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ question, cypher, results }),
     });
+
+    if (response.status === 401) {
+      return '로그인이 필요합니다.';
+    }
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
     }
 
     const result = await response.json();
-    
+
     if (result.status === 'success' && result.data) {
       return result.data.explanation || "결과를 설명할 수 없습니다.";
     }
@@ -93,7 +166,7 @@ export const generateMarketAnalysis = async (query: string): Promise<{ text: str
     }
 
     const result = await response.json();
-    
+
     if (result.status === 'success' && result.data) {
       return {
         text: result.data.text || "분석을 생성할 수 없습니다.",
