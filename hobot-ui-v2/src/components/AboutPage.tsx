@@ -123,6 +123,98 @@ export const AboutPage: React.FC = () => {
                 </div>
             </section>
 
+            {/* Live Screenshots */}
+            <section className="py-20 px-6 bg-slate-50">
+                <div className="max-w-6xl mx-auto">
+                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-4 text-center">
+                        {currentLang === 'KR' ? '실제 운영 화면' : 'Live Screenshots'}
+                    </h2>
+                    <p className="text-zinc-500 text-center mb-12">
+                        {currentLang === 'KR'
+                            ? '현재 실제로 운영 중인 Trading Dashboard의 화면입니다.'
+                            : 'Screenshots from our live Trading Dashboard in production.'}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Dashboard Overview */}
+                        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden hover:shadow-lg transition-all">
+                            <img
+                                src="/screenshots/dashboard_overview.png"
+                                alt="Dashboard Overview"
+                                className="w-full h-auto"
+                            />
+                            <div className="p-4 border-t border-zinc-100">
+                                <h4 className="font-semibold text-zinc-900">
+                                    {currentLang === 'KR' ? '대시보드 개요' : 'Dashboard Overview'}
+                                </h4>
+                                <p className="text-sm text-zinc-500 mt-1">
+                                    {currentLang === 'KR'
+                                        ? '총 평가금액, 수익률, 자산 추이를 한눈에 확인'
+                                        : 'Total valuation, returns, and asset trends at a glance'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Portfolio Holdings */}
+                        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden hover:shadow-lg transition-all">
+                            <img
+                                src="/screenshots/portfolio_holdings.png"
+                                alt="Portfolio Holdings"
+                                className="w-full h-auto"
+                            />
+                            <div className="p-4 border-t border-zinc-100">
+                                <h4 className="font-semibold text-zinc-900">
+                                    {currentLang === 'KR' ? '보유 종목' : 'Portfolio Holdings'}
+                                </h4>
+                                <p className="text-sm text-zinc-500 mt-1">
+                                    {currentLang === 'KR'
+                                        ? '개별 종목별 수량, 현재가, 평가금액, 수익률 현황'
+                                        : 'Individual holdings with quantity, price, valuation, and returns'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Rebalancing Status */}
+                        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden hover:shadow-lg transition-all">
+                            <img
+                                src="/screenshots/rebalancing_status.png"
+                                alt="Rebalancing Status"
+                                className="w-full h-auto"
+                            />
+                            <div className="p-4 border-t border-zinc-100">
+                                <h4 className="font-semibold text-zinc-900">
+                                    {currentLang === 'KR' ? '리밸런싱 현황' : 'Rebalancing Status'}
+                                </h4>
+                                <p className="text-sm text-zinc-500 mt-1">
+                                    {currentLang === 'KR'
+                                        ? 'AI 분석 기반 목표(Target) vs 실제(Actual) 비중 비교'
+                                        : 'AI-driven Target vs Actual allocation comparison'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Sub-MP Details */}
+                        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden hover:shadow-lg transition-all">
+                            <img
+                                src="/screenshots/sub_mp_details.png"
+                                alt="Sub-MP Details"
+                                className="w-full h-auto"
+                            />
+                            <div className="p-4 border-t border-zinc-100">
+                                <h4 className="font-semibold text-zinc-900">
+                                    {currentLang === 'KR' ? 'Sub-MP 상세' : 'Sub-MP Details'}
+                                </h4>
+                                <p className="text-sm text-zinc-500 mt-1">
+                                    {currentLang === 'KR'
+                                        ? '주식, 채권, 대체, 현금 각 자산군별 세부 비중'
+                                        : 'Detailed breakdown by Stocks, Bonds, Alternatives, and Cash'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Footer */}
             <footer className="py-12 border-t border-zinc-200 bg-white">
                 <div className="max-w-5xl mx-auto px-6 text-center">

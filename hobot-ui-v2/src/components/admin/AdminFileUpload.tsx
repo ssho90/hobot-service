@@ -17,6 +17,7 @@ export const AdminFileUpload: React.FC = () => {
     const [uploadMessage, setUploadMessage] = useState('');
     const [contentInput, setContentInput] = useState('');
     const [pastedFile, setPastedFile] = useState<File | null>(null);
+    const [displayedContent, setDisplayedContent] = useState<{ type: 'text' | 'image', content: string | null } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { getAuthHeaders } = useAuth();
 
@@ -60,7 +61,7 @@ export const AdminFileUpload: React.FC = () => {
         formData.append('file', file);
 
         try {
-            setUploadMessage('업로드 중...');
+            setUploadMessage(`'${file.name}' 업로드 중...`);
             // Note: fetch automatically sets Content-Type to multipart/form-data with boundary when body is FormData
             // We need to NOT set Content-Type in headers
             const headers = getAuthHeaders() as Record<string, string>;
@@ -74,7 +75,7 @@ export const AdminFileUpload: React.FC = () => {
             });
 
             if (response.ok) {
-                setUploadMessage('업로드가 완료되었습니다.');
+                setUploadMessage(`'${file.name}' 업로드가 완료되었습니다.`);
                 fetchFiles();
                 setTimeout(() => setUploadMessage(''), 3000);
             } else {
@@ -103,7 +104,9 @@ export const AdminFileUpload: React.FC = () => {
         e.stopPropagation();
         setIsDragging(false);
         if (e.dataTransfer.files.length > 0) {
-            handleUpload(e.dataTransfer.files[0]);
+            Array.from(e.dataTransfer.files).forEach(file => {
+                handleUpload(file);
+            });
         }
     };
 
@@ -126,20 +129,25 @@ export const AdminFileUpload: React.FC = () => {
         }
     };
 
-    const handleContentUpload = () => {
+    useEffect(() => {
+        return () => {
+            if (displayedContent?.type === 'image' && displayedContent.content) {
+                URL.revokeObjectURL(displayedContent.content);
+            }
+        };
+    }, [displayedContent]);
+
+    const handleDisplayContent = () => {
         if (pastedFile) {
-            handleUpload(pastedFile);
+            const newUrl = URL.createObjectURL(pastedFile);
+            setDisplayedContent({ type: 'image', content: newUrl });
             setPastedFile(null);
             setPreviewUrl(null);
         } else if (contentInput.trim()) {
-            const now = new Date();
-            const timestamp = now.toISOString().replace(/[:.]/g, '-');
-            const blob = new Blob([contentInput], { type: 'text/plain' });
-            const file = new File([blob], `memo_${timestamp}.txt`, { type: 'text/plain' });
-            handleUpload(file);
+            setDisplayedContent({ type: 'text', content: contentInput });
             setContentInput('');
         } else {
-            alert('업로드할 텍스트나 이미지가 없습니다.');
+            alert('표시할 텍스트나 이미지가 없습니다.');
         }
     };
 
@@ -184,7 +192,9 @@ export const AdminFileUpload: React.FC = () => {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            handleUpload(e.target.files[0]);
+            Array.from(e.target.files).forEach(file => {
+                handleUpload(file);
+            });
         }
     };
 
@@ -211,10 +221,10 @@ export const AdminFileUpload: React.FC = () => {
                             }
                         `}
                     >
-                        <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
+                        <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileChange} multiple />
                         <Upload className={`w-12 h-12 mb-4 ${isDragging ? 'text-blue-600' : 'text-zinc-400'}`} />
                         <h3 className="text-lg font-medium text-zinc-700">파일을 드래그하여 업로드</h3>
-                        <p className="text-sm text-zinc-500 mt-2">또는 클릭하여 파일 선택</p>
+                        <p className="text-sm text-zinc-500 mt-2">여러 파일을 드래그하거나 클릭하여 선택</p>
                     </div>
 
                     {/* Paste Area */}
@@ -249,13 +259,32 @@ export const AdminFileUpload: React.FC = () => {
 
                         <div className="flex justify-end mt-4">
                             <button
-                                onClick={handleContentUpload}
-                                className="px-4 py-2 bg-white hover:bg-slate-50 text-zinc-700 rounded-lg text-sm transition-colors border border-zinc-300 shadow-sm font-medium"
+                                onClick={handleDisplayContent}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors shadow-sm font-medium"
                             >
-                                붙여넣은 내용 업로드
+                                화면에 출력
                             </button>
                         </div>
                     </div>
+
+                    {/* Displayed Content Area */}
+                    {displayedContent && (
+                        <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                            <h3 className="text-sm font-semibold text-zinc-900 mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                최신 출력 내용
+                            </h3>
+                            <div className="bg-slate-50 rounded-lg p-4 border border-zinc-100 min-h-[100px] flex items-center justify-center">
+                                {displayedContent.type === 'image' ? (
+                                    <img src={displayedContent.content!} alt="Displayed Content" className="max-w-full h-auto rounded shadow-sm border border-zinc-200" />
+                                ) : (
+                                    <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-700 w-full break-all">
+                                        {displayedContent.content}
+                                    </pre>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Messages */}
                     {uploadMessage && (
