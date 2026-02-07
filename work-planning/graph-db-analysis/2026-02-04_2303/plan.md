@@ -481,7 +481,7 @@ RETURN e.name, collect(a.alias) AS aliases;
 ## 11. 실행 계획 (Phased Plan)
 
 ### 11.0 Phase 검토 요약 (리스크/의사결정 포인트)
-Phase A~D 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정량/통계 엣지 → GraphRAG/UI” 순서가 올바릅니다.
+Phase A~E 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정량/통계 엣지 → GraphRAG/UI” 순서가 올바릅니다.
 다만 아래 항목은 **초기에 명확히 결정/합의**되어야 이후 Phase의 재작업을 줄일 수 있습니다.
 
 1) **Neo4j DB 경계(결정됨)**  
@@ -526,7 +526,7 @@ Phase A~D 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 #### 상세 작업
 1) **Neo4j 스키마/제약/인덱스 확정**
    - `MacroTheme/EconomicIndicator/Document/Entity/EntityAlias` UNIQUE 제약 적용
-   - `IndicatorObservation`/`DerivedFeature` 키 설계
+   - `IndicatorObservation`/`DerivedFeature` 키 설
      - (권장) `IndicatorObservation`의 키는 `(indicator_code, obs_date[, vintage_date])`
      - Phase A에서는 `vintage_date`를 nullable로 두고, 제약은 “빈티지 미사용” 버전으로 먼저 적용(또는 두 모델 중 하나 선택)
    - 자주 조회될 `published_at`, `country`, `category`, `obs_date` 인덱스 적용
@@ -785,8 +785,9 @@ Phase A~D 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 4) **MacroState/AnalysisRun 적재**
    - `MacroState(date)` 생성: 당일 주요 시그널(`DerivedFeature`)과 테마 요약 연결
    - `AnalysisRun` 생성: 질문/프롬프트/응답/사용 모델/소요시간/근거 노드 링크 저장
-   - 회고/재현성을 위한 “as_of_date” 기록(필수)
+   - 회고/재현성을 위한 “as_of_date” 기록(필수) 
    - 참고: `ai_strategist.py` 기반 MP/Sub-MP 선택 및 리밸런싱 비율 산출/저장은 **Phase E**로 분리
+
 
 5) **운영/품질**
    - GraphRAG 품질 측정: “근거 링크 포함률”, “질문 재현성”, “응답 일관성”
@@ -809,6 +810,7 @@ Phase A~D 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 #### 리스크/대응
 * (리스크) GraphRAG 컨텍스트가 커져 토큰/비용 증가 → 서브그래프 Top-K, Evidence 요약/압축, 캐시 적용
 * (리스크) UI가 “무거운 그래프”를 렌더링하기 어려움 → 서버에서 요약 그래프/계층 뷰 제공
+
 
 ### Phase E: Strategy Integration (1주)
 `hobot/service/macro_trading/ai_strategist.py`의 MP/Sub-MP 선택 결과(=리밸런싱 목표 비중 산출)를 **Macro Graph(MKG)와 양방향으로 연결**합니다.
@@ -864,7 +866,6 @@ Phase A~D 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 * “오늘(또는 특정일) MP/Sub-MP가 왜 선택됐는가?”를 **Evidence 링크 포함** 형태로 조회/설명 가능
 * `StrategyDecision`이 `MacroState` 및 최소 2개 이상의 `Evidence/Document`와 연결됨(데이터 가용 시)
 * 전략결정 저장/미러링은 재실행 시 중복 없이(upsert) 동작
-
 ---
 **작성자**: Antigravity (AI Assistant)  
-**최종 업데이트**: 2026년 2월 7일
+**최종 업데이트**: 2026년 2월 6일
