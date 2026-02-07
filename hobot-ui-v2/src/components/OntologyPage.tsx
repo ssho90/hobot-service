@@ -13,7 +13,7 @@ interface ChatMessage {
     timestamp: Date;
 }
 
-const OntologyPage: React.FC<{ mode?: 'architecture' | 'news' }> = ({ mode = 'architecture' }) => {
+const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'architecture' }) => {
     const { isAuthenticated } = useAuth();
 
     // Chat state
@@ -93,10 +93,10 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'news' }> = ({ mode = 'ar
         setGraphLoading(true);
         setGraphError(null);
         try {
-            // For News graph, we might want a different default query or Limit
+            // For Macro graph, we might want a different default query or Limit
             const query = mode === 'architecture'
                 ? 'MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100'
-                : 'MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100'; // Adjust for news if needed
+                : 'MATCH (n)-[r]->(m) RETURN n,r,m LIMIT 100'; // Adjust for macro if needed
 
             const result = await runCypherQuery(query, {}, mode);
             setGraphData({ nodes: result.nodes, links: result.links });
@@ -197,9 +197,9 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'news' }> = ({ mode = 'ar
         'VNet과 연결된 Subnet 목록을 보여줘',
         '어떤 환경(Environment)들이 있어?',
     ] : [
-        '최근 1주일간 가장 많이 언급된 기업은?',
-        '특정 키워드와 연관된 뉴스를 찾아줘',
-        '뉴스 기사 간의 연결 관계를 보여줘',
+        '최근 7일간 인플레이션 리스크를 높인 이벤트는?',
+        '최근 유동성(Liquidity) 관련 이벤트 Top 10과 근거를 보여줘',
+        'Event → Theme → Indicator 영향 경로를 보여줘',
     ];
 
     return (
@@ -211,7 +211,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'news' }> = ({ mode = 'ar
                     <div className="flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-indigo-600" />
                         <h2 className="font-semibold text-gray-800">
-                            {mode === 'architecture' ? 'Architecture Graph' : 'News Graph'} 자연어 질의
+                            {mode === 'architecture' ? 'Architecture Graph' : 'Macro Graph'} 자연어 질의
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">

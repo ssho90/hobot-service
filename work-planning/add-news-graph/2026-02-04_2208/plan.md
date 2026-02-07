@@ -1,7 +1,7 @@
-# Ontology 메뉴 하위 화면 구성 및 News Graph 연결 계획
+# Ontology 메뉴 하위 화면 구성 및 Macro Graph 연결 계획
 
 ## 1. 개요
-* **목표**: Ontology 메뉴를 "Architecture Graph"와 "News Graph"로 분리하고, News Graph는 새로운 Neo4j 도메인에 연결.
+* **목표**: Ontology 메뉴를 "Architecture Graph"와 "Macro Graph"로 분리하고, Macro Graph는 별도 Neo4j 도메인에 연결. (legacy 명칭: News Graph)
 * **기간**: 2026-02-04
 * **담당**: Antigravity
 
@@ -10,38 +10,38 @@
 ### 2.1 Backend (Python)
 * [x] `hobot/main.py` 수정
     * `Neo4jQueryRequest` 모델에 `database` 필드 추가 (기본값: "architecture")
-    * `get_neo4j_driver` 함수가 `database` 인자에 따라 다른 드라이버("architecture" 또는 "news")를 반환하도록 수정
-    * `_neo4j_news_driver` 싱글톤 추가
+    * `get_neo4j_driver` 함수가 `database` 인자에 따라 다른 드라이버("architecture" 또는 "macro")를 반환하도록 수정 (legacy: "news")
+    * `_neo4j_macro_driver` 싱글톤 추가
     * APi 엔드포인트 `/api/neo4j/query`, `/api/neo4j/health` 수정
 
 ### 2.2 Frontend (React)
 * [x] `hobot-ui-v2/src/services/neo4jService.ts` 수정
     * `runCypherQuery`, `checkNeo4jHealth` 함수에 `database` 파라미터 추가
 * [x] `hobot-ui-v2/src/components/OntologyPage.tsx` 수정
-    * `mode` prop 추가 ('architecture' | 'news')
+    * `mode` prop 추가 ('architecture' | 'macro')
     * `mode`에 따라 쿼리 실행 시 `database` 파라미터 전달
     * UI 타이틀 및 예제 질문을 모드에 맞게 변경
 * [x] `hobot-ui-v2/src/components/Header.tsx` 수정
     * Ontology 메뉴를 Dropdown으로 변경
-    * 하위 메뉴: "Architecture Graph", "News Graph" 추가
+    * 하위 메뉴: "Architecture Graph", "Macro Graph" 추가
 * [x] `hobot-ui-v2/src/App.tsx` 수정
-    * 라우트 추가: `/ontology/architecture`, `/ontology/news`
+    * 라우트 추가: `/ontology/architecture`, `/ontology/macro` (legacy: `/ontology/news`는 redirect)
     * `/ontology` 접속 시 리다이렉트 처리
 
 ### 2.3 Deployment
 * [x] `.github/workflows/deploy.yml` 수정
-    * `NEO4J_NEWS_URI` Secret 환경변수 추가
+    * `NEO4J_MACRO_URI` Secret 환경변수 추가
 * [x] `.github/deploy/deploy.sh` 수정
-    * `NEO4J_NEWS_URI` export 및 `.env` 파일 생성 로직 추가
+    * `NEO4J_MACRO_URI` export 및 `.env` 파일 생성 로직 추가
 
 ## 3. 검증 계획
 * 배포 후 각 페이지 접속 테스트
 * Architecture Graph가 기존 데이터(Localhost/Existing)를 잘 불러오는지 확인
-* News Graph가 새로운 데이터(News Neo4j)를 잘 불러오는지 확인
+* Macro Graph가 새로운 데이터(Macro Neo4j)를 잘 불러오는지 확인
 
 ## 4. 기술적 주의사항 및 고도화 제언 (Data/Analysis Layer)
-본 문서는 “News Graph UI/연결”까지를 범위로 작성되었으나, **그래프의 분석 가치**는 결국 “데이터 적재/정규화/가중치 관리” 품질에 의해 결정됩니다.
-아래 항목은 News Graph 도메인에 실제 분석 데이터를 채우는 단계에서 반드시 고려해야 할 기술적 주의사항과 고도화 방향입니다.
+본 문서는 “Macro Graph UI/연결(legacy: News Graph)”까지를 범위로 작성되었으나, **그래프의 분석 가치**는 결국 “데이터 적재/정규화/가중치 관리” 품질에 의해 결정됩니다.
+아래 항목은 Macro Graph 도메인에 실제 분석 데이터를 채우는 단계에서 반드시 고려해야 할 기술적 주의사항과 고도화 방향입니다.
 
 ### 4.1 엔티티 정규화(Entity Normalization) / NEL 강화
 뉴스 텍스트는 표현이 매우 다양하므로, 엔티티 정규화가 무너지면 그래프 연결성 자체가 파편화됩니다.

@@ -67,7 +67,7 @@ jobs:
           NEO4J_URI: ${{ secrets.NEO4J_URI }}
           NEO4J_USER: ${{ secrets.NEO4J_USER }}
           NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
-          NEO4J_NEWS_URI: ${{ secrets.NEO4J_NEWS_URI }}
+          NEO4J_MACRO_URI: ${{ secrets.NEO4J_MACRO_URI }}
         run: |
           # 배포 스크립트 전송 및 실행
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
@@ -103,7 +103,7 @@ jobs:
             export NEO4J_URI="${NEO4J_URI}"
             export NEO4J_USER="${NEO4J_USER}"
             export NEO4J_PASSWORD="${NEO4J_PASSWORD}"
-            export NEO4J_NEWS_URI="${NEO4J_NEWS_URI}"
+            export NEO4J_MACRO_URI="${NEO4J_MACRO_URI}"
             
             chmod +x /tmp/deploy.sh
             /tmp/deploy.sh "${DEPLOY_PATH}" "${{ github.repository }}" "${GH_TOKEN}"

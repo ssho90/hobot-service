@@ -3840,7 +3840,7 @@ class GeminiMarketAnalysisRequest(BaseModel):
 
 class GeminiCypherRequest(BaseModel):
     question: str
-    database: Optional[str] = "architecture"  # "architecture" or "news"
+    database: Optional[str] = "architecture"  # "architecture" or "macro" (legacy: "news")
     schema_override: Optional[str] = None
 
 class GeminiExplainRequest(BaseModel):
@@ -3864,17 +3864,44 @@ Graph Database Schema:
 - Resource types may include: VM, Storage, Database, LoadBalancer, etc.
 """
 
-NEWS_GRAPH_SCHEMA = """
-Graph Database Schema:
-- Node Labels: News, Person, Organization, Location, Topic, Stock, Country
-- Relationships: 
-  - (News)-[:MENTIONS]->(Person)
-  - (News)-[:MENTIONS]->(Organization)
-  - (News)-[:MENTIONS]->(Location)
-  - (News)-[:ABOUT]->(Topic)
-  - (News)-[:RELATES_TO]->(Stock)
-  - (News)-[:PUBLISHED_IN]->(Country)
-- Common Node Properties: name, title, date, sentiment, importance
+MACRO_GRAPH_SCHEMA = """
+Macro Knowledge Graph Schema:
+- Node Labels:
+  - Document (doc_id, title, url, source, published_at, country, category, lang)
+  - Event (event_id, type, summary, event_time, country)
+  - MacroTheme (theme_id, name, description)
+  - EconomicIndicator (indicator_code, name, unit, frequency, source, country)
+  - IndicatorObservation (indicator_code, obs_date, value, vintage_date?)
+  - DerivedFeature (indicator_code, feature_name, obs_date)
+  - Entity (canonical_id, name, entity_type)
+  - EntityAlias (canonical_id, alias, lang)
+  - Fact (metric, value, unit, period, prev_value?)
+  - Claim (polarity, confidence)
+  - Evidence (text, lang, offset_start?, offset_end?)
+  - Story (story_id, window_days, method)
+  - MacroState (date)
+  - AnalysisRun (run_id, created_at, question, model, as_of_date)
+
+- Relationships:
+  - (Document)-[:MENTIONS]->(Event|Fact|Entity|EconomicIndicator|MacroTheme)
+  - (Document)-[:HAS_EVIDENCE]->(Evidence)
+  - (Evidence)-[:SUPPORTS]->(Fact|Claim)
+  - (Entity)-[:HAS_ALIAS]->(EntityAlias)
+  - (Event)-[:ABOUT_THEME]->(MacroTheme)
+  - (EconomicIndicator)-[:BELONGS_TO]->(MacroTheme)
+  - (Event)-[:AFFECTS]->(EconomicIndicator|MacroTheme)
+  - (Event)-[:CAUSES]->(Event)
+  - (Claim)-[:ABOUT]->(Event|EconomicIndicator|MacroTheme)
+  - (EconomicIndicator)-[:HAS_OBSERVATION]->(IndicatorObservation)
+  - (IndicatorObservation)-[:HAS_FEATURE]->(DerivedFeature)
+  - (Story)-[:CONTAINS]->(Document)
+  - (Story)-[:ABOUT_THEME]->(MacroTheme)
+  - (Story)-[:AFFECTS]->(EconomicIndicator)
+  - (MacroState)-[:HAS_SIGNAL]->(DerivedFeature)
+  - (MacroState)-[:DOMINANT_THEME]->(MacroTheme)
+  - (MacroState)-[:EXPLAINED_BY]->(Event|Story)
+  - (AnalysisRun)-[:USED_EVIDENCE]->(Evidence)
+  - (AnalysisRun)-[:USED_NODE]->(Event|EconomicIndicator|MacroTheme|Story|Document)
 """
 
 # Rate limiting for ontology queries (DB-based)
@@ -3897,7 +3924,7 @@ def check_ontology_rate_limit(user: dict) -> tuple[bool, int]:
                 FROM llm_usage_logs 
                 WHERE user_id = %s 
                 AND DATE(created_at) = CURRENT_DATE()
-                AND service_name IN ('architecture_graph_cypher', 'news_graph_cypher', 'ontology_generate_cypher')
+                AND service_name IN ('architecture_graph_cypher', 'macro_graph_cypher', 'news_graph_cypher', 'ontology_generate_cypher')
             """
             cursor.execute(query, (user_id,))
             result = cursor.fetchone()
@@ -3967,8 +3994,12 @@ async def gemini_generate_cypher(request: GeminiCypherRequest, current_user: dic
             raise HTTPException(status_code=500, detail="GOOGLE_API_KEY is not configured")
         
         client = genai.Client(api_key=api_key)
-        if request.database == "news":
-            schema = request.schema_override or NEWS_GRAPH_SCHEMA
+        database = (request.database or "architecture").lower()
+        if database == "news":
+            database = "macro"
+
+        if database == "macro":
+            schema = request.schema_override or MACRO_GRAPH_SCHEMA
         else:
             schema = request.schema_override or GRAPH_SCHEMA
         
@@ -4015,7 +4046,7 @@ IMPORTANT:
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
                 total_tokens=total_tokens,
-                service_name=f'{request.database}_graph_cypher', # 'architecture_graph_cypher' or 'news_graph_cypher'
+                service_name=f'{database}_graph_cypher', # 'architecture_graph_cypher' or 'macro_graph_cypher'
                 duration_ms=duration_ms,
                 user_id=user_id
             )
@@ -4180,34 +4211,38 @@ async def gemini_market_analysis(request: GeminiMarketAnalysisRequest):
 class Neo4jQueryRequest(BaseModel):
     query: str
     params: Optional[dict] = None
-    database: Optional[str] = "architecture"  # "architecture" or "news"
+    database: Optional[str] = "architecture"  # "architecture" or "macro" (legacy: "news")
 
 # Neo4j driver singletons
 _neo4j_driver = None
-_neo4j_news_driver = None
+_neo4j_macro_driver = None
 
 def get_neo4j_driver(database: str = "architecture"):
-    global _neo4j_driver, _neo4j_news_driver
+    global _neo4j_driver, _neo4j_macro_driver
     
     # Common credentials
     user = os.getenv("NEO4J_USER", "neo4j")
     password = os.getenv("NEO4J_PASSWORD", "")
 
+    database = (database or "architecture").lower()
     if database == "news":
-        if _neo4j_news_driver is None:
+        database = "macro"
+
+    if database == "macro":
+        if _neo4j_macro_driver is None:
             from neo4j import GraphDatabase
-            # News Graph URL
-            uri = os.getenv("NEO4J_NEWS_URI")
-            logging.info(f"[Neo4j] Initializing News Graph Driver. URI: {uri}")
+            # Macro Graph URL
+            uri = os.getenv("NEO4J_MACRO_URI")
+            logging.info(f"[Neo4j] Initializing Macro Graph Driver. URI: {uri}")
             
             if not uri:
                  # Fallback/Log or Error if critical, but for now log warning
-                 logging.warning("NEO4J_NEWS_URI not set. logic might fail.")
+                 logging.warning("NEO4J_MACRO_URI not set. Macro Graph logic might fail.")
                  # Default to localhost if not set in dev, but in prod it should be set
                  uri = "bolt://localhost:7687" 
 
-            _neo4j_news_driver = GraphDatabase.driver(uri, auth=(user, password))
-        return _neo4j_news_driver
+            _neo4j_macro_driver = GraphDatabase.driver(uri, auth=(user, password))
+        return _neo4j_macro_driver
     else:
         # Default / Architecture
         if _neo4j_driver is None:

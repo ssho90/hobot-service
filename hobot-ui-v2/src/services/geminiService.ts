@@ -49,7 +49,7 @@ export const getOntologyQueryLimit = async (): Promise<QueryLimitInfo | null> =>
 
 export const generateCypherFromNaturalLanguage = async (
   question: string,
-  database: 'architecture' | 'news' = 'architecture',
+  database: 'architecture' | 'macro' = 'architecture',
   schemaOverride?: string
 ): Promise<{ cypher: string; error?: string; remaining_queries?: number }> => {
   try {

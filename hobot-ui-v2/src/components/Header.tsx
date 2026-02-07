@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
 
   const ontologyItems = [
     { path: '/ontology/architecture', label: 'Architecture Graph' },
-    { path: '/ontology/news', label: 'News Graph' },
+    { path: '/ontology/macro', label: 'Macro Graph' },
   ];
 
   const adminItems = [
