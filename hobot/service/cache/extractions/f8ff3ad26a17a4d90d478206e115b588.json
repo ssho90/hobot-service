@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5673",
+  "extracted_at": "2026-02-07T15:42:15.766593",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "US-India trade deal",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "A trade agreement cutting US tariffs on Indian goods from 50% to 18% while maintaining protections for certain agricultural products.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Budget session",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Upcoming legislative session regarding the national budget.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "RBI interest rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of India's scheduled meeting to decide on interest rates.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Indian rupee rose toward 90.1 per dollar, reaching its strongest level in over three weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indian rupee"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Indian rupee rose toward 90.1 per dollar, extending gains to its strongest level in over three weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US-India trade deal reduces US tariffs on Indian goods from 50% to 18%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "US",
+        "India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US-India trade deal, which cuts US tariffs on Indian goods from 50% to 18%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Reserve Bank of India\u2019s interest rate decision is scheduled for February 6, 2026.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Reserve Bank of India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Reserve Bank of India\u2019s interest rate decision scheduled for February 6, 2026.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Corporate flows continued to influence the currency.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Corporate flows continued to influence the currency",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Easing forward premiums and increased exporter hedging have helped temper near-term depreciation pressures.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "easing forward premiums and increased exporter hedging have helped temper near-term depreciation pressures.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The trade deal underpins Indian assets.",
+      "claim_type": "opinion",
+      "author": "Analysts",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Analysts say the deal underpins Indian assets",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Sustained gains for the rupee will depend on clarity around implementation and broader capital flows.",
+      "claim_type": "prediction",
+      "author": "Analysts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "sustained gains will depend on clarity around implementation and broader capital flows.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US-India trade deal",
+      "target_type": "Theme",
+      "target_ref": "Indian Rupee",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the currency continues to draw some support from the recent US-India trade deal",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Corporate dollar activity",
+      "target_type": "Theme",
+      "target_ref": "Indian Rupee",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Corporate flows continued to influence the currency",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Exporter hedging",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "increased exporter hedging have helped temper near-term depreciation pressures.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "RBI interest rate decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investors remain cautious ahead of developments in the Budget session and the Reserve Bank of India\u2019s interest rate decision",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12915,
+  "error_messages": []
+}

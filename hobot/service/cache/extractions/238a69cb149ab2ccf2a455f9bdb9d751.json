@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5785",
+  "extracted_at": "2026-02-07T05:44:42.084032",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Copper fell to around $5.77 per pound on Friday, hitting its lowest level in nearly six weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Copper"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Copper fell to around $5.77 per pound on Friday, hitting its lowest level in nearly six weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Copper is on track for its worst week since late November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Copper"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "and on track for its worst week since late November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Stockpiles in LME warehouses across Asia are climbing.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "LME warehouses",
+        "Asia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Stockpiles in LME warehouses across Asia are also climbing",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The China Nonferrous Metals Industry Association projected that refined copper output will rise about 5% in 2026.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "China Nonferrous Metals Industry Association",
+        "refined copper"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Market sentiment was further weighed down after the China Nonferrous Metals Industry Association projected that refined copper output will rise about 5% in 2026, half the growth recorded in 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Slowing demand from Chinese buyers and rising inventories pressured copper prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "pressured by slowing demand from Chinese buyers and rising inventories",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The trend of rising stockpiles could accelerate as traders divert shipments from Africa to China to take advantage of temporary price gaps between Shanghai and London.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Analysts say the trend could accelerate as traders divert shipments from Africa to China to take advantage of temporary price gaps between Shanghai and London.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Slowing demand from Chinese buyers",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pressured by slowing demand from Chinese buyers",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rising inventories",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pressured by slowing demand from Chinese buyers and rising inventories",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5474,
+  "error_messages": []
+}

@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5882",
+  "extracted_at": "2026-02-09T01:09:15.463468",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January jobs report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "US labor market data release scheduled for Wednesday.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Inflation data release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "US inflation data set for release on Friday.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan General Election",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Landslide victory for incumbent Prime Minister Sanae Takaichi.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran discussions",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Top US and Iranian officials continuing discussions following talks last Friday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Gold climbed more than 1% to above $5,030 per ounce on Monday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gold climbed more than 1% to above $5,030 per ounce on Monday, reaching its highest level in over a week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Sanae Takaichi won a landslide victory in Japan.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Sanae Takaichi",
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a landslide victory for incumbent Prime Minister Sanae Takaichi",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "China's central bank has purchased gold for 15 consecutive months as of January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China",
+        "central bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "China\u2019s central bank extending its gold purchases for a 15th consecutive month in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The January jobs report is expected to show signs of stabilization in the labor market.",
+      "claim_type": "prediction",
+      "author": "Market consensus",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The January jobs report due Wednesday, which is expected to show signs of stabilization in the labor market",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Takaichi's victory strengthened expectations of looser fiscal policy and a weaker yen.",
+      "claim_type": "analysis",
+      "author": "Investors",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "strengthened expectations of looser fiscal and continued downward pressure on the yen",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Investors are looking to US economic data for guidance on the Federal Reserve's interest rate path.",
+      "claim_type": "analysis",
+      "author": "Investors",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "investors awaited key US economic data that could offer clearer guidance on the Federal Reserve\u2019s interest rate outlook",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US economic data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "key US economic data that could offer clearer guidance on the Federal Reserve\u2019s interest rate outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Sanae Takaichi victory",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "strengthened expectations of looser fiscal",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "China's central bank",
+      "target_type": "Theme",
+      "target_ref": "Gold",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "demand from central banks remained strong, with China\u2019s central bank extending its gold purchases",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-Iran discussions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the geopolitical front, top US and Iranian officials are set to continue discussions",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11442,
+  "error_messages": []
+}

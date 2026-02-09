@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5611",
+  "extracted_at": "2026-02-07T16:26:46.887781",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Lower house elections",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Snap vote called by Prime Minister Sanae Takaichi scheduled for the upcoming weekend.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan\u2019s Q4 GDP report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Quarterly economic growth report due for release next week.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Renesas Electronics Timing business sale",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Renesas Electronics announced plans to sell its Timing business to SiTime for $3 billion.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Nikkei 225 Index rose 0.2% to around 4,400 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nikkei 225 Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Nikkei 225 Index rose 0.2% to around 4,400 on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Topix Index gained 0.4% to 3,670.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Topix Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the broader Topix Index gained 0.4% to 3,670",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Prime Minister Sanae Takaichi called a snap vote.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Sanae Takaichi"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Prime Minister Sanae Takaichi called the snap vote",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Renesas Electronics shares rose 7% following a divestment announcement.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Renesas Electronics",
+        "SiTime"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Renesas Electronics jumped 7% after announcing plans to sell its Timing business to SiTime for $3 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Japan's Q4 GDP is expected to rebound after a sharp contraction.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s Q4 GDP report due next week, which is expected to rebound after a sharp contraction in the prior quarter.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Prime Minister is seeking voter backing for increased spending.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "she seeks voter backing for increased spending and other policy priorities.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Lower house elections",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors turned their attention to lower house elections scheduled for this weekend.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Japan\u2019s Q4 GDP report",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investors are also looking ahead to Japan\u2019s Q4 GDP report due next week, which is expected to rebound",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Sanae Takaichi",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "she seeks voter backing for increased spending and other policy priorities.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10291,
+  "error_messages": []
+}

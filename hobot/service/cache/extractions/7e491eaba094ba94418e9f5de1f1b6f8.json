@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5825",
+  "extracted_at": "2026-02-07T05:42:05.115059",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Lithuania's trade deficit narrowed to EUR 0.506 billion in December 2025 from EUR 0.632 billion in December 2024.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Lithuania"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Lithuania\u2019s trade deficit narrowed to EUR 0.506 billion in December 2025 from EUR 0.632 billion in December 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports surged 8% year-on-year to EUR 2.856 billion.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Lithuania"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports surged 8% year-on-year to EUR 2.856 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports also rose by 2.6% year-on-year to EUR 3.361 billion.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Lithuania"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "imports also rose by 2.6% year-on-year to EUR 3.361 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For full-year 2025, the country\u2019s trade deficit widened to EUR 6.525 billion from EUR 4.598 billion.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Lithuania"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "However, for full-year 2025, the country\u2019s trade deficit widened to EUR 6.525 billion from EUR 4.598 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports surged 8% year-on-year to EUR 2.856 billion",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, imports also rose by 2.6% year-on-year to EUR 3.361 billion",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade Deficit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Lithuania\u2019s trade deficit narrowed to EUR 0.506 billion in December 2025 from EUR 0.632 billion in December 2024",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4992,
+  "error_messages": []
+}

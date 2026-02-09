@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5845",
+  "extracted_at": "2026-02-07T14:28:22.988830",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England Interest Rate Signal",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England signaled potential interest rate cuts if inflation continues to decline.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates",
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Rio Tinto and Glencore Merger Collapse",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Reports indicated that merger discussions between mining giants Rio Tinto and Glencore have ended.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran Tensions",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Heightened geopolitical friction between the US and Iran impacting commodity markets.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The FTSE 100 reached approximately 10,330 points on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "FTSE 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "London\u2019s FTSE 100 edged up to around 10,330 points on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shares in Barclays, NatWest Group, and Lloyds increased by 1.1% to 1.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Barclays",
+        "NatWest Group",
+        "Lloyds"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "shares in Barclays, NatWest Group and Lloyds rising between 1.1% and 1.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "RELX shares fell by more than 4% and Experian dropped by 2.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "RELX",
+        "Experian"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "RELX slid more than 4% and Experian dropped 2.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "AI is expected to disrupt the business models of data and software companies.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "growing concerns that AI could disrupt their business models",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The revelation of Peter Mandelson's ties to Jeffrey Epstein poses a challenge to Keir Starmer's leadership.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "posing a fresh challenge to Prime Minister Keir Starmer\u2019s leadership",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signals from the Bank of England on Thursday that interest rates could be lowered",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US\u2013Iran tensions",
+      "target_type": "Theme",
+      "target_ref": "precious metal prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "precious metal prices climbed amid heightened US\u2013Iran tensions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "data and software stocks underperformed amid growing concerns that AI could disrupt their business models",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Domestic political uncertainty",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Domestic political uncertainty added to caution after emails revealed the extent of UK ambassador Peter Mandelson\u2019s ties to Jeffrey Epstein",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9875,
+  "error_messages": []
+}

@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5877",
+  "extracted_at": "2026-02-09T01:10:30.773089",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January jobs report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The January employment data release, which was delayed by a partial government shutdown.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January consumer price index reading",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The postponed inflation data for January scheduled for release on Friday.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Corporate earnings week",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Earnings reports from major companies including Coca-Cola, Ford Motor, Robinhood, McDonald\u2019s and Coinbase Global.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US stock futures edged higher on Monday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US stock futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US stock futures edged higher on Monday as investors looked ahead to a heavy slate of economic data",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Dow rose 2.5% on the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Dow"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Dow rose 2.5% on the week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The S&P 500 slipped 0.1% and the Nasdaq Composite slipped 1.84% over the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while the S&P 500 and Nasdaq Composite slipped 0.1% and 1.84%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Economic indicators from the previous week suggest a slowdown in the labor market.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "after a run of indicators last week pointed to cooling momentum in the labor market.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Market averages rebounded on Friday due to an improvement in investor sentiment.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "before rebounding on Friday as sentiment improved.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "partial government shutdown",
+      "target_type": "Theme",
+      "target_ref": "January jobs report",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "delayed by the partial government shutdown",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "indicators",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "indicators last week pointed to cooling momentum in the labor market.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "sentiment",
+      "target_type": "Theme",
+      "target_ref": "market_event",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rebounding on Friday as sentiment improved.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13032,
+  "error_messages": []
+}

@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5566",
+  "extracted_at": "2026-02-07T17:51:00.616099",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Santander Brasil Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Santander Brasil reported its financial results, posting profits slightly above expectations but highlighting macroeconomic challenges.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Ibovespa Wednesday Trading",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Brazilian stock index experienced a decline during Wednesday's trading session.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Ibovespa fell more than 0.5% to hover around 184,500 on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ibovespa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Ibovespa fell more than 0.5% to hover around 184,500 on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Santander Brasil shares fell more than 3% after its earnings report.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Santander Brasil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Santander fell more than 3% after posting profits slightly above expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Banco do Brasil and Bradesco shares both declined by 1.3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Banco do Brasil",
+        "Bradesco"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Banco do Brasil and Bradesco both down 1.3%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Santander Brasil is facing a challenging macroeconomic scenario.",
+      "claim_type": "analysis",
+      "author": "Santander Brasil",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "citing a \u201cchallenging macroeconomic scenario,\u201d",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Concerns over asset quality are negatively impacting market sentiment.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "while concerns over asset quality weighed on sentiment",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Ita\u00fa has an optimistic outlook for its earnings guidance.",
+      "claim_type": "prediction",
+      "author": "Ita\u00fa",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "despite optimistic earnings guidance",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Santander Brasil Results",
+      "target_type": "Theme",
+      "target_ref": "Ibovespa",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Ibovespa fell more than 0.5%... pressured by muted results from Santander Brasil.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Asset quality concerns",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "concerns over asset quality weighed on sentiment",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Macroeconomic scenario",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "citing a \u201cchallenging macroeconomic scenario,\u201d",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12779,
+  "error_messages": []
+}

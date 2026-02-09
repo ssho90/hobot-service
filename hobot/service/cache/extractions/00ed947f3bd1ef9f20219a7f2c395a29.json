@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5662",
+  "extracted_at": "2026-02-07T15:40:11.439622",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "HCOB Construction PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the Purchasing Managers' Index for the French construction sector for January 2026.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Construction PMI in France was 43.5 in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "France"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Construction PMI in France came in at 43.5 in January 2026, broadly unchanged from December and November.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The downturn in the French construction sector began in June 2022.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "France"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "extending the severe downturn that began in June 2022.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment levels in the construction sector continued to fall in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "labor"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment levels continued to fall, but job losses eased for a second month and were only marginal overall.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Supplier delivery times lengthened for the eighth consecutive month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "suppliers"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Supplier delivery times lengthened for the eighth consecutive month, though delays were moderate and the weakest since July.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Firms forecast a further decline in construction activity over the next year.",
+      "claim_type": "prediction",
+      "author": "French construction firms",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, expectations remained bleak, with firms forecasting a further decline in activity over the next 12 months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The construction sector is experiencing a sharp contraction.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The data signaled another sharp contraction in construction sector activity",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "HCOB Construction PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The data signaled another sharp contraction in construction sector activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "subdued demand",
+      "target_type": "Theme",
+      "target_ref": "New orders",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "New orders fell significantly... amid ongoing subdued demand.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "construction sector activity",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment levels continued to fall",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "French Construction",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "extending the severe downturn that began in June 2022.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8653,
+  "error_messages": []
+}

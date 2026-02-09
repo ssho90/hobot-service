@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5836",
+  "extracted_at": "2026-02-07T05:35:13.428429",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Bitcoin rebounded above $65,000 from the two-year low of $60,000 earlier on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bitcoin"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bitcoin rebounded above $65,000 from the two-year low of $60,000 earlier on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bitcoin remained around 30% lower year-to-date.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bitcoin"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bitcoin remained around 30% lower year-to-date",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bitcoin was trading at around half the value since its record high four months prior.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bitcoin"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "trading at around half the value since its record high four months prior",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Higher share of Bitcoin in institutional portfolios",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The higher share of Bitcoin in institutional portfolios made it more vulnerable to derisking",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Higher volatility and margin requirements in precious and base metal derivatives",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "higher volatility and margin requirements in precious and base metal derivatives",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Decline in cryptocurrency holdings by retail traders",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the decline in cryptocurrency holdings by retail traders on the broader range of substitutes for speculative trading, including leveraged ETFs with exposure to AI companies, zero-day options for equities, and the rise of betting markets.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 3941,
+  "error_messages": []
+}

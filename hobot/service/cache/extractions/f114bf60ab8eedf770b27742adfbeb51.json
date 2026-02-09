@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5767",
+  "extracted_at": "2026-02-07T05:47:00.117483",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "RBA Rate Hike",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of Australia delivered its first rate hike in two years.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "RBA lifted rates by 25bps to 3.85%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "RBA",
+        "rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The central bank lifted rates by 25bps to 3.85%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Underlying inflation rose to 3.4% in Q4.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Underlying inflation rose to 3.4% in Q4, the highest in over a year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Stronger-than-expected demand and persistent supply constraints risk keeping inflation elevated.",
+      "claim_type": "analysis",
+      "author": "Michele Bullock",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Governor Michele Bullock told lawmakers Friday that stronger-than-expected demand and persistent supply constraints risk keeping inflation elevated.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Underlying inflation is projected to peak at 3.7% by mid-year before gradually easing toward target by 2028.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Underlying inflation rose to 3.4% in Q4, the highest in over a year, and is projected to peak at 3.7% by mid-year before gradually easing toward target by 2028.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBA Rate Hike",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Reserve Bank of Australia said it must rein in demand growth to restore price stability, after delivering its first rate hike in two years earlier this week.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "demand growth",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Reserve Bank of Australia said it must rein in demand growth to restore price stability",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "geopolitical risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "significant uncertainties remain amid trade and geopolitical risks.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4373,
+  "error_messages": []
+}

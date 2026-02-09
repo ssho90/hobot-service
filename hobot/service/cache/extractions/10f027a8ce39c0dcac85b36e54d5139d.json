@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5726",
+  "extracted_at": "2026-02-07T15:01:15.323095",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "December 2025 US Job Openings Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the Job Openings and Labor Turnover Survey (JOLTS) data for December 2025.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US job openings decreased by 386,000 to a total of 6.542 million in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "Job openings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Job openings in the US fell by 386,000 to 6.542 million in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The job openings figure was lower than the market expectation of 7.2 million.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "market expectations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "well below market expectations of 7.2 million",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings in professional and business services fell by 257,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "professional and business services"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of job openings decreased in professional and business services (-257,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Hires and total separations both stood at 5.3 million.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "hires",
+        "separations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "hires and total separations were little changed at 5.3 million each",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Layoffs and discharges were recorded at 1.8 million.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "layoffs",
+        "discharges"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "layoffs and discharges (1.8 million) were little changed",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The December 2025 job openings represent the lowest level since September 2020.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "the lowest since September 2020",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Hires and total separations showed minimal movement during the period.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "hires and total separations were little changed",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Job openings",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Job openings in the US fell by 386,000 to 6.542 million in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Professional and business services",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The number of job openings decreased in professional and business services (-257,000)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Retail trade",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "retail trade (-195,000)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Finance and insurance",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "finance and insurance (-120,000)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12418,
+  "error_messages": []
+}

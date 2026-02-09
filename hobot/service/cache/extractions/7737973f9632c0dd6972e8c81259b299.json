@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5708",
+  "extracted_at": "2026-02-07T05:52:48.491565",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "ECB Holds Rates Steady",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank left interest rates unchanged at its first policy meeting of 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The interest rate on the main refinancing operations was maintained at 2.15%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "interest rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The interest rate on the main refinancing operations was maintained at 2.15%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The deposit facility rate was kept at 2.0%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "deposit facility rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while the deposit facility and marginal lending rates were kept at 2.0% and 2.4%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The marginal lending rate was kept at 2.4%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "marginal lending rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while the deposit facility and marginal lending rates were kept at 2.0% and 2.4%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is expected to stabilize at the 2% target over the medium term.",
+      "claim_type": "prediction",
+      "author": "ECB",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reiterating that inflation is expected to stabilize at its 2% target over the medium term.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The euro area economy remains resilient.",
+      "claim_type": "analysis",
+      "author": "ECB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The ECB said the euro area economy remains resilient, supported by low unemployment, healthy private-sector balance sheets, the gradual rollout of public spending on defense and infrastructure, and the lingering supportive effects of earlier rate cuts.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The economic outlook remains uncertain due to global trade policy risks and ongoing geopolitical tensions.",
+      "claim_type": "analysis",
+      "author": "ECB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "However, policymakers cautioned that the outlook remains uncertain, particularly due to global trade policy risks and ongoing geopolitical tensions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB rate decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The European Central Bank left interest rates unchanged at its first policy meeting of 2026, in line with expectations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB rate decision",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reiterating that inflation is expected to stabilize at its 2% target over the medium term.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Euro area economy",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The ECB said the euro area economy remains resilient, supported by low unemployment, healthy private-sector balance sheets, the gradual rollout of public spending on defense and infrastructure, and the lingering supportive effects of earlier rate cuts.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Low unemployment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The ECB said the euro area economy remains resilient, supported by low unemployment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Global trade policy risks and ongoing geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "However, policymakers cautioned that the outlook remains uncertain, particularly due to global trade policy risks and ongoing geopolitical tensions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6119,
+  "error_messages": []
+}

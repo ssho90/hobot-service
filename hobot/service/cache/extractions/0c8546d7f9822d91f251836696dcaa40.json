@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5661",
+  "extracted_at": "2026-02-07T05:55:42.946325",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "Bank of England decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Expected to keep rates on hold at 3.75%",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "FTSE 100 traded lower on Thursday after hitting a record high in the previous session.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "FTSE 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "FTSE 100 traded lower on Thursday after hitting a record high in the previous session",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Vodafone fell almost 5% after reporting slower than expected service revenue growth.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Vodafone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vodafone led declines, falling almost 5% after reporting slower than expected service revenue growth",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell dropped around 1.5% as quarterly profit slightly missed forecasts, though the group announced another $3.5 billion share buyback.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shell"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shell dropped around 1.5% as quarterly profit slightly missed forecasts, though the group announced another $3.5 billion share buyback.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Anglo American slipped about 1% after cutting its 2026 copper production forecast due to weaker expected output from Chile.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Anglo American"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Anglo American slipped about 1% after cutting its 2026 copper production forecast due to weaker expected output from Chile.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BT rose more than 1% after a trading update showed third quarter adjusted EBITDA in line with estimates and confirmed it remains on track to meet full year guidance.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BT"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BT rose more than 1% after a trading update showed third quarter adjusted EBITDA in line with estimates and confirmed it remains on track to meet full year guidance.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as investors turned cautious ahead of the Bank of England decision expected to keep rates on hold at 3.75%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Vodafone",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vodafone led declines, falling almost 5% after reporting slower than expected service revenue growth",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Anglo American",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Anglo American slipped about 1% after cutting its 2026 copper production forecast due to weaker expected output from Chile.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4998,
+  "error_messages": []
+}

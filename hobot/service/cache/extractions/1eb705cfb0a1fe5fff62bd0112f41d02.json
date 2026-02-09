@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5525",
+  "extracted_at": "2026-02-08T01:05:15.496834",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Nickel Futures Rebound",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Nickel futures rose to approximately $17,500 per tonne from a one-month low.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Indonesia Mining Permit Reduction",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Indonesia announced a reduction in mining permits to 260 million wet tons for 2026.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Nickel futures rose to around $17,500 per tonne, rebounding from a one-month low of $17,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nickel"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Nickel futures rose to around $17,500 per tonne, rebounding from a one-month low of $17,000 touched earlier in February",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Indonesia will cut mining permits to 260 million wet tons in 2026 from 379 million tons last year.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia, the world\u2019s largest nickel ore producer, which confirmed it will cut mining permits to 260 million wet tons in 2026, down from 379 million tons last year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The reduction in permits signals tighter availability of nickel feedstock for stainless steel and battery production.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The reduction signals tighter availability of nickel feedstock for both stainless steel and battery production",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Enforcement actions against illegal mining are adding to supply uncertainty.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "enforcement actions against illegal mining adding to supply uncertainty.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Progress in US and Canadian nickel projects underscores structural shifts in the global supply chain.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "underscore structural shifts in the global nickel supply chain beyond Southeast Asia.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Indonesia mining permit cuts",
+      "target_type": "Theme",
+      "target_ref": "Nickel supply",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The reduction signals tighter availability of nickel feedstock",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Supply concerns",
+      "target_type": "Theme",
+      "target_ref": "Nickel futures price",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The move was largely supported by ongoing supply concerns linked to Indonesia",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Illegal mining enforcement",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "enforcement actions against illegal mining adding to supply uncertainty.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11943,
+  "error_messages": []
+}

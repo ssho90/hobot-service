@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5576",
+  "extracted_at": "2026-02-07T17:50:08.147314",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global Canada Composite PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the S&P Global Canada Composite PMI data for January 2026, showing a contraction in private sector activity.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global Canada Composite PMI recorded 46.4 in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "Canada"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global Canada Composite PMI recorded 46.4 in January 2026, down from 46.7 in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The services sector PMI fell to 45.8 from 46.5.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Services sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "services fell to 45.8 from 46.5",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New business volumes declined for a fourteenth consecutive month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "New business"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "New business volumes declined for a fourteenth consecutive month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment contracted for a fifth successive month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment contracted for a fifth successive month, albeit modestly",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation reached its softest rise since November 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Input cost inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "input cost inflation softened to its softest rise since November 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The services sector was the primary driver of the overall private sector downturn.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "services fell to 45.8 from 46.5, with the latter the main driver of the downturn",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business confidence remained well below the historical trend.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Business confidence softened since December and remained well below trend",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Firms were easily able to manage their workloads due to decreasing backlogs.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Backlogs of work decreased markedly again as firms were easily able to keep on top of workloads",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New business volumes",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "New business volumes declined for a fourteenth consecutive month and continued to weigh on output",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Services sector",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "services fell to 45.8 from 46.5, with the latter the main driver of the downturn",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment contraction",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment contracted for a fifth successive month, albeit modestly, as firms pared staff or chose not to replace leavers",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input cost inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the price front input cost inflation softened to its softest rise since November 2024",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13050,
+  "error_messages": []
+}

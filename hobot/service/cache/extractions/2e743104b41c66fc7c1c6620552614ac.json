@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5751",
+  "extracted_at": "2026-02-07T05:48:01.674600",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Household spending in Japan declined 2.6% yoy in December 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Household spending",
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Household spending in Japan declined 2.6% yoy in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly, personal spending fell 2.9%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "personal spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Monthly, personal spending fell 2.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "In November, personal spending jumped 6.2%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "personal spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "swinging from a 6.2% jump in November, which had marked the strongest monthly rise since March 2021.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Consumer demand remained fragile at the end of the year amid elevated living costs.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest result indicated that consumer demand remained fragile at the end of the year amid elevated living costs.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Private demand may struggle to gain momentum despite supportive monetary conditions.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "adds to concerns that private demand may struggle to gain momentum despite supportive monetary conditions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Household spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Household spending in Japan declined 2.6% yoy in December 2025, missing market expectations for a flat reading and marking a deeper contraction after a 2.9% drop in the previous month.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "elevated living costs",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The latest result indicated that consumer demand remained fragile at the end of the year amid elevated living costs.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "private demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "adds to concerns that private demand may struggle to gain momentum despite supportive monetary conditions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4928,
+  "error_messages": []
+}

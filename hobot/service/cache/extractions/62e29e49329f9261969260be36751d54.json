@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5687",
+  "extracted_at": "2026-02-07T15:07:12.593687",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Ireland January 2026 Unemployment Rate Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of seasonally adjusted unemployment data for Ireland for the month of January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Ireland's seasonally adjusted unemployment rate was 4.7% in January 2026, unchanged from the revised December 2025 figure.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The seasonally adjusted unemployment rate stood at 4.7% in January 2026, unchanged from a downwardly revised figure in December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The number of unemployed individuals in Ireland increased by 600 month-on-month to a total of 138,400.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of unemployed persons increased by 600 month-on-month to 138,400.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The youth unemployment rate for those aged 15-24 rose to 11.8% in January 2026 from 11.4% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the youth unemployment rate, rose to 11.8% from 11.4% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The unemployment rate for individuals aged 25-74 decreased to 3.6% from 3.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "whereas the rate for those aged 25\u201374 ticked lower to 3.6% from 3.7%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Ireland January 2026 Unemployment Rate Release",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The seasonally adjusted unemployment rate stood at 4.7% in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Youth unemployment rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the youth unemployment rate, rose to 11.8% from 11.4% in December",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Unemployment rate for individuals aged 25-74",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the rate for those aged 25\u201374 ticked lower to 3.6% from 3.7%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 20786,
+  "error_messages": []
+}

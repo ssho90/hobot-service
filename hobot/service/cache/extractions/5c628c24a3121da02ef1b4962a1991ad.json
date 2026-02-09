@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5486",
+  "extracted_at": "2026-02-08T01:14:01.149639",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Reserve Bank of Australia February meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The RBA raised interest rates during its February meeting.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P/ASX 200 slipped 0.2% to around 8,840 in early Wednesday deals.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P/ASX 200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P/ASX 200 slipped 0.2% to around 8,840 in early Wednesday deals",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Reserve Bank of Australia raised interest rates in its February meeting.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank of Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Reserve Bank of Australia raised rates in its February meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Local technology stocks plunged over 7% to hit their lowest level since early February 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "technology stocks"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Local technology stocks led the losses, plunging over 7% to hit its lowest level since early February 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Xero shares fell 14% to a more than two-year low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Xero"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Accounting software maker Xero sank 14% to a more than two-year low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Wisetech Global shares dropped 7% to their lowest since January 2023.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Wisetech Global"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "logistics software provider Wisetech Global dropped 7% to its lowest since January 2023",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors have increased the probability of a May rate hike to 80%.",
+      "claim_type": "prediction",
+      "author": "investors",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "investors ramped bets of a May rate increase to 80%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets expect approximately 40 basis points of additional tightening for the remainder of the year.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "now see about 40 bps of additional tightening priced in for the rest of the year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "US technology stocks declined due to concerns regarding AI disruption.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "their US peers declined on worries of AI disruption",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street tech-led sell-off",
+      "target_type": "Theme",
+      "target_ref": "S&P/ASX 200",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "tracking a tech-led sell-off in Wall Street overnight",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Reserve Bank of Australia rate hike",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Reserve Bank of Australia raised rates in its February meeting",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Faster-than-expected economic growth",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Reserve Bank of Australia raised rates in its February meeting amid faster-than-expected economic growth",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Sticky inflation outlook",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Reserve Bank of Australia raised rates in its February meeting amid... sticky inflation outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI disruption worries",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "their US peers declined on worries of AI disruption",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15989,
+  "error_messages": []
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5623",
+  "extracted_at": "2026-02-07T16:26:19.543287",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Australia Goods Imports Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Australia's goods imports data for December 2025, showing a decline to a three-month low.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Australia\u2019s goods imports dropped 0.8% month-on-month to AUD 41.26 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Australia\u2019s goods imports dropped 0.8% month-on-month to a three-month low of AUD 41.26 billion in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Purchases of intermediate and other merchandise goods shrank 1.3% to AUD 16.72 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Purchases of intermediate and other merchandise goods shrank 1.3% to AUD 16.72 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports of capital goods fell 2.5% to AUD 9.65 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports of capital goods also fell 2.5% to AUD 9.65 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumption goods grew 0.8% to AUD 12.64 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In contrast, consumption goods grew 0.8% to AUD 12.64 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The decline in imports indicates weaker domestic demand at the end of 2025.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest result indicated weaker domestic demand at the year-end",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business investment is cautious due to an uncertain global outlook.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "cautious business investment amid an uncertain global outlook",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Australia Goods Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The latest result indicated weaker domestic demand at the year-end",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports of capital goods",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "cautious business investment amid an uncertain global outlook",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10245,
+  "error_messages": []
+}

@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5648",
+  "extracted_at": "2026-02-07T16:20:12.581365",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Singapore Retail Sales Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of retail sales data for December 2025 showing a significant slowdown in growth compared to the previous month.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Retail sales in Singapore increased by 2.7% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Singapore"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Retail sales in Singapore rose by 2.7% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The previous month's retail sales growth was revised to 6.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Singapore"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "slowing from a downwardly revised and near two-year high of 6.2% gain in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a seasonally adjusted monthly basis, retail sales fell by 5.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Singapore"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, retail sales tumbled to 5.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Sales for petrol service stations declined by 9.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "petrol service stations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "petrol service stations (-9.1% vs -6.7%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The December 2025 retail sales growth was the weakest since September 2025.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "This marked the weakest growth since September 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The monthly decline in retail sales was the steepest since May 2021.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "marking the steepest decline since May 2021",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Retail Sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Retail sales in Singapore rose by 2.7% year-on-year in December 2025, slowing from a downwardly revised and near two-year high of 6.2% gain",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Department stores",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "In addition, sales slipped for department stores (-1.7% vs 2.6%)",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11853,
+  "error_messages": []
+}

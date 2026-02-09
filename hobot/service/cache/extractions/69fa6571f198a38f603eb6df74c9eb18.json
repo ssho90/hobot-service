@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5803",
+  "extracted_at": "2026-02-07T05:39:09.959558",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Kazuyuki Masu said further interest rate hikes will be necessary to complete Japan\u2019s monetary policy normalization.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Kazuyuki Masu",
+        "Bank of Japan",
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Further interest rate hikes will be necessary to complete Japan\u2019s monetary policy normalization, central bank board member Kazuyuki Masu said in a speech on Friday.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Masu joined the Bank of Japan\u2019s nine-member board last July.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Masu",
+        "Bank of Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The speech was Masu\u2019s first public appearance since joining the Bank of Japan\u2019s nine-member board last July",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Raising rates would help reduce the policy divergence between Japan and other major economies.",
+      "claim_type": "analysis",
+      "author": "Masu",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Masu noted that raising rates would help reduce the policy divergence between Japan and other major economies, a gap widely seen as a key driver of prolonged yen weakness that has pushed up import costs for businesses and households.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Timely and appropriate rate hikes are needed to keep underlying inflation below 2%.",
+      "claim_type": "analysis",
+      "author": "Masu",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "He said timely and appropriate rate hikes are needed to keep underlying inflation below 2%, while warning against raising rates too aggressively in a way that could disrupt the gradual upward trend in wages and inflation.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Raising rates too aggressively could disrupt the gradual upward trend in wages and inflation.",
+      "claim_type": "analysis",
+      "author": "Masu",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "He said timely and appropriate rate hikes are needed to keep underlying inflation below 2%, while warning against raising rates too aggressively in a way that could disrupt the gradual upward trend in wages and inflation.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Masu characterized his stance as balanced between hawkish and dovish views.",
+      "claim_type": "statement",
+      "author": "Masu",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "when he characterized his stance as balanced between hawkish and dovish views.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Rate Hikes",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Further interest rate hikes will be necessary to complete Japan\u2019s monetary policy normalization",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rate Hikes",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "He said timely and appropriate rate hikes are needed to keep underlying inflation below 2%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rate Hikes",
+      "target_type": "Theme",
+      "target_ref": "wages",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "warning against raising rates too aggressively in a way that could disrupt the gradual upward trend in wages and inflation.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Yen Weakness",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a gap widely seen as a key driver of prolonged yen weakness that has pushed up import costs for businesses and households.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6134,
+  "error_messages": []
+}

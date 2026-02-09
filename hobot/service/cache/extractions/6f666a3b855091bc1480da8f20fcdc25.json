@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5530",
+  "extracted_at": "2026-02-08T01:04:17.806073",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Rubber Price Gain",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The price of rubber increased by 0.97%.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Rubber gained by 0.97%",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rubber"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rubber Gains by 0.97%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Rubber",
+      "target_type": "Theme",
+      "target_ref": "Agricultural Commodities",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Agricultural Commodities Updates: Rubber Gains by 0.97%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5064,
+  "error_messages": []
+}

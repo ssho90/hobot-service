@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5798",
+  "extracted_at": "2026-02-07T14:44:59.674293",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "New Zealand Dollar Rise",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The New Zealand Dollar increased in value by 0.33%.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The New Zealand Dollar rose by 0.33%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "New Zealand Dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "New Zealand Dollar Rises by 0.33%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Dollar",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "FX Updates: New Zealand Dollar Rises by 0.33%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8996,
+  "error_messages": []
+}

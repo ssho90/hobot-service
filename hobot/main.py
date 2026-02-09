@@ -20,6 +20,10 @@ from service import auth
 from service import file_service
 from service.core.time_provider import TimeProvider
 from service import llm as llm_service
+from service.graph.rag.context_api import router as graph_rag_router
+from service.graph.rag.response_generator import router as graph_rag_answer_router
+from service.graph.monitoring.graphrag_metrics import router as graph_rag_metrics_router
+from service.graph.strategy.strategy_api import router as strategy_api_router
 # 서비스 시작 시 데이터베이스 초기화 (지연 초기화)
 # 실제 사용 시점에 자동으로 초기화됨
 from typing import Optional
@@ -28,6 +32,10 @@ app = FastAPI(title="Hobot API", version="1.0.0")
 
 # API 라우터 생성
 api_router = APIRouter(prefix="/api")
+api_router.include_router(graph_rag_router)
+api_router.include_router(graph_rag_answer_router)
+api_router.include_router(graph_rag_metrics_router)
+api_router.include_router(strategy_api_router)
 
 # CORS 설정
 app.add_middleware(
@@ -57,6 +65,9 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+# Reduce noise from Neo4j driver
+logging.getLogger("neo4j").setLevel(logging.WARNING)
 
 # Pydantic 모델
 class StrategyRequest(BaseModel):
@@ -1220,193 +1231,20 @@ async def search_stocks(
 
 @api_router.get("/macro-trading/overview")
 async def get_ai_overview():
-    """AI 분석 Overview 조회"""
+    """AI 분석 Overview 조회 (Graph DB 기반)"""
     try:
-        from service.database.db import get_db_connection
-        import json
+        from service.macro_trading.overview_service import get_overview_data
         
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT 
-                    id,
-                    decision_date,
-                    analysis_summary,
-                    target_allocation,
-                    recommended_stocks,
-                    created_at
-                FROM ai_strategy_decisions
-                ORDER BY decision_date DESC
-                LIMIT 1
-            """)
-            
-            row = cursor.fetchone()
-            
-            if not row:
-                return {
-                    "status": "success",
-                    "data": None,
-                    "message": "AI 분석 결과가 아직 없습니다."
-                }
-            
-            # JSON 필드 파싱
-            target_allocation_raw = row['target_allocation']
-            if isinstance(target_allocation_raw, str):
-                target_allocation_raw = json.loads(target_allocation_raw)
-            
-            # MP 기반 저장 형식 처리 (mp_id와 target_allocation이 함께 저장됨)
-            mp_id = None
-            target_allocation = None
-            sub_mp_data = None
-            if isinstance(target_allocation_raw, dict):
-                # 새로운 형식: {"mp_id": "MP-4", "target_allocation": {...}, "sub_mp": {...}}
-                if "mp_id" in target_allocation_raw:
-                    mp_id = target_allocation_raw["mp_id"]
-                    # mp_id가 있으면 get_model_portfolio_allocation을 사용하여 실제 allocation 가져오기
-                    from service.macro_trading.ai_strategist import get_model_portfolio_allocation
-                    allocation_from_mp = get_model_portfolio_allocation(mp_id)
-                    if allocation_from_mp:
-                        target_allocation = allocation_from_mp
-                    else:
-                        # MP ID가 유효하지 않으면 저장된 target_allocation 사용
-                        target_allocation = target_allocation_raw.get("target_allocation", target_allocation_raw)
-                    
-                    # Sub-MP 정보 추출
-                    sub_mp_data = target_allocation_raw.get("sub_mp")
-                else:
-                    # 기존 형식: 직접 target_allocation만 있음
-                    target_allocation = target_allocation_raw
-            else:
-                target_allocation = target_allocation_raw
-            
-            # Sub-MP 세부 종목 정보 가져오기
-            sub_mp_details = None
-            if sub_mp_data and mp_id:
-                from service.macro_trading.ai_strategist import get_sub_mp_details
-
-                sub_mp_details = get_sub_mp_details(sub_mp_data)
-            
-            # MP 메타데이터 조회
-            mp_info = None
-            if mp_id:
-                from service.macro_trading.ai_strategist import get_model_portfolios
-                all_mps = get_model_portfolios()
-                mp_data = all_mps.get(mp_id)
-                if mp_data:
-                    # 현재 MP가 연속으로 적용된 첫 날짜(started_at) 찾기
-                    mp_started_at = None
-                    with get_db_connection() as conn2:
-                        cursor2 = conn2.cursor()
-                        cursor2.execute(
-                            """
-                            SELECT decision_date, target_allocation
-                            FROM ai_strategy_decisions
-                            ORDER BY decision_date DESC
-                            LIMIT 100
-                            """
-                        )
-                        history_rows = cursor2.fetchall()
-                    
-                    if history_rows:
-                        for hist_row in history_rows:
-                            row_alloc = hist_row["target_allocation"]
-                            if isinstance(row_alloc, str):
-                                row_alloc = json.loads(row_alloc)
-                            row_mp_id = row_alloc.get("mp_id") if isinstance(row_alloc, dict) else None
-                            if row_mp_id == mp_id:
-                                mp_started_at = hist_row["decision_date"]
-                            else:
-                                # mp_id가 달라지면 중단 (이전까지가 현재 MP의 연속 적용 기간)
-                                break
-                    
-                    mp_info = {
-                        "name": mp_data.get("name"),
-                        "description": mp_data.get("description"),
-                        "updated_at": mp_started_at.strftime("%Y-%m-%d %H:%M:%S") if mp_started_at else mp_data.get("updated_at"),
-                        "started_at": mp_started_at.strftime("%Y-%m-%d %H:%M:%S") if mp_started_at else None
-                    }
-            
-            # Sub-MP별 started_at 계산 (각 Sub-MP가 연속으로 적용된 첫 날짜)
-            if sub_mp_details and sub_mp_data:
-                # 이력 조회 (이미 위에서 조회한 history_rows 재사용 또는 새로 조회)
-                with get_db_connection() as conn3:
-                    cursor3 = conn3.cursor()
-                    cursor3.execute(
-                        """
-                        SELECT decision_date, target_allocation
-                        FROM ai_strategy_decisions
-                        ORDER BY decision_date DESC
-                        LIMIT 100
-                        """
-                    )
-                    sub_mp_history_rows = cursor3.fetchall()
-                
-                if sub_mp_history_rows:
-                    # 각 자산군별로 Sub-MP started_at 계산
-                    for asset_key in ["stocks", "bonds", "alternatives", "cash"]:
-                        if asset_key not in sub_mp_details:
-                            continue
-                        
-                        current_sub_mp_id = sub_mp_data.get(asset_key)
-                        if not current_sub_mp_id:
-                            continue
-                        
-                        sub_mp_started_at = None
-                        for hist_row in sub_mp_history_rows:
-                            row_alloc = hist_row["target_allocation"]
-                            if isinstance(row_alloc, str):
-                                row_alloc = json.loads(row_alloc)
-                            
-                            row_sub_mp = row_alloc.get("sub_mp", {}) if isinstance(row_alloc, dict) else {}
-                            row_sub_mp_id = row_sub_mp.get(asset_key)
-                            
-                            if row_sub_mp_id == current_sub_mp_id:
-                                sub_mp_started_at = hist_row["decision_date"]
-                            else:
-                                # Sub-MP ID가 달라지면 중단
-                                break
-                        
-                        # sub_mp_details에 started_at 추가
-                        if sub_mp_started_at:
-                            sub_mp_details[asset_key]["updated_at"] = sub_mp_started_at.strftime("%Y-%m-%d %H:%M:%S")
-                            sub_mp_details[asset_key]["started_at"] = sub_mp_started_at.strftime("%Y-%m-%d %H:%M:%S")
-            
-            recommended_stocks = row.get('recommended_stocks')
-            if recommended_stocks:
-                if isinstance(recommended_stocks, str):
-                    recommended_stocks = json.loads(recommended_stocks)
-            else:
-                recommended_stocks = None
-            
-            # analysis_summary에서 reasoning 추출 (판단 근거: 이후 텍스트)
-            analysis_summary = row['analysis_summary'] or ''
-            reasoning = ''
-            if '판단 근거:' in analysis_summary:
-                parts = analysis_summary.split('판단 근거:')
-                if len(parts) > 1:
-                    reasoning = parts[1].strip()
-                    analysis_summary = parts[0].strip()
-            
-            # Sub-MP reasoning 추출 (recommended_stocks에서 sub_mp reasoning이 있을 수 있음)
-            sub_mp_reasoning = None
-            if sub_mp_data and isinstance(sub_mp_data, dict):
-                sub_mp_reasoning = sub_mp_data.get('reasoning')
-            
+        result = await get_overview_data()
+        
+        if not result or not result.get("data"):
             return {
                 "status": "success",
-                "data": {
-                    "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
-                    "analysis_summary": analysis_summary,
-                    "reasoning": reasoning,
-                    "mp_id": mp_id,
-                    "mp_info": mp_info,
-                    "target_allocation": target_allocation,
-                    "sub_mp": sub_mp_details,
-                    "sub_mp_reasoning": sub_mp_reasoning,
-                    "recommended_stocks": recommended_stocks,
-                    "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
-                }
+                "data": None,
+                "message": "AI 분석 결과가 아직 없습니다."
             }
+            
+        return result
             
     except Exception as e:
         logging.error(f"Error getting AI overview: {e}", exc_info=True)

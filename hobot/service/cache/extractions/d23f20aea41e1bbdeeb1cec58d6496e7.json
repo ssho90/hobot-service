@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5651",
+  "extracted_at": "2026-02-07T15:44:04.060568",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Malaysian Palm Oil Board (MPOB) monthly data release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of monthly data regarding palm oil production, stocks, and exports for Malaysia.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Malaysian palm oil futures slipped below MYR 4,215 per tonne on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Malaysian palm oil futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Malaysian palm oil futures slipped below MYR 4,215 per tonne on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "January palm oil shipments rose by 14.9%\u201317.9% month-on-month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "cargo surveyors",
+        "palm oil shipments"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "cargo surveyors reported that January palm oil shipments rose by 14.9%\u201317.9% mom.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "India's palm oil imports jumped 51% to a four-month high in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "India",
+        "palm oil imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Demand from key buyer India strengthened notably, with imports jumping 51% to a four-month high in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Indonesia recorded a 102.23% surge in exports from December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia, the world\u2019s largest producer, recorded a 102.23% surge in exports from December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Indonesia's total 2025 shipments increased 9.1% year-on-year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "bringing total 2025 shipments up 9.1% yoy.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Malaysia\u2019s palm oil inventories likely ended a 10-month rise in January.",
+      "claim_type": "prediction",
+      "author": "Reuters",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Reuters forecast Malaysia\u2019s palm oil inventories likely ended a 10-month rise in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Losses in Dalian palm oil and weaker Chicago oils weighed on market sentiment.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "losses in the Dalian palm oil contract and weaker rival oils in Chicago weighed on sentiment.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A softer ringgit helped cap the downside for palm oil prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the downside was partly capped by a softer ringgit.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Dalian palm oil contract",
+      "target_type": "Theme",
+      "target_ref": "Malaysian palm oil futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "losses in the Dalian palm oil contract... weighed on sentiment.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Ringgit",
+      "target_type": "Theme",
+      "target_ref": "Malaysian palm oil futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the downside was partly capped by a softer ringgit.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Palm oil's discount to soyoil",
+      "target_type": "Theme",
+      "target_ref": "India palm oil imports",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by palm oil\u2019s steep discount to soyoil that encouraged refiners to increase purchases.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Robust exports",
+      "target_type": "Theme",
+      "target_ref": "Palm oil inventories",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Malaysia\u2019s palm oil inventories likely ended a 10-month rise in January, as robust exports coincided with a seasonal slowdown in production.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14071,
+  "error_messages": []
+}

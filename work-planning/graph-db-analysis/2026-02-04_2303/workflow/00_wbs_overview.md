@@ -64,24 +64,26 @@ workflow/
 - [ ] B-3: Country/Category 표준화 사전 구축
 - [ ] B-4: ExternalIndicator 확장 모델 정의
 - [ ] B-5: NEL 파이프라인 구현 (추출→후보→연결)
-- [ ] B-6: 추출 파이프라인 운영화 (재시도/캐시/Backfill)
+- [x] B-6: 추출 파이프라인 운영화 (재시도/캐시/Backfill)
 - [ ] B-7: Phase B 검증 및 DoD 확인
 
 ### Phase C (정량 Impact & 통계)
-- [ ] C-1: Event Window Impact 계산 모듈
-- [ ] C-2: AFFECTS 동적 가중치 재계산 배치
-- [ ] C-3: Indicator↔Indicator 통계 엣지 생성
-- [ ] C-4: Story(내러티브) 클러스터링
-- [ ] C-5: 데이터 품질/모니터링 지표 추가
-- [ ] C-6: Phase C 검증 및 DoD 확인
+- [x] C-1: Event Window Impact 계산 모듈
+- [x] C-2: AFFECTS 동적 가중치 재계산 배치
+- [x] C-3: Indicator↔Indicator 통계 엣지 생성
+- [x] C-4: Story(내러티브) 클러스터링
+- [x] C-5: 데이터 품질/모니터링 지표 추가
+- [x] C-6: Phase C 검증 및 DoD 확인
+- 최신 실측(2026-02-08 재실행): `AFFECTS observed_delta=3966/3966(100%)`, `CORRELATED_WITH=31`, `LEADS=24`, `Story=25` (`source_documents=314`, `story_min_docs=3`)
 
 ### Phase D (GraphRAG + UI)
-- [ ] D-1: 질문→서브그래프 추출 API 개발
-- [ ] D-2: GraphRAG 응답 생성 모듈
-- [ ] D-3: UI Evidence/경로 탐색 UX 구현
-- [ ] D-4: MacroState/AnalysisRun 적재 로직
-- [ ] D-5: 운영/품질 모니터링 구축
-- [ ] D-6: Phase D 검증 및 DoD 확인
+- [x] D-1: 질문→서브그래프 추출 API 개발 (`POST /api/graph/rag/context`)
+- [x] D-2: GraphRAG 응답 생성 모듈 (`POST /api/graph/rag/answer`)
+- [x] D-3: UI Evidence/경로 탐색 UX 구현 (`OntologyPage` Macro Graph UX + Path Explorer)
+- [x] D-4: MacroState/AnalysisRun 적재 로직 (`state/macro_state_generator.py` + answer API 연동)
+- [x] D-5: 운영/품질 모니터링 구축 (`GraphRagApiCall` 로그 + `/api/graph/rag/metrics` + UI Top-K/페이지네이션)
+- [x] D-6: Phase D 검증 및 DoD 확인
+- 최신 실측(2026-02-08 재검증): 질문 성공 `10/10`, Evidence 포함 `10/10`, 문서링크 포함 `10/10`, `Document→Evidence→Claim=2,950`, `MacroState(2026-02-08)=1`, `AnalysisRun(당일=2/누적=20)`, 재현성 `84.62%`
 
 ### Phase E (Strategy Integration)
 - [ ] E-1: StrategyDecision 그래프 스키마 확정

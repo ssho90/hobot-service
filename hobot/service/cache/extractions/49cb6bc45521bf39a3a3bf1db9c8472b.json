@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5708",
+  "extracted_at": "2026-02-07T15:04:45.401016",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB Policy Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The first policy meeting of the European Central Bank in 2026 where interest rates were held steady.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "President Christine Lagarde\u2019s Press Conference",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A press conference following the ECB policy meeting to discuss the economic outlook and inflation.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The European Central Bank left interest rates unchanged at its first policy meeting of 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "European Central Bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The European Central Bank left interest rates unchanged at its first policy meeting of 2026, in line with expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The interest rate on main refinancing operations was maintained at 2.15%, deposit facility at 2.0%, and marginal lending at 2.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ECB"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The interest rate on the main refinancing operations was maintained at 2.15%, while the deposit facility and marginal lending rates were kept at 2.0% and 2.4%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is expected to stabilize at the 2% target over the medium term.",
+      "claim_type": "prediction",
+      "author": "European Central Bank",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reiterating that inflation is expected to stabilize at its 2% target over the medium term.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The euro area economy remains resilient.",
+      "claim_type": "analysis",
+      "author": "ECB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The ECB said the euro area economy remains resilient, supported by low unemployment, healthy private-sector balance sheets",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The economic outlook remains uncertain due to global trade policy risks and geopolitical tensions.",
+      "claim_type": "analysis",
+      "author": "Policymakers",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "policymakers cautioned that the outlook remains uncertain, particularly due to global trade policy risks and ongoing geopolitical tensions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Low unemployment",
+      "target_type": "Theme",
+      "target_ref": "Economy resilience",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the euro area economy remains resilient, supported by low unemployment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Global trade policy risks",
+      "target_type": "Theme",
+      "target_ref": "Economic outlook",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "policymakers cautioned that the outlook remains uncertain, particularly due to global trade policy risks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Stronger euro",
+      "target_type": "Theme",
+      "target_ref": "Inflation outlook",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "assessing the impact of a stronger euro on the inflation outlook.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10430,
+  "error_messages": []
+}

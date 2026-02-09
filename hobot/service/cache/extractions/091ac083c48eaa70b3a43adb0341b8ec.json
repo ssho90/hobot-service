@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5754",
+  "extracted_at": "2026-02-07T05:48:17.023996",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The unemployment rate in Costa Rica fell to 6.3% in the fourth quarter of 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Costa Rica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The unemployment rate in Costa Rica fell to 6.3% in the fourth quarter of 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The unemployment rate decreased from 6.9% in the same period a year earlier.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Costa Rica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "down from 6.9% in the same period a year earlier.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The number of unemployed individuals declined by 17.7 thousand to 147.5 thousand.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Costa Rica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of unemployed individuals declined by 17.7 thousand to 147.5 thousand.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The employment rate edged down to 51.1% from 52.8%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Costa Rica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the employment rate edged down to 51.1% from 52.8%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The number of employed individuals decreased by 47.9 thousand to 2.18 million.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Costa Rica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the number of employed individuals decreased by 47.9 thousand to 2.18 million.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The labor force participation rate declined to 54.5%, down from 56.7%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Costa Rica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the labor force participation rate declined to 54.5%, down from 56.7%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Unemployment rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The unemployment rate in Costa Rica fell to 6.3% in the fourth quarter of 2025, down from 6.9% in the same period a year earlier.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, the employment rate edged down to 51.1% from 52.8%, as the number of employed individuals decreased by 47.9 thousand to 2.18 million.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Labor force participation rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "At the same time, the labor force participation rate declined to 54.5%, down from 56.7%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5748,
+  "error_messages": []
+}

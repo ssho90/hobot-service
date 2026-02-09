@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5586",
+  "extracted_at": "2026-02-07T17:47:21.351056",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indirect talks in Oman",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Iranian Foreign Minister Abbas Araghchi and US envoy Steve Witkoff are scheduled to discuss nuclear issues and sanctions relief.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "EIA Weekly Petroleum Status Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Energy Information Administration reported a decrease in US crude inventories.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Strait of Hormuz tanker harassment",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The US-flagged tanker Stena Imperative was harassed by small armed vessels.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "WTI crude oil futures rose to approximately $63.5 per barrel on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "WTI crude oil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "WTI crude oil futures rose to around $63.5 per barrel on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US crude inventories decreased by 3.5 million barrels last week according to the EIA.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Energy Information Administration",
+        "US crude inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US crude inventories fell by 3.5 million barrels last week, according to the Energy Information Administration",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The API estimated a crude inventory decline of 11.1 million barrels.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "API"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "less than the 11.1 million barrel decline estimated by the API on Tuesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Middle East region supplies approximately one-third of global crude oil.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Middle East"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a region supplying roughly a third of global crude",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Market price movements are being driven by a balance between geopolitical tensions and inventory data.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "markets balanced geopolitical tensions in the Middle East against a drop in US stockpiles",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There are increased fears of conflict within the Middle East region.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "amid heightened fears of conflict in a region supplying roughly a third of global crude",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "markets balanced geopolitical tensions in the Middle East against a drop in US stockpiles",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US crude inventories",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US crude inventories fell by 3.5 million barrels last week",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Middle East conflict",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "heightened fears of conflict in a region supplying roughly a third of global crude",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12249,
+  "error_messages": []
+}

@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5691",
+  "extracted_at": "2026-02-07T05:54:30.015329",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Eurozone retail sales fell by 0.5% month on month in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Eurozone retail sales fell by 0.5% month on month in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "November retail sales were revised down to a 0.1% increase.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "reversing a downwardly revised 0.1% increase in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Non-food retailing sales dropped 1.2% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The weakness was led by non-food retailing, where sales dropped 1.2%, the steepest fall since September 2023, ending a three-month run of gains.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Fuel sales were unchanged for a second consecutive month.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Fuel sales were unchanged for a second consecutive month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Sales of food, drinks and tobacco edged up by 0.1% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while sales of food, drinks and tobacco edged up by 0.1%, following a 0.4% decline in November.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail activity contracted in France (-1.4%), Spain (-0.9%) and Italy (-0.5%) in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "France",
+        "Spain",
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Among the region\u2019s largest economies, retail activity contracted notably in France (-1.4%), Spain (-0.9%) and Italy (-0.5%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Germany recorded a modest increase of 0.1% in retail activity in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while Germany recorded a modest increase of 0.1%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On an annual basis, retail sales growth slowed sharply to 1.3% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On an annual basis, retail sales growth slowed sharply to 1.3% in December, down from 2.4% in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Eurozone Retail Sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Eurozone retail sales fell by 0.5% month on month in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Eurozone Retail Sales Growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On an annual basis, retail sales growth slowed sharply to 1.3% in December, down from 2.4% in November and below the 1.6% consensus forecast, underscoring a loss of consumer momentum toward year-end.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6092,
+  "error_messages": []
+}

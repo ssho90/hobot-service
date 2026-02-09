@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5489",
+  "extracted_at": "2026-02-08T01:13:19.213830",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "RBA February Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank raised its cash rate for the first time in two years.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Services PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Data showing Australia\u2019s services sector posting its strongest expansion in nearly four years.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Trade Balance Figures Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming trade balance figures providing clues on the economy\u2019s health.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Australian dollar strengthened to approximately $0.703 on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australian dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Australian dollar strengthened further to around $0.703 on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Reserve Bank of Australia implemented its first rate hike in two years during the February meeting.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Reserve Bank raised its cash rate for the first time in two years in its February meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Australia's services sector expansion reached a nearly four-year high.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "services sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Australia\u2019s services sector posting its strongest expansion in nearly four years",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors have increased the probability of a May rate hike to 80%.",
+      "claim_type": "prediction",
+      "author": "investors",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "investors ramped bets of a May rate increase to 80%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets have priced in approximately 40 basis points of additional tightening for 2026.",
+      "claim_type": "prediction",
+      "author": "markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "now see about 40 bps of additional tightening priced in for 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Elevated inflation risks might lead to more rate increases than the RBA's base case suggests.",
+      "claim_type": "analysis",
+      "author": "Analysts",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Analysts noted that while the RBA\u2019s base case suggests only one more hike, elevated inflation risks could prompt additional increases.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBA February Meeting",
+      "target_type": "Theme",
+      "target_ref": "Australian dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "extending the prior session\u2019s hawkish-policy-driven rally",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Services PMI",
+      "target_type": "Theme",
+      "target_ref": "Australian dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "upbeat services PMI added support",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation outlook",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Reserve Bank raised its cash rate... amid stronger economic growth and a persistent inflation outlook.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "economic growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "underscoring the economy\u2019s ongoing upswing",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13262,
+  "error_messages": []
+}

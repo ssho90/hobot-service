@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5759",
+  "extracted_at": "2026-02-07T14:54:33.973466",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Iran\u2013US talks",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Scheduled negotiations between Iran and the US aimed at easing tensions.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Saudi Arabia price cut",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Saudi Arabia reduced prices for its main crude grade sold to Asia.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Russia\u2013Ukraine energy infrastructure strikes",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Fresh military strikes targeting Ukraine's energy infrastructure.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Washington\u2013Moscow military dialogue",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Reopening of senior-level military communication between the US and Russia.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "WTI crude oil futures fell more than 1% to around $62.5 per barrel on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "WTI crude oil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "WTI crude oil futures fell more than 1% to around $62.5 per barrel on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Oil prices are heading for their first weekly decline in six weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Oil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "heading for their first weekly decline in six weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Saudi Arabia cut prices for its main crude grade sold to Asia to the lowest level since late 2020.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Saudi Arabia",
+        "Asia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Saudi Arabia cut prices for its main crude grade sold to Asia to the lowest level since late 2020",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Iran's confirmation of negotiations helped ease near-term concerns over military conflict and supply disruptions.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Iran\u2019s confirmation that negotiations would take place helped ease near-term concerns over military conflict and supply disruptions",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Saudi price cut signals an oversupply in the market.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "signaling oversupply",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The smaller-than-expected price reduction by Saudi Arabia suggested confidence in demand.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the smaller-than-expected reduction suggested confidence in demand",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Differing views on the scope of Iran-US talks cast doubt on whether major gaps can be bridged.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "differing views on the scope of the talks cast doubt on whether major gaps can be bridged",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Iran\u2013US talks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "helped ease near-term concerns over military conflict and supply disruptions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Saudi Arabia price cut",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signaling oversupply",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Russia\u2013Ukraine conflict",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "fresh strikes on Ukraine\u2019s energy infrastructure",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13030,
+  "error_messages": []
+}

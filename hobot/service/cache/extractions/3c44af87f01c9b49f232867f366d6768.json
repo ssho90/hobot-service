@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5785",
+  "extracted_at": "2026-02-07T14:46:49.028191",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Copper Price Drop to Six-Week Low",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Copper prices fell to approximately $5.77 per pound, marking the lowest point in nearly six weeks.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Chinese Holidays",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Upcoming seasonal holidays in China causing a pullback in manufacturing activity.",
+      "impact_level": "low",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Copper fell to around $5.77 per pound on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Copper"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Copper fell to around $5.77 per pound on Friday, hitting its lowest level in nearly six weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Stockpiles in LME warehouses across Asia are increasing.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "LME",
+        "Asia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Stockpiles in LME warehouses across Asia are also climbing",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "China Nonferrous Metals Industry Association projected refined copper output will rise about 5% in 2026.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "China Nonferrous Metals Industry Association"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "China Nonferrous Metals Industry Association projected that refined copper output will rise about 5% in 2026, half the growth recorded in 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The downward trend in copper prices could accelerate due to shipment diversions.",
+      "claim_type": "prediction",
+      "author": "Analysts",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Analysts say the trend could accelerate as traders divert shipments from Africa to China to take advantage of temporary price gaps",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Slowing demand from Chinese buyers is pressuring the market.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "pressured by slowing demand from Chinese buyers and rising inventories",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Chinese demand",
+      "target_type": "Theme",
+      "target_ref": "Copper Price",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pressured by slowing demand from Chinese buyers and rising inventories",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "LME inventories",
+      "target_type": "Theme",
+      "target_ref": "Copper Price",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Stockpiles in LME warehouses across Asia are also climbing, further signaling softer demand.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Refined copper output projection",
+      "target_type": "Theme",
+      "target_ref": "Market sentiment",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Market sentiment was further weighed down after the China Nonferrous Metals Industry Association projected that refined copper output will rise about 5% in 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12131,
+  "error_messages": []
+}

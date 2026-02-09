@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5788",
+  "extracted_at": "2026-02-07T14:45:25.461398",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of Japan's coincident economic index",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Flash data release for Japan's coincident economic index for December 2025.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s coincident economic index fell to 114.5 in December 2025 from 114.9.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "Japan Coincident Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s coincident economic index, which tracks factory output, employment, and retail sales, fell to 114.5 in December 2025 from 114.9, flash data showed.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The December 2025 reading of 114.5 is the lowest since August.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan Coincident Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "It marked the lowest reading since August.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The index tracks factory output, employment, and retail sales.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Japan Coincident Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s coincident economic index, which tracks factory output, employment, and retail sales",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Japan Coincident Index",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan\u2019s coincident economic index, which tracks factory output, employment, and retail sales, fell to 114.5",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Japan Coincident Index",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "which tracks factory output, employment, and retail sales",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8853,
+  "error_messages": []
+}

@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5579",
+  "extracted_at": "2026-02-07T17:48:11.918531",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Baltic Dry Index Decline",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Baltic Exchange's dry bulk freight index fell to its lowest level since January 26.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Baltic Exchange's dry bulk freight index fell 3.6% to 1955.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Baltic Exchange",
+        "Baltic Dry Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Baltic Exchange's dry bulk freight index fell 3.6% to 1955, its lowest since January 26.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The capesize index declined 5.7% to 2994.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "capesize index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The capesize index, which typically transport 150,000-ton cargoes such as iron ore and coal, declined 5.7% to 2994.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The panamax index fell 2.3% to 1685 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "panamax index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Also, the panamax index, which usually carry 60,000 to 70,000 tons of coal or grain, fell 2.3% to 1685 points.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The supramax index increased 0.8% to 1092.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "supramax index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the other hand, the supramax index increased 0.8% to 1092.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Baltic Dry Index",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Baltic Exchange's dry bulk freight index fell 3.6% to 1955, its lowest since January 26.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "capesize index",
+      "target_type": "Theme",
+      "target_ref": "iron ore",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The capesize index, which typically transport 150,000-ton cargoes such as iron ore and coal",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "panamax index",
+      "target_type": "Theme",
+      "target_ref": "grain",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the panamax index, which usually carry 60,000 to 70,000 tons of coal or grain",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11652,
+  "error_messages": []
+}

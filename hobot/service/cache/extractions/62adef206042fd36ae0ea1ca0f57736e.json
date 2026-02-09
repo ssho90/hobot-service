@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5496",
+  "extracted_at": "2026-02-08T01:11:51.653681",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "New Zealand Q4 Jobs Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of quarterly labor market data including unemployment and employment growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor",
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "RBNZ Policy Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Upcoming meeting of the Reserve Bank of New Zealand to determine the official cash rate.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The New Zealand dollar fell to $0.603 on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "New Zealand dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The New Zealand dollar edged lower to $0.603 on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New Zealand's unemployment rate rose to 5.4% in the fourth quarter.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "unemployment rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The country\u2019s unemployment rate ticked up to 5.4% in the fourth quarter, its highest level since 2015",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment grew by 0.5% in the fourth quarter.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment rose by 0.5% over the quarter, stronger than the estimated 0.3% growth",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Reserve Bank of New Zealand will likely maintain the official cash rate at 2.25% this month.",
+      "claim_type": "prediction",
+      "author": "Market consensus",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reinforcing expectations that policymakers will keep the official cash rate unchanged at 2.25% at their upcoming meeting later this month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There is a 78% probability of a 25 bps rate hike in September.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "a 25 bps increase is currently priced in at around 78%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The first interest rate hike is expected by December by most economists.",
+      "claim_type": "prediction",
+      "author": "Economists",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "most economists anticipate the first rate hike by December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Q4 Jobs Report",
+      "target_type": "Theme",
+      "target_ref": "New Zealand dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The New Zealand dollar edged lower to $0.603 on Wednesday... as a mixed jobs report left policy expectations for later this month largely unchanged.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Q4 Jobs Report",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Overall, the figures were broadly in line with the Reserve Bank of New Zealand\u2019s projections, reinforcing expectations that policymakers will keep the official cash rate unchanged",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment growth",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment rose by 0.5% over the quarter... signaling a stabilization in the labor market.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15380,
+  "error_messages": []
+}

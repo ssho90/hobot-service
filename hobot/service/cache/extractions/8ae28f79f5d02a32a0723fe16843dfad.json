@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5696",
+  "extracted_at": "2026-02-07T15:05:40.446969",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Tech-led sell-off",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A continued decline in technology stocks impacting major US indices.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Alphabet Earnings Report",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Alphabet reported earnings and revenue that beat expectations but flagged higher AI spending.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Qualcomm Outlook Issuance",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Qualcomm issued a disappointing financial outlook.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Amazon Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Scheduled earnings release for Amazon after the market close.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "S&P 500 futures fell 0.5%, Nasdaq 100 futures fell 0.8%, and Dow Jones futures dropped approximately 120 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq 100",
+        "Dow Jones"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "S&P 500 futures down 0.5%, Nasdaq 100 futures falling 0.8%, and Dow Jones futures shedding around 120 points",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Alphabet shares decreased by 5% despite exceeding earnings and revenue forecasts.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Alphabet"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Alphabet slid 5% after flagging a sharp increase in AI spending this year, despite beating earnings and revenue expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Qualcomm shares dropped nearly 11% following a disappointing outlook.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Qualcomm"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Qualcomm plunged nearly 11% after issuing a disappointing outlook",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The market decline is driven by persistent worries regarding AI disruption and high stock valuations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "continued amid persistent concerns over AI-related disruption and elevated valuations",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The recent sell-off has eliminated all year-to-date gains for the Nasdaq 100.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "erased the Nasdaq 100\u2019s gains for the year continued",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "AI-related disruption",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "continued amid persistent concerns over AI-related disruption and elevated valuations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "elevated valuations",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "continued amid persistent concerns over AI-related disruption and elevated valuations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Qualcomm outlook",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Qualcomm plunged nearly 11% after issuing a disappointing outlook",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Alphabet AI spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Alphabet slid 5% after flagging a sharp increase in AI spending this year",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14216,
+  "error_messages": []
+}

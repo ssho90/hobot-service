@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5878",
+  "extracted_at": "2026-02-09T01:10:16.912721",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "LDP's Landslide Win",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The ruling Liberal Democratic Party secured a two-thirds supermajority in the lower house in a historic victory.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japanese Snap Election",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "An election for Japan's House of Representatives where the LDP-led coalition won 352 of 465 seats.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Japanese yen weakened past 157.5 per dollar on Monday, reaching a two-week low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japanese yen"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Japanese yen weakened past 157.5 per dollar on Monday, sliding to a two-week low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Takaichi's coalition won 352 of the 465 seats in Japan's House of Representatives.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Sanae Takaichi",
+        "House of Representatives"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Takaichi\u2019s coalition won 352 of the 465 seats in Japan\u2019s House of Representatives",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Liberal Democratic Party (LDP) alone secured 316 seats.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Liberal Democratic Party"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "with the LDP alone securing a majority of 316",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The election result gives Takaichi a clear mandate to pursue expansionary fiscal policies.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The result gives Takaichi a clear mandate from the snap election to pursue expansionary fiscal policies",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Expansionary fiscal policies could pressure the yen and Japanese government bonds while supporting equities.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "a stance that could further pressure the yen and Japanese government bonds while potentially supporting equities",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The election outcome reinforced expectations for looser fiscal policy and possible tax cuts.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The outcome reinforced expectations for looser fiscal policy and possible tax cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Takaichi is expected to advance a conservative agenda including tougher immigration and land-ownership rules.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Takaichi is also expected to advance a conservative agenda, including a tougher immigration system and tighter land-ownership rule",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "LDP's Landslide Win",
+      "target_type": "Theme",
+      "target_ref": "Japanese yen",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Yen Falls After LDP\u2019s Landslide Win",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Expansionary fiscal policies",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a stance that could further pressure the yen and Japanese government bonds",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Looser fiscal policy",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rattled Japanese financial markets in recent weeks amid concerns over Japan\u2019s growing debt burden",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "LDP's Landslide Win",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pursue expansionary fiscal policies, a stance that could... potentially supporting equities",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15108,
+  "error_messages": []
+}

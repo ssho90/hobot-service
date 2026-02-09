@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5765",
+  "extracted_at": "2026-02-07T05:46:47.796007",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The unemployment rate in the Philippines remained at 4.4% in December 2025, unchanged from November.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Philippines",
+        "unemployment rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The unemployment rate in the Philippines remained at 4.4% in December 2025, unchanged from November, reflecting stable labor market conditions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The unemployment rate in December 2025 was higher than the 3.1% recorded in December 2024.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Philippines",
+        "unemployment rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "However, it was higher than the 3.1% recorded in December 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The number of unemployed persons rose slightly to 2.26 million in December 2025 from 2.25 million in November and 1.63 million a year earlier.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Philippines",
+        "unemployment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of unemployed persons rose slightly to 2.26 million from 2.25 million in November and 1.63 million a year earlier.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Total employment in the Philippines increased to 49.43 million in December 2025 from 49.26 million in November but remained below December 2024\u2019s 50.19 million.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Philippines",
+        "employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Total employment increased to 49.43 million from 49.26 million in November but remained below December 2024\u2019s 50.19 million.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Services continued to dominate employment at 62.4% of total workers, followed by agriculture at 20.7% and industry at 16.9%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "employment",
+        "services",
+        "agriculture",
+        "industry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Among major sectors, services continued to dominate employment at 62.4% of total workers, followed by agriculture at 20.7% and industry at 16.9%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The labor force participation rate was 64.4% in December 2025, up from 64.0% in November but below December 2024\u2019s 65.1%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "labor force participation rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The labor force participation rate was 64.4%, up from 64.0% in November but below December 2024\u2019s 65.1%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Unemployment Rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Philippines Jobless Rate Unchanged at 4.4%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Total employment increased to 49.43 million from 49.26 million in November",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Labor force participation rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The labor force participation rate was 64.4%, up from 64.0% in November but below December 2024\u2019s 65.1%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7208,
+  "error_messages": []
+}

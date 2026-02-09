@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5760",
+  "extracted_at": "2026-02-07T14:54:45.746136",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver Price Collapse",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver prices dropped by 9.6% to below $64.1 per ounce, marking its steepest collapse since 1980.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Nomination of Kevin Warsh",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The nomination of Kevin Warsh as the next Federal Reserve chair.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January Precious Metals Rally",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver and other precious metals surged to record highs in January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver slid as much as 9.6% to below $64.1 per ounce on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver slid as much as 9.6% to below $64.1 per ounce on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Silver is down approximately 45% from its January 29 peak.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The white metal is now down roughly 45% from its Jan. 29 peak",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Kevin Warsh was nominated as the next Fed chair.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Kevin Warsh",
+        "Federal Reserve"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "nomination of Kevin Warsh as the next Fed chair",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Kevin Warsh is considered a more hawkish choice for the Federal Reserve chair.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "nomination of Kevin Warsh as the next Fed chair, widely seen as the more hawkish choice",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Speculative buying from Chinese traders added froth to the silver rally.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Speculative buying, particularly from Chinese traders, added froth to the rally",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Widespread deleveraging and a deepening selloff across financial markets drove the silver price drop.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "sinking to its lowest level in seven weeks amid widespread deleveraging and a deepening selloff across financial markets",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh nomination",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pressure on precious metals increased further after a sharp rebound in the dollar following the nomination of Kevin Warsh as the next Fed chair, widely seen as the more hawkish choice.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by heightened geopolitical risks, economic uncertainty, and concerns over the US Federal Reserve\u2019s independence that fueled safe-haven demand.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Speculative flows",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver\u2019s volatility outpaced other metals as heavy speculative flows overshadowed its supply-demand fundamentals.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Dollar rebound",
+      "target_type": "Theme",
+      "target_ref": "Silver",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pressure on precious metals increased further after a sharp rebound in the dollar",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11303,
+  "error_messages": []
+}

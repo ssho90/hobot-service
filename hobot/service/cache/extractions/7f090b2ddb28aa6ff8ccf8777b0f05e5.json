@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5819",
+  "extracted_at": "2026-02-07T05:38:36.093887",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Germany\u2019s trade surplus widened to \u20ac17.1 billion in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Germany",
+        "trade surplus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Germany\u2019s trade surplus widened to \u20ac17.1 billion in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The trade surplus in December increased from an upwardly revised \u20ac13.6 billion in November.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "trade surplus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "up from an upwardly revised \u20ac13.6 billion in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "December's exports rose 4.0% to a 20-month high of \u20ac133.3 billion.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "exports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports rose 4.0% to a 20-month high of \u20ac133.3 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports to the US, Germany\u2019s largest market, rose 8.9%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "exports",
+        "US",
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "exports to the US, Germany\u2019s largest market, which rose 8.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Outbound shipments also increased to China (10.7%), the UK (14.6%), and Russia (1.8%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "shipments",
+        "China",
+        "UK",
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Outbound shipments also increased to China (10.7%), the UK (14.6%), and Russia (1.8%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports rose 1.4% to a 29-month high of \u20ac116.2 billion.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports rose 1.4% to a 29-month high of \u20ac116.2 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports increased from the US (3.0%), China (4.1%), and Russia (6%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "imports",
+        "US",
+        "China",
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "including the US (3.0%), China (4.1%), and Russia (6%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the full year of 2025, Germany registered a trade surplus of \u20ac202.7 billion.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Germany",
+        "trade surplus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the full year of 2025, Germany registered a trade surplus of \u20ac202.7 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the full year of 2025, exports were up just 1.0% while imports increased 4.4%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "exports",
+        "imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "with exports up just 1.0% while imports increased 4.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "German Trade Surplus",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "German Trade Surplus Widens in December",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports rose 4.0%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Imports rose 1.4%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7013,
+  "error_messages": []
+}

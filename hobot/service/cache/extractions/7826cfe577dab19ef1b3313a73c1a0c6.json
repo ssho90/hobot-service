@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5640",
+  "extracted_at": "2026-02-07T16:21:39.713049",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indonesia Q4 2025 GDP Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Indonesia's gross domestic product data for the fourth quarter of 2025, showing a 5.39% year-on-year growth.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Indonesia's GDP grew by 5.39% year-on-year in Q4 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s GDP advanced 5.39% yoy in Q4 2025, surpassing market expectations of 5.01%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private consumption expansion accelerated to 5.11% in Q4 from 4.89% in Q3.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "private consumption"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "faster expansion in private consumption (5.11% vs 4.89% in Q3)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Fixed investment growth rose to 6.12% in Q4.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "fixed investment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "fixed investment (6.12% vs 5.04%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The full-year 2025 economic growth was 5.11%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia",
+        "economy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the full year of 2025, the economy grew by 5.11%, below the government\u2019s target of 5.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Indonesian government set a 5.2% GDP growth target for 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "government",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For 2026, the GDP growth target remains at 5.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Global trade uncertainty caused a slowdown in export growth.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, export growth slowed (3.25% vs 9.14%), reflecting persistent global trade uncertainty",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Natural disasters in three provinces prevented the economy from reaching the 5.2% annual target.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting the impact of natural disasters in three provinces last year",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "private consumption",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The acceleration was mainly driven by faster expansion in private consumption",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "fixed investment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The acceleration was mainly driven by faster expansion in... fixed investment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "global trade uncertainty",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "export growth slowed (3.25% vs 9.14%), reflecting persistent global trade uncertainty",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "natural disasters",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "below the government\u2019s target of 5.2%, reflecting the impact of natural disasters in three provinces last year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11278,
+  "error_messages": []
+}

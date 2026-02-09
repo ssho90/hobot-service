@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5573",
+  "extracted_at": "2026-02-07T17:49:26.600267",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Swedish Krona depreciation",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Swedish Krona experienced a decline of 0.78% in foreign exchange markets.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Swedish Krona dropped by 0.78%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Swedish Krona"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Swedish Krona Drops by 0.78%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Swedish Krona",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Swedish Krona Drops by 0.78%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7798,
+  "error_messages": []
+}

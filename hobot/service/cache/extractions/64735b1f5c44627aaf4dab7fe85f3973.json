@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5554",
+  "extracted_at": "2026-02-08T00:58:23.896809",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Slovenia December 2025 Trade Balance Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of Slovenia's trade data for December 2025, showing a significant narrowing of the trade deficit.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Full-Year 2025 Trade Performance Summary",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Annual summary of Slovenia's trade balance showing a reversal from deficit to surplus.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Slovenia's trade deficit narrowed to EUR 210.7 million in December 2025 from EUR 891.3 million in December 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Slovenia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Slovenia\u2019s trade deficit narrowed sharply to EUR 210.7 million in December 2025 from EUR 891.3 million in the corresponding period of the previous year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased by 13.3% year-on-year to EUR 5,363.4 million in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Slovenia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports climbed 13.3% year-on-year to EUR 5,363.4 million",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports decreased by 0.9% to EUR 5,574 million in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Slovenia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "imports fell by 0.9% to EUR 5,574 million",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Slovenia recorded a trade surplus of EUR 1,488.4 million for the full year 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Slovenia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Considering the entire year, the country posted a surplus of EUR 1,488.4 million, reversing a trade deficit of EUR 7,701.7 million recorded in the same period last year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports climbed 13.3% year-on-year to EUR 5,363.4 million, due to higher sales to both the EU (1.5%) and non-EU countries (23.7%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "imports fell by 0.9% to EUR 5,574 million, largely driven by a drop in purchases from non-EU countries (-3%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade Surplus",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the country posted a surplus of EUR 1,488.4 million, reversing a trade deficit of EUR 7,701.7 million",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12336,
+  "error_messages": []
+}

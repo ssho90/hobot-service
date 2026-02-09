@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5834",
+  "extracted_at": "2026-02-07T05:36:32.401605",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "US natural gas futures were little changed around $3.50 per MMBtu on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "natural gas futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US natural gas futures were little changed around $3.50 per MMBtu on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Natural gas futures are on track to end the week down nearly 20%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Natural gas futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "are on track to end the week down nearly 20%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "A record 360 Bcf withdrawal from US underground natural gas storage last week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "natural gas storage"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a record 360 Bcf withdrawal from US underground natural gas storage last week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inventories are 27 Bcf below the five-year average.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "which left inventories 27 Bcf below the five-year average",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inventories were 143 Bcf above the five-year average in the prior week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "compared with a 143 Bcf surplus in the prior week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Lower 48 output rising to around 106.6 bcfd in early February from January levels.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Lower 48 output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Lower 48 output rising to around 106.6 bcfd in early February from January levels",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Natural gas prices",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Natural Gas Prices in the US Stabilize",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "weather forecasts",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mid-February weather forecasts have shifted markedly warmer particularly across the northeastern US, reducing expected heating demand",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5565,
+  "error_messages": []
+}

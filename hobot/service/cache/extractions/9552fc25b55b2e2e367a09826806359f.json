@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5582",
+  "extracted_at": "2026-02-07T17:48:52.147462",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of January 2026 ISM Services PMI",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Institute for Supply Management released the Services PMI data for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The US ISM Services PMI was 53.8 in January 2026, matching the revised December figure.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ISM",
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The ISM Services PMI for the US steadied at 53.8 in January 2026, the same as a downwardly revised 53.8 in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The business activity/production index rose to 57.4 from 55.2.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ISM"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a faster increase seen for business activity/production (57.4 vs 55.2)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The price pressures index increased to 66.6 in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ISM"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "price pressures increased (66.6 vs 65.1)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment and new orders indices slowed compared to the previous month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ISM"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while new orders (53.1 vs 56.5), employment (50.3 vs 51.7) and supplier deliveries (54.2 vs 51.8) slowed.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The services sector is undergoing a robust expansion.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The reading pointed to another robust expansion in the services sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Tariff impacts and geopolitical tensions are contributing to respondent uncertainty.",
+      "claim_type": "opinion",
+      "author": "Steve Miller",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "There was more respondent commentary in January on tariff impacts and uncertainty, potentially the result of annual contract renewals and geopolitical tensions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Future pricing trends need to be monitored to see if increases will persist.",
+      "claim_type": "prediction",
+      "author": "Steve Miller",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "whether pricing increases will stick or expand needs to be closely watched",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ISM Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The reading pointed to another robust expansion in the services sector",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "price pressures",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "price pressures increased (66.6 vs 65.1)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "tariff impacts",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "There was more respondent commentary in January on tariff impacts and uncertainty",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "employment index",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment (50.3 vs 51.7) and supplier deliveries (54.2 vs 51.8) slowed.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11510,
+  "error_messages": []
+}

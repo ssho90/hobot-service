@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5862",
+  "extracted_at": "2026-02-07T14:26:44.265899",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Ibovespa Friday Close",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Ibovespa closed 0.5% higher at 182,950 on Friday, recovering earlier losses.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Iran talks in Oman",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Upcoming talks between the US and Iran in Oman affecting oil price sentiment.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Finance Ministry Macroeconomic Forecast Update",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Finance Ministry adjusted its 2026 growth and inflation projections.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Ibovespa closed 0.5% higher at 182,950 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ibovespa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Ibovespa closed 0.5% higher at 182,950 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Ita\u00fasa jumped nearly 3% and B3 surged over 4.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ita\u00fasa",
+        "B3"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ita\u00fasa jumped nearly 3% and B3 surged over 4.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Finance Ministry trimmed its 2026 growth forecast and raised its inflation projection.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Finance Ministry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Finance Ministry slightly trimmed its 2026 growth forecast while raising its inflation projection",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Strength in select cyclicals and domestic stocks offset lingering caution around banks.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "strength in select cyclicals and domestic stocks offset lingering caution around banks",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Bradesco's cautious 2026 guidance outweighed its solid recent results.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Bradesco slipping again after its cautious 2026 guidance continued to outweigh solid recent results",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US Iran talks in Oman",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Petrobras edged lower alongside choppy oil prices ahead of US Iran talks in Oman",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Finance Ministry",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Finance Ministry slightly trimmed its 2026 growth forecast",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Finance Ministry",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "raising its inflation projection",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11153,
+  "error_messages": []
+}

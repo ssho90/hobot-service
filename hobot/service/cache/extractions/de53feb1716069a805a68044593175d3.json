@@ -1,0 +1,237 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5729",
+  "extracted_at": "2026-02-07T14:59:40.945114",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "WTI crude oil futures price drop",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "WTI crude oil futures fell more than 3% to around $63 per barrel on Thursday.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Iran-US negotiations in Oman",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Iran confirmed it will hold negotiations with the US in Oman on Friday to reduce military conflict risks.",
+      "impact_level": "high",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US private jobs data release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of weaker US private jobs data affecting economic outlook.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Russia military contact resumption",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The US and Russia agreed to resume high level military contacts.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "WTI crude oil futures fell more than 3% to around $63 per barrel on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "WTI crude oil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "WTI crude oil futures fell more than 3% to around $63 per barrel on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Iran will hold negotiations with the US in Oman on Friday.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Iran",
+        "US",
+        "Oman"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Iran confirmed it will hold negotiations with the US in Oman on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Middle East accounts for about a third of global crude supply.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Middle East"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Middle East, which accounts for about a third of global crude supply",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US and Russia agreed to resume high level military contacts.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "US",
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the US and Russia agreed to resume high level military contacts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Easing geopolitical tensions and demand concerns pressured oil prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reversing a two-day advance as easing geopolitical tensions and demand concerns pressured prices",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Negotiations reduce the immediate risk of military conflict and supply disruptions.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "reducing the immediate risk of military conflict and potential supply disruptions from the major OPEC producer",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weaker US private jobs data revived concerns about an economic slowdown and softer fuel demand.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Prices also came under pressure after weaker US private jobs data revived concerns about an economic slowdown and softer fuel demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Uncertainty remains over whether Washington and Tehran can bridge key differences.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Still, uncertainty remains over whether Washington and Tehran can bridge key differences, keeping some risk premium in the market",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Iran-US negotiations",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The news eased some of the geopolitical risk premium tied to the Middle East",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US private jobs data",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weaker US private jobs data revived concerns about an economic slowdown",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "WTI crude oil futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "easing geopolitical tensions and demand concerns pressured prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "economic slowdown",
+      "target_type": "Theme",
+      "target_ref": "fuel demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "revived concerns about an economic slowdown and softer fuel demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11635,
+  "error_messages": []
+}

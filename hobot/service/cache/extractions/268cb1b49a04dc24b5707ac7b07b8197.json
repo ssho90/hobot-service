@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5794",
+  "extracted_at": "2026-02-07T14:44:15.125332",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "December 2025 Dutch Household Consumption Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of data showing household consumption in the Netherlands rose 0.8% year-on-year.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January Consumption Conditions Indicator Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of the indicator showing deterioration in consumption conditions for January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Dutch household consumption rose 0.8% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Netherlands",
+        "Household consumption"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Household consumption in the Netherlands rose 0.8% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Services spending in the Netherlands increased to 1.2% in December from 0.6% in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "services spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "services spending strengthened to 1.2% from 0.6%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Services account for more than half of total household consumption in the Netherlands.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "services",
+        "household consumption"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Services account for more than half of total household consumption.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment growth in the Netherlands slowed in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "employment growth"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment growth slowed",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The December 2025 consumption growth was the slowest in three months.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "marking the slowest growth in three months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Consumers became less optimistic about their financial outlook for the year ahead.",
+      "claim_type": "opinion",
+      "author": "consumers",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "consumers became less optimistic about their financial outlook for the year ahead",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The January Consumption Conditions indicator points to softer momentum in household demand.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "pointing to softer momentum in household demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "employment growth",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment growth slowed",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "employment growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment growth slowed... pointing to softer momentum in household demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "consumer optimism",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "consumers became less optimistic about their financial outlook for the year ahead, pointing to softer momentum in household demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "services spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Services account for more than half of total household consumption.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15248,
+  "error_messages": []
+}

@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5848",
+  "extracted_at": "2026-02-07T05:34:54.846889",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "BoE interest rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England left interest rates unchanged but surprised markets with a narrow 5\u20134 vote to hold.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Sterling is on track for its sharpest weekly decline against the dollar since late October.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Sterling",
+        "dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Sterling edged back toward $1.36 at the end of a volatile week that nonetheless put sterling on track for its sharpest weekly decline against the dollar since late October",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The BoE's Monetary Policy Committee (MPC) voted 5-4 to hold interest rates steady.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "BoE",
+        "MPC",
+        "interest rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the policy front, the BoE left interest rates unchanged but surprised markets with a narrow 5\u20134 vote to hold.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Four MPC members supported an immediate 25 bp rate cut.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "MPC",
+        "interest rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Four MPC members supported an immediate 25 bp cut, citing expectations that inflation will fall back toward the 2% target from April.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Risks from persistent inflation have eased.",
+      "claim_type": "statement",
+      "author": "Bank of England",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The Bank noted that risks from persistent inflation have eased, while downside risks from weaker demand and a softening labor market have become more pronounced.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Downside risks from weaker demand and a softening labor market have become more pronounced.",
+      "claim_type": "statement",
+      "author": "Bank of England",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The Bank noted that risks from persistent inflation have eased, while downside risks from weaker demand and a softening labor market have become more pronounced.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "BoE interest rate decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the policy front, the BoE left interest rates unchanged but surprised markets with a narrow 5\u20134 vote to hold.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "MPC members supporting rate cut",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Four MPC members supported an immediate 25 bp cut, citing expectations that inflation will fall back toward the 2% target from April.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BoE",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Bank noted that risks from persistent inflation have eased",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BoE",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Bank noted that risks from persistent inflation have eased, while downside risks from weaker demand and a softening labor market have become more pronounced.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BoE",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Bank noted that risks from persistent inflation have eased, while downside risks from weaker demand and a softening labor market have become more pronounced.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6488,
+  "error_messages": []
+}

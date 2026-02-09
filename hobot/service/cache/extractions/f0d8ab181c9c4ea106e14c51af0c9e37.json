@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5519",
+  "extracted_at": "2026-02-08T01:06:19.484899",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "February 2026 meeting of the Central Bank of the Republic of Azerbaijan",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The central bank met to decide on the discount rate and interest rate corridor.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Central Bank of the Republic of Azerbaijan cut its discount rate by 0.25 percentage points to 6.5%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Central Bank of the Republic of Azerbaijan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Central Bank of the Republic of Azerbaijan cut its discount rate by 0.25 percentage points to 6.5% at its February 2026 meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The interest rate corridor was set with a lower limit of 5.5% and an upper limit of 7.5%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Central Bank of the Republic of Azerbaijan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The decision also adjusted the interest rate corridor accordingly, setting the lower limit at 5.5% and the upper at 7.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation remains within the 4\u00b12% target range.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Central Bank of the Republic of Azerbaijan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "continuing its gradual easing cycle as inflation remains within the 4\u00b12% target range",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Price pressures are easing and core inflation is close to target.",
+      "claim_type": "analysis",
+      "author": "Central Bank of the Republic of Azerbaijan",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The move reflects the central bank\u2019s view that price pressures are easing, with a recent downward trend in inflation and core inflation close to target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation risks have not changed significantly.",
+      "claim_type": "analysis",
+      "author": "Officials",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Officials noted that inflation risks have not changed significantly",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Bank is ready to modify policy if inflation deviates from the baseline outlook.",
+      "claim_type": "prediction",
+      "author": "Central Bank of the Republic of Azerbaijan",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "emphasizing readiness to modify policy if actual or forecast inflation deviates from its baseline outlook",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "February 2026 meeting",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signaling policymakers\u2019 intent to maintain adequate liquidity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "February 2026 meeting",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "continuing its gradual easing cycle as inflation remains within the 4\u00b12% target range",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "external price transmission",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "external price transmission and domestic cost factors remaining the main variables to watch",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9493,
+  "error_messages": []
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5737",
+  "extracted_at": "2026-02-07T14:57:33.990928",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Orange Juice Price Plunge",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Orange juice prices experienced a significant decline of 5.65%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Orange juice prices decreased by 5.65%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Orange Juice"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Orange Juice Plunges by 5.65%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Orange Juice",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Orange Juice Plunges by 5.65%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Orange Juice",
+      "target_type": "Theme",
+      "target_ref": "Agricultural Commodities",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Agricultural Commodities Updates: Orange Juice Plunges by 5.65%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6213,
+  "error_messages": []
+}

@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5830",
+  "extracted_at": "2026-02-07T14:31:31.314835",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Iceland January 2026 Trade Balance Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of trade data for Iceland for the month of January 2026, showing a significant narrowing of the trade deficit.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Iceland's trade deficit narrowed to ISK 0.3 billion in January 2026 from ISK 7.8 billion in January 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Iceland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Iceland\u2019s trade deficit narrowed sharply to ISK 0.3 billion in January 2026 from ISK 7.8 billion in the corresponding month of the previous year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports declined by 20.9% year-on-year to ISK 72.4 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Iceland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports declined by 20.9% year-on-year to ISK 72.4 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports fell by 26.8% to ISK 72.7 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Iceland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports also fell by 26.8% to ISK 72.7 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The narrowing of the trade deficit was primarily due to exports falling less than imports.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "This marked the smallest trade deficit since a surplus recorded in January 2019, as exports fell less than imports.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The decline in exports was weighed down by lower shipments of manufactured goods and other products.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "weighed down by lower shipments of manufactured goods (-36.6%) and other products (-49%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports declined by 20.9% year-on-year to ISK 72.4 billion, weighed down by lower shipments of manufactured goods",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Imports also fell by 26.8% to ISK 72.7 billion, driven by a notable drop in purchases of industrial supplies (-35.8%), fuels and lubricants (-41.2%)",
+        "source_sentence": null,
+        "confidence": "low",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Manufactured goods",
+      "target_type": "Theme",
+      "target_ref": "Exports",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports declined by 20.9% year-on-year to ISK 72.4 billion, weighed down by lower shipments of manufactured goods (-36.6%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Fuels and lubricants",
+      "target_type": "Theme",
+      "target_ref": "Imports",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Imports also fell by 26.8% to ISK 72.7 billion, driven by a notable drop in purchases of... fuels and lubricants (-41.2%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10874,
+  "error_messages": []
+}

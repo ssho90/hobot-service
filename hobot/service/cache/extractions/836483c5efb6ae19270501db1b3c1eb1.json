@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5685",
+  "extracted_at": "2026-02-07T05:53:49.933132",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "Bank of England Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England kept its Bank Rate unchanged at 3.75% in February.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Bank of England kept its Bank Rate unchanged at 3.75% in February.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England",
+        "Bank Rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Bank of England kept its Bank Rate unchanged at 3.75% in February",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The vote to keep rates steady was 5 to 4.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England",
+        "Monetary Policy Committee"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "with a narrow 5 to 4 vote",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bank Rate has already been reduced by 150 basis points since August 2024.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank Rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bank Rate has already been reduced by 150 basis points since August 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation remains above the 2% target.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Inflation remains above the 2% target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is expected to fall back to around 2% from April.",
+      "claim_type": "prediction",
+      "author": "Bank of England",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Inflation remains above the 2% target but is expected to fall back to around that level from April",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Further rate cuts are likely but will depend on incoming inflation data.",
+      "claim_type": "prediction",
+      "author": "Monetary Policy Committee",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The committee signalled that further rate cuts are likely but will depend on incoming inflation data",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "easing inflation pressures",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as policymakers balanced easing inflation pressures against risks from a weakening economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "weakening economy",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as policymakers balanced easing inflation pressures against risks from a weakening economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Pay growth and services inflation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pay growth and services inflation have continued to ease, reflecting subdued economic growth",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Pay growth and services inflation",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pay growth and services inflation have continued to ease, reflecting subdued economic growth and rising slack in the labour market.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "weaker demand",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "while weaker demand and a softening jobs market pose downside risks.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "softening jobs market",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "while weaker demand and a softening jobs market pose downside risks.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "energy price developments",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Inflation remains above the 2% target but is expected to fall back to around that level from April due partly to energy price developments.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8529,
+  "error_messages": []
+}

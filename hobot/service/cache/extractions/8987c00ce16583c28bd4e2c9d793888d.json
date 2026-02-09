@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5485",
+  "extracted_at": "2026-02-08T01:14:12.639750",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global Hong Kong SAR PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the January 2026 PMI data showing an increase to 52.3.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global Hong Kong SAR PMI increased to 52.3 in January 2026 from 51.9 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "Hong Kong SAR"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global Hong Kong SAR PMI increased to 52.3 in January 2026 from December\u2019s 51.9",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Foreign sales increased at the fastest pace since February 2023.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hong Kong SAR"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "foreign sales increasing at the fastest pace since February 2023",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Supplier performance improved for the second consecutive month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hong Kong SAR"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "supplier performance improved for the second month in a row",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment in the private sector experienced a further reduction.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hong Kong SAR"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a further reduction in employment, although the pace of job shedding was only marginal",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Business sentiment weakened to a five-month low due to US trade policy and market competition.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, business sentiment weakened to a five-month low amid concerns over US trade policy and intense market competition.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Firms discounted prices to stimulate sales.",
+      "claim_type": "opinion",
+      "author": "S&P Global",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "output inflation accelerated modestly as firms discounted prices to stimulate sales",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New business inflows",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "marking the fastest expansion in the private sector since March 2023, driven by a stronger rise in new business inflows",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US trade policy",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "business sentiment weakened to a five-month low amid concerns over US trade policy",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Staff costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input costs rose due to higher raw material prices and staff costs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Job shedding",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a further reduction in employment, although the pace of job shedding was only marginal",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10456,
+  "error_messages": []
+}

@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5714",
+  "extracted_at": "2026-02-07T05:51:34.196724",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Ecuador\u2019s annual inflation accelerated to 2.44% in January 2026 from 1.91% in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Ecuador",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ecuador\u2019s annual inflation accelerated to 2.44% in January 2026 from 1.91% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The sharpest rise in Ecuador's inflation since May 2024.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Ecuador",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the sharpest rise since May 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Largest increases in Ecuador were recorded in housing and utilities (20.79%), healthcare (3.13%), alcoholic beverages and tobacco (1.43%), restaurants and hotels (1.47%), and food and non-alcoholic beverages (2.09%).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Ecuador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The largest increases were recorded in housing and utilities (20.79%), healthcare (3.13%), alcoholic beverages and tobacco (1.43%), restaurants and hotels (1.47%), and food and non-alcoholic beverages (2.09%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Deflation was recorded in clothing and footwear (-4.89%), recreation and culture (-2.54%), and communications (-0.28%) in Ecuador.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Ecuador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Deflation was recorded in clothing and footwear (-4.89%), recreation and culture (-2.54%), and communications (-0.28%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, consumer prices rose 0.37% in January in Ecuador.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Ecuador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose 0.37% in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices in Ecuador declined 0.14% in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Ecuador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following a 0.14% decline in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Ecuador Inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ecuador Inflation Accelerates the Most in 20 Months",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Ecuador Inflation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ecuador Inflation Accelerates the Most in 20 Months",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5239,
+  "error_messages": []
+}

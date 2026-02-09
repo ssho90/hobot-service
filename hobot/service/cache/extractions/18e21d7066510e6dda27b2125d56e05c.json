@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5698",
+  "extracted_at": "2026-02-07T15:06:07.526374",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England kept interest rates unchanged at 3.75% but signaled a dovish stance.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Appointment of Peter Mandelson as UK ambassador to the US",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Prime Minister Keir Starmer appointed Peter Mandelson, leading to political uncertainty.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "UK 10-year gilt yields fell to 4.55% in afternoon trade.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK 10-year gilt"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "UK 10-year gilt yields fell to 4.55% in afternoon trade",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Bank of England kept interest rates unchanged at 3.75%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Bank of England kept interest rates unchanged at 3.75%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Four of nine MPC members voted for a 25 basis point rate cut.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "MPC",
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "four of nine MPC members favoring an immediate 25 basis point cut to 3.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gilt yields reached a three-month high of 4.612% earlier in the session.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK gilt"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Earlier in the session, gilt yields had reached an over three-month high of 4.612%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Bank of England signaled a more dovish stance than markets had expected.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "signaled a more dovish stance than markets had expected",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "CPI inflation will return toward the 2% target from April.",
+      "claim_type": "prediction",
+      "author": "MPC members",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "expectations that CPI inflation will return toward the 2% target from April",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Risks from persistent inflation have eased.",
+      "claim_type": "opinion",
+      "author": "Bank of England",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The Bank highlighted that risks from persistent inflation have eased",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weaker demand and a softening labor market have become more pronounced.",
+      "claim_type": "analysis",
+      "author": "Bank of England",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "while weaker demand and a softening labor market have become more pronounced",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England Interest Rate Decision",
+      "target_type": "Theme",
+      "target_ref": "UK Gilt Yields",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "UK 10-year gilt yields fell to 4.55%... after the Bank of England kept interest rates unchanged at 3.75% but signaled a more dovish stance",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Appointment of Peter Mandelson",
+      "target_type": "Theme",
+      "target_ref": "UK Gilt Yields",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "gilt yields had reached an over three-month high of 4.612%, driven by rising political uncertainty after Prime Minister Keir Starmer appointed Peter Mandelson",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "CPI inflation",
+      "target_type": "Theme",
+      "target_ref": "Bank of England Interest Rate Decision",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "citing expectations that CPI inflation will return toward the 2% target from April",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "softening labor market",
+      "target_type": "Theme",
+      "target_ref": "Bank of England Interest Rate Decision",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Bank highlighted that... a softening labor market have become more pronounced",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15498,
+  "error_messages": []
+}

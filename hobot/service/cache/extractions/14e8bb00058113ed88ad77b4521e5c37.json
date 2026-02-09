@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5843",
+  "extracted_at": "2026-02-07T05:35:56.686867",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Croatia's trade deficit slightly widened to EUR 1.3 billion in December 2025, from EUR 1.2 billion in the same month of the previous year.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Croatia's trade deficit slightly widened to EUR 1.3 billion in December 2025, from EUR 1.2 billion in the same month of the previous year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports declined by 2.2% year-on-year to EUR 3.3 billion in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports declined by 2.2% year-on-year to EUR 3.3 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports fell by 4.2% to EUR 2 billion in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "exports fell by 4.2% to EUR 2 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the whole of 2025, Croatia's trade deficit widened to EUR 19.2 billion, from EUR 18.8 billion in the same period a year earlier.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the whole of 2025, the country's trade deficit widened to EUR 19.2 billion, from EUR 18.8 billion in the same period a year earlier.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased by 4.4% to EUR 25.1 billion in 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "During this period, exports increased by 4.4% to EUR 25.1 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports grew by 3.3% to EUR 44.3 billion in 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, imports grew by 3.3% to EUR 44.3 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "During this period, exports increased by 4.4% to EUR 25.1 billion, supported by higher sales to both EU (5.6%) and non-EU (2.2%) countries.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, imports grew by 3.3% to EUR 44.3 billion, mainly driven by increased purchases from both EU (1.2%) and non-EU (10.5%) countries.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade deficit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Croatia's trade deficit slightly widened to EUR 1.3 billion in December 2025, from EUR 1.2 billion in the same month of the previous year, as imports fell less than exports.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5926,
+  "error_messages": []
+}

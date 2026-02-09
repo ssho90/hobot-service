@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5800",
+  "extracted_at": "2026-02-07T14:42:14.259131",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of German Industrial Output Data (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The official release of Germany's industrial production figures for the month of December 2025.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Germany\u2019s industrial output declined by 1.9% month-on-month in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Germany\u2019s industrial output declined by 1.9% month-on-month in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The automotive industry experienced an 8.9% decline in output.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "automotive industry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The automotive industry (-8.9%) led the decline",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Industrial activity from October to December was 0.9% higher than the previous three months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In the less volatile three-month comparison, activity from October to December was 0.9% higher than in the previous three months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The construction sector saw a 3% increase in output.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "construction sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the construction sector (+3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The 1.9% decline in industrial output was worse than market expectations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "worse than market expectations of a 0.3% fall",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Lower output in capital goods and intermediate goods dragged down the overall industrial production.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "industrial production dropped 3%, dragged by lower output in capital goods (-5.3%) and intermediate goods (-1.2%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Automotive industry",
+      "target_type": "Theme",
+      "target_ref": "German Industrial Output",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The automotive industry (-8.9%) led the decline",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "German Industrial Output",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Germany\u2019s industrial output declined by 1.9% month-on-month in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Construction sector",
+      "target_type": "Theme",
+      "target_ref": "German Industrial Output",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "These declines were partially offset by gains in... the construction sector (+3%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Capital goods",
+      "target_type": "Theme",
+      "target_ref": "German Industrial Output",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "industrial production dropped 3%, dragged by lower output in capital goods (-5.3%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13278,
+  "error_messages": []
+}

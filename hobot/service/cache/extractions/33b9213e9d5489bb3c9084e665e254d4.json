@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5821",
+  "extracted_at": "2026-02-07T05:36:34.545491",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Mexican Peso increased by 0.71%",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mexican Peso"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mexican Peso Increases by 0.71%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Mexican Peso",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Mexican Peso Increases by 0.71%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 1672,
+  "error_messages": []
+}

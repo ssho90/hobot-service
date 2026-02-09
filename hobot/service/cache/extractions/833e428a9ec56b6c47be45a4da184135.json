@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5686",
+  "extracted_at": "2026-02-07T15:06:51.192605",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "BSE Sensex Closing",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The BSE Sensex closed 0.6% lower at 83,314 on Thursday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "India-US Bilateral Trade Agreement Phase 1",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The first phase of the trade agreement is nearing completion with a joint statement expected soon.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "India's BSE Sensex closed about 0.6% down at 83,314 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BSE Sensex"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "India's BSE Sensex closed about 0.6% down at 83,314 on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Minister Piyush Goyal stated the first phase of the India-US bilateral trade agreement is almost ready.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Piyush Goyal",
+        "India",
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Minister Piyush Goyal said the first phase of the India-US bilateral trade agreement is almost ready.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Eternal, Bharti Airtel, Bharat Electronics, ITC, ICICI Bank, Reliance and Infosys fell up to 2.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Eternal",
+        "Bharti Airtel",
+        "Bharat Electronics",
+        "ITC",
+        "ICICI Bank",
+        "Reliance",
+        "Infosys"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Eternal, Bharti Airtel, Bharat Electronics ,ITC, ICICI Bank, Reliance and Infosys were among the top losers, falling up to 2.5%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Trent, Tata Steel, State Bank of India and Bajaj Finance gained as much as 3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Trent",
+        "Tata Steel",
+        "State Bank of India",
+        "Bajaj Finance"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In contrast, Trent, Tata Steel, State Bank of India and Bajaj Finance bucked the broader trend, gaining as much as 3%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Sensex decline was mainly caused by profit booking.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "mainly due to profit booking.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Market caution was driven by a mixed earnings season and a global rout in tech stocks.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "This also reflected caution amid the ongoing mixed earnings season and the recent global rout in tech stocks",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Optimism regarding India-US trade helped mitigate the market's losses.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "partly offset by India-US trade optimism.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Profit booking",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mainly due to profit booking.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Global rout in tech stocks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflected caution amid ... the recent global rout in tech stocks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "India-US bilateral trade agreement",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "partly offset by India-US trade optimism.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 17176,
+  "error_messages": []
+}

@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5697",
+  "extracted_at": "2026-02-07T15:05:51.596568",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Moody's Revises Indonesia Credit Outlook to Negative",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Moody\u2019s Investors Service changed Indonesia\u2019s sovereign credit rating outlook from stable to negative on February 5, 2026.",
+      "impact_level": "high",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Moody's affirmed Indonesia's Baa2 rating.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Moody's",
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "affirming the Baa2 rating",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Standard & Poor's credit rating for Indonesia is BBB with a stable outlook.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Standard & Poor's",
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Standard & Poor's credit rating for Indonesia stands at BBB with a stable outlook.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Reduced predictability and coherence in policymaking have increased risks to policy credibility.",
+      "claim_type": "analysis",
+      "author": "Moody's",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The agency highlighted that reduced predictability and coherence in policymaking, along with less effective policy communication, have increased risks to policy credibility",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Policy credibility risks could undermine governance, economic performance, and fiscal stability.",
+      "claim_type": "prediction",
+      "author": "Moody's",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "which could undermine governance, economic performance, and fiscal stability.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Indonesia's structural strengths support medium-term growth.",
+      "claim_type": "analysis",
+      "author": "Moody's",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The rating affirmation reflects Indonesia\u2019s structural strengths, including natural resource endowments, favorable demographics, and prudent fiscal and monetary policies, which support medium-term growth.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Policymaking predictability",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reduced predictability and coherence in policymaking... have increased risks to policy credibility",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Policy credibility",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "which could undermine governance, economic performance, and fiscal stability.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Market volatility",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "These developments are reflected in higher equity and foreign-exchange market volatility",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Structural strengths",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Indonesia\u2019s structural strengths... support medium-term growth.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10598,
+  "error_messages": []
+}

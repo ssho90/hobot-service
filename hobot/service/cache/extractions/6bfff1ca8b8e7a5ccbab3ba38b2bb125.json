@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5492",
+  "extracted_at": "2026-02-08T01:12:41.055131",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "AGOA Extension Signing",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "U.S. President Donald Trump signed a one-year extension of the African Growth and Opportunity Act (AGOA).",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "President Donald Trump signed a one-year extension of the African Growth and Opportunity Act (AGOA) into law.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Donald Trump",
+        "AGOA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "U.S. President Donald Trump on Tuesday signed into law a one-year extension of the African Growth and Opportunity Act (AGOA)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The AGOA extension runs through December 31 and is applied retroactively from September 30, 2025.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "AGOA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "running through December 31 and applied retroactively from September 30, 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "AGOA allows qualifying countries to export more than 1,800 products to the U.S. without tariffs.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "AGOA",
+        "United States"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "AGOA allows qualifying countries to export more than 1,800 products to the United States without tariffs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The AGOA program supports trade, investment, and employment across the Sub-Saharan African region.",
+      "claim_type": "analysis",
+      "author": "Jamieson Greer",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "supporting trade, investment, and employment across the region.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "AGOA",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supporting trade, investment, and employment across the region.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AGOA",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supporting trade, investment, and employment across the region.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9218,
+  "error_messages": []
+}

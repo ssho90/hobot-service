@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5583",
+  "extracted_at": "2026-02-07T17:49:06.933488",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "TSX Recovery",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The S&P TSX Composite rose around 0.2% to above the 32,400 mark on Wednesday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Suncor Fourth-Quarter Results",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Suncor posted better-than-expected fourth-quarter results.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Canada January PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of Canada\u2019s composite and services PMIs for January.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P TSX Composite rose around 0.2% to above the 32,400 mark on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P TSX Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P TSX Composite rose around 0.2% to above the 32,400 mark on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shopify and Celestica fell over 7% and 4.5%, respectively.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shopify",
+        "Celestica"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "technology lagged sharply, with Shopify and Celestica falling over 7% and 4.5%, respectively",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Canada\u2019s composite and services PMIs showed private-sector activity contracting further in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Canada"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Canada\u2019s composite and services PMIs showed private-sector activity contracting further in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "A sharp rebound in precious metals and firmer crude prices drove a rotation into commodity-linked names.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "a sharp rebound in precious metals and firmer crude prices drove a rotation into commodity-linked names",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Suncor's fourth-quarter results were better-than-expected.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Suncor climbed more than 2.5% after posting better-than-expected fourth-quarter results",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Domestic data remained weak.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, domestic data remained weak",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Precious metals and crude prices",
+      "target_type": "Theme",
+      "target_ref": "S&P TSX Composite",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a sharp rebound in precious metals and firmer crude prices drove a rotation into commodity-linked names",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Suncor Fourth-Quarter Results",
+      "target_type": "Theme",
+      "target_ref": "Suncor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Suncor climbed more than 2.5% after posting better-than-expected fourth-quarter results",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Canada\u2019s composite and services PMIs",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Canada\u2019s composite and services PMIs showed private-sector activity contracting further in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14289,
+  "error_messages": []
+}

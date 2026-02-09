@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5822",
+  "extracted_at": "2026-02-07T14:32:43.709244",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB Policy Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank's policy decision followed by President Lagarde's remarks.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Germany Industrial Production Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of December industrial production data for Germany which showed a contraction.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The DAX 40 index decreased by 0.3% to a level below 24,400 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX 40"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Frankfurt\u2019s DAX 40 edged down 0.3% to below 24,400 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "German industrial production saw a sharper than expected contraction in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Germany\u2019s industrial production contracted more sharply than anticipated in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Siemens Healthineers shares fell by 4.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Siemens Healthineers"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Siemens Healthineers led losses, down 4.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "European market sentiment is currently subdued due to corporate earnings and AI risks.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting subdued sentiment across European markets amid mixed corporate earnings and lingering concerns over AI-related risks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "ECB President Lagarde reduced the likelihood of near-term interest rate cuts.",
+      "claim_type": "analysis",
+      "author": "Christine Lagarde",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "she dampened speculation of rate cuts in response to the euro's strength",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB President Lagarde\u2019s remarks",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "she dampened speculation of rate cuts in response to the euro's strength",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI-related risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "lingering concerns over AI-related risks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Germany\u2019s industrial production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Germany\u2019s industrial production contracted more sharply than anticipated in December, snapping a three-month run of growth",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10736,
+  "error_messages": []
+}

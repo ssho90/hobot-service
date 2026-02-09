@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5670",
+  "extracted_at": "2026-02-07T15:41:40.216240",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Czech Republic Retail Sales Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of retail sales data for the Czech Republic for December 2025, showing a significant slowdown in growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Retail sales in the Czech Republic rose by 1.8% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Czech Republic",
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Retail sales in the Czech Republic rose by 1.8% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The retail sales growth of 1.8% was lower than the market forecast of 3.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Market Forecasts"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "sharply lower than market forecasts of a 3.5% gain",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail sales growth in the previous month was revised to 4.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "slowing from a downwardly revised and five-month high of 4.5% increase in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a seasonally adjusted monthly basis, retail trade fell by 0.1% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Retail trade"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, retail trade fell by 0.1% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The slowdown in retail sales was primarily driven by weaker performance in the non-food product sector.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "driven by softer sales increase for non-food products (2% vs 6.3% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Activity growth slowed for automotive fuel and food, beverages, and tobacco.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Additionally, activity growth slowed for automotive fuel (3.9% vs 6%) and food, beverages, and tobacco (1% vs 1.1%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Retail Sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Retail sales in the Czech Republic rose by 1.8% year-on-year in December 2025... slowing from a downwardly revised and five-month high of 4.5% increase",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Non-food products",
+      "target_type": "Theme",
+      "target_ref": "Retail Sales",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by softer sales increase for non-food products (2% vs 6.3% in November)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11554,
+  "error_messages": []
+}

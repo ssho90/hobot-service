@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5509",
+  "extracted_at": "2026-02-08T01:08:37.903538",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "New Zealand S&P/NZX 50 Closing",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The benchmark index rose 0.3% to close at 13,467 on Wednesday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "China January PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "China released its January composite and service PMI data, both reaching three-month highs.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "New Zealand Q4 Jobs Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Local data showed unemployment rising to 5.4% while employment growth increased to 0.5%.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor",
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Employment Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Investors are awaiting US employment data due later in the day.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "New Zealand\u2019s benchmark S&P/NZX 50 rose 0.3% to close at 13,467 on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P/NZX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "New Zealand\u2019s benchmark S&P/NZX 50 rose 0.3% to close at 13,467 on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "China's January composite PMI was 51.6 and its service PMI was 52.3.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "China"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "release of its January composite PMI at a three-month high of 51.6 and a service PMI also at a three-month peak of 52.3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The New Zealand Q4 unemployment rate rose to 5.4% from 5.3%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "New Zealand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Q4 unemployment rate edged up to 5.4% from 5.3% in the previous quarter",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New Zealand employment growth was 0.5% in Q4.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "New Zealand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment growth picked up to 0.5% after remaining flat in Q3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Market sentiment was lifted by positive economic data from China.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Sentiment was lifted by China, New Zealand\u2019s top trading partner, following the release of its January composite PMI",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The mixed jobs report put downward pressure on the New Zealand dollar.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The mixed jobs report weighed on the local dollar",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The jobs report provided support for exporters and stabilized sectors sensitive to interest rates.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "supporting exporters and stabilizing rate-sensitive sectors",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "China PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sentiment was lifted by China... following the release of its January composite PMI",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Q4 Jobs Report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Local data also showed a mixed picture as the Q4 unemployment rate edged up to 5.4%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Q4 Jobs Report",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The mixed jobs report weighed on the local dollar, supporting exporters and stabilizing rate-sensitive sectors.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Local dollar",
+      "target_type": "Theme",
+      "target_ref": "exporters",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weighed on the local dollar, supporting exporters",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 17728,
+  "error_messages": []
+}

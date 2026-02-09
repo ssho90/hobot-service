@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5715",
+  "extracted_at": "2026-02-07T05:51:39.951504",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Ibovespa rose about 0.5% to hover near 182,500.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ibovespa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Ibovespa rose about 0.5% to hover near 182,500",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Ita\u00fa shares gained nearly 1% after reporting strong 4Q25 results.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Ita\u00fa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ita\u00fa shares gained nearly 1% after reporting strong 4Q25 results",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bradesco (+0.7%) and Multiplan (+1%) are set to release earnings after the close.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Bradesco",
+        "Multiplan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bradesco (+0.7%) and Multiplan (+1%) are set to release earnings after the close.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Petrobras slipped 0.2% and Vale fell 1.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Petrobras",
+        "Vale"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, Petrobras slipped 0.2% and Vale fell 1.7%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US and Iran agreed to hold talks in Oman on Friday.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "US",
+        "Iran",
+        "Oman"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "oil slid sharply after the US and Iran agreed to hold talks in Oman on Friday, easing concerns over potential regional supply disruptions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Ita\u00fa earnings",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ibovespa Rises on Ita\u00fa Earnings",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "iron ore prices",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vale fell 1.7% as iron ore prices edged lower",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US and Iran agreed to hold talks in Oman",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "oil slid sharply after the US and Iran agreed to hold talks in Oman on Friday, easing concerns over potential regional supply disruptions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5282,
+  "error_messages": []
+}

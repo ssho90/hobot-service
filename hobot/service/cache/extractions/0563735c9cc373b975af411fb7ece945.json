@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5591",
+  "extracted_at": "2026-02-07T17:46:54.596217",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "European stock market session",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A trading session on Wednesday characterized by mixed results and heavy earnings reports.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Eurozone inflation release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Inflation in the Eurozone fell as expected, influencing the ECB rate outlook.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation",
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Santander acquisition of Webster Bank",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Santander announced the acquisition of US regional Webster Bank for $12.2 billion.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Eurozone's STOXX 50 dropped 0.2% to 5,982 and the pan-European STOXX 600 rose 0.2% to a new record high of 619.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 50",
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Eurozone's STOXX 50 dropped 0.2% to 5,982 and the pan-European STOXX 600 rose 0.2% to a new record high of 619.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Siemens announced a $1 billion investment to expand its US manufacturing capabilities.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Siemens"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Siemens plummeted close to 8% after announcing a $1 billion investment to expand its US manufacturing capabilities.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Santander acquired US regional Webster Bank for $12.2 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Santander",
+        "Webster Bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Santander slipped 3.5% after posting its results and announcing it acquired US regional Webster Bank for $12.2 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Novo Nordisk shares fell 17% following a disappointing forecast for its weight-loss drug.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Novo Nordisk"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, Novo Nordisk plunged 17% after issuing a disappointing forecast for its weight-loss drug.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Banks were broadly higher because falling inflation maintained a predictable path for the ECB's rate outlook.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Banks were broadly higher as inflation in the Eurozone fell, as expected, to maintain a relatively predictable path for the ECB's rate outlook.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Air Liquid and BASF surged due to optimism regarding softer emission reduction rules in Europe.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Lastly, Air Liquid and BASF surged on optimism of softer emission reduction rules in Europe.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "ASML's stock decline was linked to results published by AMD.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "ASML sank nearly 5% on results published by AMD",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Banks were broadly higher as inflation in the Eurozone fell, as expected, to maintain a relatively predictable path for the ECB's rate outlook.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Banks were broadly higher as inflation in the Eurozone fell, as expected, to maintain a relatively predictable path for the ECB's rate outlook.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AMD",
+      "target_type": "Theme",
+      "target_ref": "ASML",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ASML sank nearly 5% on results published by AMD",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14788,
+  "error_messages": []
+}

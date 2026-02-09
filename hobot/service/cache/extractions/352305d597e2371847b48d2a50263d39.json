@@ -1,0 +1,216 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5669",
+  "extracted_at": "2026-02-07T15:41:27.695198",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England's scheduled meeting to decide on the benchmark interest rate, expected to remain at 3.75%.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Inflation Target Achievement",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The point at which inflation is forecast to reach the 2% target in the second quarter.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The current interest rate is 3.75%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "keep interest rates unchanged at 3.75% on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The current inflation rate is 3.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Inflation remains elevated at 3.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The unemployment rate has reached 5.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "unemployment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "unemployment has risen to 5.1%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Markets see less than a 1% chance of a rate cut in the immediate meeting.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Markets"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Markets see less than a 1% chance of a rate cut",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Bank of England will keep interest rates steady.",
+      "claim_type": "prediction",
+      "author": "Economists",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The Bank of England is expected to keep interest rates unchanged",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation will fall to the 2% target in the second quarter.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "forecast to fall to the 2% target in the second quarter",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The labor market is deteriorating and causing economic weakness.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "labor market deterioration... raising concerns about economic weakness",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There is a 70% chance of a rate cut in April.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "markets pricing about a 70% chance of the next rate cut in April",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "policymakers wait for clearer evidence that inflation is under control",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "labor market",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "labor market deterioration... raising concerns about economic weakness",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Andrew Bailey",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Governor Andrew Bailey is expected to back a hold",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "GDP growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Recent data has been mixed, with stronger GDP growth",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13870,
+  "error_messages": []
+}

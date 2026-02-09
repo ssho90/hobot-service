@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5710",
+  "extracted_at": "2026-02-07T15:01:21.825928",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Norwegian Krone Drop",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Norwegian Krone experienced a decline of 1.13%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Norwegian Krone dropped by 1.13%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Norwegian Krone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Norwegian Krone Drops by 1.13%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Norwegian Krone",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "FX Updates: Norwegian Krone Drops by 1.13%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6001,
+  "error_messages": []
+}

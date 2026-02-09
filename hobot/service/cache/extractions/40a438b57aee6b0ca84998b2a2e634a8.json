@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5822",
+  "extracted_at": "2026-02-07T05:36:38.792705",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Germany\u2019s industrial production contracted more sharply than anticipated in December, snapping a three-month run of growth.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Germany",
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the data front, Germany\u2019s industrial production contracted more sharply than anticipated in December, snapping a three-month run of growth.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Frankfurt\u2019s DAX 40 edged down 0.3% to below 24,400 on Friday, heading for a fourth consecutive day of losses.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX 40"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "DAX Down for 4th Day Frankfurt\u2019s DAX 40 edged down 0.3% to below 24,400 on Friday, heading for a fourth consecutive day of losses",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Subdued sentiment across European markets amid mixed corporate earnings and lingering concerns over AI-related risks.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting subdued sentiment across European markets amid mixed corporate earnings and lingering concerns over AI-related risks.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB President Lagarde\u2019s remarks",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Traders also continued to digest ECB President Lagarde\u2019s remarks following Thursday\u2019s policy decision, in which she dampened speculation of rate cuts in response to the euro's strength.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Germany\u2019s industrial production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the data front, Germany\u2019s industrial production contracted more sharply than anticipated in December, snapping a three-month run of growth.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI-related risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting subdued sentiment across European markets amid mixed corporate earnings and lingering concerns over AI-related risks.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 3830,
+  "error_messages": []
+}

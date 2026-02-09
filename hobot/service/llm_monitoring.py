@@ -318,7 +318,18 @@ class LLMCallTracker:
                             usage_found = True
                             logger.info(f"토큰 사용량 추출 (token_usage): input={self.prompt_tokens}, output={self.completion_tokens}, total={self.total_tokens}")
             
-            # 4. 디버깅: response 객체의 모든 속성 확인
+            # 4. Google GenAI SDK (v1.0+) response structure support
+            if not usage_found and hasattr(response, 'usage_metadata'):
+                usage = response.usage_metadata
+                # Check for Google GenAI attribute names (prompt_token_count, candidates_token_count)
+                if hasattr(usage, 'prompt_token_count'):
+                    self.prompt_tokens = usage.prompt_token_count
+                    self.completion_tokens = getattr(usage, 'candidates_token_count', 0) or getattr(usage, 'total_token_count', 0) - self.prompt_tokens
+                    self.total_tokens = getattr(usage, 'total_token_count', self.prompt_tokens + self.completion_tokens)
+                    usage_found = True
+                    logger.info(f"토큰 사용량 추출 (Google GenAI): input={self.prompt_tokens}, output={self.completion_tokens}, total={self.total_tokens}")
+
+            # 5. 디버깅: response 객체의 모든 속성 확인
             if not usage_found:
                 logger.warning("토큰 정보를 찾을 수 없습니다. response 객체 속성 확인 중...")
                 logger.debug(f"response 타입: {type(response)}")
@@ -331,6 +342,7 @@ class LLMCallTracker:
         except Exception as e:
             logger.error(f"토큰 정보 추출 실패: {e}", exc_info=True)
             # 토큰 정보 추출 실패해도 계속 진행
+
     
     def set_token_usage(
         self,

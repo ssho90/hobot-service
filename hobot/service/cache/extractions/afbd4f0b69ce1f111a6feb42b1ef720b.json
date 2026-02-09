@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5797",
+  "extracted_at": "2026-02-07T05:43:47.144459",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "RBI Rate Hold",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of India kept its key repo rate unchanged at 5.25%.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Indian rupee rose to around 90.2 per dollar.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indian Rupee"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Indian rupee rose to around 90.2 per dollar",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Reserve Bank of India kept its key repo rate unchanged at 5.25%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank of India",
+        "repo rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Reserve Bank of India kept its key repo rate unchanged at 5.25%, in line with expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US-India trade deal reduces US tariffs on Indian imports from nearly 50% to 18%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "US",
+        "India",
+        "tariffs"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the US-India trade deal, which reduces US tariffs on Indian imports from nearly 50% to 18%, while protecting agricultural and key export sectors.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The hold reflects confidence in a softer inflation outlook and reassures markets that accommodative conditions will persist.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The hold reflects confidence in a softer inflation outlook and reassures markets that accommodative conditions will persist.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Near-term movements will continue to hinge on global risk sentiment, capital flows, and clarity around trade deal implementation, as well as the Budget session.",
+      "claim_type": "prediction",
+      "author": "analysts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Analysts note that near-term movements will continue to hinge on global risk sentiment, capital flows, and clarity around trade deal implementation, as well as the Budget session.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBI Rate Hold",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Reserve Bank of India kept its key repo rate unchanged at 5.25%, in line with expectations.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "RBI Rate Hold",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The hold reflects confidence in a softer inflation outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-India trade deal",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the US-India trade deal, which reduces US tariffs on Indian imports from nearly 50% to 18%, while protecting agricultural and key export sectors.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "RBI Rate Hold",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reassures markets that accommodative conditions will persist.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "global risk sentiment",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Analysts note that near-term movements will continue to hinge on global risk sentiment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6189,
+  "error_messages": []
+}

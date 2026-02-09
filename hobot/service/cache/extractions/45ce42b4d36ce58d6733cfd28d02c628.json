@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5767",
+  "extracted_at": "2026-02-07T14:53:12.867384",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "RBA Interest Rate Hike",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of Australia lifted interest rates by 25 basis points to 3.85%.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Governor Bullock's Address to Lawmakers",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Governor Michele Bullock spoke to lawmakers regarding inflation risks and demand growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "risk",
+        "growth",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Reserve Bank of Australia lifted interest rates by 25bps to 3.85%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank of Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The central bank lifted rates by 25bps to 3.85% after inflation reaccelerated following three cuts last year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Underlying inflation rose to 3.4% in Q4.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Underlying inflation rose to 3.4% in Q4, the highest in over a year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices have exceeded forecasts for two consecutive quarters.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Consumer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Consumer prices have exceeded forecasts for two straight quarters, staying well above the 2%\u20133% target.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Demand growth must be reined in to restore price stability.",
+      "claim_type": "analysis",
+      "author": "Michele Bullock",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The Reserve Bank of Australia said it must rein in demand growth to restore price stability",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Stronger-than-expected demand and supply constraints risk keeping inflation elevated.",
+      "claim_type": "opinion",
+      "author": "Michele Bullock",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "stronger-than-expected demand and persistent supply constraints risk keeping inflation elevated.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation is projected to peak at 3.7% by mid-year before easing by 2028.",
+      "claim_type": "prediction",
+      "author": "Reserve Bank of Australia",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "is projected to peak at 3.7% by mid-year before gradually easing toward target by 2028.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Significant uncertainties remain due to trade and geopolitical risks.",
+      "claim_type": "analysis",
+      "author": "Michele Bullock",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "significant uncertainties remain amid trade and geopolitical risks.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "demand growth",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "stronger-than-expected demand and persistent supply constraints risk keeping inflation elevated.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "supply constraints",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "stronger-than-expected demand and persistent supply constraints risk keeping inflation elevated.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "geopolitical risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "significant uncertainties remain amid trade and geopolitical risks.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "demand growth",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Reserve Bank of Australia said it must rein in demand growth to restore price stability, after delivering its first rate hike in two years",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13367,
+  "error_messages": []
+}

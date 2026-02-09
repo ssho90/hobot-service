@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5856",
+  "extracted_at": "2026-02-07T05:32:48.688101",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Ripple's price increased by 22.37%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ripple"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ripple Soars by 22.37%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 1319,
+  "error_messages": []
+}

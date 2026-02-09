@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5559",
+  "extracted_at": "2026-02-08T00:57:23.765963",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Eurozone Inflation Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of January CPI and core inflation data for the eurozone.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank's scheduled meeting to decide on interest rates.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Italy 10-Year BTP Yield Movement",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The yield on Italy's 10-year benchmark bond falling below 3.5%.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Italy\u2019s 10-year BTP yield fell below 3.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy",
+        "BTP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Italy\u2019s 10-year BTP yield slipped further below 3.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Eurozone CPI slowed to 1.7% in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Eurozone CPI slowed to 1.7% in January, comfortably below the ECB\u2019s target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Eurozone core inflation fell to 2.2%, the lowest since October 2021.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "core inflation unexpectedly fell to 2.2%, its lowest since October 2021",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Italy's inflation rate eased to 1.0%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In Italy, inflation eased to 1.0%, the lowest level since October 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "A stronger euro could lead to a resumption of interest rate cuts.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "raising concerns that a stronger euro could trigger a resumption of rate cuts paused in June",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The ECB is expected to maintain current interest rates.",
+      "claim_type": "prediction",
+      "author": "Market consensus",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The ECB is widely expected to keep rates unchanged for a fifth consecutive meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Christine Lagarde will likely state that monetary policy is currently appropriate.",
+      "claim_type": "prediction",
+      "author": "Market analysts",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "ECB President Christine Lagarde is expected to reaffirm that monetary policy remains in a \u201cgood place\u201d",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Interest rates are expected to remain steady through 2026.",
+      "claim_type": "prediction",
+      "author": "Money markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "money markets anticipate rates will remain steady through 2026",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Eurozone inflation data",
+      "target_type": "Theme",
+      "target_ref": "Italy's 10-Year BTP Yield",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Italy\u2019s 10-year BTP yield slipped further below 3.5% as markets reacted to weaker eurozone inflation data",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Stronger euro",
+      "target_type": "Theme",
+      "target_ref": "resumption of rate cuts",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "raising concerns that a stronger euro could trigger a resumption of rate cuts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Eurozone CPI",
+      "target_type": "Theme",
+      "target_ref": "ECB rate decision",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "markets reacted to weaker eurozone inflation data ahead of the European Central Bank's decision",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12381,
+  "error_messages": []
+}

@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5852",
+  "extracted_at": "2026-02-07T05:34:14.779546",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Employment in Canada fell 0.1% (-25,000) in January 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Canada"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment in Canada fell 0.1% (-25,000) in January 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The employment rate edged down 0.1 percentage point to 60.8%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "employment rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The employment rate edged down 0.1 percentage point to 60.8%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job losses were concentrated among core-aged women (25\u201354), down 27,000 (-0.4%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Job losses",
+        "women"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Job losses were concentrated among core-aged women (25\u201354), down 27,000 (-0.4%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment declined in manufacturing (-28,000; -1.5%), educational services (-24,000; -1.5%) and public administration (-10,000; -0.8%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Employment",
+        "manufacturing",
+        "educational services",
+        "public administration"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "By sector, employment declined in manufacturing (-28,000; -1.5%), educational services (-24,000; -1.5%) and public administration (-10,000; -0.8%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Offsetting gains were seen in information, culture and recreation (+17,000; +2.0%), business, building and other support services (+14,000; +2.1%), agriculture (+11,000; +4.5%) and utilities (+4,200; +2.5%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "information",
+        "culture",
+        "recreation",
+        "business",
+        "building",
+        "support services",
+        "agriculture",
+        "utilities"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Offsetting gains were seen in information, culture and recreation (+17,000; +2.0%), business, building and other support services (+14,000; +2.1%), agriculture (+11,000; +4.5%) and utilities (+4,200; +2.5%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment fell sharply in Ontario (-67,000; -0.8%), while Alberta (+20,000; +0.8%), Saskatchewan (+6,100; +1.0%) and Newfoundland and Labrador (+3,800; +1.6%) posted gains.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Employment",
+        "Ontario",
+        "Alberta",
+        "Saskatchewan",
+        "Newfoundland and Labrador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Regionally, employment fell sharply in Ontario (-67,000; -0.8%), while Alberta (+20,000; +0.8%), Saskatchewan (+6,100; +1.0%) and Newfoundland and Labrador (+3,800; +1.6%) posted gains.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Canada Employment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Canada Employment Slips in January",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment rate",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The employment rate edged down 0.1 percentage point to 60.8%.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment in Canada fell 0.1% (-25,000) in January 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6772,
+  "error_messages": []
+}

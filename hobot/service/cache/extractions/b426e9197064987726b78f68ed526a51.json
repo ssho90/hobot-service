@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5692",
+  "extracted_at": "2026-02-07T05:54:36.580667",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Turkey\u2019s BIST 100 stock index surged to 13,800 in February, a record high.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Turkey",
+        "BIST 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Turkey\u2019s BIST 100 stock index surged to 13,800 in February, a record high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Aselsan shares were nearly 300% higher from the previous year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Aselsan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Aselsan shares were nearly 300% higher from the previous year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The TCMB cut its benchmark rate by 100bps last month.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "TCMB"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The TCMB cut its benchmark rate by 100bps last month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors assessed whether the macroeconomic backdrop for the year would continue to favor equities.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "investors assessed whether the macroeconomic backdrop for the year would continue to favor equities",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The predictable decline in the lira has allowed investors to use riskier assets such as equities to protect themselves against inflation.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The predictable decline in the lira has also allowed investors to use riskier assets such as equities to protect themselves against inflation.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "TCMB reiterated that its baseline scenario sees underlying inflation continue to slow this year.",
+      "claim_type": "statement",
+      "author": "TCMB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "but reiterated that its baseline scenario sees underlying inflation continue to slow this year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Higher defense spending from NATO members",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Aselsan shares were nearly 300% higher from the previous year amid higher defense spending from NATO members",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "stability of domestic inflation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Banks also outperformed in the recent quarters on the stability of domestic inflation, despite remaining high, spurred by credit activity following the prolonged period of unorthodox monetary policy by the central bank.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "decline in the lira",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The predictable decline in the lira has also allowed investors to use riskier assets such as equities to protect themselves against inflation.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "TCMB rate cut",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The TCMB cut its benchmark rate by 100bps last month",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "TCMB baseline scenario",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "but reiterated that its baseline scenario sees underlying inflation continue to slow this year.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6015,
+  "error_messages": []
+}

@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5832",
+  "extracted_at": "2026-02-07T14:32:01.419625",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Armenia January 2026 Inflation Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Armenia's annual and monthly inflation data for January 2026, showing a rise to 3.8%.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Armenia's annual inflation rate increased to 3.8% in January 2026 from 3.3% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Armenia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Armenia\u2019s annual inflation rate rose to 3.8% in January 2026 from 3.3% in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Food and non-alcoholic beverage prices rose by 5.9% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "food and non-alcoholic beverages"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Prices increased for food and non-alcoholic beverages (5.9% vs 4.3% in December 2025)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices rose by 2% on a monthly basis in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "consumer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices increased by 2% in January, following a 1.2% gain in the prior month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Housing and utilities costs decreased by 0.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "housing and utilities"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Conversely, prices declined for housing and utilities (-0.1% vs 0.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The January 2026 inflation rate is the highest level recorded since June 2025.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "marking the highest reading since June 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflationary pressure in the transport sector showed signs of easing.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "while inflation eased for transport (4.3% vs 6.2%)",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Food and non-alcoholic beverages",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices increased for food and non-alcoholic beverages (5.9% vs 4.3% in December 2025)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Transport",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "while inflation eased for transport (4.3% vs 6.2%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Housing and utilities",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Conversely, prices declined for housing and utilities (-0.1% vs 0.3%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Alcoholic beverages and tobacco",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices increased for... alcoholic beverages and tobacco (9% vs 7.3%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12936,
+  "error_messages": []
+}

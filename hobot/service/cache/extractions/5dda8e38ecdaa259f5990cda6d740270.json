@@ -1,0 +1,225 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5649",
+  "extracted_at": "2026-02-07T16:20:28.134907",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indonesia 2025 GDP Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Indonesia's annual economic growth data for 2025.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Sumatra Disaster",
+      "event_type": "other",
+      "event_date": null,
+      "description": "A major disaster in Sumatra occurring late in the previous year that caused economic disruptions.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "U.S. Tariff Implementation",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "New tariffs imposed by the United States affecting selected shipments.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Indonesia's economy expanded by 5.11% in 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s economy expanded 5.11% in 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 2025 GDP growth fell short of the government's 5.2% target.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesian Government"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "falling short of the government\u2019s 5.2% target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private consumption grew at 4.98% compared to 4.94% in Q3.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Private consumption"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Private consumption remained resilient (4.98% vs 4.94% in Q3)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Fixed investment growth increased to 5.09% from 4.61%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Fixed investment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "fixed investment gained traction (5.09% vs 4.61%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Import growth slowed to 4.77% from 8.15%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "import growth eased sharply (4.77% vs 8.15%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Indonesian government projects economic growth of 5.4% in 2026.",
+      "claim_type": "prediction",
+      "author": "Indonesian Government",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the government projects economic growth of 5.4% in 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The central bank maintains a growth forecast between 4.9% and 5.7%.",
+      "claim_type": "prediction",
+      "author": "Central Bank of Indonesia",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "the central bank maintained its growth forecast at 4.9%\u20135.7%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Slowing import growth indicates weaker domestic demand and purchasing power.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "signalling softer domestic demand due to weaker purchasing power and the drag from a depreciating rupiah",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Sumatra disaster",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "despite persistent disruptions from a major disaster in Sumatra late last year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "lower interest rates",
+      "target_type": "Theme",
+      "target_ref": "Private consumption",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Private consumption remained resilient... amid ongoing government support measures and lower interest rates",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "U.S. tariffs",
+      "target_type": "Theme",
+      "target_ref": "exports",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "exports accelerated (7.03% vs 6.85%), even as new U.S. tariffs weighed on selected shipments",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "depreciating rupiah",
+      "target_type": "Theme",
+      "target_ref": "import growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "import growth eased sharply... due to... the drag from a depreciating rupiah",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15065,
+  "error_messages": []
+}

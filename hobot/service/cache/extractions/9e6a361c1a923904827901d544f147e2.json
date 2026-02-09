@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5570",
+  "extracted_at": "2026-02-07T17:52:07.435484",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "TSX Futures Rise",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Futures linked to the S&P TSX Composite Index rose on Wednesday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US downs Iranian drone",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The US military shot down an Iranian drone, increasing Middle East tensions.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Suncor Energy Q4 Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Suncor Energy reported fourth-quarter profit results.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Trump Tariff and Decertification Threat",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "US President Donald Trump threatened decertification and tariffs on Canadian-made aircraft.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Gold prices increased by more than 2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gold climbed more than 2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Suncor Energy beat its fourth-quarter profit estimates.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Suncor Energy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Suncor Energy also supported the sector after beating fourth-quarter profit estimates",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Canada's aviation regulator is collaborating with the FAA regarding Gulfstream jet approval delays.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Canada\u2019s aviation regulator",
+        "Federal Aviation Administration",
+        "Gulfstream"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Canada\u2019s aviation regulator said it is working with the Federal Aviation Administration on delays in approving Gulfstream jets",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Gains in gold and oil prices supported the rise in TSX futures.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Futures linked to the S&P TSX Composite Index rose on Wednesday, supported by gains in gold and oil prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Higher production levels contributed to Suncor Energy's profit beat.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "helped by higher production",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Trump's threats regarding aircraft may negatively impact Bombardier's performance.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "potentially weighing on Bombardier",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Gold and oil prices",
+      "target_type": "Theme",
+      "target_ref": "TSX Futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Futures linked to the S&P TSX Composite Index rose on Wednesday, supported by gains in gold and oil prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Middle East tensions",
+      "target_type": "Theme",
+      "target_ref": "Oil prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "while oil advanced amid heightened Middle East tensions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US downed an Iranian drone",
+      "target_type": "Theme",
+      "target_ref": "Middle East tensions",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "after the US downed an Iranian drone",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trump's tariff threat",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "potentially weighing on Bombardier",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12747,
+  "error_messages": []
+}

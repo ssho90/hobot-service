@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5855",
+  "extracted_at": "2026-02-07T14:25:31.739861",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January 2026 Colombia Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Colombia's annual and monthly inflation data for January 2026, showing an acceleration in price growth.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Colombia's annual inflation rate rose to 5.35% in January 2026 from 5.10% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Colombia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Colombia\u2019s annual inflation rate rose to 5.35% in January 2026 from 5.10% in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Colombian central bank has an inflation target of 3%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "central bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "price growth remaining well above the central bank\u2019s 3% target.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices rose 1.18% on a monthly basis in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Colombia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose 1.18% in January, sharply accelerating from a 0.27% increase in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Education inflation remained unchanged at 7.36%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "education"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "education inflation was unchanged at 7.36%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation accelerated notably in food, non-alcoholic beverages, and furnishings.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Inflation accelerated notably in food and non-alcoholic beverages (5.11% vs. 5.07%), housing (4.59% vs. 4.76%), and furnishings (4.12% vs. 3.31%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Price pressures eased in healthcare, clothing, recreation, and transport sectors.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "In contrast, price pressures eased in healthcare (7.38% vs. 7.20%), clothing (2.45% vs. 2.12%), recreation and culture (2.54% vs. 1.85%), and transport (5.79% vs. 5.35%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "January 2026 Colombia Inflation Release",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Colombia\u2019s annual inflation rate rose to 5.35% in January 2026 from 5.10% in December.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Food and non-alcoholic beverages",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Inflation accelerated notably in food and non-alcoholic beverages (5.11% vs. 5.07%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Monthly consumer prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On a monthly basis, consumer prices rose 1.18% in January, sharply accelerating from a 0.27% increase in December.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13078,
+  "error_messages": []
+}

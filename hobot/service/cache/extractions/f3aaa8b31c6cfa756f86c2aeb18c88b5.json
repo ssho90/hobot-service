@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5521",
+  "extracted_at": "2026-02-08T01:05:55.999087",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver price surge",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver experienced a significant price increase of 5.84%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver prices increased by 5.84%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver Soars by 5.84%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Silver",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Metals Commodities Updates: Silver Soars by 5.84%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7557,
+  "error_messages": []
+}

@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5716",
+  "extracted_at": "2026-02-07T05:51:48.061795",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The dollar index traded little changed at 97.6 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "dollar index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Dollar Little Changed The dollar index pared early gains to trade little changed at 97.6 on Thursday, as renewed concerns over the health of the US economy, the labour market, and elevated AI valuations weighed on sentiment.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US companies announced 108.4K job cuts last month, the highest January total since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US companies"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Challenger report showed US companies announced 108.4K job cuts last month, the highest January total since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial jobless claims rose to 231K, the highest in two months and well above forecasts of 212K.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "jobless claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while initial jobless claims rose to 231K, the highest in two months and well above forecasts of 212K.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ECB and the Bank of England left interest rates unchanged, as expected.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, both the ECB and the Bank of England left interest rates unchanged, as expected.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Weaker labor data reinforced bets on Federal Reserve rate cuts.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The string of weaker labour data reinforced bets on Federal Reserve rate cuts, with markets still pricing in a first reduction in June and a second potentially in September.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are pricing in a first Federal Reserve rate cut in June and a second potentially in September.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The string of weaker labour data reinforced bets on Federal Reserve rate cuts, with markets still pricing in a first reduction in June and a second potentially in September.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Traders interpreted the BoE\u2019s tone as more dovish.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The dollar rose sharply against the British pound, as traders interpreted the BoE\u2019s tone as more dovish.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Renewed concerns over the health of the US economy, the labour market, and elevated AI valuations",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Dollar Little Changed The dollar index pared early gains to trade little changed at 97.6 on Thursday, as renewed concerns over the health of the US economy, the labour market, and elevated AI valuations weighed on sentiment.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Challenger report showing US companies announced 108.4K job cuts",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Challenger report showed US companies announced 108.4K job cuts last month, the highest January total since 2009",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Initial jobless claims rose to 231K",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "while initial jobless claims rose to 231K, the highest in two months and well above forecasts of 212K.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Weaker labour data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The string of weaker labour data reinforced bets on Federal Reserve rate cuts, with markets still pricing in a first reduction in June and a second potentially in September.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7391,
+  "error_messages": []
+}

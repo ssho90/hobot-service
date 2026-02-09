@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5751",
+  "extracted_at": "2026-02-07T14:55:10.008216",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan Household Spending Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Japan's household spending data for December 2025, which showed an unexpected decline.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Household spending in Japan declined 2.6% yoy in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "Household spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Household spending in Japan declined 2.6% yoy in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly personal spending fell 2.9% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "Personal spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Monthly, personal spending fell 2.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Household spending in November 2025 had dropped 2.9% yoy.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "Household spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "marking a deeper contraction after a 2.9% drop in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Consumer demand remained fragile at the end of the year due to high living costs.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest result indicated that consumer demand remained fragile at the end of the year amid elevated living costs.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Private demand may struggle to gain momentum despite supportive monetary conditions.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "adds to concerns that private demand may struggle to gain momentum despite supportive monetary conditions.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weak personal consumption presents ongoing challenges for Japan's economic recovery.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The sustained weakness in personal consumption underscores ongoing challenges for Japan\u2019s economic recovery",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Elevated living costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "consumer demand remained fragile at the end of the year amid elevated living costs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Personal consumption",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The sustained weakness in personal consumption underscores ongoing challenges for Japan\u2019s economic recovery",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Monetary conditions",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "private demand may struggle to gain momentum despite supportive monetary conditions",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10371,
+  "error_messages": []
+}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Search, RefreshCw, Clock, ExternalLink, Newspaper } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Network, Search, RefreshCw, Clock, ExternalLink, Newspaper } from 'lucide-react';
 import { TickerTape } from './TickerTape';
 import { AIMacroReport } from './AIMacroReport';
 import { MacroIndicators } from './MacroIndicators';
@@ -100,6 +101,31 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 self-start md:self-auto">
+            <Link
+              to="/ontology/macro"
+              className="group hidden lg:flex items-center gap-3 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-white px-4 py-2 shadow-sm transition-colors hover:from-blue-100 hover:to-white"
+              title="Ontology 기반 Macro Graph로 이동"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
+                <Network className="h-5 w-5" />
+              </span>
+              <span className="flex flex-col leading-tight">
+                <span className="text-sm font-semibold text-zinc-900">Macro Ontology Graph</span>
+                <span className="text-xs text-zinc-500">온톨로지로 근거 기반 거시경제 분석</span>
+              </span>
+              <ArrowRight className="h-4 w-4 text-zinc-400 transition-colors group-hover:text-zinc-700" />
+            </Link>
+
+            <Link
+              to="/ontology/macro"
+              className="group lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-blue-200 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-sm"
+              title="Macro Graph로 이동"
+            >
+              <Network className="h-4 w-4" />
+              Macro Graph
+              <ArrowRight className="h-4 w-4 text-blue-400 transition-colors group-hover:text-blue-600" />
+            </Link>
+
             <button
               className="flex items-center gap-2 px-6 py-2 bg-white border border-zinc-200 text-zinc-600 text-sm font-medium rounded-lg hover:bg-zinc-50 hover:text-zinc-900 transition-all shadow-sm"
               onClick={() => setIsHistoryModalOpen(true)}

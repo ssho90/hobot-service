@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5829",
+  "extracted_at": "2026-02-07T05:37:19.016224",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Spain's industrial production decreased by 0.3% year-on-year in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Spain",
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Spain\u2019s industrial production fell by 0.3% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "This decline is the first since February 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the first decrease since February 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The previous month saw an upwardly revised increase of 4.6%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "after an upwardly revised 4.6% rise in the prior month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Durable consumer goods declined by 2% in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Durable consumer goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "declines in durable consumer goods (-2% vs -3.3% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Intermediate goods decreased by 1.6% in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Intermediate goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "intermediate goods (-1.6% vs 3.2%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Capital goods fell by 0.8% in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Capital goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "capital goods (-0.8% vs 1.5%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Energy output growth slowed to 3.9% in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Energy output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "output growth slowed for energy (3.9% vs 7.4%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Non-durable consumer goods growth slowed to 0.8% in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Non-durable consumer goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "non-durable consumer goods (0.8% vs 3.8%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a seasonally adjusted monthly basis, industrial activity shrank by 2.5% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, industrial activity shrank by 2.5% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the year 2025 as a whole, Spanish industrial production grew by an average of 1.3%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Spanish industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the year 2025 as a whole, Spanish industrial production grew by an average of 1.3%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "industrial production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Spain\u2019s industrial production fell by 0.3% year-on-year in December 2025, the first decrease since February 2025, after an upwardly revised 4.6% rise in the prior month.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6844,
+  "error_messages": []
+}

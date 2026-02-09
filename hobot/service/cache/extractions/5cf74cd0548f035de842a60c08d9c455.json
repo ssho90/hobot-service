@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5494",
+  "extracted_at": "2026-02-08T01:12:15.436372",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "20th session of the Standing Committee of the 14th NPC",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "A legislative session in Beijing to finalize draft laws and adjust the legislative agenda.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Annual full meeting of the National People\u2019s Congress",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "China's most significant political event where leaders set economic growth targets and fiscal strategies.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Standing Committee of the 14th National People\u2019s Congress will hold its 20th session in Beijing on Wednesday.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Standing Committee of the 14th National People\u2019s Congress",
+        "Beijing"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Standing Committee of the 14th National People\u2019s Congress (NPC), China\u2019s top legislative body, will hold its 20th session in Beijing on Wednesday.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The annual full meeting of the National People\u2019s Congress opens on March 5.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "National People\u2019s Congress"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the annual full meeting, which opens on March 5.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "February sessions traditionally serve to finalize draft laws and adjust the legislative agenda in preparation for the annual meeting.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "February sessions traditionally serve to finalize draft laws, gather public input, and adjust the legislative agenda in preparation for the annual full meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The March gathering is China\u2019s most consequential political event of the year.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "That gathering is China\u2019s most consequential political event of the year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Annual full meeting of the National People\u2019s Congress",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "where senior leaders outline policy priorities, set economic growth targets",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Annual full meeting of the National People\u2019s Congress",
+      "target_type": "Theme",
+      "target_ref": "fiscal strategies",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "announce fiscal strategies, and introduce major reform measures.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10998,
+  "error_messages": []
+}

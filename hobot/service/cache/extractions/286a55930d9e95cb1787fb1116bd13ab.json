@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5707",
+  "extracted_at": "2026-02-07T15:04:34.445621",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank left interest rates unchanged as expected.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Eurostat Inflation Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of January headline and core inflation data for the euro area.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The euro traded around $1.18.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "euro"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The euro traded around $1.18",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The European Central Bank left interest rates unchanged.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "European Central Bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the European Central Bank left interest rates unchanged as expected",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Headline inflation eased to 1.7% year on year in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurostat",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Eurostat data showed headline inflation eased to 1.7% year on year in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Core inflation slowed to 2.2%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "core inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Core inflation also slowed to 2.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is expected to stabilize at its 2% target over the medium term.",
+      "claim_type": "prediction",
+      "author": "European Central Bank",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The ECB reiterated that inflation is expected to stabilize at its 2% target over the medium term",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The euro area economy remains resilient.",
+      "claim_type": "analysis",
+      "author": "European Central Bank",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "noting that the euro area economy remains resilient",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The current policy stance is in a \"good place.\"",
+      "claim_type": "opinion",
+      "author": "European Central Bank",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "describing its stance as being in a \u201cgood place,\u2013",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Further euro appreciation could revive the case for additional rate cuts.",
+      "claim_type": "prediction",
+      "author": "some officials",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "some officials have cautioned that further euro appreciation could revive the case for additional rate cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB Interest Rate Decision",
+      "target_type": "Theme",
+      "target_ref": "euro",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The euro traded around $1.18, recovering modest early-session losses after the European Central Bank left interest rates unchanged",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "global trade policy risks",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "uncertain outlook driven by global trade policy risks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "uncertain outlook driven by... ongoing geopolitical tensions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "euro appreciation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "further euro appreciation could revive the case for additional rate cuts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14365,
+  "error_messages": []
+}

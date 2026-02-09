@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5738",
+  "extracted_at": "2026-02-07T05:49:09.982856",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Silver prices plunged by 14.52%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver Plunges by 14.52%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Silver",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver Plunges by 14.52%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 1707,
+  "error_messages": []
+}

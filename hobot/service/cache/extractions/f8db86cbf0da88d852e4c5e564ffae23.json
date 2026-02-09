@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5799",
+  "extracted_at": "2026-02-07T05:43:06.846513",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "South Africa's gross foreign exchange reserves reached $80.193 billion in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "South Africa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gross foreign exchange reserves in South Africa rose to $80.193 billion in January 2026, the largest value since records began in 1998, from $75.892 billion in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The January 2026 reserves figure is the largest since records began in 1998.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "South Africa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gross foreign exchange reserves in South Africa rose to $80.193 billion in January 2026, the largest value since records began in 1998, from $75.892 billion in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold reserves increased to $20.670 billion in January 2026 from $17.493 billion in December 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "gold reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This was driven by increases in gold reserves ($20.670 billion vs $17.493 billion in December 2025)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "SDR holdings increased to $6.666 billion in January 2026 from $6.604 billion in December 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "SDR holdings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "SDR holdings ($6.666 billion vs $6.604 billion)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Foreign currency reserves increased to $52.857 billion in January 2026 from $51.795 billion.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "foreign currency reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "foreign currency reserves ($52.857 billion vs $51.795 billion)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The forward position decreased to $0.564 billion in January from $1.161 billion in the prior month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "forward position"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, the forward position, representing the central bank's unsettled or swap transactions, decreased sharply to $0.564 billion in January from $1.161 billion in the prior month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Gross foreign exchange reserves",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Gross foreign exchange reserves in South Africa rose to $80.193 billion in January 2026, the largest value since records began in 1998, from $75.892 billion in the previous month.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5290,
+  "error_messages": []
+}

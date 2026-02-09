@@ -1,0 +1,345 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5666",
+  "extracted_at": "2026-02-07T05:56:22.893239",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "Bank of England monetary policy decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England is expected to leave interest rates unchanged.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB monetary policy decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The ECB is expected to leave interest rates unchanged.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The STOXX 50 rose 0.5% on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The STOXX 50 rose 0.5% on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The broader STOXX 600 slipped 0.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the broader STOXX 600 slipped 0.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell fell 1.6% after missing profit estimates amid lower crude prices.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shell"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shell fell 1.6% after missing profit estimates amid lower crude prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BBVA tumbled more than 4% as its results failed to meet investor expectations.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BBVA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BBVA tumbled more than 4% as its results failed to meet investor expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Maersk plunged nearly 6% after warning of a decline in earnings in 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Maersk"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Maersk plunged nearly 6% after warning of a decline in earnings in 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Vestas slid 2.6% following a profit miss.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Vestas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vestas slid 2.6% following a profit miss.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Rheinmetall also dropped 4.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall also dropped 4.2%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BNP Paribas gained 3% after raising its outlook for shareholder returns.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BNP Paribas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BNP Paribas gained 3% after raising its outlook for shareholder returns",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ArcelorMittal climbed 0.9% after reporting a stronger-than-expected Q4 profit.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ArcelorMittal"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ArcelorMittal climbed 0.9% after reporting a stronger-than-expected Q4 profit.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ASML Holding (+1.5%), Siemens (+1.2%), SAP (+1.9%), and Prosus (+3%) also traded higher.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ASML Holding",
+        "Siemens",
+        "SAP",
+        "Prosus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ASML Holding (+1.5%), Siemens (+1.2%), SAP (+1.9%), and Prosus (+3%) also traded higher.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Both the BoE and the ECB are widely expected to leave interest rates unchanged.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "BoE",
+        "ECB"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "both the BoE and the ECB are widely expected to leave interest rates unchanged.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Shell",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Shell fell 1.6% after missing profit estimates amid lower crude prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BBVA",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "BBVA tumbled more than 4% as its results failed to meet investor expectations.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Maersk",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Maersk plunged nearly 6% after warning of a decline in earnings in 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Vestas",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vestas slid 2.6% following a profit miss.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rheinmetall",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Rheinmetall also dropped 4.2%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BNP Paribas",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "BNP Paribas gained 3% after raising its outlook for shareholder returns",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ArcelorMittal",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ArcelorMittal climbed 0.9% after reporting a stronger-than-expected Q4 profit.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BoE",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "both the BoE and the ECB are widely expected to leave interest rates unchanged.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "both the BoE and the ECB are widely expected to leave interest rates unchanged.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9877,
+  "error_messages": []
+}

@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5842",
+  "extracted_at": "2026-02-07T14:30:55.870889",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Malta Industrial Production Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Malta's industrial output data for December 2025, showing a 6% year-on-year decline.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Malta's industrial production fell by 6% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Malta",
+        "Industrial Production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Malta\u2019s industrial production fell by 6% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Energy production grew by 8.7% in December compared to 3.7% in the previous month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Energy production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "gains were recorded in energy production (8.7% vs 3.7%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Capital goods activity rebounded to 4.4% from a 7.1% decline.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Capital goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "activity rebounded in capital goods (4.4% vs -7.1%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a seasonally adjusted monthly basis, industrial activity grew by 4.2% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Industrial activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, industrial activity grew by 4.2% in December, recovering from a 0.1% fall in November.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The slowdown in the industrial production decline was primarily caused by improved output in manufacturing.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The slowdown was mainly driven by higher output in the manufacturing sector (-7% vs -9%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing sector",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The slowdown was mainly driven by higher output in the manufacturing sector (-7% vs -9%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Energy production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Across main industrial groupings, gains were recorded in energy production (8.7% vs 3.7%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Consumer goods",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the other hand, activity fell further in consumer non-durable goods (-6.9% versus -2.8%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10337,
+  "error_messages": []
+}

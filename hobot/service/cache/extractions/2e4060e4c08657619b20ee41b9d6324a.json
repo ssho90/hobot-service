@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5542",
+  "extracted_at": "2026-02-08T01:00:48.142568",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of HCOB Spain Services PMI for January 2026",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The publication of the Purchasing Managers' Index for Spain's services sector, showing a slowdown in growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Spain Services PMI fell to 53.5 in January 2026 from 57.1 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "Spain"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Spain Services PMI fell to 53.5 in January 2026 from December\u2019s 12-month high of 57.1",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The PMI reading of 53.5 was lower than the market expectation of 56.6.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "market"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "well below market expectations of 56.6.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment growth in the services sector reached its highest level since March of the previous year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Spain"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment growth remained strongly positive and picked up from December, reaching its highest level since last March.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Business sentiment reached a ten-month high in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Spain"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Finally, business sentiment improved slightly, climbing to a ten-month high.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The January PMI reading indicates the weakest expansion in the services sector since August.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest reading signaled the weakest pace of expansion in services activity since August",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Despite the slowdown, the overall growth in the services sector remains solid.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "though growth remained solid overall.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weaker demand from major European markets caused a decline in export sales.",
+      "claim_type": "analysis",
+      "author": "Firms",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "export sales declined for a second time in three months, with firms pointing to weaker demand from key European markets.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Input cost inflation remains high due to hardware costs and labor expenses.",
+      "claim_type": "analysis",
+      "author": "Companies",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "input cost inflation stayed elevated, with companies citing higher costs for computer hardware and components as well as rising labor expenses",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "HCOB Spain Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The HCOB Spain Services PMI fell to 53.5... signaling the weakest pace of expansion in services activity since August",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "European markets",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "export sales declined... with firms pointing to weaker demand from key European markets.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Labor expenses",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input cost inflation stayed elevated, with companies citing... rising labor expenses",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Selling prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "selling prices increased at the fastest pace in three months.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment growth",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment growth remained strongly positive and picked up from December",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11595,
+  "error_messages": []
+}

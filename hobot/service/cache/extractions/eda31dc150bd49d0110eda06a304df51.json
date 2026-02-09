@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5537",
+  "extracted_at": "2026-02-08T01:01:40.263430",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "HCOB Italy Composite PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the composite Purchasing Managers' Index for Italy's private sector for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Italy Composite PMI rose to 51.4 in January 2026 from 50.3 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Italy Composite PMI rose to 51.4 in January 2026 from 50.3 in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private sector employment increased in both the services and manufacturing sectors.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy",
+        "services sector",
+        "manufacturing sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Private sector employment edged higher, with both services and manufacturing adding staff",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Service providers increased their charges at the fastest rate in six months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "service providers"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "service providers raised charges at the fastest pace in six months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Italy's private sector has regained momentum.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "signaling regained momentum",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The expansion in the private sector is considered modest.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "still only a modest expansion in the private sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Service sector firms have cautious expectations for growth in the coming months.",
+      "claim_type": "prediction",
+      "author": "service sector firms",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "service sector firms expressing more cautious expectations for growth in the months ahead",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Services sector",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Growth was led by the services sector, which recorded a stronger rise in activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input costs rose, particularly for manufacturers, driving overall price pressures higher",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Private sector employment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Private sector employment edged higher, with both services and manufacturing adding staff",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9797,
+  "error_messages": []
+}

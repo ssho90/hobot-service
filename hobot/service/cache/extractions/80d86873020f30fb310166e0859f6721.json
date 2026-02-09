@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5763",
+  "extracted_at": "2026-02-07T14:50:22.116588",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Philippine Industrial Output Release December 2025",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of manufacturing production data for the Philippines for the month of December 2025.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Manufacturing production in the Philippines grew by 1.9% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Philippines",
+        "Manufacturing production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Manufacturing production in the Philippines climbed 1.9% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The manufacturing production figure for November was revised downward to a 1% decline.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Manufacturing production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "recovering from a downwardly revised 1% decline in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The manufacture of non-metallic mineral products increased by 29.5% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "non-metallic mineral products"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "manufacture of other non-metallic mineral products (29.5% vs 4.4% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Seasonally adjusted monthly industrial activity increased by 4.7% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "industrial activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, industrial activity jumped 4.7%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The recovery in manufacturing production was primarily driven by the non-metallic mineral products sector.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "mainly driven by a faster annual increase in the manufacture of other non-metallic mineral products (29.5% vs 4.4% in November), which contributed 23.2% to the overall uptrend in manufacturing production",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "non-metallic mineral products",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mainly driven by a faster annual increase in the manufacture of other non-metallic mineral products (29.5% vs 4.4% in November), which contributed 23.2% to the overall uptrend",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "machinery and equipment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Activity also rebounded in machinery and equipment except electrical (9.7% vs -11.1%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Philippine Industrial Output Recovers to 4-Month High",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9994,
+  "error_messages": []
+}

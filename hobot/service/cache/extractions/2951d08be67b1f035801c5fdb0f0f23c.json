@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5778",
+  "extracted_at": "2026-02-07T14:49:18.829387",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January 2026 FDI Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of foreign direct investment data for Vietnam for the month of January 2026.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Foreign direct investment disbursed in Vietnam reached USD 1.68 billion in January 2026, an 11.3% increase year-on-year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Vietnam"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Foreign direct investment (FDI) disbursed in Vietnam reached USD 1.68 billion in January 2026, up 11.3% year-on-year from USD 1.51 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Total registered FDI in Vietnam fell 40.6% to USD 2.57 billion in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Vietnam"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "total registered FDI fell 40.6% to USD 2.57 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing and processing sectors received 76.3% of the FDI share.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Manufacturing",
+        "Processing"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "manufacturing and processing accounted for the largest share (76.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Singapore was the largest investor in Vietnam, contributing 41.5% of total registered capital.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Singapore",
+        "Vietnam"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Singapore remained the largest investor with 41.5% of total registered capital",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The FDI data reflects sustained investor confidence in Vietnam.",
+      "claim_type": "analysis",
+      "author": "Ministry of Finance",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The Ministry of Finance said the data reflect sustained investor confidence",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Global supply chain shifts are influencing investment patterns in Vietnam.",
+      "claim_type": "analysis",
+      "author": "Ministry of Finance",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "amid global supply chain shifts",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "FDI Disbursed",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signaling continued expansion of foreign business activities",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Global supply chain shifts",
+      "target_type": "Theme",
+      "target_ref": "FDI",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the data reflect sustained investor confidence amid global supply chain shifts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Investor confidence",
+      "target_type": "Theme",
+      "target_ref": "FDI",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the data reflect sustained investor confidence",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10355,
+  "error_messages": []
+}

@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5540",
+  "extracted_at": "2026-02-08T01:01:09.033228",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Central Bank of Iceland February 2026 Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Monetary Policy Committee kept the key policy rate steady at 7.25%.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Central Bank of Iceland kept its key policy rate at 7.25% in February 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Central Bank of Iceland",
+        "Monetary Policy Committee"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Central Bank of Iceland\u2019s Monetary Policy Committee (MPC) kept its key policy rate steady at 7.25% during its February 2026 meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The annual inflation rate in Iceland rose to 5.2% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Iceland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The annual inflation rate climbed to 5.2% in January 2026, from 4.5% in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Central Bank of Iceland cut rates by 25 bps in November 2025.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Central Bank of Iceland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following a 25 bps cut in November 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "GDP growth is expected to remain subdued.",
+      "claim_type": "prediction",
+      "author": "Central Bank of Iceland",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "GDP growth expected to remain subdued",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Future rate cuts are dependent on inflation returning to the 2.5% target.",
+      "claim_type": "analysis",
+      "author": "Central Bank of Iceland",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The Central Bank emphasized that any future rate cuts will hinge on clear evidence that inflation is returning toward its 2\u00bd% target.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Underlying inflationary pressures are continuing to persist despite a cooling labor market.",
+      "claim_type": "analysis",
+      "author": "Central Bank of Iceland",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Despite slower economic activity and signs of a cooling labor market, underlying inflationary pressures continue to persist.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Central Bank emphasized that any future rate cuts will hinge on clear evidence that inflation is returning toward its 2\u00bd% target.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "growth",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Policymakers also noted that near-term monetary policy will continue to be guided by evolving trends in economic activity",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8328,
+  "error_messages": []
+}

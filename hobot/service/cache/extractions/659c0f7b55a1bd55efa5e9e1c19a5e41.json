@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5635",
+  "extracted_at": "2026-02-07T16:23:09.388247",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Nikkei 225 Index Fall",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Nikkei 225 Index fell 0.7% to below 54,000 on Thursday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Global Tech Selloff",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A broader decline in technology shares globally affecting Japanese markets.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Arm Holdings Licensing Sales Forecast Miss",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Chip designer subsidiary Arm Holdings missed fiscal third-quarter licensing sales forecasts.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Renesas Electronics Timing Business Sale",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Renesas Electronics announced plans to sell its Timing business to SiTime for $3 billion.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Nikkei 225 Index fell 0.7% to below 54,000, while the Topix Index slipped 0.1% to 3,650.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nikkei 225 Index",
+        "Topix Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Nikkei 225 Index fell 0.7% to below 54,000, while the broader Topix Index slipped 0.1% to 3,650 on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "SoftBank Group shares dropped more than 6%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "SoftBank Group"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "SoftBank Group dropped more than 6% after chip designer subsidiary Arm Holdings missed fiscal third-quarter licensing sales forecasts.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Panasonic shares surged as much as 15.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Panasonic"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, Panasonic surged as much as 15.2% despite lowering its full-year profit estimates",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Renesas Electronics is selling its Timing business to SiTime for $3 billion.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Renesas Electronics",
+        "SiTime"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Renesas Electronics gained 5% after announcing plans to sell its Timing business to SiTime for $3 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors pulled back from technology shares due to concerns about valuations, AI spending, and software business model disruption.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Investors pulled back from technology shares over concerns about elevated valuations, heavy AI spending, and the potential disruption to traditional software business models.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Global tech selloff",
+      "target_type": "Theme",
+      "target_ref": "Nikkei 225 Index",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "extending losses from the previous session amid a global tech selloff.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Arm Holdings",
+      "target_type": "Theme",
+      "target_ref": "SoftBank Group",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "SoftBank Group dropped more than 6% after chip designer subsidiary Arm Holdings missed fiscal third-quarter licensing sales forecasts.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI spending",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investors pulled back from technology shares over concerns about elevated valuations, heavy AI spending",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Renesas Electronics",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Renesas Electronics gained 5% after announcing plans to sell its Timing business to SiTime for $3 billion.",
+        "source_sentence": null,
+        "confidence": "low",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14773,
+  "error_messages": []
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5886",
+  "extracted_at": "2026-02-09T01:08:26.393321",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japanese Lower House Election",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The ruling Liberal Democratic Party (LDP) led by Sanae Takaichi secured a two-thirds supermajority in the House of Representatives.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Nikkei 225 Index surged 5% toward 57,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nikkei 225 Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Nikkei 225 Index surged 5% toward 57,000",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Topix Index gained 2.2% to 3,780 on Monday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Topix Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the broader Topix Index gained 2.2% to 3,780 on Monday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The LDP-led coalition won 352 of the 465 seats in Japan\u2019s House of Representatives.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Liberal Democratic Party",
+        "Sanae Takaichi",
+        "House of Representatives"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Takaichi\u2019s coalition won 352 of the 465 seats in Japan\u2019s House of Representatives",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "SoftBank Group shares rose 6%, Mitsubishi Heavy Industries rose 3.2%, and Toyota Motor rose 2.3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "SoftBank Group",
+        "Mitsubishi Heavy Industries",
+        "Toyota Motor"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Strong performers included heavyweights firms such as SoftBank Group (6%), Mitsubishi Heavy Industries (3.2%) and Toyota Motor (2.3%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The election outcome reinforced expectations for looser fiscal policy and possible tax cuts.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The outcome reinforced expectations for looser fiscal policy and possible tax cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There are concerns over Japan\u2019s growing debt burden.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "amid concerns over Japan\u2019s growing debt burden",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Japanese Lower House Election",
+      "target_type": "Theme",
+      "target_ref": "Japanese Shares",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japanese shares hitting fresh record highs after the ruling Liberal Democratic Party... secured a two-thirds supermajority",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street gains",
+      "target_type": "Theme",
+      "target_ref": "Japanese equities",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japanese equities also benefited from Wall Street gains on Friday",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "looser fiscal policy",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "expectations for looser fiscal policy and possible tax cuts, which have rattled Japanese financial markets in recent weeks amid concerns over Japan\u2019s growing debt burden",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12666,
+  "error_messages": []
+}

@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5731",
+  "extracted_at": "2026-02-07T14:58:27.829426",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "December 2025 US Pending Home Sales Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "US pending home sales plunged 9.3% month on month in December 2025.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January Lumber Rally",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A price rally in lumber futures that occurred in January prior to the current decline.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Lumber futures slipped below $590 per thousand board feet.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Lumber futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Lumber futures slipped below $590 per thousand board feet, the lowest level in nearly four weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US pending home sales decreased by 9.3% month on month in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US pending home sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US pending home sales plunging 9.3% month on month in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mills continued operations to rebuild inventories after a winter supply squeeze.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "mills"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "mills continued running to rebuild inventories after the winter squeeze",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Financing costs edged higher and housing activity cooled.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Demand softened as financing costs edged higher and housing activity cooled",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Falling volumes and open interest amplified the decline in lumber prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "falling volumes and open interest amplifying the price decline",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Housing demand weakened and earlier restocking momentum faded.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "housing demand weakened and earlier restocking momentum faded",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Financing costs",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Demand softened as financing costs edged higher",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US pending home sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "removing a key source of construction and renovation related wood consumption",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Open interest",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "falling volumes and open interest amplifying the price decline",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Housing activity",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "housing activity cooled, with US pending home sales plunging 9.3%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13425,
+  "error_messages": []
+}

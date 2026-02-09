@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5786",
+  "extracted_at": "2026-02-07T05:44:48.510677",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "RBNZ Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of New Zealand is set to meet later this month.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The New Zealand dollar edged up to $0.596 but stayed close to its lowest level in almost two weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "New Zealand dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The New Zealand dollar edged up to $0.596 but stayed close to its lowest level in almost two weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The implied probability of a September rate move stands at about 70%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "September rate move"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the implied probability of a September move stands at about 70%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The RBNZ is set to meet later this month in what will be the first meeting under its new governor, Anna Breman.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "RBNZ",
+        "Anna Breman"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The RBNZ is set to meet later this month in what will be the first meeting under its new governor, Anna Breman",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the week, the kiwi has fallen about 1%, on track to snap a three-week winning streak.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "kiwi"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the week, the kiwi has fallen about 1%, on track to snap a three-week winning streak.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Policymakers are widely expected to leave rates unchanged.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "policymakers are widely expected to leave rates unchanged.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are closely watching whether the central bank maintains its guidance for a first rate increase around mid-2027.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "markets closely watching whether it maintains its guidance for a first rate increase around mid-2027.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Dollar",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "New Zealand Dollar Remains Near 2-Week Lows The New Zealand dollar edged up to $0.596 but stayed close to its lowest level in almost two weeks, amid reduced bets for an imminent rate hike from the Reserve Bank.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Mixed jobs report",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "A mixed jobs report earlier in the week, showing an unexpected rise in unemployment to a decade high, while employment increased more than forecast, prompted markets to push back expectations for a near-term rate hike.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "RBNZ Meeting",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The RBNZ is set to meet later this month in what will be the first meeting under its new governor, Anna Breman, and policymakers are widely expected to leave rates unchanged.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "kiwi",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "For the week, the kiwi has fallen about 1%, on track to snap a three-week winning streak.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5871,
+  "error_messages": []
+}

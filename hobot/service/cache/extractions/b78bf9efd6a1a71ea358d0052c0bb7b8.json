@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5845",
+  "extracted_at": "2026-02-07T05:34:34.297724",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "FTSE 100 edged up to around 10,330 points on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "FTSE 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "FTSE 100 edged up to around 10,330 points on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shares in Barclays, NatWest Group and Lloyds rose between 1.1% and 1.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Barclays",
+        "NatWest Group",
+        "Lloyds"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Heavyweight bank stocks led the advance, with shares in Barclays, NatWest Group and Lloyds rising between 1.1% and 1.9%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "RELX slid more than 4% and Experian dropped 2.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "RELX",
+        "Experian"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "RELX slid more than 4% and Experian dropped 2.9%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Interest rates could be lowered if the recent decline in inflation proves sustained.",
+      "claim_type": "prediction",
+      "author": "Bank of England",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "supported by signals from the Bank of England on Thursday that interest rates could be lowered if the recent decline in inflation proves sustained.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "AI could disrupt data and software stocks business models.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "By contrast, data and software stocks underperformed amid growing concerns that AI could disrupt their business models.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supported by signals from the Bank of England on Thursday that interest rates could be lowered if the recent decline in inflation proves sustained.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "decline in inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supported by signals from the Bank of England on Thursday that interest rates could be lowered if the recent decline in inflation proves sustained.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US\u2013Iran tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Mining stocks also rebounded as precious metal prices climbed amid heightened US\u2013Iran tensions",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4601,
+  "error_messages": []
+}

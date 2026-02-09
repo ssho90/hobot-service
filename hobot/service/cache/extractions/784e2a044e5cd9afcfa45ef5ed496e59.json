@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5536",
+  "extracted_at": "2026-02-08T01:01:50.502512",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Germany Composite PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the HCOB Germany Composite Purchasing Managers' Index for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Germany Composite PMI increased to 52.1 in January 2026 from 51.3 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Germany Composite PMI increased to 52.1 in January 2026 from 51.3 in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Workforce numbers continued to decline in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Workforce numbers continued to decline, alongside further reductions in backlogs across both manufacturing and services.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Average input costs rose at the fastest pace in nearly three years.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "average input costs rose at the fastest pace in nearly three years",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "A rebound in manufacturing production offset slower growth in services activity.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "as a rebound in manufacturing production offset slower growth in services activity",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Output charge inflation was driven mainly by higher service-sector prices.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "output charge inflation jumped to a 23-month high, driven mainly by higher service-sector prices",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business sentiment reached its highest level since May 2024.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Business sentiment climbed to its highest level since May 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as a rebound in manufacturing production offset slower growth in services activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Service-sector prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "output charge inflation jumped to a 23-month high, driven mainly by higher service-sector prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Workforce numbers",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Workforce numbers continued to decline",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Export sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Total new business expanded for the third time in four months, supported by a broad stabilization in export sales.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9683,
+  "error_messages": []
+}

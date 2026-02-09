@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5665",
+  "extracted_at": "2026-02-07T15:40:43.655172",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January 2026 HCOB Italy Construction PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the Purchasing Managers' Index for the Italian construction sector in January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Italy Construction PMI fell to 47.7 in January 2026 from 47.9 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Italy Construction PMI edged down to 47.7 in January 2026 from 47.9 in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment growth in the Italian construction sector reached a seven-month high in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment growth accelerated to a seven-month high as companies favored permanent staff",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Civil engineering was the only sub-sector to show growth in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Civil engineering"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "civil engineering was the only area to record a small uptick",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Uncertainty regarding the economic outlook dampened demand for new construction projects.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Order books fell at one of the steepest rates in over a year as uncertainty dampened demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business confidence remains positive due to expectations of future projects.",
+      "claim_type": "opinion",
+      "author": "HCOB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Business confidence weakened but remained marginally positive, with firms citing expected future projects",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The PNRR deadline is creating uncertainty that negatively impacts business sentiment.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "uncertainty around the PNRR deadline tempered sentiment",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Housing segment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Housing remained the weakest segment, posting a substantial drop and weighing most on the headline index",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Raw material and energy prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Input cost inflation picked up due to higher raw material and energy prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "PNRR deadline",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "uncertainty around the PNRR deadline tempered sentiment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Uncertainty",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Order books fell at one of the steepest rates in over a year as uncertainty dampened demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9700,
+  "error_messages": []
+}

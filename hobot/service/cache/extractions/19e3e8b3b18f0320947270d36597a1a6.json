@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5800",
+  "extracted_at": "2026-02-07T05:38:50.084118",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "German industrial output declined by 1.9% month-on-month in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Germany",
+        "industrial output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "German Industrial Output Falls More than Expected Germany\u2019s industrial output declined by 1.9% month-on-month in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The automotive industry led the decline with a decrease of 8.9%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "automotive industry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The automotive industry (-8.9%) led the decline",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Machine maintenance and assembly declined by 17.6%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "machine maintenance",
+        "assembly"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "machine maintenance and assembly (-17.6%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Excluding energy and construction, industrial production dropped 3%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Excluding energy and construction, industrial production dropped 3%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output in capital goods decreased by 5.3%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "capital goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "lower output in capital goods (-5.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output in intermediate goods decreased by 1.2%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "intermediate goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "intermediate goods (-1.2%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer goods production rose by 0.5%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "consumer goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "consumer goods production rose (+0.5%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On an annual basis, industrial output fell 0.6%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On an annual basis, industrial output fell 0.6%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "German industrial output",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "German Industrial Output Falls More than Expected German\u2019s industrial output declined by 1.9% month-on-month in December 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5572,
+  "error_messages": []
+}

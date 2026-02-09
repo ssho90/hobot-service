@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5656",
+  "extracted_at": "2026-02-07T15:42:47.552608",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Natural Gas UK Price Increase",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The price of Natural Gas in the UK rose by 2.86%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Natural Gas UK Rises by 2.86%",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Natural Gas UK"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Natural Gas UK Rises by 2.86%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Natural Gas UK",
+      "target_type": "Theme",
+      "target_ref": "Energy Commodities",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Energy Commodities Updates: Natural Gas UK Rises by 2.86%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5339,
+  "error_messages": []
+}

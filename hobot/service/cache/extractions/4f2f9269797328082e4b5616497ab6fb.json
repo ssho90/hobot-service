@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5799",
+  "extracted_at": "2026-02-07T14:43:21.158491",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "South Africa Forex Reserves Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of South Africa's gross foreign exchange reserves data for January 2026, showing a record high.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "South Africa's gross foreign exchange reserves reached a record high of $80.193 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "South Africa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gross foreign exchange reserves in South Africa rose to $80.193 billion in January 2026, the largest value since records began in 1998",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold reserves increased to $20.670 billion in January 2026 from $17.493 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This was driven by increases in gold reserves ($20.670 billion vs $17.493 billion in December 2025)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The forward position decreased to $0.564 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "central bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the forward position, representing the central bank's unsettled or swap transactions, decreased sharply to $0.564 billion in January from $1.161 billion in the prior month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Foreign currency reserves rose to $52.857 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "foreign currency reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "foreign currency reserves ($52.857 billion vs $51.795 billion)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Gold reserves",
+      "target_type": "Theme",
+      "target_ref": "Gross foreign exchange reserves",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This was driven by increases in gold reserves",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Foreign currency reserves",
+      "target_type": "Theme",
+      "target_ref": "Gross foreign exchange reserves",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This was driven by increases in... foreign currency reserves",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "SDR holdings",
+      "target_type": "Theme",
+      "target_ref": "Gross foreign exchange reserves",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This was driven by increases in... SDR holdings",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Gross foreign exchange reserves",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Gross foreign exchange reserves in South Africa rose to $80.193 billion",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11187,
+  "error_messages": []
+}

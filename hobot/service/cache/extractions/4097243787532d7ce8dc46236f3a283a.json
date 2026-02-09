@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5665",
+  "extracted_at": "2026-02-07T05:56:12.494676",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The HCOB Italy Construction PMI edged down to 47.7 in January 2026 from 47.9 in December, signaling a third straight month of contraction.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "HCOB Italy Construction PMI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Italy Construction PMI edged down to 47.7 in January 2026 from 47.9 in December, signaling a third straight month of contraction",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Order books fell at one of the steepest rates in over a year.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Order books"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Order books fell at one of the steepest rates in over a year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment growth accelerated to a seven-month high.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment growth accelerated to a seven-month high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation picked up due to higher raw material and energy prices.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Input cost inflation",
+        "raw material prices",
+        "energy prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Input cost inflation picked up due to higher raw material and energy prices",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Uncertainty dampened demand, prompting firms to scale back input buying.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Order books fell at one of the steepest rates in over a year as uncertainty dampened demand, prompting firms to scale back input buying.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business confidence weakened but remained marginally positive.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Business confidence weakened but remained marginally positive, with firms citing expected future projects even as uncertainty around the PNRR deadline tempered sentiment.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Construction PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Italian Construction PMI Contracts Further in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input cost inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Input cost inflation picked up due to higher raw material and energy prices, though overall pressures stayed below long-run averages.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment growth",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Despite softer workloads, employment growth accelerated to a seven-month high as companies favored permanent staff.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Uncertainty",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Order books fell at one of the steepest rates in over a year as uncertainty dampened demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6299,
+  "error_messages": []
+}

@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5528",
+  "extracted_at": "2026-02-08T01:04:43.400501",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Austria January 2026 Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of annual and monthly inflation data for Austria in January 2026 showing a significant decline.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Austria's annual inflation rate fell to 2% in January 2026 from 3.8% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The annual inflation rate in Austria eased to 2% in January 2026 from 3.8% in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Energy prices in Austria dropped by 4.9% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "mainly driven by a 4.9% drop in energy prices",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices in Austria decreased by 0.7% on a monthly basis in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices fell by 0.7% in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation for services slowed to 3.8% and food, tobacco, and alcohol slowed to 2.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while inflation for services and for food, tobacco and alcohol slowed to 3.8% and 2.7%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation in Austria will return to levels seen in the second half of 2024 following high rates in 2025.",
+      "claim_type": "analysis",
+      "author": "Manuela Lenk",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "This means that, following the high inflation rates of 2025, inflation in Austria will fall back to the levels seen in the second half of 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Energy and industrial goods had a dampening effect on the overall inflation rate.",
+      "claim_type": "analysis",
+      "author": "Manuela Lenk",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Electricity, gas, heating oil, fuel and industrial goods had a dampening effect",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Energy prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mainly driven by a 4.9% drop in energy prices after the base effects of the electricity price cap faded, energy taxes were cut, and renewable energy subsidies were reduced.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Industrial goods",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Electricity, gas, heating oil, fuel and industrial goods had a dampening effect",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Energy tax cuts",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "energy taxes were cut, and renewable energy subsidies were reduced.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11123,
+  "error_messages": []
+}

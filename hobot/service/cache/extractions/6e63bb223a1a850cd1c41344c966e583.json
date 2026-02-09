@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5853",
+  "extracted_at": "2026-02-07T14:28:01.555238",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Canada January 2026 Labour Force Survey Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Canada's unemployment and employment data for January 2026.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Canada's unemployment rate fell to 6.5% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Canada",
+        "unemployment rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The unemployment rate in Canada fell to 6.5% in January 2026 from 6.8% in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Canadian labour force contracted by approximately 94,000 people.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "labour force"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The labour force contracted by roughly 94,000, pushing the participation rate down to 65.0% from 65.4%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Net employment in Canada decreased by 25,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "net employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Net employment fell by 25,000 to 21.12 million, interrupting the recent run of gains.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Full-time employment increased by 45,000 while part-time employment fell by 70,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "full-time employment",
+        "part-time employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Losses were driven by a 70,000 decline in part-time employment, partly offset by a 45,000 increase in full-time work.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The drop in the unemployment rate was driven by fewer people searching for work.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "marking the lowest level in 18 months, as fewer people searched for work.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The decline in the unemployment rate partially reversed the increase seen in the previous month.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The decline marked a partial reversal of the prior month\u2019s increase",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Labour force contraction",
+      "target_type": "Theme",
+      "target_ref": "unemployment rate",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The labour force contracted by roughly 94,000, pushing the participation rate down to 65.0% from 65.4%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Part-time employment decline",
+      "target_type": "Theme",
+      "target_ref": "Net employment",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Losses were driven by a 70,000 decline in part-time employment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Full-time employment increase",
+      "target_type": "Theme",
+      "target_ref": "Net employment",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "partly offset by a 45,000 increase in full-time work.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12623,
+  "error_messages": []
+}

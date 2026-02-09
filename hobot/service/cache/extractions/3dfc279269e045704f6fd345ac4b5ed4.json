@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5732",
+  "extracted_at": "2026-02-07T14:58:40.655700",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The ECB left its rates unchanged as largely expected during the session.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "BoE Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The BoE held rates but multiple MPC members opted for cuts.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Labor Market Softening",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Softening US labor market data impacting European markets.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Eurozone's STOXX 50 fell 0.8% to 5,976 and the European STOXX 600 dropped 1.1% to 612.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 50",
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Eurozone's STOXX 50 fell 0.8% to 5,976 and the European STOXX 600 dropped 1.1% to 612.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell fell 3.5% after missing profit estimates.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shell"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shell fell 3.5% after missing profit estimates amid lower crude prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BBVA tumbled 8.8% as its results failed to meet investor expectations.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BBVA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BBVA tumbled 8.8% as its results failed to meet investor expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Rheinmetall dropped 6.5% after cutting its guidance.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall dropped 6.5% after cutting its guidance.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "President Lagarde downplayed the recent data of softer inflation and concerns of a stronger euro.",
+      "claim_type": "analysis",
+      "author": "President Lagarde",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "President Lagarde downplayed the recent data of softer inflation and concerns of a stronger euro",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Lagarde's comments limited bets of incoming interest rate cuts this year.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "limiting bets of incoming cuts this year",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "European stocks closed firmly lower due to negative earnings and hawkish ECB hints.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "European stocks closed firmly lower on Thursday amid a batch of negative earnings, hawkish hints from the ECB",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The ECB left its rates unchanged as largely expected during the session",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US labor market",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the impact of a softening US labor market",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "President Lagarde",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "President Lagarde downplayed the recent data of softer inflation",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Crude prices",
+      "target_type": "Theme",
+      "target_ref": "Shell",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Shell fell 3.5% after missing profit estimates amid lower crude prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12332,
+  "error_messages": []
+}

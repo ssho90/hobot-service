@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5851",
+  "extracted_at": "2026-02-07T14:27:28.359323",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bradesco 4Q25 Results and 2026 Outlook Release",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Bradesco released its fourth-quarter results for 2025 along with a cautious outlook for 2026.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Brazil Finance Ministry Forecast Revision",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Finance Ministry updated its projections for national growth and inflation for 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Ibovespa traded below 182,000 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ibovespa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ibovespa edged lower to trade below 182,000 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bradesco shares fell by more than 4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bradesco"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The bank lost more than 4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Ita\u00fa BBA increased its ADR price target for Vale to US$19.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ita\u00fa BBA",
+        "Vale"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ita\u00fa BBA raised its ADR price target to US$19 from US$14 earlier in the week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Brazil's Finance Ministry reduced its 2026 growth forecast and raised its inflation projection.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Brazil\u2019s Finance Ministry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Brazil\u2019s Finance Ministry slightly cut its 2026 growth forecast while lifting its inflation projection.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Bradesco's cautious 2026 outlook had a greater market impact than its solid 4Q25 results.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "its cautious 2026 outlook overshadowed solid 4Q25 results",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Ita\u00fa BBA recommends buying Vale stock.",
+      "claim_type": "recommendation",
+      "author": "Ita\u00fa BBA",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "reiterating a buy rating",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bradesco Outlook",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ibovespa edged lower to trade below 182,000 on Friday, weighed by pessimistic results from Bradesco.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Oil prices",
+      "target_type": "Theme",
+      "target_ref": "Petrobras",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Petrobras gained 0.6% as oil prices edged higher.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Brazil\u2019s Finance Ministry",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Brazil\u2019s Finance Ministry slightly cut its 2026 growth forecast",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Brazil\u2019s Finance Ministry",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "lifting its inflation projection",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13024,
+  "error_messages": []
+}

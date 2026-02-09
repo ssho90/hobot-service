@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5734",
+  "extracted_at": "2026-02-07T05:49:50.403693",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The average rate on a 30-year fixed mortgage rose marginally to 6.11% as of February 5th.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "mortgage rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The average rate on a 30-year fixed mortgage rose marginally to 6.11% as of February 5th",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The rate rose for a third straight week from the lowest level since September 2022 of 6.06%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "mortgage rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "loosely rising for a third straight week from the lowest level since September 2022 of 6.06%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Improving affordability and availability of homes is a positive sign for buyers and sellers heading into the spring home sales season.",
+      "claim_type": "analysis",
+      "author": "Sam Khater, Freddie Mac\u2019s chief economist",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The combination of improving affordability and availability of homes to purchase is a positive sign for buyers and sellers heading into the spring home sales season",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "mortgage rates",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The average rate on a 30-year fixed mortgage rose marginally to 6.11% as of February 5th",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "mortgage rates",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The combination of improving affordability and availability of homes to purchase is a positive sign for buyers and sellers heading into the spring home sales season",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 3337,
+  "error_messages": []
+}

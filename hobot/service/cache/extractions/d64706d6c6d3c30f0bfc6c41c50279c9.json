@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5744",
+  "extracted_at": "2026-02-07T05:48:42.393132",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Colombia\u2019s producer prices fell 1.98% year-on-year in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Colombia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Colombia\u2019s producer prices fell 1.98% year-on-year in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "PPI deflation was 2.63% in the previous month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "PPI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following 2.63% deflation in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mining and quarrying prices were down 21.26%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Mining",
+        "quarrying"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mining and quarrying was the only sector below the average, with prices down 21.26%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing prices rose 0.87%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Manufacturing"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Manufacturing prices rose 0.87%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Agriculture, livestock and fishing prices increased 2.90%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Agriculture",
+        "livestock",
+        "fishing"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "agriculture, livestock and fishing increased 2.90%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a month-over-month basis, the PPI rose 1.51%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "PPI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a month-over-month basis, the PPI rose 1.51%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Colombia PPI",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Colombia PPI Remains in Deflation in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4392,
+  "error_messages": []
+}

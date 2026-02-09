@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5713",
+  "extracted_at": "2026-02-07T05:51:28.413247",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "ECB decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The ECB left borrowing costs unchanged.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Bank of England decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England left borrowing costs unchanged.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Frankfurt's DAX 40 fell more than 1% to below 24,400.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX 40"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Frankfurt's DAX 40 extended losses on Thursday afternoon, falling more than 1% to below 24,400",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Rheinmetall slumped as much as 8%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall slumped as much as 8%, heading for its biggest one-day drop in over ten months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "SAP rose by 1.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "SAP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "SAP and Infineon Technologies saw more modest rises of 1.7% and 1.6%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Infineon Technologies rose by 1.6%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Infineon Technologies"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "SAP and Infineon Technologies saw more modest rises of 1.7% and 1.6%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Aggressive AI spending may undermine profitability.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "a global tech rout resumed amid renewed fears that aggressive AI spending may undermine profitability.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation could fluctuate in the months ahead amid greater uncertainty.",
+      "claim_type": "prediction",
+      "author": "President Lagarde",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "President Lagarde said the central bank and eurozone inflation outlook remain in a \u201cgood place,\u201d but cautioned that inflation could fluctuate in the months ahead amid greater uncertainty.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weak preliminary forecasts for 2026 caused Rheinmetall to slump.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall slumped as much as 8%, heading for its biggest one-day drop in over ten months, with brokers also citing weak preliminary forecasts for 2026.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Easing geopolitical tensions caused Hensoldt and Renk to fall.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Hensoldt (-1%) and Renk (-0.2%) also fell amid signs of easing geopolitical tensions.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Traders also digested the latest ECB and Bank of England decisions, which left borrowing costs unchanged.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Traders also digested the latest ECB and Bank of England decisions, which left borrowing costs unchanged.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Aggressive AI spending",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a global tech rout resumed amid renewed fears that aggressive AI spending may undermine profitability.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "President Lagarde said the central bank and eurozone inflation outlook remain in a \u201cgood place,\u201d but cautioned that inflation could fluctuate in the months ahead amid greater uncertainty.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Easing geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Hensoldt (-1%) and Renk (-0.2%) also fell amid signs of easing geopolitical tensions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7279,
+  "error_messages": []
+}

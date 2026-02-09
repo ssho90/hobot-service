@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5688",
+  "extracted_at": "2026-02-07T15:07:27.295487",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Weekly EIA storage report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The upcoming release of natural gas storage data by the Energy Information Administration.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Arctic blast",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Severe cold weather in the previous week that impacted gas inventories.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Russia\u2019s 2022 invasion of Ukraine",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Geopolitical conflict that caused global supply disruptions in the energy market.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US natural gas futures were priced at $3.45 per million British thermal units on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US natural gas futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US natural gas futures were little changed at $3.45 per million British thermal units on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gas flows to the eight largest US LNG export plants averaged 18.3 bcfd in February.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US LNG export plants"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gas flows to the eight largest US LNG export plants averaged 18.3 bcfd so far in February",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US became the world\u2019s largest LNG exporter in 2023.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The US became the world\u2019s largest LNG exporter in 2023",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Natural gas production in the Lower 48 reached 106.4 bcfd.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Lower 48"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Production in the Lower 48 edged up to 106.4 bcfd",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Analysts expect heavy withdrawals to have shifted inventories from 5% above normal to 1% below normal.",
+      "claim_type": "prediction",
+      "author": "Analysts",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Analysts expect heavy withdrawals during last week\u2019s Arctic blast to have shifted inventories from about 5% above normal to roughly 1% below normal",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weather is expected to turn mostly warmer nationwide through February 19.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Weather is expected to turn mostly warmer nationwide through February 19",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Northeast will remain colder for another week.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "though the Northeast will remain colder for another week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Arctic blast",
+      "target_type": "Theme",
+      "target_ref": "inventories",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Analysts expect heavy withdrawals during last week\u2019s Arctic blast to have shifted inventories",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "global demand",
+      "target_type": "Theme",
+      "target_ref": "LNG export flows",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting strong global demand for US gas",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Russia\u2019s 2022 invasion of Ukraine",
+      "target_type": "Theme",
+      "target_ref": "US LNG export status",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The US became the world\u2019s largest LNG exporter in 2023 amid supply disruptions following Russia\u2019s 2022 invasion of Ukraine",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "weather forecasts",
+      "target_type": "Theme",
+      "target_ref": "natural gas prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "traders awaited the weekly EIA storage report and weighed strong LNG demand against milder weather forecasts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14236,
+  "error_messages": []
+}

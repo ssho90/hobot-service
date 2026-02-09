@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5567",
+  "extracted_at": "2026-02-07T17:51:18.545869",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Uranium Price Correction",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Uranium futures fell from a near two-year high of $101.5 to $92 per pound.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Uzbekistan Uranium Production Boost",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Uzbek Atomic Energy Agency increased annual production to 7,000 tonnes, exceeding market expectations.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Nuclear Policy Expansion",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The US government cut regulations on permits and announced $2.7 billion in contracts to secure domestic supply.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Uranium futures in the US decreased to $92 per pound from a high of $101.5.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Uranium futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Uranium futures in the US fell to $92 per pound from the near two-year high of $101.5",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Uzbek Atomic Energy Agency produced 7,000 tonnes of Uranium last year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Uzbek Atomic Energy Agency"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Uzbek Atomic Energy Agency boosted its annual production of Uranium to 7,000 tonnes last year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US government allocated $2.7 billion in contracts to Centrus and other enrichers.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "US government",
+        "Centrus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "fresh $2.7 billion in contracts to Centrus and two other reactors and enrichers",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Cameco approved the development of Westinghouse reactors.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Cameco",
+        "Westinghouse"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "partnership with Cameco, which approved the development of Westinghouse reactors",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Increased global supply has temporarily offset the impact of high demand expectations on uranium prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "a fresh increase in global supply momentarily outweighed the view of soaring growing demand expectations that carried prices in recent quarters",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Nuclear power capacity is expected to grow to meet the needs of datacenters and electrification.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "expectations that nuclear power capacity will continue to increase to match datacenter and electrification demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "US government contracts are intended to mitigate the loss of nuclear fuel supply from Russia due to sanctions.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "to offset the shun of supply from Russia following sanctions on their nuclear fuel",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Global supply",
+      "target_type": "Theme",
+      "target_ref": "Uranium prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a fresh increase in global supply momentarily outweighed the view of soaring growing demand expectations that carried prices in recent quarters",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Nuclear power capacity",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "nuclear power capacity will continue to increase to match datacenter and electrification demand",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Sanctions on Russia",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "offset the shun of supply from Russia following sanctions on their nuclear fuel",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US government regulation cuts",
+      "target_type": "Theme",
+      "target_ref": "Uranium supply",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The US government cut regulation on permits for uranium converters and announced deals for the construction of new plants",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 17464,
+  "error_messages": []
+}

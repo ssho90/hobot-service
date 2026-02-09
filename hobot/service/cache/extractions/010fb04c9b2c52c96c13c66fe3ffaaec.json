@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5779",
+  "extracted_at": "2026-02-07T05:46:04.681593",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Vietnam's industrial production surged 21.5% year-on-year in January 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Vietnam",
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vietnam\u2019s industrial production surged 21.5% year-on-year in January 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 21.5% increase marks the fastest growth since April 2021.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The latest reading marked the fastest since April 2021",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing output grew by 23.6% in January 2025, compared to 10.9% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "manufacturing output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Output growth strengthened across most sectors, including manufacturing (23.6% vs 10.9% in December)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Electricity and gas supply increased by 14.1% in January 2025, compared to 11.2% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "electricity and gas supply"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "electricity and gas supply (14.1% vs 11.2%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Water supply, waste management, and wastewater treatment grew by 13.6% in January 2025, compared to 6.3% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "water supply",
+        "waste management",
+        "wastewater treatment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "water supply, waste management, and wastewater treatment (13.6% vs 6.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mining and quarrying picked up sharply to 10.3% in January 2025, compared to 0.2% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "mining",
+        "quarrying"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, mining and quarrying picked up sharply (10.3% vs 0.2%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, industrial output edged down 0.2% in January 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, industrial output edged down 0.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "In 2025, industrial production rose 9.2% from the prior year.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "industrial production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In 2025, industrial production rose 9.2% from the prior year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Vietnam\u2019s industrial production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vietnam\u2019s industrial production surged 21.5% year-on-year in January 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5757,
+  "error_messages": []
+}

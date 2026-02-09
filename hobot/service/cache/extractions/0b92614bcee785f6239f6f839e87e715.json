@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5753",
+  "extracted_at": "2026-02-07T05:48:10.831900",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "ASX200 decreased to 8706.00 Index Points, the lowest since January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ASX200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ASX200 decreased to 8706.00 Index Points, the lowest since January 2026.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Over the past 4 weeks, Australia Stock Market Index (AU200) gained 0.34%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia Stock Market Index",
+        "AU200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Over the past 4 weeks, Australia Stock Market Index (AU200) gained 0.34%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "In the last 12 months, Australia Stock Market Index (AU200) increased 2.25%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia Stock Market Index",
+        "AU200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "in the last 12 months, it increased 2.25%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ASX200",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Stocks in Australia Hit 4-week Low ASX200 decreased to 8706.00 Index Points, the lowest since January 2026.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 3403,
+  "error_messages": []
+}

@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5852",
+  "extracted_at": "2026-02-07T14:27:48.366258",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Canada January 2025 Employment Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Canada's employment data for January 2025, showing a decline in jobs.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Employment in Canada decreased by 25,000 (0.1%) in January 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Canada"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment in Canada fell 0.1% (-25,000) in January 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The employment rate in Canada dropped to 60.8%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Canada"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The employment rate edged down 0.1 percentage point to 60.8%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing employment fell by 28,000 or 1.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "manufacturing"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment declined in manufacturing (-28,000; -1.5%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Ontario experienced a job loss of 67,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ontario"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment fell sharply in Ontario (-67,000; -0.8%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The employment data failed to meet the expected increase of 7,000 jobs.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "missing expectations for a 7,000 increase",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The January decline was the most significant monthly drop since August 2025.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "marking the sharpest monthly decline since August 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Employment in Canada",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment in Canada fell 0.1% (-25,000) in January 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment declined in manufacturing (-28,000; -1.5%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Ontario",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment fell sharply in Ontario (-67,000; -0.8%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 19446,
+  "error_messages": []
+}

@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5679",
+  "extracted_at": "2026-02-07T15:08:59.557174",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB policy decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank's meeting to decide on interest rates.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "German debt issuance",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Germany's plan to raise a record amount of debt for infrastructure and defense.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Germany's 10-year Bund yield was at 2.87%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany",
+        "10-year Bund"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Germany\u2019s 10-year Bund yield was little changed at 2.87%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Germany plans to raise a record \u20ac512 billion this year.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Germany plans to raise a record \u20ac512 billion this year to finance infrastructure upgrades and increased defense spending.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Eurozone headline CPI eased to 1.7% in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Recent data showed eurozone inflation cooled sharply in January, with headline CPI easing to 1.7%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Core inflation in the eurozone fell to 2.2%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "eurozone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "core inflation unexpectedly falling to 2.2%, its lowest level since October 2021.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ECB is expected to leave interest rates unchanged.",
+      "claim_type": "prediction",
+      "author": "Market consensus",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The ECB is widely expected to leave interest rates unchanged for a fifth straight meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Christine Lagarde will reiterate that policy remains in a good place.",
+      "claim_type": "prediction",
+      "author": "Market analysts",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "ECB President Christine Lagarde is expected to reiterate that policy remains in a \u201cgood place,\u201d",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are pricing in steady interest rates through 2026.",
+      "claim_type": "analysis",
+      "author": "Markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "with markets pricing in steady rates through 2026.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB policy decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The ECB is widely expected to leave interest rates unchanged for a fifth straight meeting",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "German debt issuance",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Germany plans to raise a record \u20ac512 billion this year to finance infrastructure upgrades and increased defense spending.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "eurozone inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Recent data showed eurozone inflation cooled sharply in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "infrastructure and defense spending",
+      "target_type": "Theme",
+      "target_ref": "German debt issuance",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Germany plans to raise a record \u20ac512 billion this year to finance infrastructure upgrades and increased defense spending.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11997,
+  "error_messages": []
+}

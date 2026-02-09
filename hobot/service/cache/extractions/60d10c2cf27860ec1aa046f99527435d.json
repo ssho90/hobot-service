@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5552",
+  "extracted_at": "2026-02-08T00:58:56.586983",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Croatia January 2026 Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of preliminary data for Croatia's annual and monthly inflation rates for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The annual inflation rate in Croatia was 3.4% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The annual inflation rate in Croatia edged up to 3.4% in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation in December 2025 was 3.3%, which was an eight-month low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following an eight-month low of 3.3% in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Services prices rose by 7.2% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "7.2% for services",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Energy prices rose by 3.7% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "3.7% for energy",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices rose by 0.3% on a monthly basis in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose by 0.3% in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices fell by 0.4% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Croatia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "rebounding from a 0.4% drop in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The 0.4% drop in December 2025 was the steepest monthly decline since January 2024.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "which marked the steepest monthly decline since January 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Services prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices were estimated to have risen by... 7.2% for services",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Energy prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices were estimated to have risen by... 3.7% for energy",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Food, beverages, and tobacco",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices were estimated to have risen by 3.0% for food, beverages, and tobacco",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11535,
+  "error_messages": []
+}

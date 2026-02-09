@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5873",
+  "extracted_at": "2026-02-07T06:01:22.799842",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "DAX 40 Friday Close",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Frankfurt DAX 40 index closed higher on Friday, ending a three-day losing streak.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Corporate Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "A fresh batch of corporate earnings from both sides of the Atlantic were assessed by traders.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The DAX 40 closed approximately 0.9% higher at 24,721.5 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX 40"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Frankfurt's DAX 40 managed to close about 0.9% firmer at 24,721.5 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Siemens Energy shares increased by 3.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Siemens Energy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Siemens Energy (+3.9%) outperformed",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Renk shares rose 6.1% following rating upgrades by BNP Paribas and Exane.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Renk",
+        "BNP Paribas",
+        "Exane"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Renk surged 6.1% after BNP Paribas and French broker Exane raised their ratings on the stock.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The DAX index rose 0.7% over the course of the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the week, the index rose 0.7%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Market anxiety regarding massive spending on AI has decreased to some extent.",
+      "claim_type": "analysis",
+      "author": "Traders",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "nervousness around AI-massive spending easing somewhat.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Negative developments at Stellantis caused downward pressure on the broader automotive sector.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Negative news from Stellantis pressured the automotive sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bloom Energy",
+      "target_type": "Theme",
+      "target_ref": "Siemens Energy",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Siemens Energy (+3.9%) outperformed, boosted by better-than-expected results and strong 2026 guidance from US peer Bloom Energy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Stellantis",
+      "target_type": "Theme",
+      "target_ref": "Automotive sector",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Negative news from Stellantis pressured the automotive sector, with Volkswagen, Daimler Truck, BMW, and Porsche Automobil falling up to 1.2%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI spending sentiment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Traders assessed a fresh batch of corporate earnings from both sides of the Atlantic, with nervousness around AI-massive spending easing somewhat.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14123,
+  "error_messages": []
+}

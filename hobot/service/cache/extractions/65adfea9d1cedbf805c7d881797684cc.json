@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5807",
+  "extracted_at": "2026-02-07T05:37:34.032671",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Czech Republic's industrial production rose by 3.8% year-on-year in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Czech Republic",
+        "Industrial Production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Industrial production in the Czech Republic rose by 3.8% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The industrial production increase of 3.8% surpassed market expectations of 3.2%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Industrial Production",
+        "Market Expectations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "surpassing market expectations of 3.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The industrial production growth slowed from 5.7% in the previous month.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Industrial Production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "albeit slowing from a more than three-year high of 5.7% in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output growth slowed in manufacturing to 4.5% from 6.4% in November.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Manufacturing Output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Output growth slowed in manufacturing (4.5% vs 6.4% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output tumbled for electricity, gas, steam, and air-conditioning supply by -2.6% compared to 2.6% previously.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Electricity",
+        "Gas",
+        "Steam",
+        "Air-conditioning supply"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "output tumbled for electricity, gas, steam, and air-conditioning supply (-2.6% vs 2.6%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output in mining and quarrying rebounded to 6.3% from a 12.8% decline in November.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Mining",
+        "Quarrying"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "output in mining and quarrying rebounded notably to 6.3% from a 12.8% decline in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, industrial activity slowed to 0.4% in December from 2.4% in the prior month.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Industrial Activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, industrial activity slowed sharply to 0.4% in December from 2.4% in the prior month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Industrial Production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Industrial production in the Czech Republic rose by 3.8% year-on-year in December 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing Output",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Output growth slowed in manufacturing (4.5% vs 6.4% in November)",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Mining and Quarrying",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "output in mining and quarrying rebounded notably to 6.3% from a 12.8% decline in November",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6372,
+  "error_messages": []
+}

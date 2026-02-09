@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5658",
+  "extracted_at": "2026-02-07T15:43:11.754697",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Finland December 2025 Trade Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of preliminary estimates for Finland's trade balance in December 2025 and the full-year 2025 summary.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Finland's trade deficit narrowed to EUR 0.21 billion in December 2025 from EUR 0.22 billion in the previous year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Finland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Finland\u2019s trade deficit narrowed slightly to EUR 0.21 billion in December 2025 from EUR 0.22 billion a year earlier, according to preliminary estimates.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased by 0.4% year-on-year to reach EUR 6 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Finland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports rose 0.4% year-on-year to EUR 6 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports rose by 0.3% to EUR 6.2 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Finland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, imports also increased by 0.3% to EUR 6.2 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Finland's cumulative trade deficit for the full year 2025 was EUR 0.86 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Finland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For full-year 2025, Finland recorded a cumulative trade deficit of EUR 0.86 billion, narrowing sharply from EUR 2.7 billion in the previous year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The growth in exports was primarily fueled by a significant rise in trade with non-EU countries.",
+      "claim_type": "analysis",
+      "author": "Preliminary estimates",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Exports rose 0.4% year-on-year to EUR 6 billion, driven by a sharp 12.6% increase to non-EU countries.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Non-EU exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports rose 0.4% year-on-year to EUR 6 billion, driven by a sharp 12.6% increase to non-EU countries.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade deficit narrowing",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Finland\u2019s trade deficit narrowed slightly to EUR 0.21 billion in December 2025 from EUR 0.22 billion a year earlier",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11481,
+  "error_messages": []
+}

@@ -1,0 +1,251 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5581",
+  "extracted_at": "2026-02-07T17:48:39.951648",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Nomination of Kevin Warsh as Fed chair",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "President Trump nominated Kevin Warsh to succeed as the next Federal Reserve chair.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ADP report release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of private payroll growth data for the US labor market.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor",
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ISM services PMI release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the services sector Purchasing Managers' Index data.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Downing of Iranian drone",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "US forces downed an Iranian drone near an aircraft carrier in the Arabian Sea.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran talks",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Scheduled diplomatic talks between the US and Iran.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Gold traded just under the $5,000 mark on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gold pared earlier gains on Wednesday to trade just under the $5,000 mark",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ADP report showed private payroll growth was lower than expected.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "ADP",
+        "labor-market"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ADP report, which showed private payroll growth undershooting expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ISM services PMI was stronger than forecast.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "ISM services PMI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "stronger-than-forecast ISM services PMI pointed to resilient activity in the sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold prices rose by more than 6% in the previous trading session.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bullion had surged more than 6% in the prior session, its biggest daily jump since 2008",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US forces downed an Iranian drone in the Arabian Sea.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "US forces",
+        "Iran"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US forces downed an Iranian drone near an aircraft carrier in the Arabian Sea",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors are evaluating US economic data to determine the Federal Reserve's future policy path.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "investors assessed fresh US economic data and its implications for the Federal Reserve\u2019s policy path",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The surge in gold was driven by dip buyers following a previous price drop.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "after dip buyers stepped in following a sharp pullback earlier in the week",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Geopolitical tensions are maintaining demand for gold as a safe-haven asset.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Safe-haven demand also remained supported by geopolitical tensions",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US economic data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors assessed fresh US economic data and its implications for the Federal Reserve\u2019s policy path",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Safe-haven demand also remained supported by geopolitical tensions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ADP report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "attention turned to the ADP report, which showed private payroll growth undershooting expectations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ISM services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ISM services PMI pointed to resilient activity in the sector",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15262,
+  "error_messages": []
+}

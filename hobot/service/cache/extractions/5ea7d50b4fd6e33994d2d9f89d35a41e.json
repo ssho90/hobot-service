@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5781",
+  "extracted_at": "2026-02-07T05:44:54.686251",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The Nikkei 225 rose 0.5% to around 54,070.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nikkei 225"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Nikkei 225 rose 0.5% to around 54,070",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Topix Index gained 0.7% to 3,678.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Topix Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the broader Topix Index gained 0.7% to 3,678",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Prime Minister Sanae Takaichi called the snap vote to secure backing for increased spending and potential tax cuts.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Sanae Takaichi"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Prime Minister Sanae Takaichi called the snap vote to secure backing for increased spending and potential tax cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Japanese tech shares led the recovery, with gains from SoftBank Group (1.9%), Advantest (0.8%), Disco Corp (2.5%), Fujikura (3.2%), and Lasertec (4.3%).",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "SoftBank Group",
+        "Advantest",
+        "Disco Corp",
+        "Fujikura",
+        "Lasertec"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japanese tech shares led the recovery, with gains from SoftBank Group (1.9%), Advantest (0.8%), Disco Corp (2.5%), Fujikura (3.2%), and Lasertec (4.3%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ruling coalition is widely expected to win decisively.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "her ruling coalition widely expected to win decisively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Both benchmark indexes are positioned to finish the week higher.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Both benchmark indexes are positioned to finish the week higher.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "snap vote",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prime Minister Sanae Takaichi called the snap vote to secure backing for increased spending and potential tax cuts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "increased spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prime Minister Sanae Takaichi called the snap vote to secure backing for increased spending and potential tax cuts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "potential tax cuts",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prime Minister Sanae Takaichi called the snap vote to secure backing for increased spending and potential tax cuts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "national election",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reversing earlier losses as investors focused on this weekend\u2019s national election.",
+        "source_sentence": null,
+        "confidence": "low",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5598,
+  "error_messages": []
+}

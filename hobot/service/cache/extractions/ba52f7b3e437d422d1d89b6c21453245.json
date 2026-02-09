@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5661",
+  "extracted_at": "2026-02-07T15:40:02.250030",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England interest rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England is expected to announce its decision on interest rates, with a consensus expectation to maintain the rate at 3.75%.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The FTSE 100 traded lower on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "FTSE 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The FTSE 100 traded lower on Thursday after hitting a record high in the previous session",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Vodafone shares fell nearly 5% following its service revenue report.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Vodafone"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vodafone led declines, falling almost 5% after reporting slower than expected service revenue growth",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell announced a $3.5 billion share buyback program.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Shell"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the group announced another $3.5 billion share buyback",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Anglo American reduced its copper production forecast for 2026.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Anglo American"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Anglo American slipped about 1% after cutting its 2026 copper production forecast",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BT shares increased by more than 1% after its trading update.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BT"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BT rose more than 1% after a trading update showed third quarter adjusted EBITDA in line with estimates",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors are exhibiting caution due to the upcoming Bank of England decision.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "investors turned cautious ahead of the Bank of England decision",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Bank of England is expected to maintain interest rates at 3.75%.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Bank of England decision expected to keep rates on hold at 3.75%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors turned cautious ahead of the Bank of England decision expected to keep rates on hold at 3.75%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England decision",
+      "target_type": "Theme",
+      "target_ref": "FTSE 100",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The FTSE 100 traded lower on Thursday... as investors turned cautious ahead of the Bank of England decision",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Vodafone service revenue growth",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vodafone led declines, falling almost 5% after reporting slower than expected service revenue growth",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Anglo American copper production forecast",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Anglo American slipped about 1% after cutting its 2026 copper production forecast due to weaker expected output from Chile",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10963,
+  "error_messages": []
+}

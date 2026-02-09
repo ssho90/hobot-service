@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5478",
+  "extracted_at": "2026-02-08T01:15:24.974272",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "US Crude Oil Inventory Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Weekly report on US crude oil inventory levels for the week ended January 30th, 2025.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US crude oil inventories decreased by 11.1 million barrels in the week ended January 30th, 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "Crude Oil Inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US crude oil inventories plunged by 11.1 million barrels in the week ended January 30th, 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The inventory draw significantly exceeded market expectations of a 0.7 million barrel build.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US Crude Oil Inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The decrease sharply contrasted with expectations for a 0.7 million barrel build",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 11.1 million barrel drop is the largest decline in inventories since August 2023.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US Crude Oil Inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "to mark the sharpest decline since August 2023",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Crude oil inventories had a 0.25 million-barrel draw in the week prior to January 30th.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US Crude Oil Inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "extending a 0.25 million-barrel draw in the prior week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US Crude Oil Inventories",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US crude oil inventories plunged by 11.1 million barrels",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Crude Oil Inventories",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The decrease sharply contrasted with expectations for a 0.7 million barrel build",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11528,
+  "error_messages": []
+}

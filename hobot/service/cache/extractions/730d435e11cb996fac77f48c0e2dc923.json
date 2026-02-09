@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5641",
+  "extracted_at": "2026-02-07T16:21:53.425376",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan Lower House Elections",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Elections for the lower house of parliament occurring this weekend.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan Q4 GDP Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of Japan's fourth-quarter Gross Domestic Product data.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "10-year Bond Auction",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Weekly auction of 10-year Japanese government bonds.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s 10-year government bond yield eased to around 2.23% on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan 10-year government bond"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s 10-year government bond yield eased to around 2.23% on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 10-year bond auction average yield was 2.249%, up from 2.095% at the previous sale.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "10-year bond auction"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "average yield of 2.249%, up sharply from 2.095% at the previous sale",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ruling LDP is expected to gain seats in the upcoming election.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Prime Minister Sanae Takaichi\u2019s ruling LDP is expected to gain seats",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Takaichi's expansionary fiscal policies are raising concerns over debt-funded spending and the fiscal outlook.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "her push for expansionary fiscal policies raising concerns over debt-funded spending and the country\u2019s fiscal outlook",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Japan's Q4 GDP is expected to rebound after a sharp contraction.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "expected to rebound after the prior quarter\u2019s sharp contraction",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The 10-year bond auction showed softer demand due to election jitters.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "this week\u2019s 10-year bond auction showed softer demand amid election jitters",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Lower house elections",
+      "target_type": "Theme",
+      "target_ref": "Japan 10-year government bond yield",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "remaining range-bound for two weeks now as investors positioned ahead of lower house elections this weekend",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Sanae Takaichi",
+      "target_type": "Theme",
+      "target_ref": "Japanese bonds and the yen",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japanese bonds and the yen have faced pressure since Takaichi took office",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Election jitters",
+      "target_type": "Theme",
+      "target_ref": "10-year bond auction demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "this week\u2019s 10-year bond auction showed softer demand amid election jitters",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13162,
+  "error_messages": []
+}

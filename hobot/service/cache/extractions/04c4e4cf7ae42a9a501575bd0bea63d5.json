@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5863",
+  "extracted_at": "2026-02-07T14:26:57.751602",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January labour data release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of Canadian employment figures showing a fall in the unemployment rate to 6.5%.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Iran talks in Oman",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Diplomatic discussions between the US and Iran affecting oil price volatility.",
+      "impact_level": "medium",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Friday TSX Market Close",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The S&P TSX Composite closed with a 1.5% gain on Friday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P TSX Composite climbed 1.5% to close above 32,471 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P TSX Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P TSX Composite climbed 1.5% to close above 32,471 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Canadian unemployment rate fell to 6.5% in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "unemployment rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "January labour data showing the unemployment rate unexpectedly falling to 6.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Open Text shares surged 9.7% following strong earnings.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Open Text"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Open Text surging 9.7% after strong earnings",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold prices surged, leading to gains in resource stocks between 2.7% and 3.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Agnico Eagle",
+        "Barrick",
+        "Wheaton Precious Metals",
+        "Franco Nevada",
+        "gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Agnico Eagle, Barrick, Wheaton Precious Metals, and Franco Nevada gaining between 2.7% and 3.7% as gold prices surged",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The unexpected fall in the unemployment rate eased near-term growth concerns.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "unemployment rate unexpectedly falling to 6.5%, which eased near term growth concerns",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A modest drop in net employment reduced expectations for a hawkish Bank of Canada stance.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "a modest drop in net employment tempered expectations of a sharply more hawkish Bank of Canada",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Strength in mining and technology stocks was sufficient to overcome general macroeconomic caution.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "strength in mining and technology stocks outweighed lingering macro caution",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "January labour data",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "January labour data showing the unemployment rate unexpectedly falling to 6.5%, which eased near term growth concerns",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "net employment",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a modest drop in net employment tempered expectations of a sharply more hawkish Bank of Canada",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "gold prices",
+      "target_type": "Theme",
+      "target_ref": "Resource stocks",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Resource stocks also outperformed... as gold prices surged",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Iran talks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "oil prices remained volatile ahead of US Iran talks in Oman",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12940,
+  "error_messages": []
+}

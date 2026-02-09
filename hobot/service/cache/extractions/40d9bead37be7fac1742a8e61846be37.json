@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5706",
+  "extracted_at": "2026-02-07T15:04:19.596626",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "US Initial Jobless Claims Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Weekly report on the number of individuals filing for unemployment insurance for the first time.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Continuing Claims Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Weekly report on the number of people receiving ongoing unemployment benefits.",
+      "impact_level": "low",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US initial jobless claims rose by 22,000 to 231,000 in the last week of January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US Initial Jobless Claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Initial jobless claims in the US rose by 22,000 from the previous week to 231,000 on the last week of January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Market expectations for initial jobless claims were 212,000.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Market expectations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "sharply above market expectations of 212,000",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Continuing claims rose by 25,000 to 1,844,000 in the previous week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Continuing claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "continuing claims rose by 25,000 to 1,844,000 in the previous week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The US labor market remains in a low firing and low hiring trend.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "the results maintained the view that the US labor market remains in a low firing and low hiring trend.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The rise in claims represents the largest magnitude of initial claims in nearly two months.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "to mark the largest magnitude of initial claims in nearly two months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There is evidence of softening in the labor market.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Despite the evidence of softening",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Initial Jobless Claims",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Initial jobless claims in the US rose by 22,000... to mark the largest magnitude of initial claims in nearly two months.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Continuing Claims",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "continuing claims rose by 25,000 to 1,844,000 in the previous week",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Softening evidence",
+      "target_type": "Theme",
+      "target_ref": "labor market trend",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Despite the evidence of softening, the results maintained the view that the US labor market remains in a low firing and low hiring trend.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11502,
+  "error_messages": []
+}

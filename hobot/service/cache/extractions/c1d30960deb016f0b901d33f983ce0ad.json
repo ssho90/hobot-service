@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5765",
+  "extracted_at": "2026-02-07T14:50:54.946130",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Philippines December 2025 Labor Force Survey Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of labor market data for December 2025, including unemployment and employment figures.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The unemployment rate in the Philippines was 4.4% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Philippines"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The unemployment rate in the Philippines remained at 4.4% in December 2025, unchanged from November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The unemployment rate in December 2024 was 3.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Philippines"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "it was higher than the 3.1% recorded in December 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The number of unemployed persons in the Philippines reached 2.26 million in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Philippines"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of unemployed persons rose slightly to 2.26 million from 2.25 million in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The services sector accounted for 62.4% of total employment.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "services sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "services continued to dominate employment at 62.4% of total workers",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The labor force participation rate was 64.4% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Philippines"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The labor force participation rate was 64.4%, up from 64.0% in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The labor market conditions in the Philippines are stable.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reflecting stable labor market conditions",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Philippines December 2025 Labor Force Survey Release",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The unemployment rate in the Philippines remained at 4.4% in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "services sector",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "services continued to dominate employment at 62.4% of total workers",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "unemployment rate",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting stable labor market conditions",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13487,
+  "error_messages": []
+}

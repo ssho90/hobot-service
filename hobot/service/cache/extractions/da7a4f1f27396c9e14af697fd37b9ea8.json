@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5859",
+  "extracted_at": "2026-02-07T05:40:38.439190",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "El Salvador's inflation rate decreased to 0.65% year-over-year in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "El Salvador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "El Salvador Inflation Rate Eases in January Consumer prices in El Salvador rose 0.65% year over year in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The inflation rate in December was 0.91%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "El Salvador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "down from 0.91% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Food prices in El Salvador increased by 0.89%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "El Salvador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The increase was led by food (and related items), which rose 0.89%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Transport prices in El Salvador fell by 3.27%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "El Salvador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "prices fell further for transport (-3.27% vs. -1.64%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation Rate",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "El Salvador Inflation Rate Eases in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Consumer prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Consumer prices in El Salvador rose 0.65% year over year in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Food prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The increase was led by food (and related items), which rose 0.89%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Transport prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "prices fell further for transport (-3.27% vs. -1.64%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4213,
+  "error_messages": []
+}

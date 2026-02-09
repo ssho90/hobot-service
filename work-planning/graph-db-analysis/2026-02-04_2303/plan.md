@@ -678,10 +678,17 @@ Phase A~E 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 * (리스크) Wikidata 연동은 네트워크/응답 품질 이슈 → 내부 KB를 1차로 두고, 외부 KB는 선택적으로
 
 ### Phase C: 정량 Impact & 자동 통계 엣지 (1주)
-* [ ] Event Window Impact 계산 및 `AFFECTS`에 observed_delta 저장
-* [ ] `AFFECTS` 동적 가중치(90/180일 슬라이딩 윈도우) 재계산 배치 + 이력화
-* [ ] Indicator↔Indicator CORRELATED/LEADS 관계 주기적 생성
-* [ ] Story(내러티브) 클러스터링
+* [x] Event Window Impact 계산 및 `AFFECTS`에 observed_delta 저장
+* [x] `AFFECTS` 동적 가중치(90/180일 슬라이딩 윈도우) 재계산 배치 + 이력화
+* [x] Indicator↔Indicator CORRELATED/LEADS 관계 주기적 생성
+* [x] Story(내러티브) 클러스터링
+
+#### 최신 실측 스냅샷 (2026-02-08)
+* `run_phase_c_weekly_jobs(as_of=2026-02-08)` 실행 완료
+* `AFFECTS observed_delta`: `3966/3966 (100.0%)`
+* `CORRELATED_WITH`: `31`, `LEADS`: `24`
+* `Story`: `25`개, `story_min_docs=3` (DoD 충족)
+* 최신 Document 시각: `2026-02-07T14:23:39Z`
 
 #### 목표
 * “뉴스/이벤트가 지표에 영향을 준다”를 **정량 근거(관측 변화)** 로 보강하고,
@@ -742,9 +749,16 @@ Phase A~E 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 * (리스크) 통계 엣지 과다 생성으로 UI/질의가 느려짐 → 임계치/Top-K 제한 + 주기 조절
 
 ### Phase D: GraphRAG + UI 완성도 (1주)
-* [ ] 질문 → 서브그래프 추출 API(백엔드)
-* [ ] UI에서 “근거(Evidence)”까지 보여주는 경로 탐색 UX
-* [ ] 일일 MacroState/AnalysisRun 생성 및 리포트 뷰
+* [x] 질문 → 서브그래프 추출 API(백엔드)
+* [x] UI에서 “근거(Evidence)”까지 보여주는 경로 탐색 UX
+* [x] 일일 MacroState/AnalysisRun 생성 및 리포트 뷰
+
+#### 최신 실측 스냅샷 (2026-02-08)
+* 회귀 기준 유지: 질문 성공 `10/10`, Evidence 포함 `10/10`, 문서링크 포함 `10/10`
+* 스모크 1회: `GraphRagAnswerRequest(..., model='gemini-3-flash-preview')` 성공
+* 컨텍스트: `nodes=92`, `links=517`, `events=25`, `documents=35`, `stories=12`, `evidences=40`
+* 저장: `MacroState(2026-02-08)=1`, `AnalysisRun(당일=2/누적=20)`
+* 품질/운영(최근 1일): `total_calls=35`, `success=32`, `error=3`, `api_error_rate=8.57%`, `reproducibility=84.62%`
 
 #### 목표
 * 사용자가 질문하면 “서브그래프 + Evidence”를 근거로 **재현 가능한 답변**을 제공한다.
@@ -868,4 +882,4 @@ Phase A~E 구성이 타당하며 “그래프 뼈대 → 추출 품질 → 정�
 * 전략결정 저장/미러링은 재실행 시 중복 없이(upsert) 동작
 ---
 **작성자**: Antigravity (AI Assistant)  
-**최종 업데이트**: 2026년 2월 6일
+**최종 업데이트**: 2026년 2월 8일

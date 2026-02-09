@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5834",
+  "extracted_at": "2026-02-07T14:32:24.357029",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Record US natural gas storage withdrawal",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "A record 360 Bcf withdrawal from US underground natural gas storage was reported for the previous week.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Arctic blast",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Extreme cold weather event in the previous week that drove high heating demand.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Production recovery",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Natural gas production in the Lower 48 states began to recover in early February.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US natural gas futures were priced around $3.50 per MMBtu on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US natural gas futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US natural gas futures were little changed around $3.50 per MMBtu on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Natural gas futures are down nearly 20% for the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US natural gas futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "are on track to end the week down nearly 20%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US underground natural gas storage saw a record 360 Bcf withdrawal last week.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US underground natural gas storage"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Traders assessed a record 360 Bcf withdrawal from US underground natural gas storage last week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Natural gas inventories are 27 Bcf below the five-year average.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "left inventories 27 Bcf below the five-year average",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Lower 48 natural gas output rose to approximately 106.6 bcfd in early February.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Lower 48 output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Lower 48 output rising to around 106.6 bcfd in early February from January levels",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Mid-February weather forecasts have shifted to significantly warmer temperatures.",
+      "claim_type": "prediction",
+      "author": "Weather forecasts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "mid-February weather forecasts have shifted markedly warmer particularly across the northeastern US",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Warmer weather is expected to decrease the demand for heating.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reducing expected heating demand following last week\u2019s Arctic blast",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Warmer weather forecasts",
+      "target_type": "Theme",
+      "target_ref": "Heating demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mid-February weather forecasts have shifted markedly warmer... reducing expected heating demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Arctic blast",
+      "target_type": "Theme",
+      "target_ref": "Storage withdrawal",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reducing expected heating demand following last week\u2019s Arctic blast",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Production recovery",
+      "target_type": "Theme",
+      "target_ref": "Natural gas prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, production has begun to recover... US natural gas futures were little changed",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Storage withdrawal",
+      "target_type": "Theme",
+      "target_ref": "Inventories",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "withdrawal from US underground natural gas storage last week, which left inventories 27 Bcf below the five-year average",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11548,
+  "error_messages": []
+}

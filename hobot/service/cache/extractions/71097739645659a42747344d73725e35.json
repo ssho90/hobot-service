@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5707",
+  "extracted_at": "2026-02-07T05:52:41.786194",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "ECB Holds Rates",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank left interest rates unchanged as expected.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The ECB left interest rates unchanged.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "interest rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the European Central Bank left interest rates unchanged as expected.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ECB expects inflation to stabilize at its 2% target over the medium term.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "ECB",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The ECB reiterated that inflation is expected to stabilize at its 2% target over the medium term",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Eurostat data showed headline inflation eased to 1.7% year on year in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Eurostat",
+        "headline inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Separately, Eurostat data showed headline inflation eased to 1.7% year on year in January, matching expectations and marking the lowest reading since September 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Core inflation slowed to 2.2%, the weakest since October 2021.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "core inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Core inflation also slowed to 2.2%, slightly below forecasts and the weakest since October 2021.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Some ECB officials cautioned that further euro appreciation could revive the case for additional rate cuts.",
+      "claim_type": "statement",
+      "author": "ECB officials",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "although some officials have cautioned that further euro appreciation could revive the case for additional rate cuts.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB Holds Rates",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Euro Steadies After ECB Holds Rates",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The ECB reiterated that inflation is expected to stabilize at its 2% target over the medium term",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the euro area economy remains resilient despite an uncertain outlook driven by global trade policy risks and ongoing geopolitical tensions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "euro appreciation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "although some officials have cautioned that further euro appreciation could revive the case for additional rate cuts.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "while noting that the euro area economy remains resilient despite an uncertain outlook driven by global trade policy risks and ongoing geopolitical tensions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6195,
+  "error_messages": []
+}

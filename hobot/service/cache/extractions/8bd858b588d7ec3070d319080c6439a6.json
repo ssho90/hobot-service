@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5850",
+  "extracted_at": "2026-02-07T05:35:06.302562",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Chile\u2019s annual inflation rate eased to 2.8% in January 2026, the lowest since February 2021, from 3.5% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Chile",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Chile\u2019s annual inflation rate eased to 2.8% in January 2026, the lowest since February 2021, from 3.5% in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, consumer prices rose 0.4% in January, reversing a 0.2% decline in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "consumer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose 0.4% in January, reversing a 0.2% decline in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Price pressures were strongest in restaurants and lodging (6.3%), followed by education (5.4%) and healthcare (4.9%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "restaurants",
+        "lodging",
+        "education",
+        "healthcare"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Price pressures were strongest in restaurants and lodging (6.3%), followed by education (5.4%) and healthcare (4.9%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Food prices rose 4.1%, while housing and utilities increased 4.0%.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "food prices",
+        "housing",
+        "utilities"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Food prices rose 4.1%, while housing and utilities increased 4.0%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Transport costs fell 1.1%, with deflation also recorded in clothing and footwear (-4.6%) and insurance and financial services (-1.9%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "transport costs",
+        "clothing",
+        "footwear",
+        "insurance",
+        "financial services"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Transport costs fell 1.1%, with deflation also recorded in clothing and footwear (-4.6%) and insurance and financial services (-1.9%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Chile Annual Inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Chile Annual Inflation Slows to 2021-Lows",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Chile Annual Inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Chile Annual Inflation Slows to 2021-Lows",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5203,
+  "error_messages": []
+}

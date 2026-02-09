@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5792",
+  "extracted_at": "2026-02-07T14:43:46.132692",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver market volatility on Friday",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver prices experienced extreme swings, rising 3% after a 10% plunge.",
+      "impact_level": "high",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Nomination of Kevin Warsh as Fed chair",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The nomination of Kevin Warsh to lead the US Federal Reserve.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Silver price peak on Jan. 29",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver reached a record high peak in late January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver rose more than 3% to above $73 per ounce on Friday after a 10% plunge.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver rose more than 3% to above $73 per ounce on Friday after plunging nearly 10% earlier in the session",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Silver volatility reached levels not seen since 1980.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "volatility surging to levels last seen in 1980",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Silver remains approximately 40% below its January 29 peak.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "remains about 40% below its Jan. 29 peak",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Kevin Warsh has been nominated as the next Fed chair.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Kevin Warsh",
+        "Federal Reserve"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "nomination of Kevin Warsh as the next Fed chair",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Silver's extreme price swings are caused by its small market size and thin liquidity.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reflecting silver\u2019s smaller market size, thinner liquidity, and heavy speculative positioning",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Speculative buying from Chinese traders added unsustainable froth to the silver rally.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Speculative buying, particularly from Chinese traders, added froth to the rally",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Kevin Warsh is considered a hawkish choice for Federal Reserve chair.",
+      "claim_type": "opinion",
+      "author": "Market participants",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "widely seen as the more hawkish choice",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Concerns over Fed independence boosted demand for safe-haven assets.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "concerns over the US Federal Reserve\u2019s independence that boosted safe-haven demand",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh nomination",
+      "target_type": "Theme",
+      "target_ref": "US Dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a sharp rebound in the dollar following the nomination of Kevin Warsh",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Dollar rebound",
+      "target_type": "Theme",
+      "target_ref": "Precious metals",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pressure on precious metals intensified further after a sharp rebound in the dollar",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical risks",
+      "target_type": "Theme",
+      "target_ref": "Safe-haven demand",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "heightened geopolitical risks... boosted safe-haven demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Market size and liquidity",
+      "target_type": "Theme",
+      "target_ref": "Silver volatility",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Price swings in the metal have been far more extreme than in gold, reflecting silver\u2019s smaller market size, thinner liquidity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10362,
+  "error_messages": []
+}

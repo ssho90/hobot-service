@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5809",
+  "extracted_at": "2026-02-07T05:37:45.205405",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "France\u2019s trade deficit widened to \u20ac4.8 billion in December 2025 from a revised \u20ac4.0 billion in November.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "France",
+        "trade deficit"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "France\u2019s trade deficit widened to \u20ac4.8 billion in December 2025 from a revised \u20ac4.0 billion in November.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports rose 3.0% month-on-month to \u20ac57.9 billion, led by transport equipment (+10.3%), mechanical and electronic equipment (+2.1%), and refined petroleum products (+8.0%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Imports",
+        "transport equipment",
+        "mechanical and electronic equipment",
+        "refined petroleum products"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports rose 3.0% month-on-month to \u20ac57.9 billion, led by transport equipment (+10.3%), mechanical and electronic equipment (+2.1%), and refined petroleum products (+8.0%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports grew 1.8% to \u20ac53.1 billion, supported by mechanical and electronic equipment (+6.3%), agri-food products (+2.4%), and natural hydrocarbons (+11.1%), partially offset by declines in refined petroleum products (-10.2%), transport equipment (-2.2%), and agricultural products (-2.5%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Exports",
+        "mechanical and electronic equipment",
+        "agri-food products",
+        "natural hydrocarbons",
+        "refined petroleum products",
+        "transport equipment",
+        "agricultural products"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports grew 1.8% to \u20ac53.1 billion, supported by mechanical and electronic equipment (+6.3%), agri-food products (+2.4%), and natural hydrocarbons (+11.1%), partially offset by declines in refined petroleum products (-10.2%), transport equipment (-2.2%), and agricultural products (-2.5%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the full year, the trade gap narrowed slightly to \u20ac69.6 billion from \u20ac79.0 billion in 2024.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "trade gap"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the full year, the trade gap narrowed slightly to \u20ac69.6 billion from \u20ac79.0 billion in 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "trade deficit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "France\u2019s trade deficit widened to \u20ac4.8 billion in December 2025 from a revised \u20ac4.0 billion in November.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Imports rose 3.0% month-on-month to \u20ac57.9 billion",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports grew 1.8% to \u20ac53.1 billion",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5677,
+  "error_messages": []
+}

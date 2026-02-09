@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5716",
+  "extracted_at": "2026-02-07T15:02:34.841728",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Challenger Job Cuts Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Report showing US companies announced 108.4K job cuts last month.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Initial Jobless Claims Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Weekly report showing jobless claims rose to 231K.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ADP Employment Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Private-sector job growth report which fell short of expectations.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor",
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank left interest rates unchanged.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England left interest rates unchanged.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The dollar index traded at 97.6 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "dollar index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The dollar index pared early gains to trade little changed at 97.6 on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US companies announced 108.4K job cuts last month, the highest January total since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Challenger report",
+        "US companies"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Challenger report showed US companies announced 108.4K job cuts last month, the highest January total since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial jobless claims rose to 231K, exceeding the forecast of 212K.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "initial jobless claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "initial jobless claims rose to 231K, the highest in two months and well above forecasts of 212K.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Both the ECB and the Bank of England kept interest rates unchanged.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, both the ECB and the Bank of England left interest rates unchanged, as expected.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Concerns over the US economy, labor market, and AI valuations weighed on market sentiment.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "renewed concerns over the health of the US economy, the labour market, and elevated AI valuations weighed on sentiment.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are pricing in a first Federal Reserve rate cut in June and a second in September.",
+      "claim_type": "prediction",
+      "author": "markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "markets still pricing in a first reduction in June and a second potentially in September.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Traders interpreted the Bank of England's tone as dovish.",
+      "claim_type": "opinion",
+      "author": "traders",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "traders interpreted the BoE\u2019s tone as more dovish.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "labor data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The string of weaker labour data reinforced bets on Federal Reserve rate cuts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BoE tone",
+      "target_type": "Theme",
+      "target_ref": "British pound",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The dollar rose sharply against the British pound, as traders interpreted the BoE\u2019s tone as more dovish.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI valuations",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "elevated AI valuations weighed on sentiment.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10929,
+  "error_messages": []
+}

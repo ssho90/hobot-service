@@ -1,0 +1,250 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5614",
+  "extracted_at": "2026-02-07T16:27:32.893819",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Gold Price Rally",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Gold climbed to around $5,000 per ounce, extending gains for a third straight session.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Fed Chair Nomination",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "President Trump nominated Kevin Warsh as the next Federal Reserve chair.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ADP Employment Report Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of private payroll growth data which came in weaker than expected.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ISM Services PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of services sector activity data showing an upside surprise.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran Nuclear Talks Agreement",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Agreement to hold nuclear talks in Oman on Friday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Gold reached approximately $5,000 per ounce on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gold climbed to around $5,000 per ounce on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "President Trump nominated Kevin Warsh as the next Fed chair.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Donald Trump",
+        "Kevin Warsh",
+        "Federal Reserve"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "President Trump nominated Kevin Warsh as the next Fed chair",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ADP employment report showed weaker-than-expected private payroll growth.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "ADP",
+        "private payrolls"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ADP employment report, which showed weaker-than-expected private payroll growth",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold posted its largest intraday rise since 2008 earlier in the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "after posting its largest intraday rise since 2008 earlier this week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The gold price move was driven by dip buying following a historic pullback.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The move was driven by dip buying following a historic pullback from record highs late last week.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets placed greater weight on private indicators due to delays in US government data.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "with key US government data delayed, markets placed greater weight on private indicators to gauge the economy",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The upside surprise in the ISM services PMI indicates resilience in the services sector.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "an upside surprise in the ISM services PMI pointed to resilience in the services sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Washington has not ruled out military strikes against Iran.",
+      "claim_type": "prediction",
+      "author": "Washington",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Washington has not ruled out strikes over Iran\u2019s treatment of demonstrators and its nuclear activities",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ADP employment report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ADP employment report, which showed weaker-than-expected private payroll growth",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ISM services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "an upside surprise in the ISM services PMI pointed to resilience in the services sector",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US\u2013Iran tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US\u2013Iran tensions lingered despite an agreement to hold nuclear talks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh nomination",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "to gauge the economy and the Federal Reserve\u2019s outlook, particularly after President Trump nominated Kevin Warsh",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14972,
+  "error_messages": []
+}

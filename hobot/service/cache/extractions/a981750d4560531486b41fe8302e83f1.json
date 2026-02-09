@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5735",
+  "extracted_at": "2026-02-07T14:57:22.205086",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Brazil January 2026 Trade Balance Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Brazil's trade surplus, import, and export data for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Brazil recorded a trade surplus of USD 4.34 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Brazil posted a USD 4.34 billion trade surplus in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The trade surplus increased by 85.8% compared to the previous year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "up 85.8% year on year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports decreased by 9.8% to USD 20.8 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Purchases abroad fell 9.8% to USD 20.8 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Extractive industry imports saw a 30.2% decline.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "extractive industry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "led by a 30.2% plunge in extractive industry imports",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports to China increased by 17.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "sales to China jumped 17.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The significant increase in the trade surplus was primarily caused by the sharp decline in imports.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "largely driven by a sharp drop in imports",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Import Drop",
+      "target_type": "Theme",
+      "target_ref": "Trade Surplus",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "largely driven by a sharp drop in imports",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Extractive Industry Imports",
+      "target_type": "Theme",
+      "target_ref": "Total Imports",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Purchases abroad fell 9.8% to USD 20.8 billion, led by a 30.2% plunge in extractive industry imports",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "China",
+      "target_type": "Theme",
+      "target_ref": "Export Growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "sales to China jumped 17.4%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11308,
+  "error_messages": []
+}

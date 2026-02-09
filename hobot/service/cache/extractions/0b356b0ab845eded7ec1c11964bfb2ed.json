@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5833",
+  "extracted_at": "2026-02-07T14:32:12.413281",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bulgaria Retail Sales Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of retail sales data for Bulgaria for the month of December 2025, showing significant growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Retail sales in Bulgaria rose by 7.7% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bulgaria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Retail sales in Bulgaria rose by 7.7% year-on-year in December 2025, following a 3.1% gain in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Sales in household appliances, furniture, and other household goods grew by 29.3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "household appliances",
+        "furniture"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "household appliances, furniture, and other household goods (29.3% vs 15.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail activity in food, beverages, and tobacco declined by 4.6% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "food",
+        "beverages",
+        "tobacco"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, activity declined further in food, beverages, and tobacco (-4.6% vs -2%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, retail sales grew by 1.6% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bulgaria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, retail sales grew by 1.6% in December, following an upwardly revised 0.2% growth in the preceding period.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The December 2025 retail sales growth marked the sharpest rise in retail activity in eleven months.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "This marked the sharpest rise in retail activity in eleven months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Retail sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Retail sales in Bulgaria rose by 7.7% year-on-year in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Non-food products",
+      "target_type": "Theme",
+      "target_ref": "Retail sales",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "sales increased sharply in automotive fuel and lubricants (11.8% vs 10.3%) and non-food products excluding fuel (15.7% vs 5.9% in November)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10447,
+  "error_messages": []
+}

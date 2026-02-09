@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5558",
+  "extracted_at": "2026-02-08T00:57:36.480223",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "MBA Mortgage Applications Survey Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Weekly report by the Mortgage Bankers Association for the week ended January 30, detailing mortgage rates and application volumes.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Winter Storm Fern",
+      "event_type": "other",
+      "event_date": null,
+      "description": "A significant winter storm that impacted much of the United States, affecting economic activity and homebuying.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The average contract rate on 30-year fixed-rate mortgages fell to 6.21% for the week ended January 30.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mortgage Bankers Association",
+        "30-year fixed-rate mortgages"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The average contract rate on 30-year fixed-rate mortgages for conforming loans of $806,500 or less in the US fell to 6.21% in the week ended January 30",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mortgage applications declined by 8.9% in the week ended January 30.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mortgage Bankers Association"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "mortgage applications declined 8.9%, extending an 8.5% drop in the previous week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Refinancing applications decreased by 4.7% and the purchase index fell by 14.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Refinancing applications",
+        "purchase index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Refinancing applications went down 4.7%, after a 15.7% drop and the purchase index tumbled 14.4% after decreasing 0.4%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Winter Storm Fern likely hampered homebuying activity because much of the country was snowed in.",
+      "claim_type": "analysis",
+      "author": "Joel Kan",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Winter Storm Fern likely had an impact as much of the country was snowed in, hampering homebuying activity.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The annual increase in purchase applications reached its weakest point since April 2025.",
+      "claim_type": "analysis",
+      "author": "Joel Kan",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The annual increase in purchase applications was the weakest since April 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Winter Storm Fern",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Winter Storm Fern likely had an impact as much of the country was snowed in, hampering homebuying activity.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "30-year fixed-rate mortgages",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The average contract rate on 30-year fixed-rate mortgages for conforming loans of $806,500 or less in the US fell to 6.21%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Mortgage applications",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mortgage applications declined 8.9%, extending an 8.5% drop in the previous week, with the winter storm taking a toll.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12124,
+  "error_messages": []
+}

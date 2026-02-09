@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5727",
+  "extracted_at": "2026-02-07T05:49:58.848725",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Tunisia's inflation rate edged down to 4.8% in January 2025, the lowest since March 2021.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Tunisia",
+        "inflation rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Tunisia's inflation rate edged down to 4.8% in January 2025, the lowest since March 2021, from 4.9% in each of the previous three months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "inflation",
+        "food & non-alcoholic beverages",
+        "restaurants & hotels",
+        "miscellaneous goods & services",
+        "health",
+        "transportation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, the CPI rose by 0.3% in January, after a 0.2% increase in the prior month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "CPI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, the CPI rose by 0.3% in January, after a 0.2% increase in the prior month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "inflation rate",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Tunisia's inflation rate edged down to 4.8% in January 2025, the lowest since March 2021, from 4.9% in each of the previous three months.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "food & non-alcoholic beverages",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "restaurants & hotels",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "miscellaneous goods & services",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "health",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "transportation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The slowdown in inflation was mainly due to softer increases in prices of food & non-alcoholic beverages (5.9% vs 6.1% in December); restaurants & hotels (5.5% vs 6%); miscellaneous goods & services (5.6% vs 5.8%); health (3% vs 3.7%) and transportation (2.6% vs 2.8%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "CPI",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On a monthly basis, the CPI rose by 0.3% in January, after a 0.2% increase in the prior month.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7979,
+  "error_messages": []
+}

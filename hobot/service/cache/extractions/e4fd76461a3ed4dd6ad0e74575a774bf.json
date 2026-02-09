@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5720",
+  "extracted_at": "2026-02-07T05:50:33.470744",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "US energy firms withdrew 360 billion cubic feet of natural gas from storage in the week ended January 30, 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US energy firms",
+        "natural gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US energy firms withdrew 360 billion cubic feet of natural gas from storage in the week ended January 30, 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The withdrawal of 360 bcf of natural gas was the biggest on record.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "natural gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the biggest on record",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The natural gas withdrawal was slightly less than expected.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "natural gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "but slightly less than expected",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The withdrawal of 360 bcf compares with a draw of 195 bcf during the same week a year ago.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "natural gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "That figure compares with a draw of 195 bcf during the same week a year ago",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The withdrawal of 360 bcf compares with a five-year average decline of 190 bcf for this time of year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "natural gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "and a five-year average decline of 190 bcf for this time of year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Stockpiles fell to 2.463 trillion cubic feet.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "stockpiles"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Stockpiles fell to 2.463 trillion cubic feet",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Stockpiles are 1.7% above the same week a year ago.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "stockpiles"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "1.7% above the same week a year ago",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Stockpiles are 1.1% below the five-year average for the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "stockpiles"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "1.1% below the five-year average for the week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "In the prior week ended January 23, utilities withdrew 242 bcf of gas from storage.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "utilities",
+        "gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In the prior week ended January 23, utilities withdrew 242 bcf of gas from storage.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Arctic freeze",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as an Arctic freeze boosted heating demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6147,
+  "error_messages": []
+}

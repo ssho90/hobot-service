@@ -4,7 +4,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import ClassVar, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 import logging
 
@@ -37,9 +37,22 @@ class RebalancingConfig(BaseModel):
 
 class LLMConfig(BaseModel):
     """LLM 설정"""
-    model: str = Field(..., description="모델명 (gemini-2.5-pro 등)")
+    ALLOWED_MODELS: ClassVar[set[str]] = {"gemini-3-flash-preview", "gemini-3-pro-preview"}
+
+    model: str = Field(..., description="모델명 (gemini-3-flash-preview | gemini-3-pro-preview)")
     temperature: float = Field(..., ge=0, le=2, description="Temperature (0-2)")
     max_tokens: int = Field(..., ge=1, le=100000, description="최대 토큰 수")
+
+    @field_validator("model")
+    @classmethod
+    def validate_model(cls, v: str) -> str:
+        model = (v or "").strip()
+        if model not in cls.ALLOWED_MODELS:
+            raise ValueError(
+                "지원하지 않는 모델입니다. "
+                "허용값: gemini-3-flash-preview, gemini-3-pro-preview"
+            )
+        return model
 
 
 class SchedulesConfig(BaseModel):
@@ -217,4 +230,3 @@ def reload_config() -> MacroTradingConfig:
         MacroTradingConfig: 새로 로드된 설정 객체
     """
     return get_config_loader().reload()
-

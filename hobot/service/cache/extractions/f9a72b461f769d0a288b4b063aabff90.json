@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5808",
+  "extracted_at": "2026-02-07T05:42:19.321804",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Austria's wholesale prices increased by 0.4% year-on-year in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Wholesale prices in Austria increased by 0.4% year-on-year in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The wholesale price increase of 0.4% in January 2026 accelerated from a 0.1% gain in the previous month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "accelerating from a 0.1% gain in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Significant price increases were seen for coffee, tea, cocoa and spices (+14.7%), watches and jewellery (+13.4%), as well as waste and scrap (+13.3%).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "coffee",
+        "tea",
+        "cocoa",
+        "spices",
+        "watches",
+        "jewellery",
+        "waste",
+        "scrap"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Significant price increases were seen for coffee, tea, cocoa and spices (+14.7%), watches and jewellery (+13.4%), as well as waste and scrap (+13.3%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Wholesale prices fell sharply for other liquid and gaseous fuels and related products (-13.2%), grain, seeds and animal feeds (-13.1%), motor spirit (-9.0%), plastics and rubber in primary forms (-8.9%) as well as hides and leather (-5.0%).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "fuels",
+        "grain",
+        "seeds",
+        "animal feeds",
+        "motor spirit",
+        "plastics",
+        "rubber",
+        "hides",
+        "leather"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the other hand, wholesale prices fell sharply for other liquid and gaseous fuels and related products (-13.2%), grain, seeds and animal feeds (-13.1%), motor spirit (-9.0%), plastics and rubber in primary forms (-8.9%) as well as hides and leather (-5.0%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, wholesale prices rose by 0.7% in January, recovering from a 0.7% decline in the preceding period.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "wholesale prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, wholesale prices rose by 0.7% in January, recovering from a 0.7% decline in the preceding period.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Wholesale prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Wholesale prices in Austria increased by 0.4% year-on-year in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4595,
+  "error_messages": []
+}

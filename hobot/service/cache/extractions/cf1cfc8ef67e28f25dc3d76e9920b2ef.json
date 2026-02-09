@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5859",
+  "extracted_at": "2026-02-07T14:26:14.168996",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "El Salvador January 2026 Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of consumer price index data for El Salvador for the month of January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Consumer prices in El Salvador rose 0.65% year over year in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "El Salvador"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Consumer prices in El Salvador rose 0.65% year over year in January 2026, down from 0.91% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Food prices in El Salvador rose by 0.89% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Food sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The increase was led by food (and related items), which rose 0.89% (vs. 1.29% in December).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Transport prices fell by 3.27% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Transport sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "prices fell further for transport (-3.27% vs. -1.64%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Housing and utilities prices increased to 1.16%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Housing and utilities"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "housing and utilities picked up to 1.16% (vs. 0.96%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "El Salvador is experiencing a four-month disinflation trend.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "extending the disinflation trend into a fourth consecutive month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Food (and related items)",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The increase was led by food (and related items), which rose 0.89%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Transport",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "prices fell further for transport (-3.27% vs. -1.64%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Housing and utilities",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Additional upward pressure came from... housing and utilities picked up to 1.16%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10240,
+  "error_messages": []
+}

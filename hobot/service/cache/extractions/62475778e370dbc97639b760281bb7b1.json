@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5690",
+  "extracted_at": "2026-02-07T15:07:48.612814",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Moldova Key Policy Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The National Bank of Moldova maintained its benchmark interest rate at 5%.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "December 2025 Monetary Policy Action",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "A 100 bps reduction in the benchmark interest rate occurred in December.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The National Bank of Moldova left its benchmark interest rate unchanged at 5% on February 5, 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "National Bank of Moldova"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The National Bank of Moldova left its benchmark interest rate unchanged at 5% on February 5, 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation in Moldova reached a one-year low of 6.8% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Moldova"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Inflation eased to a one-year low of 6.8% in December 2025, down from 7% in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The central bank reduced reserve requirements in Moldovan lei and freely convertible currency.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "National Bank of Moldova"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the central bank reduced reserve requirements in both Moldovan lei and freely convertible currency to meet the banking system\u2019s liquidity needs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is expected to return to the target range in the first quarter of 2026.",
+      "claim_type": "prediction",
+      "author": "National Bank of Moldova",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "is expected to return to the target range in the first quarter, remaining close to target thereafter",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Reducing reserve requirements will increase lending capacity and support aggregate demand.",
+      "claim_type": "analysis",
+      "author": "National Bank of Moldova",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "This measure is expected to increase lending capacity to the real and public sectors, supporting aggregate demand by encouraging consumption and investment",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "National Bank of Moldova",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "aims to maintain medium-term inflation within \u00b11.5 percentage points of the 5% target",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Reserve requirements reduction",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reduced reserve requirements in both Moldovan lei and freely convertible currency to meet the banking system\u2019s liquidity needs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Reserve requirements reduction",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supporting aggregate demand by encouraging consumption and investment, and helping balance the national economy",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10470,
+  "error_messages": []
+}

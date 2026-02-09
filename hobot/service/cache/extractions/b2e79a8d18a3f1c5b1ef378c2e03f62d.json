@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5706",
+  "extracted_at": "2026-02-07T05:52:35.121749",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Initial jobless claims in the US rose by 22,000 to 231,000 on the last week of January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US",
+        "Initial Jobless Claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Initial jobless claims in the US rose by 22,000 from the previous week to 231,000 on the last week of January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The increase in initial jobless claims was above market expectations of 212,000.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Initial Jobless Claims",
+        "market expectations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "sharply above market expectations of 212,000",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Continuing claims rose by 25,000 to 1,844,000 in the previous week.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Continuing Claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Consistently, continuing claims rose by 25,000 to 1,844,000 in the previous week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The results maintained the view that the US labor market remains in a low firing and low hiring trend.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Despite the evidence of softening, the results maintained the view that the US labor market remains in a low firing and low hiring trend.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Initial Jobless Claims",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Initial jobless claims in the US rose by 22,000 from the previous week to 231,000 on the last week of January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Continuing Claims",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Consistently, continuing claims rose by 25,000 to 1,844,000 in the previous week",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US labor market",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the results maintained the view that the US labor market remains in a low firing and low hiring trend.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4261,
+  "error_messages": []
+}

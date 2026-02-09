@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5555",
+  "extracted_at": "2026-02-08T00:58:10.868587",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global UK Services PMI Release (January)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The UK Services PMI was released for January, showing a rise to 54 from 51.4 in December.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global UK Services PMI rose to 54 in January from 51.4 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "UK Services PMI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global UK Services PMI rose to 54 in January from 51.4 in December, below preliminary estimates of 54.3 but still the highest since August 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Staffing levels in the UK services sector have fallen for four consecutive months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "staffing levels falling for a fourth straight month and marking the longest period of job losses in 16 years",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input costs for service firms rose due to higher payroll, technology, and raw material costs.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Input costs"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Input costs rose sharply, driven mainly by higher payroll, technology and raw material costs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "New business growth was supported by higher client spending and investment in new technologies.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "New business grew at a solid pace and reached a 3-month high, supported by higher client spending, digital marketing budgets and investment in new technologies",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Job losses are a result of firms focusing on cost control and automation.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "staffing levels falling... as firms focused on cost control and automation",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business optimism has reached its highest level since October 2024 despite cost concerns.",
+      "claim_type": "opinion",
+      "author": "S&P Global",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Business optimism improved to the highest since October 2024, although concerns about costs and long-term growth persisted",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "UK Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The S&P Global UK Services PMI rose to 54 in January... still the highest since August 2025.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Input costs rose sharply... prompting the steepest increase in prices charged since August 2025.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Cost control and automation",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "staffing levels falling for a fourth straight month... as firms focused on cost control and automation.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Household demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "subdued household demand and weak construction activity weighed on some sectors.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14383,
+  "error_messages": []
+}

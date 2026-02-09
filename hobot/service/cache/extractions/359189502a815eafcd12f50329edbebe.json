@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5854",
+  "extracted_at": "2026-02-07T14:28:12.638954",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Soybean futures rally",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Soybean futures in the US reached a 2-month high of $11.15 per bushel in February.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Trump's announcement on Chinese soybean purchases",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "President Trump stated China would increase purchases of US soybeans to 20 million tonnes this year and 25 million tonnes next year.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Brazilian harvest",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "A strong harvest in Brazil, the world's top producer, affecting global supply and premiums.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Soybean futures in the US reached $11.15 per bushel in February, the highest in two months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Soybean futures",
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Soybean futures in the US extended their rally to $11.15 per bushel in February, the highest in two months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Donald Trump stated China would lift purchases of domestic soybeans to 20 million tonnes this year and 25 million tonnes next year.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Donald Trump",
+        "China",
+        "soybeans"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "President Donald Trump stated that China would lift purchases of domestic soybeans to 20 million tonnes this year and 25 million tonnes in the upcoming year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Brazil is the world's top producer of soybeans.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Brazil, the world's top producer",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US premiums over CBOT contracts are nearly double those from Brazilian benchmarks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "CBOT",
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US premiums over CBOT contracts to hover nearly double those from Brazilian benchmarks.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The purchase measures are an attempt by Trump to gain support from farmers.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The measures signal the attempt by Trump to engage support for farmers after China shunned US grain following the trade war between both countries.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Chinese consumers might pay premiums on 8 million tonnes of orders compared to cheaper South American alternatives.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The pledges could drive Chinese consumers to pay premiums on 8 million tonnes of the orders when compared to cheaper South American alternatives",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Chinese interest in US shipments",
+      "target_type": "Theme",
+      "target_ref": "Soybean prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Soybean futures in the US extended their rally to $11.15 per bushel in February... on renewed interest in US soybean shipments from China.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-China trade war",
+      "target_type": "Theme",
+      "target_ref": "US grain demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "China shunned US grain following the trade war between both countries.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Brazilian harvest",
+      "target_type": "Theme",
+      "target_ref": "US premiums",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ample supply from Brazil, the world's top producer, drove US premiums over CBOT contracts to hover nearly double those from Brazilian benchmarks.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10409,
+  "error_messages": []
+}

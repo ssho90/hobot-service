@@ -1,0 +1,223 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5888",
+  "extracted_at": "2026-02-09T01:07:58.507349",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P/ASX 200 Monday Rally",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Australian stock index climbed 1.6% to 8,847 on Monday, rebounding from previous losses.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wall Street Friday Gains",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Significant gains in US stocks last Friday influenced the Australian market opening.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Australian Corporate Earnings Week",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "A busy week of corporate earnings reports in Australia.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "CAR Group H1 Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "CAR Group reported higher H1 net profit and reaffirmed its FY26 outlook.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P/ASX 200 climbed 1.6% to 8,847 on Monday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P/ASX 200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P/ASX 200 climbed 1.6% to 8,847 on Monday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "CAR Group surged 11.5% after posting higher H1 net profit.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "CAR Group"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "CAR Group surged 11.5% after posting higher H1 net profit and reaffirming its FY26 outlook.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mining giants BHP, Rio Tinto, and Fortescue gained between 1.9% and 2.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BHP",
+        "Rio Tinto",
+        "Fortescue"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mining giants BHP, Rio Tinto, and Fortescue gained between 1.9% and 2.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Support for Australia\u2019s center-right opposition has sunk to a new low.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Liberal leader Sussan Ley",
+        "Coalition"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "support for Australia\u2019s center-right opposition has sunk to a new low, intensifying pressure on Liberal leader Sussan Ley",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "US stocks gathered momentum because easing concerns over AI-driven disruption lifted technology shares.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "US stocks gathered momentum after easing concerns over AI-driven disruption lifted technology shares.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Materials stocks were supported by firm underlying commodity prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Materials stocks also supported the index amid firm underlying commodity prices.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Coalition\u2019s slide reflects growing disunity between the Liberals and Nationals.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The Coalition\u2019s slide reflects growing disunity between the Liberals and Nationals over how to regain ground in major cities",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street",
+      "target_type": "Theme",
+      "target_ref": "S&P/ASX 200",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "tracking significant gains from Wall Street last Friday.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI-driven disruption concerns",
+      "target_type": "Theme",
+      "target_ref": "Technology shares",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "easing concerns over AI-driven disruption lifted technology shares.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Commodity prices",
+      "target_type": "Theme",
+      "target_ref": "Materials stocks",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Materials stocks also supported the index amid firm underlying commodity prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Disunity",
+      "target_type": "Theme",
+      "target_ref": "Coalition\u2019s slide",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Coalition\u2019s slide reflects growing disunity between the Liberals and Nationals",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15499,
+  "error_messages": []
+}

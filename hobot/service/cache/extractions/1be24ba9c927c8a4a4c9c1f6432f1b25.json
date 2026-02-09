@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5713",
+  "extracted_at": "2026-02-07T15:02:00.438512",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank left borrowing costs unchanged.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England left borrowing costs unchanged.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "DAX 40 Market Decline",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Frankfurt's DAX 40 fell more than 1% to below 24,400.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB Press Briefing",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "President Lagarde commented on the eurozone inflation outlook.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The ECB and Bank of England left borrowing costs unchanged.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB",
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "latest ECB and Bank of England decisions, which left borrowing costs unchanged",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "DAX 40 fell more than 1% to below 24,400.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX 40"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "falling more than 1% to below 24,400",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Rheinmetall shares slumped as much as 8%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall slumped as much as 8%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "SAP and Infineon Technologies saw rises of 1.7% and 1.6% respectively.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "SAP",
+        "Infineon Technologies"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "SAP and Infineon Technologies saw more modest rises of 1.7% and 1.6%, respectively",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Aggressive AI spending may undermine profitability.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "renewed fears that aggressive AI spending may undermine profitability",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Eurozone inflation outlook remains in a good place.",
+      "claim_type": "opinion",
+      "author": "Christine Lagarde",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "President Lagarde said the central bank and eurozone inflation outlook remain in a \u201cgood place\u201d",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation could fluctuate in the months ahead amid greater uncertainty.",
+      "claim_type": "prediction",
+      "author": "Christine Lagarde",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "cautioned that inflation could fluctuate in the months ahead amid greater uncertainty",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Geopolitical tensions are showing signs of easing.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "amid signs of easing geopolitical tensions",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "AI spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "aggressive AI spending may undermine profitability",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ECB and Bank of England decisions, which left borrowing costs unchanged",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Hensoldt (-1%) and Renk (-0.2%) also fell amid signs of easing geopolitical tensions",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation outlook",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "eurozone inflation outlook remain in a \u201cgood place,\u201d but cautioned that inflation could fluctuate",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13533,
+  "error_messages": []
+}

@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5768",
+  "extracted_at": "2026-02-07T05:47:04.761155",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Gold fell to around $4,750 per ounce on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gold fell to around $4,750 per ounce on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US job cuts hit 108.4K in January, the highest for the month since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US job cuts hit 108.4K in January, the highest for the month since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial claims rose to 231K.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "initial claims rose to 231K",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ADP payrolls missed forecasts.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ADP payrolls missed forecasts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The string of weaker labour data reinforced expectations for Federal Reserve rate cuts later this year, with markets eyeing a first move in June.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The string of weaker labour data reinforced expectations for Federal Reserve rate cuts later this year, with markets eyeing a first move in June.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "geopolitical risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "heightened geopolitical risks, concerns over the Federal Reserve\u2019s independence, and speculative buying in China.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Federal Reserve rate cuts",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The string of weaker labour data reinforced expectations for Federal Reserve rate cuts later this year, with markets eyeing a first move in June.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "weaker labour data",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The string of weaker labour data reinforced expectations for Federal Reserve rate cuts later this year, with markets eyeing a first move in June.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4043,
+  "error_messages": []
+}

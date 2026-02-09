@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5645",
+  "extracted_at": "2026-02-07T15:45:09.584392",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P/NZX 50 Thursday Close",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The S&P/NZX 50 fell 0.2% to close at 13,444 on Thursday, halting gains from the previous session.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wall Street Tech and AI-linked Stock Pressure",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Major US tech and AI-linked stocks came under pressure, influencing global investor sentiment.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P/NZX 50 fell 0.2% to close at 13,444 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P/NZX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P/NZX 50 fell 0.2% to close at 13,444 on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Non-energy minerals declined by 3.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Non-energy minerals"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Non-energy minerals led the retreat, down 3.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Santana Minerals shares fell 6.8%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Santana Minerals"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "notable declines in Santana Minerals (-6.8%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The NZX 50 is 0.16% higher so far this week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "NZX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "NZX 50 remains 0.16% higher so far this week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Pressure on US tech and AI-linked stocks dampened investor sentiment in New Zealand.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The decline followed Wall Street, where major US tech and AI-linked stocks came under pressure, dampening investor sentiment.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are monitoring whether the weekly gains will persist through Friday.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "with markets tracking if gains last until Friday.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street tech and AI-linked stocks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The decline followed Wall Street, where major US tech and AI-linked stocks came under pressure, dampening investor sentiment.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Non-energy minerals",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Non-energy minerals led the retreat, down 3.2% with notable declines in Santana Minerals (-6.8%), Fletcher Building (-2.4%), Manuka Resources (-2.2%), and Chatham Rock Phosphate (-1.6%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "S&P/NZX 50",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The S&P/NZX 50 fell 0.2% to close at 13,444 on Thursday, halting gains from the previous session",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11167,
+  "error_messages": []
+}

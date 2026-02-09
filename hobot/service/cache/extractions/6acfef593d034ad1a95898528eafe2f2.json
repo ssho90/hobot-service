@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5666",
+  "extracted_at": "2026-02-07T15:40:54.981883",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England Monetary Policy Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England is scheduled to announce its decision on interest rates.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB Monetary Policy Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank is scheduled to announce its decision on interest rates.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Q4 Corporate Earnings Releases",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Major European companies reporting quarterly financial results.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The STOXX 50 index increased by 0.5% while the STOXX 600 index decreased by 0.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 50",
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The STOXX 50 rose 0.5% on Thursday, while the broader STOXX 600 slipped 0.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell's profit missed estimates due to lower crude oil prices.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shell",
+        "crude prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shell fell 1.6% after missing profit estimates amid lower crude prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BNP Paribas increased its outlook for shareholder returns.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "BNP Paribas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BNP Paribas gained 3% after raising its outlook for shareholder returns",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ArcelorMittal reported a Q4 profit that exceeded expectations.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ArcelorMittal"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ArcelorMittal climbed 0.9% after reporting a stronger-than-expected Q4 profit.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Bank of England and the ECB are expected to maintain current interest rate levels.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "On the monetary front, both the BoE and the ECB are widely expected to leave interest rates unchanged.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Maersk anticipates a decline in earnings for the year 2026.",
+      "claim_type": "prediction",
+      "author": "Maersk",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Maersk plunged nearly 6% after warning of a decline in earnings in 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "braced for monetary policy decisions from the Bank of England",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "braced for monetary policy decisions from... the ECB",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "crude prices",
+      "target_type": "Theme",
+      "target_ref": "Shell",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Shell fell 1.6% after missing profit estimates amid lower crude prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "corporate earnings",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors digested a fresh batch of corporate earnings",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10878,
+  "error_messages": []
+}

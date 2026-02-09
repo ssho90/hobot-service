@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5757",
+  "extracted_at": "2026-02-07T05:47:28.487763",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The Nikkei 225 fell 0.7% to below 53,500.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nikkei 225"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Nikkei 225 fell 0.7% to below 53,500",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Topix Index also dropped 0.7% to 3,626.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Topix Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the broader Topix Index also dropped 0.7% to 3,626",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Kioxia Holdings was down 5.6%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Kioxia Holdings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Kioxia Holdings down 5.6%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "SoftBank Group fell 1.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "SoftBank Group"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "SoftBank Group falling 1.7%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Advantest slid 3.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Advantest"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Advantest sliding 3.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Nintendo was down 3.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nintendo"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Nintendo (-3.7%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mitsubishi UFJ was down 1.8%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mitsubishi UFJ"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mitsubishi UFJ (-1.8%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ruling LDP is expected to gain seats and pursue expansionary fiscal policies under Prime Minister Sane Takaichi.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Investors are also eyeing this weekend\u2019s lower house elections, where the ruling LDP is expected to gain seats and pursue expansionary fiscal policies under Prime Minister Sane Takaichi.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Tech-led selloff on Wall Street",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japanese Shares Drop as Tech Rout Deepens The Nikkei 225 fell 0.7% to below 53,500, while the broader Topix Index also dropped 0.7% to 3,626 on Friday, extending losses from the previous session amid a tech-led selloff on Wall Street.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "artificial intelligence spending",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Concerns over massive artificial intelligence spending and potential disruption to software companies drove the decline.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "metals and cryptocurrencies selloff",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "A broader selloff in metals and cryptocurrencies further weighed on risk sentiment, reflecting widespread deleveraging across financial markets.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "deleveraging",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "A broader selloff in metals and cryptocurrencies further weighed on risk sentiment, reflecting widespread deleveraging across financial markets.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "lower house elections",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investors are also eyeing this weekend\u2019s lower house elections, where the ruling LDP is expected to gain seats and pursue expansionary fiscal policies under Prime Minister Sane Takaichi.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6589,
+  "error_messages": []
+}

@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5695",
+  "extracted_at": "2026-02-07T05:53:10.715929",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "US-based employers announced 108,435 job cuts in January 2026.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US-based employers announced 108,435 job cuts in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "January 2026 job cuts were the highest since October and the largest January total since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the highest level since October and the largest January total since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Transportation announced the highest number of job cuts (31,243), primarily due to UPS.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Transportation",
+        "UPS"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Transportation announced the highest number (31,243), primarily due to UPS.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "UPS announced it would cut 30,000 jobs after severing ties with Amazon.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "UPS",
+        "Amazon"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The company announced it would cut 30K jobs after severing ties with Amazon.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Technology announced 22,291 job cuts, with the bulk coming from Amazon (16,000).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Technology",
+        "Amazon"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Technology announced 22,291 job cuts, with the bulk coming from Amazon (16K)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Healthcare companies and health products manufacturers announced 17,107 cuts, the most for the industry since April 2020.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Healthcare companies",
+        "health products manufacturers"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Healthcare companies and health products manufacturers announced 17,107 cuts, the most for the industry since April 2020.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employers announced 5,306 hiring plans, the lowest total for the month since records began in 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, employers announced 5,306 hiring plans, the lowest total for the month since records began in 2009.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Employers are less-than-optimistic about the outlook for 2026.",
+      "claim_type": "analysis",
+      "author": "Andy Challenger, chief revenue officer for Challenger, Gray & Christmas",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "It means most of these plans were set at the end of 2025, signaling employers are less-than-optimistic about the outlook for 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "January Job Cuts",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US-based employers announced 108,435 job cuts in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "UPS severing ties with Amazon",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The company announced it would cut 30K jobs after severing ties with Amazon.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Amazon restructuring",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Technology announced 22,291 job cuts, with the bulk coming from Amazon (16K) as it restructures its layers of management.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Job Cuts",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Generally, we see a high number of job cuts in Q1, but this is a high total for January. It means most of these plans were set at the end of 2025, signaling employers are less-than-optimistic about the outlook for 2026",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6978,
+  "error_messages": []
+}

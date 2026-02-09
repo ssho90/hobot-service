@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5783",
+  "extracted_at": "2026-02-07T14:46:24.286498",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Q4 2025 Indonesia Residential Property Price Survey",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of residential property price data for the fourth quarter of 2025, showing record low growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Indonesia's residential property prices rose by 0.83% year-on-year in Q4 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia",
+        "Residential property"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Residential property prices in Indonesia rose by 0.83% year-on-year in Q4 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Property price growth in Q4 2025 was the slowest since the data series began in 2003.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "marking the slowest growth since the data series began in 2003",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Price growth for medium-sized houses slowed to 1.12% in Q4 from 1.18% in Q3.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "medium-sized houses"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Price growth slowed for medium-sized houses (1.12% vs 1.18% in Q3)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "12 out of 18 cities surveyed reported slower price growth.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Among the 18 cities included in the survey, 12 reported slower price growth",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Property prices in Manado decreased by 0.04% in Q4 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Manado"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "prices in Manado edged down by 0.04% after rising 0.03% in Q3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "A decline in purchasing power and an increase in layoffs contributed to the moderation in property prices.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest figures reflect a decline in purchasing power and a rise in layoffs, which contributed to the overall moderation in property prices.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "purchasing power",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The latest figures reflect a decline in purchasing power... which contributed to the overall moderation in property prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "layoffs",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a rise in layoffs, which contributed to the overall moderation in property prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "layoffs",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a rise in layoffs, which contributed to the overall moderation in property prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 17438,
+  "error_messages": []
+}

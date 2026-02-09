@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5838",
+  "extracted_at": "2026-02-07T05:35:26.389120",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "RBI\u2019s policy announcement",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The RBI decided to keep its policy rate unchanged.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-India trade agreement",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "A surprise trade agreement between the US and India.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "BSE Sensex closed about 0.3% up at 83,580 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BSE Sensex"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "India's BSE Sensex reversed early losses to close about 0.3% up at 83,580 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ITC led the way with a 5.2% increase following reports of fresh price hikes and strong Q3 earnings.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ITC"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Among individual stocks, ITC (+5.2%) led the way, tracking other cigarette stocks, following reports of fresh price hikes and strong Q3 earnings",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "TCS (-1.8%), Tech Mahindra (-1.7%) and Adani Ports (-1.3%) posted the biggest losses.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "TCS",
+        "Tech Mahindra",
+        "Adani Ports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Conversely, TCS (-1.8%), Tech Mahindra (-1.7%) and Adani Ports (-1.3%) posted the biggest losses.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the week, the index rose 1.6%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the week, the index rose 1.6%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Sentiment steadied following a volatile week, buoyed by a surprise US-India trade agreement and the RBI\u2019s decision to keep its policy rate unchanged.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Sentiment steadied following a volatile week, buoyed by a surprise US-India trade agreement and the RBI\u2019s decision to keep its policy rate unchanged.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The RBI\u2019s policy announcement was broadly in line with expectations, maintaining a neutral stance while reiterating a constructive growth outlook.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The RBI\u2019s policy announcement was broadly in line with expectations, maintaining a neutral stance while reiterating a constructive growth outlook.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBI\u2019s decision to keep its policy rate unchanged",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sentiment steadied following a volatile week, buoyed by a surprise US-India trade agreement and the RBI\u2019s decision to keep its policy rate unchanged.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "RBI\u2019s policy announcement",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The RBI\u2019s policy announcement was broadly in line with expectations, maintaining a neutral stance while reiterating a constructive growth outlook.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ITC",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Among individual stocks, ITC (+5.2%) led the way, tracking other cigarette stocks, following reports of fresh price hikes and strong Q3 earnings",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5936,
+  "error_messages": []
+}

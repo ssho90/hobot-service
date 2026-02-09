@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5734",
+  "extracted_at": "2026-02-07T14:59:05.637128",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Freddie Mac Weekly Mortgage Rate Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the average 30-year fixed mortgage rate for the week ending February 5th.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The average rate on a 30-year fixed mortgage rose to 6.11% as of February 5th.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Freddie Mac",
+        "30-year fixed mortgage"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The average rate on a 30-year fixed mortgage rose marginally to 6.11% as of February 5th",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Mortgage rates have increased for three consecutive weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mortgage rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "loosely rising for a third straight week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The lowest mortgage rate level since September 2022 was 6.06%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mortgage rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "from the lowest level since September 2022 of 6.06%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Improving affordability and home availability are positive indicators for the spring home sales season.",
+      "claim_type": "analysis",
+      "author": "Sam Khater",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The combination of improving affordability and availability of homes to purchase is a positive sign for buyers and sellers heading into the spring home sales season",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "30-year fixed mortgage rate",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The average rate on a 30-year fixed mortgage rose marginally to 6.11%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Mortgage rates",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The combination of improving affordability and availability of homes to purchase is a positive sign for buyers and sellers heading into the spring home sales season",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11706,
+  "error_messages": []
+}

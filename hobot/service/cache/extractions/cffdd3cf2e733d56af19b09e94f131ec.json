@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5692",
+  "extracted_at": "2026-02-07T15:08:11.720631",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "BIST 100 Record High",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Turkish BIST 100 stock index reached a record high of 13,800 in February.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "TCMB Interest Rate Cut",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Central Bank of the Republic of Turkey (TCMB) cut its benchmark interest rate by 100 basis points.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Turkey\u2019s BIST 100 stock index reached 13,800 in February.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BIST 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Turkey\u2019s BIST 100 stock index surged to 13,800 in February, a record high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Aselsan shares increased by nearly 300% compared to the previous year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Aselsan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Aselsan shares were nearly 300% higher from the previous year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The TCMB cut its benchmark rate by 100bps last month.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "TCMB"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The TCMB cut its benchmark rate by 100bps last month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Heightened geopolitical tensions in Europe and the Middle East are driving higher defense spending from NATO members.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "higher defense spending from NATO members due to heightened geopolitical tensions in both Europe and the Middle East",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Investors are utilizing equities as a hedge against inflation due to the predictable decline of the lira.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The predictable decline in the lira has also allowed investors to use riskier assets such as equities to protect themselves against inflation.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Underlying inflation in Turkey is expected to continue to slow this year.",
+      "claim_type": "prediction",
+      "author": "TCMB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "reiterated that its baseline scenario sees underlying inflation continue to slow this year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "Defense spending",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "higher defense spending from NATO members due to heightened geopolitical tensions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Lira decline",
+      "target_type": "Theme",
+      "target_ref": "Equities",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The predictable decline in the lira has also allowed investors to use riskier assets such as equities to protect themselves against inflation.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Credit activity",
+      "target_type": "Theme",
+      "target_ref": "Bank performance",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Banks also outperformed in the recent quarters... spurred by credit activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11796,
+  "error_messages": []
+}

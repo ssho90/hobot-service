@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5475",
+  "extracted_at": "2026-02-08T01:16:14.646465",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of Ai Group Industry Index (December/January)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Ai Group Industry Index for Australia\u2019s manufacturing sector was released for the December/January period, showing continued contraction.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Ai Group Industry Index for Australia\u2019s manufacturing sector remained in contraction in December/January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ai Group",
+        "Australia manufacturing sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Ai Group Industry Index for Australia\u2019s manufacturing sector remained in contraction in December/January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The chemicals index fell sharply to -35.3.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "chemicals sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The chemicals index fell sharply to -35.3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The minerals and metals index improved to -25.9.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "minerals and metals sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "minerals and metals improved to -25.9",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The machinery and equipment index declined to -22.3.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "machinery and equipment sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The machinery and equipment index declined to -22.3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The food, beverages and TCF index eased to -9.4.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "food, beverages and TCF sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Food, beverages and TCF eased to -9.4",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Overall manufacturing conditions in Australia are still weak.",
+      "claim_type": "analysis",
+      "author": "Ai Group",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "overall manufacturing conditions still weak",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Rising input and wage costs are weighing on manufacturing output.",
+      "claim_type": "analysis",
+      "author": "Ai Group",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "rising input and wage costs... continued to weigh on output",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Labour constraints are acting as a drag on the manufacturing sector.",
+      "claim_type": "analysis",
+      "author": "Ai Group",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "labour constraints continued to weigh on output",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Rising wage costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rising wage, input, energy and tax costs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Labour constraints",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "labour constraints continued to weigh on output",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Subdued demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "subdued demand... continued to weigh on output",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Higher tariffs",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "higher tariffs reduced sales",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11738,
+  "error_messages": []
+}

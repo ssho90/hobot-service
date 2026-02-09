@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5627",
+  "extracted_at": "2026-02-07T16:24:09.702603",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "RBA February Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The central bank hiked rates a quarter-point to 3.85% in its February meeting.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "December 2025 Trade Balance Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Figures showed the country's trade surplus widened to AUD 3.37 billion in December 2025.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "May Policy Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Upcoming RBA policy meeting with high market expectations for a rate hike.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Australian dollar traded near three-year peaks around $0.70.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australian Dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Australian dollar held steady around $0.70 on Thursday, trading near three-year peaks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Australia's trade surplus reached AUD 3.37 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Figures showed the country's trade surplus widened to AUD 3.37 billion in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Reserve Bank of Australia increased interest rates to 3.85% in February.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank of Australia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the central bank hiked rates a quarter-point to 3.85% in its February meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The AUD reached a 35-year high against the Japanese yen.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "AUD",
+        "Japanese yen"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the AUD climbed to a thirty-five-year high against the Japanese yen",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "There is an 80% market probability of a rate hike in May.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Markets imply around an 80% chance of a hike at its May policy meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There is a 50% chance that interest rates will reach 4.35% by the end of the year.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "a 50% probability that rates could end the year at 4.35%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The US dollar is strengthening because markets expect slower Federal Reserve rate cuts.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the US dollar was broadly stronger as markets priced in a slower pace for potential Federal Reserve rate cuts",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Reserve Bank\u2019s hawkish policy outlook",
+      "target_type": "Theme",
+      "target_ref": "Australian Dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supported by the Reserve Bank\u2019s hawkish policy outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade balance data",
+      "target_type": "Theme",
+      "target_ref": "Australian Dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supported by... robust trade balance data",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Federal Reserve rate cuts",
+      "target_type": "Theme",
+      "target_ref": "US dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the US dollar was broadly stronger as markets priced in a slower pace for potential Federal Reserve rate cuts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12153,
+  "error_messages": []
+}

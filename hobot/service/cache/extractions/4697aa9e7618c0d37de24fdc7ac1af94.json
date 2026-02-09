@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5844",
+  "extracted_at": "2026-02-07T14:31:19.950232",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Greece Trade Balance Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of trade data for December 2025 showing the widening of the trade deficit to EUR 3.6 billion.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The trade deficit in Greece widened to EUR 3.6 billion in December 2025 from EUR 3.5 billion in December 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The trade deficit in Greece widened slightly to EUR 3.6 billion in December 2025 from a revised EUR 3.5 billion in the same month a year ago.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports grew by 1.5% year-on-year to EUR 7.7 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports grew by 1.5% year-on-year to EUR 7.7 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased by 0.7% to EUR 4.1 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, exports increased by 0.7% to EUR 4.1 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The annual trade gap for 2025 narrowed to EUR 33.5 billion from EUR 35.6 billion in 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the whole year of 2025, the country's trade gap narrowed to EUR 33.5 billion from EUR 35.6 billion in 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The trade gap reached its largest level since November 2022 because imports rose more than exports.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "This was the largest trade gap since November 2022, as imports rose more than exports.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Imports grew by 1.5% year-on-year to EUR 7.7 billion, driven mainly by increased purchases from the EU (9.1%)",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, exports increased by 0.7% to EUR 4.1 billion due to higher sales to the EU (11.8%)",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade Deficit",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The trade deficit in Greece widened slightly to EUR 3.6 billion in December 2025",
+        "source_sentence": null,
+        "confidence": "low",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10984,
+  "error_messages": []
+}

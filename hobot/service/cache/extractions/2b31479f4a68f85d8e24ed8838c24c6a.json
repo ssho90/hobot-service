@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5683",
+  "extracted_at": "2026-02-07T15:09:56.234994",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Austria Trade Data Release (November 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Austria's trade balance figures for November 2025, showing a narrowing deficit.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Austria's trade deficit narrowed to EUR 0.35 billion in November 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Austria's trade deficit narrowed slightly to EUR 0.35 billion in November 2025 from EUR 0.37 billion in the corresponding month of the previous year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased 1.3% year-on-year to EUR 16.45 billion in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports increased 1.3% year-on-year to EUR 16.45 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports rose 1.2% to EUR 16.80 billion in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, imports rose 1.2% to EUR 16.80 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Austria recorded a trade deficit of EUR 5.10 billion for the first eleven months of 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Austria"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Considering the first eleven months of the year, Austria recorded an overall trade deficit of EUR 5.10 billion, shifting from a surplus of EUR 2.51 billion in the same period last year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The narrowing of the trade deficit in November was caused by exports rising faster than imports.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Austria's trade deficit narrowed slightly... as exports rose more than imports.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Export growth in November was driven by increased sales to both EU and non-EU markets.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "driven by higher sales to both EU countries (1.4%) and non-EU countries (1.3%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports increased 1.3% year-on-year to EUR 16.45 billion, driven by higher sales to both EU countries (1.4%) and non-EU countries (1.3%).",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "Trade Deficit",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Austria's trade deficit narrowed slightly... as exports rose more than imports.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade Deficit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Austria recorded an overall trade deficit of EUR 5.10 billion, shifting from a surplus of EUR 2.51 billion in the same period last year.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13258,
+  "error_messages": []
+}

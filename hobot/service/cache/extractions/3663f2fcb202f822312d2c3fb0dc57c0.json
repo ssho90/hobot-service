@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5850",
+  "extracted_at": "2026-02-07T14:29:17.477444",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Chile January 2026 Inflation Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Chile's annual and monthly consumer price index data for January 2026.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Chile's annual inflation rate slowed to 2.8% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Chile",
+        "Inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Chile\u2019s annual inflation rate eased to 2.8% in January 2026, the lowest since February 2021, from 3.5% in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly consumer prices in Chile increased by 0.4% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Chile",
+        "Consumer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose 0.4% in January, reversing a 0.2% decline in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Transport costs in Chile decreased by 1.1% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Transport costs"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In contrast, transport costs fell 1.1%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The most significant price pressures in the Chilean economy are currently coming from the hospitality and education sectors.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Price pressures were strongest in restaurants and lodging (6.3%), followed by education (5.4%) and healthcare (4.9%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Chile January 2026 Inflation Report",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Chile\u2019s annual inflation rate eased to 2.8% in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Transport costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "In contrast, transport costs fell 1.1%, with deflation also recorded in clothing and footwear (-4.6%) and insurance and financial services (-1.9%).",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9402,
+  "error_messages": []
+}

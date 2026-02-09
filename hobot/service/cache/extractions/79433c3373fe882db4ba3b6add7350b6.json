@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5655",
+  "extracted_at": "2026-02-07T15:43:49.575798",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Romania Retail Sales Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of retail sales data for December 2025, showing a year-on-year decline of 2%.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Romania's retail sales fell by 2% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Romania",
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Retail sales in Romania fell by 2% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail activity in Romania has contracted for five consecutive months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Retail activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This marked the fifth consecutive month of contraction in retail activity",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Automotive fuel sales in specialized stores rose by 3.2% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Automotive fuel"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "sales increased for automotive fuel in specialised stores (3.2% vs 2.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, retail activity increased by 0.6% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Retail activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, retail activity rose by 0.6% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The pace of contraction in retail activity is easing or softening.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "easing from a downwardly revised 3.9% decline in the previous month... albeit at a softer pace",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Retail activity",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This marked the fifth consecutive month of contraction in retail activity",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Automotive fuel sales",
+      "target_type": "Theme",
+      "target_ref": "Retail activity",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "At the same time, sales increased for automotive fuel in specialised stores (3.2% vs 2.3%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Food, beverages, and tobacco sales",
+      "target_type": "Theme",
+      "target_ref": "Retail activity",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "sales growth slowed for food, beverages, and tobacco (-3% vs -4.9% in November)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10130,
+  "error_messages": []
+}

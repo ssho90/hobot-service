@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5889",
+  "extracted_at": "2026-02-09T01:07:42.321418",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan December 2025 Wage Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of Japan's nominal and real wage growth data for December 2025.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "labor"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan's nominal wages rose 2.4% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "Nominal Wages"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s nominal wages rose 2.4% year-on-year in December 2025, up from a revised 1.7% gain in November but below market expectations of 3% growth.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Base pay in Japan accelerated to 2.2% in December from 1.9% in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Base pay"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Base pay accelerated to 2.2% in December from 1.9% in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation-adjusted real wages fell 0.1% in December, marking 12 consecutive months of contraction.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Real wages",
+        "Inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "inflation-adjusted real wages, a key gauge of household purchasing power, fell 0.1% in December from a year ago, marking the 12th consecutive month of contraction",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The December wage reading provided little clarity on the Bank of Japan's future policy direction.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The reading offered little guidance on the Bank of Japan\u2019s policy outlook",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Future monetary tightening by the Bank of Japan is contingent on consistent and broad wage increases.",
+      "claim_type": "analysis",
+      "author": "Bank of Japan officials",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "officials have indicated that further monetary tightening will depend on sustained, broad-based wage gains.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Nominal pay growth",
+      "target_type": "Theme",
+      "target_ref": "Inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "nominal pay growth lagged slightly behind consumer inflation.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Wage gains",
+      "target_type": "Theme",
+      "target_ref": "Bank of Japan policy",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "officials have indicated that further monetary tightening will depend on sustained, broad-based wage gains.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11443,
+  "error_messages": []
+}

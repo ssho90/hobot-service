@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5844",
+  "extracted_at": "2026-02-07T05:36:03.266035",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Greece's trade deficit widened to EUR 3.6 billion in December 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The trade deficit in Greece widened slightly to EUR 3.6 billion in December 2025 from a revised EUR 3.5 billion in the same month a year ago.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The trade gap in December 2025 was the largest since November 2022.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This was the largest trade gap since November 2022, as imports rose more than exports.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports grew by 1.5% year-on-year to EUR 7.7 billion.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Imports grew by 1.5% year-on-year to EUR 7.7 billion, driven mainly by increased purchases from the EU (9.1%), which more than offset a drop in imports from third countries (-7.9%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased by 0.7% to EUR 4.1 billion.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, exports increased by 0.7% to EUR 4.1 billion due to higher sales to the EU (11.8%), while shipments to the third countries declined (-11.5%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the whole year of 2025, the country's trade gap narrowed to EUR 33.5 billion from EUR 35.6 billion in 2024.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the whole year of 2025, the country's trade gap narrowed to EUR 33.5 billion from EUR 35.6 billion in 2024, with exports (-2.8%) falling less than imports (-4.1%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports fell less than imports in 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Greece"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the whole year of 2025, the country's trade gap narrowed to EUR 33.5 billion from EUR 35.6 billion in 2024, with exports (-2.8%) falling less than imports (-4.1%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Trade Deficit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The trade deficit in Greece widened slightly to EUR 3.6 billion in December 2025 from a revised EUR 3.5 billion in the same month a year ago.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Imports grew by 1.5% year-on-year to EUR 7.7 billion",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, exports increased by 0.7% to EUR 4.1 billion",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6066,
+  "error_messages": []
+}

@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5791",
+  "extracted_at": "2026-02-07T05:43:12.441108",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "RBI policy rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "RBI held its policy rate at 5.25%",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Sensex fell 386 points, or 0.5%, to 82,928.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Sensex"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Sensex fell 386 points, or 0.5%, to 82,928",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Nifty 50 also dropped 0.5% to around 25,500.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nifty 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Nifty 50 also dropped 0.5% to around 25,500",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "RBI held its policy rate at 5.25%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "RBI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "after the RBI held its policy rate at 5.25%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "RBI's upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "RBI",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Additionally, the RBI\u2019s upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the week, the index is heading for a 0.8% decline.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the week, the index is heading for a 0.8% decline",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBI policy rate decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "after the RBI held its policy rate at 5.25%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "RBI\u2019s upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Additionally, the RBI\u2019s upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326 prevented deeper declines.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Persistent tech rout",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The broader market tracked a downbeat session on Wall Street overnight amid a persistent tech rout.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5064,
+  "error_messages": []
+}

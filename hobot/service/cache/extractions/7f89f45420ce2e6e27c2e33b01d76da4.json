@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5782",
+  "extracted_at": "2026-02-07T05:44:22.826921",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s 10-year government bond yield dropped to around 2.22% on Friday, hitting a three-week low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "10-year government bond"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s 10-year government bond yield dropped to around 2.22% on Friday, hitting a three-week low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "This week\u2019s 10-year bond auction showed an average yield of 2.249%, up from 2.095% at the prior sale.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "10-year bond"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "this week\u2019s 10-year bond auction showed softer demand amid election jitters, with an average yield of 2.249%, up from 2.095% at the prior sale.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ruling coalition is widely expected to win decisively.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Prime Minister Sanae Takaichi called the snap vote to secure backing for increased spending and potential tax cuts, with her ruling coalition widely expected to win decisively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Q4 GDP is expected to rebound following a sharp contraction in the previous quarter.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Investors are also awaiting the Q4 GDP report next week, expected to rebound following a sharp contraction in the previous quarter.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Election",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan\u2019s 10-year government bond yield dropped to around 2.22% on Friday, hitting a three-week low as investors prepared for this weekend\u2019s lower house elections.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Government spending plans",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Concerns over how the government would fund its ambitious spending plans and offset potential revenue losses weighed on markets, amid uncertainty over Japan\u2019s fiscal outlook.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Election jitters",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, this week\u2019s 10-year bond auction showed softer demand amid election jitters, with an average yield of 2.249%, up from 2.095% at the prior sale.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4976,
+  "error_messages": []
+}

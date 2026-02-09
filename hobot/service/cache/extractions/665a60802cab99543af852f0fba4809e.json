@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5719",
+  "extracted_at": "2026-02-07T05:50:26.768053",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The yield on the 10-year US Treasury note fell further to the 4.2% mark on Thursday, the lowest in nearly three weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "10-year US Treasury note"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The yield on the 10-year US Treasury note fell further to the 4.2% mark on Thursday, the lowest in nearly three weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "JOLTS showed that job openings fell to a five-year low in December.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "JOLTS",
+        "job openings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The JOLTS showed that job openings fell to a five-year low in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Challenger report reflected the most January job cuts since 2009.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "Challenger report",
+        "job cuts"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Challenger report reflected the most January job cuts since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial jobless claims were sharply above expectations to a two-month high.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "initial jobless claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "initial jobless claims were sharply above expectations to a two-month high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ADP report showed private-sector job growth fell well short of expectations.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "ADP report",
+        "private-sector job growth"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the ADP report showed private-sector job growth fell well short of expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US Treasury maintained its issuance guidance for the coming quarters, favouring a greater share of short-term bills over longer-dated bonds.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "US Treasury",
+        "short-term bills",
+        "longer-dated bonds"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, the US Treasury maintained its issuance guidance for the coming quarters, favouring a greater share of short-term bills over longer-dated bonds in an effort to manage borrowing costs amid elevated interest rates.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "A batch of soft labor data supported the outlook of multiple rate cuts by the Federal Reserve this week.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "as a batch of soft labor data supported the outlook of multiple rate cuts by the Federal Reserve this week.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are still pricing in a first rate reduction in June and a second potentially in September.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "markets still pricing in a first reduction in June and a second potentially in September.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "soft labor data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as a batch of soft labor data supported the outlook of multiple rate cuts by the Federal Reserve this week.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "10-Year Treasury Yield",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The yield on the 10-year US Treasury note fell further to the 4.2% mark on Thursday, the lowest in nearly three weeks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Treasury",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the US Treasury maintained its issuance guidance for the coming quarters, favouring a greater share of short-term bills over longer-dated bonds in an effort to manage borrowing costs amid elevated interest rates.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "JOLTS",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The JOLTS showed that job openings fell to a five-year low in December",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Challenger report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Challenger report reflected the most January job cuts since 2009",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "initial jobless claims",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "initial jobless claims were sharply above expectations to a two-month high",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ADP report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the ADP report showed private-sector job growth fell well short of expectations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8598,
+  "error_messages": []
+}

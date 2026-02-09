@@ -1,0 +1,254 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5600",
+  "extracted_at": "2026-02-07T16:29:39.262248",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Ibovespa Wednesday Close",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Ibovespa index closed at 181,708 after a 2.1% decline from record highs.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Santander Quarterly Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Santander reported higher quarterly profits but saw its stock price fall.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Copom Guidance",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Monetary policy guidance provided by the Central Bank of Brazil's Copom.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Approval of New Spending Measures",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Legislative approval of new government spending measures leading to fiscal concerns.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Ibovespa slid 2.1% to close at 181,708 on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ibovespa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Ibovespa slid 2.1% to close at 181,708 on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Santander shares fell 2.8% despite reporting higher quarterly profits.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Santander"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Santander down 2.8% despite reporting higher quarterly profits",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Ita\u00fa, Bradesco, Banco do Brasil and B3 fell between 2.6% and 4.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ita\u00fa",
+        "Bradesco",
+        "Banco do Brasil",
+        "B3"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ita\u00fa, Bradesco, Banco do Brasil and B3 all fell between roughly 2.6% and 4.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "WEG shares plunged 5% and Embraer fell 4.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "WEG",
+        "Embraer"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "WEG plunging 5%, Embraer down 4.1%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Vale shares rose 0.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Vale"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vale edged 0.4% higher",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The market movement was a sharp correction after fresh record highs.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "marking a sharp correction after fresh record highs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The decline was driven by concerns over asset quality and policy signals.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "driven primarily by heavy losses in financials amid renewed concerns over asset quality and policy signals",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Rising delinquency rates and a challenging macro backdrop weighed on investor sentiment.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "rising delinquency rates and a challenging macro backdrop weighed on sentiment",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The session reflected profit taking and investor caution following policy guidance.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The session reflected a combination of profit taking after the recent rally, investor caution following Copom guidance",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Financials",
+      "target_type": "Theme",
+      "target_ref": "Ibovespa",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven primarily by heavy losses in financials",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Copom guidance",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investor caution following Copom guidance... reinforced a broad risk reduction",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New spending measures",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "lingering fiscal concerns after new spending measures were approved, all of which reinforced a broad risk reduction",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Delinquency rates",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rising delinquency rates and a challenging macro backdrop weighed on sentiment",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15285,
+  "error_messages": []
+}

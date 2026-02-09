@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5639",
+  "extracted_at": "2026-02-07T16:21:27.916726",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indonesia Q4 2025 GDP Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Indonesia's economic growth data for the fourth quarter of 2025, showing a 0.86% QoQ expansion.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Indonesia's economy grew 0.86% quarter-on-quarter in Q4 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s economy grew 0.86% qoq in Q4 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Government spending in Indonesia surged by 37.68% in Q4.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "government spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "government spending surged (37.68% vs 4.76%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Agriculture output in Indonesia plunged by 18.33% in the fourth quarter.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "agriculture"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "agriculture plunged (-18.33% vs 3.33%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Fixed investment growth slowed to 3.5% from 6.37% in the previous quarter.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Fixed investment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Fixed investment slowed (3.5% vs 6.37% in Q3)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Q4 GDP growth was the weakest in a sequence of three straight quarters of growth.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "marking a third straight quarter of growth, though the weakest in the sequence",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Economic growth was hampered by lingering disruptions from a natural disaster in Sumatra.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "amid lingering disruptions from last year\u2019s natural disaster in Sumatra",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Natural disaster in Sumatra",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the weakest in the sequence amid lingering disruptions from last year\u2019s natural disaster in Sumatra",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Lower borrowing costs",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Private consumption recovered (1.84% vs -0.55%), helped by lower borrowing costs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Government stimulus",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Private consumption recovered... helped by... government stimulus, including cash handouts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Net trade",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "net trade dragged as exports fell (-1.18% vs 6.95%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14134,
+  "error_messages": []
+}

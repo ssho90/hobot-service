@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5565",
+  "extracted_at": "2026-02-07T17:50:47.303305",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Brazilian central bank\u2019s decision minutes release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of minutes from the latest central bank meeting where policymakers signaled future rate cuts.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Potential interest rate easing",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Policymakers signaled that interest rate easing is likely to begin in March.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Brazilian real strengthened toward 5.22 per US dollar.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazilian real",
+        "US dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Brazilian real strengthened toward 5.22 per US dollar, rebounding toward its strongest levels since May 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Selic rate is currently at 15%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Selic",
+        "Brazilian central bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Selic remained elevated at 15%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The central bank's decision was a predictable transition rather than a dovish shock.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "an outcome viewed as a predictable transition rather than a dovish shock",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A softer US dollar improved the real\u2019s appeal to foreign investors.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "A softer US dollar against emerging market and commodity currencies further eased pressure on USD BRL and improved the real\u2019s appeal to foreign investors",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Fiscal uncertainty and political noise are limiting the appreciation of the Brazilian real.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "persistent fiscal uncertainty and political noise continue to cap upside",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Elevated US yields have had limited spillover effects on the Brazilian market so far.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Elevated US yields have had limited spillover so far, allowing domestic factors to dominate",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Brazilian central bank\u2019s decision minutes",
+      "target_type": "Theme",
+      "target_ref": "policy risk premium",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This reduced the policy risk premium and supported carry and duration inflows",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Softer US dollar",
+      "target_type": "Theme",
+      "target_ref": "USD BRL",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "A softer US dollar against emerging market and commodity currencies further eased pressure on USD BRL",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "High real yields",
+      "target_type": "Theme",
+      "target_ref": "foreign demand for Brazilian assets",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "steady foreign demand for Brazilian assets anchored in high real yields",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Fiscal uncertainty",
+      "target_type": "Theme",
+      "target_ref": "Brazilian real upside",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "persistent fiscal uncertainty and political noise continue to cap upside",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12600,
+  "error_messages": []
+}

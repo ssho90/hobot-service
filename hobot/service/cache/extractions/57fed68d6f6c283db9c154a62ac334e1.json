@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5784",
+  "extracted_at": "2026-02-07T14:46:36.162021",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "2025 Current Account Surplus Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "South Korea reported its largest-ever annual current account surplus of $123.05 billion.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Overseas Foreign Exchange Stabilization Bond Issuance",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The South Korean government issued $3 billion in stabilization bonds, the largest single issuance since 2009.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The South Korean won rose to approximately 1,470 per dollar.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "South Korean won"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The South Korean won rose to around 1,470 per dollar",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "South Korea's 2025 current account surplus reached US$123.05 billion.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "South Korea"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The surplus reached US$123.05 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The government issued $3 billion in overseas foreign exchange stabilization bonds in three- and five-year tranches.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "South Korean government"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the government successfully issued $3 billion in overseas foreign exchange stabilization bonds, the largest single issuance since 2009. The offering, split into three- and five-year tranches",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Strong exports reinforced investor confidence.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Strong exports, particularly amid a semiconductor upcycle, further reinforced investor confidence.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The bond sale helped ease near-term pressure on the currency.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the bond sale helped ease near-term pressure on the currency.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Tight pricing of the bond offering signaled strong demand.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The offering... was tightly priced, signaling strong demand and bolstering confidence in South Korea\u2019s external finances.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Current account surplus",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The South Korean won rose... supported by signals of net inflows of foreign currency.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Semiconductor upcycle",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Strong exports, particularly amid a semiconductor upcycle, further reinforced investor confidence.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Bond issuance",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the bond sale helped ease near-term pressure on the currency.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11324,
+  "error_messages": []
+}

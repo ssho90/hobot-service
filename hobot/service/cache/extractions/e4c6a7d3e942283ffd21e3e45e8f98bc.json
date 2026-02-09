@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5847",
+  "extracted_at": "2026-02-07T05:34:47.904895",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Mexico\u2019s Consumer Confidence Index fell 0.6 points month-on-month to 44.0 in January 2026, the lowest reading since December 2022.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Mexico",
+        "Consumer Confidence Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mexico\u2019s Consumer Confidence Index fell 0.6 points month-on-month to 44.0 in January 2026, the lowest reading since December 2022.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The sub-index for the current economic situation of the country declined 0.5 points to 38.8.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "economic situation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The sub-index for the current economic situation of the country declined 0.5 points to 38.8",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Expectations for the economy in 12 months also dropped 0.5 points to 43.9.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "economy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "expectations for the economy in 12 months also dropped 0.5 points to 43.9.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Households\u2019 current ability to purchase durable goods slipped 0.4 points to 30.5.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Households",
+        "durable goods"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Households\u2019 current ability to purchase durable goods slipped 0.4 points to 30.5.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The assessment of the current household economic situation fell 0.9 points but remained above the optimism threshold at 50.3.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "household economic situation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the assessment of the current household economic situation fell 0.9 points but remained above the optimism threshold at 50.3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Expectations for household finances in 12 months eased 0.7 points to 56.6.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "household finances"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "expectations for household finances in 12 months eased 0.7 points to 56.6.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On an annual basis, consumer confidence was down 2.7 points.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "consumer confidence"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On an annual basis, consumer confidence was down 2.7 points.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Consumer Confidence Index",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Mexico\u2019s Consumer Confidence Index fell 0.6 points month-on-month to 44.0 in January 2026, the lowest reading since December 2022.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "economic situation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The sub-index for the current economic situation of the country declined 0.5 points to 38.8",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "economy",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "expectations for the economy in 12 months also dropped 0.5 points to 43.9.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Households",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Households\u2019 current ability to purchase durable goods slipped 0.4 points to 30.5.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "household economic situation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the assessment of the current household economic situation fell 0.9 points but remained above the optimism threshold at 50.3",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "household finances",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "expectations for household finances in 12 months eased 0.7 points to 56.6.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7707,
+  "error_messages": []
+}

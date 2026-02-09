@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5571",
+  "extracted_at": "2026-02-07T17:52:18.151759",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global Brazil Composite PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the composite purchasing managers' index for Brazil's private sector for January 2026.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global Brazil Composite PMI fell to 49.9 in January 2026 from 52.1 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global Brazil Composite PMI fell to 49.9 in January 2026 from 52.1 in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment in the Brazil private sector declined for the first time in three months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment declined for the first time in three months, with modest job losses across both services and industry.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input costs and output prices in Brazil rose at the fastest pace in two months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "input costs and output prices rose at the fastest pace in two months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Brazil's private-sector activity is broadly stagnant at the start of 2026.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "signaling broadly stagnant private-sector activity at the start of the year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Services growth was insufficient to compensate for the contraction in manufacturing.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "While services output continued to expand, growth slowed sharply and failed to offset a deeper contraction in manufacturing production.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "S&P Global Brazil Composite PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The S&P Global Brazil Composite PMI fell to 49.9... signaling broadly stagnant private-sector activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "employment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment declined for the first time in three months",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "input costs and output prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input costs and output prices rose at the fastest pace in two months.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10169,
+  "error_messages": []
+}

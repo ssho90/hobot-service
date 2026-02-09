@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5758",
+  "extracted_at": "2026-02-07T05:47:36.692223",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "South Korea's current account surplus reached $123.05 billion in 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "South Korea"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "South Korea\u2019s current account surplus surged to $123.05 billion in 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 2025 current account surplus is the largest annual surplus on record for South Korea.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "South Korea"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "marking the largest annual surplus on record, driven by strong exports, particularly in semiconductors.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 2025 current account surplus surpassed the Bank of Korea\u2019s forecast of $115 billion.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "South Korea",
+        "Bank of Korea"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The result surpassed both the previous high of $105.1 billion in 2015 and the Bank of Korea\u2019s forecast of $115 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "South Korea posted a record monthly surplus of $18.7 billion in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "South Korea"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In December, the country posted a record monthly surplus of $18.7 billion, up from $12.9 billion in November.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports rose 13.1% year-on-year to $71.65 billion in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "as exports rose 13.1% year-on-year to $71.65 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports grew 1.7% to $52.8 billion in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while imports grew 1.7% to $52.8 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The services account recorded a $3.69 billion deficit in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The services account recorded a $3.69 billion deficit, largely due to increased demand for overseas travel during the winter vacation season.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The primary income account posted a $4.73 billion surplus in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, the primary income account\u2014which tracks wages of foreign workers, dividend payments, and interest income\u2014posted a $4.73 billion surplus, up sharply from November\u2019s $1.53 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Strong exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "marking the largest annual surplus on record, driven by strong exports, particularly in semiconductors.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "South Korea\u2019s current account surplus",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "South Korea\u2019s current account surplus surged to $123.05 billion in 2025, up from $99.97 billion the previous year, marking the largest annual surplus on record, driven by strong exports, particularly in semiconductors.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7686,
+  "error_messages": []
+}

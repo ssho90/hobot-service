@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5752",
+  "extracted_at": "2026-02-07T05:48:06.840144",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Bitcoin plunged toward $62,000 in early February, hitting its lowest levels since October 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bitcoin"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bitcoin plunged toward $62,000 in early February, hitting its lowest levels since October 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bitcoin has now lost about half its value from its October 2025 peak.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bitcoin"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The leading cryptocurrency has now lost about half its value from its October 2025 peak",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Some analysts argue that bitcoin has been exposed as a largely speculative asset, failing to function as a debasement hedge comparable to gold and other precious metals.",
+      "claim_type": "analysis",
+      "author": "analysts",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Some analysts argue that bitcoin has been exposed as a largely speculative asset, failing to function as a debasement hedge comparable to gold and other precious metals.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The latest drop puts long-term bitcoin holders to the test amid mounting doubts about digital assets\u2019 real-world utility.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest drop puts long-term bitcoin holders to the test amid mounting doubts about digital assets\u2019 real-world utility.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bitcoin selloff",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Bitcoin Tumbles to 17-Month Low Bitcoin plunged toward $62,000 in early February, hitting its lowest levels since October 2024 as the market continued to flush out leveraged traders amid a broad selloff across financial markets.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trump\u2019s pledges to ease regulation",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investor optimism had previously been buoyed by Trump\u2019s direct involvement in the sector and his pledges to ease regulation, priming to make the US the \u201ccrypto capital of the world.\u201d",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4638,
+  "error_messages": []
+}

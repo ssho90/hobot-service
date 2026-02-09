@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5725",
+  "extracted_at": "2026-02-07T05:50:56.394880",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "US job quits rose to 3.204 million in December 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "US",
+        "job quits"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of job quits in the US rose slightly to 3.204 million in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job quits in December 2025 were higher than the upwardly revised 3.193 million in November and above 3.095 million a year ago.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job quits"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "from the upwardly revised 3.193 million in November and above 3.095 million a year ago.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The December reading was the highest in six months.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job quits"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "It was the highest reading in six months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Quits rose primarily in retail trade (+87,000) and information (+28,000).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job quits",
+        "retail trade",
+        "information"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Quits rose primarily in retail trade (+87,000) and information (+28,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Quits fell in professional and business services (-151,000) and private educational services (-19,000).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job quits",
+        "professional and business services",
+        "private educational services"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "but fell in professional and business services (-151,000) and private educational services (-19,000).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The quits rate stood at 2% in December, matching November's reading.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "quits rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The quits rate, a metric that measures voluntary job leavers as a proportion of total employment, stood at 2% in December, matching November's reading.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job quits increased in the Midwest (+59,000) and the West (+13,000).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job quits",
+        "Midwest",
+        "West"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Regionally, job quits increased in the Midwest (+59,000) and the West (+13,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job quits declined in the South (-50,000) and the Northeast (-11,000).",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job quits",
+        "South",
+        "Northeast"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "but declined in the South (-50,000) and the Northeast (-11,000).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "job quits",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US Job Quits Hit 6-Month High",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5667,
+  "error_messages": []
+}

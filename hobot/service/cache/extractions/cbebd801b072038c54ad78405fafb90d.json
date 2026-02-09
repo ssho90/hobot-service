@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5669",
+  "extracted_at": "2026-02-07T05:56:36.294916",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England is expected to keep interest rates unchanged at 3.75%.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Bank of England is expected to keep interest rates unchanged at 3.75%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England",
+        "interest rates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Bank of England is expected to keep interest rates unchanged at 3.75% on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation remains elevated at 3.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Inflation remains elevated at 3.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Unemployment has risen to 5.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Unemployment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "At the same time, unemployment has risen to 5.1%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is forecast to fall to the 2% target in the second quarter.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Inflation remains elevated at 3.4% but is forecast to fall to the 2% target in the second quarter",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are pricing about a 70% chance of the next rate cut in April.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Governor Andrew Bailey is expected to back a hold while signalling further gradual easing ahead, with markets pricing about a 70% chance of the next rate cut in April.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets see less than a 1% chance of a rate cut.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Markets see less than a 1% chance of a rate cut",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Bank of England to Keep Rates Steady",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Inflation remains elevated at 3.4% but is forecast to fall to the 2% target in the second quarter, keeping hawkish members cautious.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Unemployment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "At the same time, unemployment has risen to 5.1% and redundancies have increased, raising concerns about economic weakness.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "labor market",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Recent data has been mixed, with stronger GDP growth, solid retail sales and improving business activity offset by labor market deterioration.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5593,
+  "error_messages": []
+}

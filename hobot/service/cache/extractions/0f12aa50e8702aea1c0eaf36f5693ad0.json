@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5865",
+  "extracted_at": "2026-02-07T06:08:59.218024",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Argentina Industrial Production Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of industrial production data for Argentina showing a year-on-year decline in December 2025.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Argentina's industrial production fell 3.9% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Argentina",
+        "Industrial Production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Argentina\u2019s industrial production fell 3.9% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Industrial production in Argentina contracted by 8.7% in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Argentina",
+        "Industrial Production"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following an 8.7% contraction in November",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Ten out of sixteen manufacturing divisions in Argentina recorded annual declines in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "manufacturing divisions"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ten of the sixteen manufacturing divisions recorded annual declines.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The motor vehicles, bodies, trailers and auto parts sector saw a decline of 21.6%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "motor vehicles",
+        "auto parts"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the steepest drops were seen in motor vehicles, bodies, trailers and auto parts (-21.6%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Argentina's industrial sector is experiencing a prolonged period of contraction.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Argentina\u2019s Industrial Production Extends Decline in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Industrial Production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Argentina\u2019s industrial production fell 3.9% year-on-year in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "motor vehicles, bodies, trailers and auto parts",
+      "target_type": "Theme",
+      "target_ref": "Industrial Production",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "By impact on the overall index, the steepest drops were seen in motor vehicles, bodies, trailers and auto parts (-21.6%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "basic metal industries",
+      "target_type": "Theme",
+      "target_ref": "Industrial Production",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, positive contributions came from basic metal industries (7.4%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 17315,
+  "error_messages": []
+}

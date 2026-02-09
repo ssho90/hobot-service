@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5780",
+  "extracted_at": "2026-02-07T14:49:43.433588",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Gold Price Reversal",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Gold rose to around $4,830 per ounce on Friday, reversing earlier losses amid volatility.",
+      "impact_level": "medium",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Labor Market Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of January job cuts, initial claims, and ADP payrolls data showing labor market weakness.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "White House Iran Policy Statement",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The White House signaled a preference for a diplomatic solution with Iran.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Gold rose to around $4,830 per ounce on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gold rose to around $4,830 per ounce on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US job cuts reached 108.4K in January, the highest for the month since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US job cuts"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US job cuts reached 108.4K in January, the highest for the month since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial claims rose to 231K and ADP payrolls missed forecasts.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "initial claims",
+        "ADP payrolls"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "initial claims rose to 231K and ADP payrolls missed forecasts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold remained on track for its second consecutive weekly loss.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Over the week, gold remained on track for its second consecutive weekly loss.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The string of weaker labor data reinforced expectations for Federal Reserve rate cuts later this year.",
+      "claim_type": "analysis",
+      "author": "Markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The string of weaker labor data reinforced expectations for Federal Reserve rate cuts later this year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Markets are eyeing a first Federal Reserve rate cut in June.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "with markets eyeing a first move in June",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "President Donald Trump prefers a diplomatic solution with Iran.",
+      "claim_type": "opinion",
+      "author": "White House",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "the White House emphasized that President Donald Trump prefers a diplomatic solution with Iran",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Labor data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The string of weaker labor data reinforced expectations for Federal Reserve rate cuts later this year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Selling pressure",
+      "target_type": "Theme",
+      "target_ref": "Gold",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weighed by selling pressure after the metal repeatedly hit record highs in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Iran diplomatic solution",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signaling patience for high-level negotiations while keeping military options as a contingency",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12438,
+  "error_messages": []
+}

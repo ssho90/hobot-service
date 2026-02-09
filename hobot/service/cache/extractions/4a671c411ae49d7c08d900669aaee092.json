@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5806",
+  "extracted_at": "2026-02-07T05:37:27.092542",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Rice gained by 1.85%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rice"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rice Gains by 1.85%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Rice",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Rice Gains by 1.85%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 1741,
+  "error_messages": []
+}

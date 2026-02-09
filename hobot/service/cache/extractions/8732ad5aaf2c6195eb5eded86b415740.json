@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5741",
+  "extracted_at": "2026-02-07T05:48:49.403834",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "Banco de M\u00e9xico\u2019s decision to hold the policy rate",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Banco de M\u00e9xico decided to hold the policy rate at 7.00%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Mexican peso retreated past 17.40 per US dollar.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mexican peso",
+        "US dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Mexican peso retreated past 17.40 per US dollar giving back part of its recent gains, as markets digested Banco de M\u00e9xico\u2019s decision to hold the policy rate at 7.00% and signal greater caution on future easing.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Banco de M\u00e9xico held the policy rate at 7.00%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Banco de M\u00e9xico",
+        "policy rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "as markets digested Banco de M\u00e9xico\u2019s decision to hold the policy rate at 7.00% and signal greater caution on future easing.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Banco de M\u00e9xico revised its inflation path higher through 2026.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Banco de M\u00e9xico",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Banxico acknowledged firmer inflation risks, revised its inflation path higher through 2026, and emphasised graduality, reinforcing expectations that real yield support will narrow only slowly rather than remain firmly anchored.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The peso remained vulnerable to external pressure.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "While the central bank\u2019s pause limited downside by discouraging near term rate cut bets, the peso remained vulnerable to external pressure as a firmer US dollar and elevated US yields continued to raise the opportunity cost of peso exposure.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Evidence that growth remains modest despite a Q4 rebound and lingering trade related uncertainty capped upside, encouraging profit taking after January\u2019s strong appreciation.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Domestically, evidence that growth remains modest despite a Q4 rebound and lingering trade related uncertainty capped upside, encouraging profit taking after January\u2019s strong appreciation.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Banco de M\u00e9xico\u2019s decision to hold the policy rate",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as markets digested Banco de M\u00e9xico\u2019s decision to hold the policy rate at 7.00% and signal greater caution on future easing.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "firmer inflation risks",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Banxico acknowledged firmer inflation risks, revised its inflation path higher through 2026, and emphasised graduality, reinforcing expectations that real yield support will narrow only slowly rather than remain firmly anchored.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "firmer US dollar and elevated US yields",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "While the central bank\u2019s pause limited downside by discouraging near term rate cut bets, the peso remained vulnerable to external pressure as a firmer US dollar and elevated US yields continued to raise the opportunity cost of peso exposure.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "growth remains modest",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Domestically, evidence that growth remains modest despite a Q4 rebound and lingering trade related uncertainty capped upside, encouraging profit taking after January\u2019s strong appreciation.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6625,
+  "error_messages": []
+}

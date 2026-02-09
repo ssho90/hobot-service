@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5617",
+  "extracted_at": "2026-02-07T16:25:01.553098",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Lower house elections",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Japanese lower house elections scheduled for this weekend.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan\u2019s Q4 GDP report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Quarterly GDP report for Japan expected to show a rebound.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Takaichi taking office",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The appointment of PM Takaichi and the subsequent policy shift.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Late January yen rally",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A significant rally in the yen driven by intervention speculation.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Japanese yen traded near 157 per dollar on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japanese yen"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Japanese yen traded near 157 per dollar on Thursday, hovering at its weakest level in nearly two weeks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The yen is down more than 1% so far this week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japanese yen"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "down more than 1% so far this week ahead of lower house elections this weekend",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The yen rallied 4.5% in late January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japanese yen"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The yen had rallied as much as 4.5% in late January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "PM Takaichi suggested a weak yen could benefit exporters.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "PM Takaichi",
+        "Japanese yen"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Takaichi suggested last weekend that a weak yen could benefit exporters",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ruling LDP is expected to gain seats in the upcoming election.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "PM Takaichi\u2019s ruling LDP is expected to gain seats in the election",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Expansionary fiscal policies are raising concerns over Japan\u2019s debt outlook.",
+      "claim_type": "analysis",
+      "author": "Investors",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "her push for expansionary fiscal policies raising concerns over Japan\u2019s debt outlook",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Japan's Q4 GDP is expected to rebound.",
+      "claim_type": "prediction",
+      "author": "Investors",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s Q4 GDP report due next week, which is expected to rebound after a sharp contraction in the prior quarter",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "PM Takaichi",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "her push for expansionary fiscal policies raising concerns over Japan\u2019s debt outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Japanese yen",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Takaichi suggested last weekend that a weak yen could benefit exporters",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Lower house elections",
+      "target_type": "Theme",
+      "target_ref": "Japanese yen",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "down more than 1% so far this week ahead of lower house elections this weekend",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-Japan joint currency intervention",
+      "target_type": "Theme",
+      "target_ref": "Japanese yen",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The yen had rallied as much as 4.5% in late January amid speculation of a US-Japan joint currency intervention",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11738,
+  "error_messages": []
+}

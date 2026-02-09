@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5633",
+  "extracted_at": "2026-02-07T16:22:41.646154",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Platinum futures price drop",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Platinum futures fell below $2,100 an ounce, retreating after a recent rebound.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Nomination of Kevin Warsh",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "President Trump nominated Kevin Warsh as the next Fed chair.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran talks",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The US and Iran scheduled a fresh round of talks.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Platinum futures fell below $2,100 an ounce.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Platinum"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Platinum futures fell below $2,100 an ounce, retreating after a recent rebound",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "South African production accounts for approximately 70% of global platinum output.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "South Africa",
+        "Platinum"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "South African production, accounting for roughly 70% of global output",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Governor Lisa Cook indicated she would not support additional rate cuts.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Lisa Cook",
+        "Federal Reserve"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Governor Lisa Cook indicating she would not support additional rate cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Kevin Warsh is perceived as being less inclined toward aggressive monetary easing.",
+      "claim_type": "analysis",
+      "author": "Market participants",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Kevin Warsh as the next Fed chair, seen as less inclined toward aggressive easing",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "High platinum prices may lead to reduced demand in the autocatalyst sector and substitution with palladium.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "elevated prices risked reducing autocatalyst purchases and encouraging substitution toward palladium",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The platinum market is experiencing structural undersupply.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "platinum markets remain structurally undersupplied",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US dollar",
+      "target_type": "Theme",
+      "target_ref": "Platinum futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "tracking a broader precious metals sell-off amid a rising US dollar",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh nomination",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reinforced expectations of a slower pace of US rate reductions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "South African production",
+      "target_type": "Theme",
+      "target_ref": "Platinum supply",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "South African production... constrained by chronic underinvestment and operational disruptions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-Iran talks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Geopolitical tensions are also in focus after the US and Iran scheduled a fresh round of talks",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9788,
+  "error_messages": []
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5675",
+  "extracted_at": "2026-02-07T15:42:29.869291",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver Price Tumble",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver experienced a significant price decline of 9.26%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver tumbled by 9.26%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver Tumbles by 9.26%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Silver",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver Tumbles by 9.26%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7229,
+  "error_messages": []
+}

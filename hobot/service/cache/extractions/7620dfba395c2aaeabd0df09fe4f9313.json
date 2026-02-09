@@ -1,0 +1,225 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5514",
+  "extracted_at": "2026-02-08T01:07:29.339026",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "RBI $10 billion 3-year dollar-rupee swap",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A scheduled swap by the Reserve Bank of India to influence liquidity and trading activity.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-India trade deal",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "A trade agreement reducing US tariffs on Indian goods from 50% to 18%.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "RBI policy repo rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The expected maintenance of the repo rate at 5.25% following previous cuts.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Indian rupee was valued at approximately 90.5 per dollar.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indian rupee",
+        "US dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Indian rupee edged lower to around 90.5 per dollar",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US-India trade deal reduces tariffs on Indian goods from 50% to 18%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "US",
+        "India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "reduces US tariffs on Indian goods from 50% to 18%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The RBI implemented 125 basis points of rate cuts in 2025.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "RBI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "after 125 bps of cuts in 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Corporates increased dollar purchases to hedge against import costs and overseas obligations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Corporates stepped up dollar purchases to hedge import costs and other overseas obligations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The RBI swap is expected to influence market liquidity and trading activity.",
+      "claim_type": "prediction",
+      "author": "investors",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "which could influence liquidity and trading activity.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The trade deal is expected to support exports in textiles, apparel, and industrial goods.",
+      "claim_type": "analysis",
+      "author": "Analysts",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Analysts note the deal supports exports in textiles, apparel, and industrial goods",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "India's trade deficit might restrict the immediate appreciation of the rupee.",
+      "claim_type": "prediction",
+      "author": "Analysts",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "though India\u2019s trade deficit may limit immediate rupee gains.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The RBI is expected to keep the repo rate steady at 5.25%.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The RBI is expected to maintain its policy repo rate at 5.25%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBI swap",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors monitored the Reserve Bank of India\u2019s $10 billion 3-year dollar-rupee swap... which could influence liquidity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-India trade deal",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the deal supports exports in textiles, apparel, and industrial goods",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "trade deficit",
+      "target_type": "Theme",
+      "target_ref": "Indian Rupee",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "India\u2019s trade deficit may limit immediate rupee gains.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "corporate dollar buying",
+      "target_type": "Theme",
+      "target_ref": "Indian Rupee",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Indian rupee edged lower... amid corporate dollar buying",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13652,
+  "error_messages": []
+}

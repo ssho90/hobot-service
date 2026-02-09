@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5835",
+  "extracted_at": "2026-02-07T14:29:30.279947",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "DAX 40 Recovery",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Frankfurt's DAX 40 rose 0.5% to above 24,600 on Friday after a weak start.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Earnings Season",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "The period during which public companies release their quarterly financial reports.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Stellantis News Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Bad news from Stellantis impacting the automotive sector.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The DAX 40 rose 0.5% to above 24,600 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "DAX 40"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Frankfurt's DAX 40 staged a recovery on Friday, rising 0.5% to above 24,600",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "German automotive stocks were negatively affected by news from Stellantis.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "German automotive stocks",
+        "Stellantis"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "German automotive stocks are hit by bad news from Stellantis",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Defense stocks Renk and Rheinmetall saw an increase in value.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Renk",
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "defense stocks of Renk and Rheinmetall are up",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bayer's stock price increased following successful research findings.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bayer"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bayer gained following successful research findings",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Global concerns regarding AI-driven disruption appeared to be decreasing.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Global concerns over AI-driven disruption appeared to ease",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "European indexes were supported by their lower exposure to the technology sector.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "European indexes also supported by their comparatively lower exposure to the tech sector",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "AI-driven disruption",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Global concerns over AI-driven disruption appeared to ease",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Tech sector exposure",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "European indexes also supported by their comparatively lower exposure to the tech sector",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Earnings season",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, the attention remained on the earnings season.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Stellantis",
+      "target_type": "Theme",
+      "target_ref": "German automotive stocks",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "German automotive stocks are hit by bad news from Stellantis",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12382,
+  "error_messages": []
+}

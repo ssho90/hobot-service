@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5624",
+  "extracted_at": "2026-02-07T16:23:31.617500",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Global tech rout",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A widespread sell-off in technology stocks globally that impacted investor sentiment in China.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Shanghai Composite decline",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Shanghai Composite index fell 0.9% to below 4,070 on Thursday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Shanghai Composite fell 0.9% to below 4,070, while the Shenzhen Component dropped 1.4% to 13,955 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shanghai Composite",
+        "Shenzhen Component"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Shanghai Composite fell 0.9% to below 4,070, while the Shenzhen Component dropped 1.4% to 13,955 on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Resource-linked firms including Zijin Mining, Hunan Gold Corp, and CMOC Group saw sharp losses.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Zijin Mining",
+        "Hunan Gold Corp",
+        "CMOC Group"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "sharp losses from Zijin Mining (-5.2%), Hunan Gold Corp (-9.9%), and CMOC Group (-6.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Clean energy stocks such as Goldwind Science, Contemporary Amperex, and Sungrow Power declined.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Goldwind Science",
+        "Contemporary Amperex",
+        "Sungrow Power"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Other notable decliners include clean energy stocks such as Goldwind Science (-7.9%), Contemporary Amperex (-2%) and Sungrow Power (-4.8%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors shied away from tech shares due to concerns over lofty valuations and heavy AI spending.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Investors shied away from tech shares amid concerns over lofty valuations, heavy AI spending, and potential disruption to traditional software business models",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The global tech rout weighed on market sentiment in China.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "ending a two-day rally as a global tech rout weighed on sentiment",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Global tech rout",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ending a two-day rally as a global tech rout weighed on sentiment",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Precious metals",
+      "target_type": "Theme",
+      "target_ref": "Resource-linked firms",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Resource-linked firms also faced renewed selling pressure as precious metals retreated",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI spending",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investors shied away from tech shares amid concerns over lofty valuations, heavy AI spending",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11204,
+  "error_messages": []
+}

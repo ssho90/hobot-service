@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5718",
+  "extracted_at": "2026-02-07T14:59:50.080907",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "South African Rand reaching 2-week low",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The South African rand eased toward 16.2 per USD, its lowest level since January 21.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The South African rand eased toward 16.2 per USD.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "South African rand",
+        "USD"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The South African rand eased toward 16.2 per USD",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold and platinum are South Africa's two key exports.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "gold",
+        "platinum",
+        "South Africa"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "gold and platinum, South Africa's two key exports",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The rand was pressured by a stronger US dollar and lower prices of precious metals.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "pressured by a stronger US dollar and lower prices of precious metals",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Broader risk-off sentiment weighed on the currency.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Broader risk-off sentiment weighed",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Investors often reduce exposure to emerging markets during periods of global market volatility.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "investors often reduced exposure to emerging markets during such periods",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US dollar",
+      "target_type": "Theme",
+      "target_ref": "South African rand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pressured by a stronger US dollar",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "precious metals prices",
+      "target_type": "Theme",
+      "target_ref": "South African rand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pressured by ... lower prices of precious metals",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "risk-off sentiment",
+      "target_type": "Theme",
+      "target_ref": "South African rand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Broader risk-off sentiment weighed",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "global market volatility",
+      "target_type": "Theme",
+      "target_ref": "emerging markets",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "volatility in global markets persisted and investors often reduced exposure to emerging markets",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8635,
+  "error_messages": []
+}

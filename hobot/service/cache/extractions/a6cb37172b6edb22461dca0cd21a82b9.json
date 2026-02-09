@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5487",
+  "extracted_at": "2026-02-08T01:13:44.596636",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan S&P Global Composite PMI Release January 2026",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the revised Composite PMI data for Japan showing an increase to 53.1.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s S&P Global Composite PMI rose to 53.1 in January 2026, up from 51.1 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "S&P Global"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s S&P Global Composite PMI rose to 53.1 in January 2026, above the flash estimate of 52.8 and up from 51.1 in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Export orders returned to growth for the first time since March 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Export orders also returned to growth for the first time since last March and at the strongest pace in more than four years.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Selling price inflation reached its highest rate in over 18 months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "selling price inflation accelerated to its fastest rate in over 18 months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The growth momentum was caused by stronger services activity and increased factory output.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Momentum was driven by a stronger pickup in services activity alongside a renewed increase in factory output.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "services activity",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Momentum was driven by a stronger pickup in services activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "factory output",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "alongside a renewed increase in factory output.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "staffing levels",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Firms continued to raise staffing levels at a solid clip as order backlogs accumulated.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "selling price inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "selling price inflation accelerated to its fastest rate in over 18 months.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12267,
+  "error_messages": []
+}

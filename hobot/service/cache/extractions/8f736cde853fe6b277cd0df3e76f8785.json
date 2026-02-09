@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5787",
+  "extracted_at": "2026-02-07T14:45:54.795978",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Malaysian Palm Oil Board data release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of palm oil data scheduled for February 10.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "China CPI and PPI readings",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming inflation data from China, the top buyer of palm oil.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Spring Festival and Ramadan",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Major seasonal holidays driving restocking demand in the palm oil market.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Malaysian palm oil futures fell below MYR 4,200 per tonne.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Malaysian palm oil futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Malaysian palm oil futures slipped for a second session to below MYR 4,200 per tonne on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "January palm oil exports increased by 14.9\u201317.9% month-on-month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "cargo surveyors",
+        "exports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "cargo surveyors reporting January exports up 14.9\u201317.9% month-on-month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "India's palm oil imports surged 51% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "India",
+        "imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Demand from top consumer India also improved in January, with imports surging 51% to a four-month high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Malaysia\u2019s palm oil inventories likely stopped a 10-month growth trend in January.",
+      "claim_type": "prediction",
+      "author": "Reuters",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Reuters projected Malaysia\u2019s inventories likely halted a 10-month rise in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Market sentiment was suppressed by upcoming Chinese economic data.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Sentiment was further restrained by upcoming CPI and PPI readings in China",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A weaker ringgit and strong shipment data prevented further price losses.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Losses were capped by a weaker ringgit and stronger shipment data",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "China CPI and PPI readings",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sentiment was further restrained by upcoming CPI and PPI readings in China",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Spring Festival and Ramadan",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by restocking ahead of the Spring Festival and Ramadan",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Weaker ringgit",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Losses were capped by a weaker ringgit",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rival edible oils",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rattled by weakness in rival edible oils on the Dalian and Chicago exchanges",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14226,
+  "error_messages": []
+}

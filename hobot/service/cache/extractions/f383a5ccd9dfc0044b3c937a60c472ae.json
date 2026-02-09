@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5657",
+  "extracted_at": "2026-02-07T15:42:59.808611",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Hungary December 2025 Retail Sales Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of retail sales data for Hungary for December 2025, showing a 3.5% year-on-year increase.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Retail sales in Hungary grew by 3.5% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hungary",
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Retail sales in Hungary grew by 3.5% year-on-year in December 2025, accelerating from a 2.5% rise in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Automotive fuel sales rose by 1.7% in December compared to 0.7% in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "automotive fuel sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "driven mainly by a faster rise in automotive fuel sales (1.7% vs 0.7% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Full-year retail sales for 2025 increased by 2.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hungary",
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For 2025 as a whole, retail sales went up by 2.9%, higher than the 2.6% rise recorded in 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Seasonally adjusted monthly retail trade rose by 0.2% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "retail trade"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, retail trade rose by 0.2%, following a 0.1% increase in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The acceleration in retail sales was primarily driven by automotive fuel sales.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "This was the highest increase since April, driven mainly by a faster rise in automotive fuel sales",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Growth in food and non-food sectors experienced a slowdown in December.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, growth slowed in food stores (2.1% vs. 2.6%) and non-food shops (4.3% vs. 4.6%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "automotive fuel sales",
+      "target_type": "Theme",
+      "target_ref": "Retail Sales",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven mainly by a faster rise in automotive fuel sales",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Retail Sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Retail sales in Hungary grew by 3.5% year-on-year in December 2025... For 2025 as a whole, retail sales went up by 2.9%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11980,
+  "error_messages": []
+}

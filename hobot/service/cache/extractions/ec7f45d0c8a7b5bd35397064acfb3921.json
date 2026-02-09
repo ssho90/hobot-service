@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5578",
+  "extracted_at": "2026-02-07T17:50:34.186876",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "National Bank of Poland February Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The National Bank of Poland kept its main interest rate unchanged at 4% in February.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "March Inflation Projection Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "A new inflation projection and final inflation figures for January and February will be published in March.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The National Bank of Poland kept its main interest rate unchanged at 4% in February.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "National Bank of Poland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The National Bank of Poland kept its main interest rate unchanged at 4% in February, as expected",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation slowed to 2.4% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Inflation slowed to 2.4% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The central bank's target range for inflation is 1.5% to 3.5%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "National Bank of Poland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the central bank\u2019s 1.5% to 3.5% target range",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Some analysts expected a 25 basis point cut in February.",
+      "claim_type": "analysis",
+      "author": "analysts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "views were split, with some analysts expecting a 25 basis point cut",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Policymakers are waiting for new macroeconomic forecasts before considering further easing.",
+      "claim_type": "prediction",
+      "author": "policymakers",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "policymakers wait for new macroeconomic forecasts before considering further easing",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The March projection will allow a clearer assessment of the disinflation trend's sustainability.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "allowing a clearer assessment of whether the recent disinflation trend is sustainable",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Macroeconomic forecasts",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "policymakers wait for new macroeconomic forecasts before considering further easing",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "A new inflation projection will be published in March, allowing a clearer assessment of whether the recent disinflation trend is sustainable.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Statistical basket changes",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "final inflation figures for January and February will also be released in March following changes to the statistical basket",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11522,
+  "error_messages": []
+}

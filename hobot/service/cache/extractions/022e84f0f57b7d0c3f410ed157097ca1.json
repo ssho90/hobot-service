@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5795",
+  "extracted_at": "2026-02-07T14:44:30.022001",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Moody\u2019s Indonesia Credit Rating Outlook Cut",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Moody\u2019s changed Indonesia\u2019s credit rating outlook from stable to negative citing policy predictability concerns.",
+      "impact_level": "high",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Indonesia 2025 GDP Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of annual GDP growth data for 2025 which missed government targets.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "MSCI Transparency Warning",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A warning from MSCI regarding transparency issues that led to a significant market selloff.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Forex Reserves Decline",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Indonesian foreign exchange reserves fell in December from a nine-month high.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Indonesian rupiah reached approximately IDR 16,880 per dollar on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesian rupiah",
+        "US Dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Indonesian rupiah dipped toward IDR 16,880 per dollar on Friday, moving closer to last month\u2019s record trough of 16,985.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Indonesia's GDP growth for 2025 was 5.11%, below the 5.2% target.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Indonesia",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "GDP growth reached 5.11% in 2025, missing the government\u2019s 5.2% target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "MSCI's transparency warning triggered a market selloff of over USD 80 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "MSCI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "MSCI\u2019s warning over transparency issues, which recently triggered a market selloff exceeding USD 80 billion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The dollar index reached a two-week high.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Dollar index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Globally, the dollar index notched a two-week high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Bank Indonesia may have room to lower interest rates due to the GDP miss.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reinforcing expectations that Bank Indonesia may have scope to ease policy further this year.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Declining policy predictability and governance issues are threatening Indonesia's credit credibility.",
+      "claim_type": "analysis",
+      "author": "Moody's",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "citing declining policy predictability. The rating agency highlighted concerns over policy effectiveness and weakening governance, cautioning that prolonged deterioration could erode Indonesia\u2019s long-standing credibility.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Broad risk-asset selloffs are driving demand for the US dollar as a safe haven.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "broad risk-asset selloffs lifted demand for safe havens.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Moody\u2019s Outlook Cut",
+      "target_type": "Theme",
+      "target_ref": "Rupiah",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Rupiah Faces Pressure from Moody\u2019s Outlook Cut",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "GDP Miss",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reinforcing expectations that Bank Indonesia may have scope to ease policy further this year.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Risk-asset selloffs",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "broad risk-asset selloffs lifted demand for safe havens.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "MSCI transparency warning",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "MSCI\u2019s warning over transparency issues, which recently triggered a market selloff exceeding USD 80 billion.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14448,
+  "error_messages": []
+}

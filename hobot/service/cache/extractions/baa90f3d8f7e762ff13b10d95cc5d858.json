@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5728",
+  "extracted_at": "2026-02-07T14:59:28.884125",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "EIA Weekly Natural Gas Storage Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The EIA reported a record 360 bcf draw for the week to January 30.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Arctic blast",
+      "event_type": "other",
+      "event_date": null,
+      "description": "A severe cold snap that occurred in the week prior to the report.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US natural gas futures fell more than 2% to $3.39 per MMBtu on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US natural gas futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US natural gas futures fell more than 2% to $3.39 per MMBtu on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The EIA reported a 360 bcf draw for the week to January 30.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "EIA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The EIA reported a record 360 bcf draw for the week to January 30",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Lower 48 output rose to approximately 106.6 bcfd in early February.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Lower 48"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Lower 48 output rising to about 106.6 bcfd in early February from January levels",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "LNG export flows reached 18.4 bcfd in February.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "LNG export flows"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "LNG export flows have strengthened to 18.4 bcfd in February, close to record highs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Warmer weather forecasts reduced demand concerns for natural gas.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "warmer weather forecasts reduced demand concerns",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The smaller-than-expected storage draw eased fears of tighter supply.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "below forecasts for a 374 bcf decline, easing fears of tighter supply",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Prices were pressured by expectations for milder temperatures and lower heating demand.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Prices were also pressured by expectations for milder temperatures and lower heating demand over the next two weeks",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "EIA storage report",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US natural gas futures fell more than 2% to $3.39 per MMBtu on Thursday after a record storage withdrawal came in smaller than expected",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Weather forecasts",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "warmer weather forecasts reduced demand concerns",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Production recovery",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Production has begun to recover, with Lower 48 output rising to about 106.6 bcfd in early February",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11731,
+  "error_messages": []
+}

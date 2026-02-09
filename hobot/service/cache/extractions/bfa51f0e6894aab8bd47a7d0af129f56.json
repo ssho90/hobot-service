@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5874",
+  "extracted_at": "2026-02-07T06:01:08.199361",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "China Foreign Exchange Reserves Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "China's foreign exchange reserves increased to USD 3.399 trillion, the highest level since 2015.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "PBOC Gold Reserve Update",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The People\u2019s Bank of China reported its fifteenth consecutive month of gold holding increases.",
+      "impact_level": "low",
+      "related_themes": [
+        "rates",
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "China\u2019s foreign exchange reserves increased by USD 41.2 billion to USD 3.399 trillion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China",
+        "USD"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "China\u2019s foreign exchange reserves increased by USD 41.2 billion to USD 3.399 trillion in January 2026, up from USD 3.358 trillion in December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The People\u2019s Bank of China increased gold holdings to 74.19 million fine troy ounces in January.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "People\u2019s Bank of China",
+        "gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "reserves rising slightly to 74.19 million fine troy ounces in January from 74.15 million in December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The value of China's gold holdings rose to USD 369.58 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China",
+        "USD",
+        "gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The value of these holdings climbed to USD 369.58 billion, up from USD 319.45 billion a month earlier.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The rise in foreign exchange reserves was supported by a weaker U.S. dollar.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "supported by a persistently weaker U.S. dollar.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "U.S. dollar",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "supported by a persistently weaker U.S. dollar.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "People\u2019s Bank of China",
+      "target_type": "Theme",
+      "target_ref": "gold holdings",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the People\u2019s Bank of China continued to add to its gold holdings for the fifteenth consecutive month",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13253,
+  "error_messages": []
+}

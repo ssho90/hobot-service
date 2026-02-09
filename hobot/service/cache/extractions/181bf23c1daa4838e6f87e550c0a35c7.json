@@ -1,0 +1,280 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5732",
+  "extracted_at": "2026-02-07T05:49:41.249843",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "ECB rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The ECB left its rates unchanged as largely expected.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "BoE rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The BoE held rates but multiple MPC members opted for cuts.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Eurozone's STOXX 50 fell 0.8% to 5,976.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Eurozone",
+        "STOXX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Eurozone's STOXX 50 fell 0.8% to 5,976",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The European STOXX 600 dropped 1.1% to 612.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "European",
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the European STOXX 600 dropped 1.1% to 612",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell fell 3.5% after missing profit estimates amid lower crude prices.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shell"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shell fell 3.5% after missing profit estimates amid lower crude prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BBVA tumbled 8.8% as its results failed to meet investor expectations.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BBVA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BBVA tumbled 8.8% as its results failed to meet investor expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Maersk fell 3.5% after warning of a decline in earnings in 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Maersk"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Maersk fell 3.5% after warning of a decline in earnings in 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Rheinmetall dropped 6.5% after cutting its guidance.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall dropped 6.5% after cutting its guidance.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BNP Paribas added 1.5% after raising its outlook for shareholder returns.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BNP Paribas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BNP Paribas added 1.5% after raising its outlook for shareholder returns",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ArcelorMittal inched higher after reporting a stronger-than-expected Q4 profit.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "ArcelorMittal"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ArcelorMittal inched higher after reporting a stronger-than-expected Q4 profit.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "President Lagarde downplayed the recent data of softer inflation and concerns of a stronger euro, limiting bets of incoming cuts this year.",
+      "claim_type": "analysis",
+      "author": "President Lagarde",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "President Lagarde downplayed the recent data of softer inflation and concerns of a stronger euro, limiting bets of incoming cuts this year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The ECB left its rates unchanged as largely expected during the session",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Softer inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "President Lagarde downplayed the recent data of softer inflation and concerns of a stronger euro, limiting bets of incoming cuts this year.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BoE",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Conversely, the BoE held rates but multiple MPC members opted for cuts.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Shell missing profit estimates",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Shell fell 3.5% after missing profit estimates amid lower crude prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "BBVA results failing to meet investor expectations",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "BBVA tumbled 8.8% as its results failed to meet investor expectations.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Maersk warning of a decline in earnings in 2026",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Maersk fell 3.5% after warning of a decline in earnings in 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rheinmetall cutting its guidance",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Rheinmetall dropped 6.5% after cutting its guidance.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9678,
+  "error_messages": []
+}

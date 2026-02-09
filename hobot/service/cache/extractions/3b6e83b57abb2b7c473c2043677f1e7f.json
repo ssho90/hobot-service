@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5584",
+  "extracted_at": "2026-02-07T17:49:18.204900",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global US Services PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the final US Services Purchasing Managers' Index for January 2026, showing growth in the sector.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global US Services PMI rose to 52.7 in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "US Services PMI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global US Services PMI rose to 52.7 in January of 2026 from 52.5 in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US services sector has experienced nearly three years of consecutive monthly growth.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US services output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The period marked nearly three years of monthly growth in the US services output",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment numbers in the services sector increased marginally.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The steady capacity demand drove employment numbers to increase marginally.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input inflation rose due to payroll increases and tariff-related cost pressures.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "input inflation",
+        "payrolls",
+        "tariffs"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, increases in payrolls and cost pressures from tariffs lifted input inflation",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "US services output outperformed other major economies.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "outperforming those from other major economies.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business confidence for the upcoming year fell to its lowest level in three months.",
+      "claim_type": "prediction",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking forward, business confidence for the upcoming year fell to its lowest in three months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "tariffs",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "robust activity in the domestic market was enough to offset softness for foreign clients amid the tariffs passed by the US",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "capacity demand",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The steady capacity demand drove employment numbers to increase marginally.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "tariffs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "cost pressures from tariffs lifted input inflation",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "payrolls",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "increases in payrolls... lifted input inflation",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10840,
+  "error_messages": []
+}

@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5700",
+  "extracted_at": "2026-02-07T05:51:59.139950",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The yield on the US 10-year Treasury note fell 4 bps to 4.24% on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US 10-year Treasury note"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The yield on the US 10-year Treasury note fell 4 bps to 4.24% on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US companies announced 108.4K job cuts last month, the highest January total since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US companies"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Challenger report showed US companies announced 108.4K job cuts last month, the highest January total since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial jobless claims rose to 231K, the highest in two months and well above forecasts of 212K.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "jobless claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "initial jobless claims rose to 231K, the highest in two months and well above forecasts of 212K",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US Treasury maintained its issuance guidance for the coming quarters, favouring a greater share of short-term bills over longer-dated bonds.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "US Treasury"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, the US Treasury maintained its issuance guidance for the coming quarters, favouring a greater share of short-term bills over longer-dated bonds",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Markets are pricing in a first Federal Reserve rate cut in June and a second potentially in September.",
+      "claim_type": "prediction",
+      "author": "markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "markets still pricing in a first reduction in June and a second potentially in September.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Weak Labour Data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The run of weaker labour data reinforced bets on Federal Reserve rate cuts, with markets still pricing in a first reduction in June and a second potentially in September.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Treasury Yields",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Treasury Yields Fall After Weak Labour Data",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Elevated interest rates",
+      "target_type": "Theme",
+      "target_ref": "borrowing costs",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "in an effort to manage borrowing costs amid elevated interest rates.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5190,
+  "error_messages": []
+}

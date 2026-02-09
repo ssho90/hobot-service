@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5885",
+  "extracted_at": "2026-02-09T01:08:36.951852",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan Bank Lending Growth Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Japan's bank lending rose 4.5% year-on-year in January 2026, marking the fastest pace since April 2021.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan's bank lending rose 4.5% year-on-year in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s bank lending rose 4.5% year-on-year in January 2026, up from a 4.4% gain in December and in line with market expectations, marking the fastest pace since April 2021.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Total outstanding loans across major, regional, and shinkin banks reached \u00a5663.8 trillion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "major banks",
+        "regional banks",
+        "shinkin banks"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Total outstanding loans across major, regional, and shinkin banks reached \u00a5663.8 trillion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Major banks saw a 5.8% increase in lending, while regional banks saw a 4.1% increase.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Major banks",
+        "regional banks"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Major banks led the expansion with a 5.8% increase, followed by regional banks at 4.1%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The modest rise in Shinkin bank lending reflects softer credit demand in certain parts of the economy.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Shinkin banks, local cooperative lenders serving small businesses and communities, saw a more modest 1.4% rise, reflecting softer credit demand in parts of the economy.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank Lending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan Bank Lending Growth Hits Near 5-Year High",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Shinkin banks",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting softer credit demand in parts of the economy.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9894,
+  "error_messages": []
+}

@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5722",
+  "extracted_at": "2026-02-07T15:00:32.552184",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "US500 Hit 7-week Low",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The United States Stock Market Index (US500) reached its lowest level in seven weeks, dropping to 6788.00 Index Points.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The US500 decreased to 6788.00 Index Points, marking its lowest level since December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "United States Stock Market Index",
+        "US500"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US500 decreased to 6788.00 Index Points, the lowest since December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The United States Stock Market Index (US500) declined by 2.23% over the previous four weeks.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "United States Stock Market Index",
+        "US500"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Over the past 4 weeks, United States Stock Market Index (US500) lost 2.23%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US500 has seen an increase of 11.61% over the last 12 months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "United States Stock Market Index",
+        "US500"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "in the last 12 months, it increased 11.61%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US500",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The United States Stock Market Index (US500) Hit 7-week Low",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US500",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "in the last 12 months, it increased 11.61%.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8603,
+  "error_messages": []
+}

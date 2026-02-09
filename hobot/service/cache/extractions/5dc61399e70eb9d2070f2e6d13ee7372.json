@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5688",
+  "extracted_at": "2026-02-07T05:54:08.803603",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "US natural gas futures were little changed at $3.45 per million British thermal units on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "natural gas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US natural gas futures were little changed at $3.45 per million British thermal units on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gas flows to the eight largest US LNG export plants averaged 18.3 bcfd so far in February, up from 17.8 bcfd in January and near December\u2019s record 18.5 bcfd.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "LNG"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Gas flows to the eight largest US LNG export plants averaged 18.3 bcfd so far in February, up from 17.8 bcfd in January and near December\u2019s record 18.5 bcfd",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US became the world\u2019s largest LNG exporter in 2023.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "LNG"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The US became the world\u2019s largest LNG exporter in 2023",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Production in the Lower 48 edged up to 106.4 bcfd but remains below December\u2019s record levels.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Lower 48"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Production in the Lower 48 edged up to 106.4 bcfd but remains below December\u2019s record levels.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Analysts expect heavy withdrawals during last week\u2019s Arctic blast to have shifted inventories from about 5% above normal to roughly 1% below normal for this time of year, tightening supply.",
+      "claim_type": "prediction",
+      "author": "analysts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Analysts expect heavy withdrawals during last week\u2019s Arctic blast to have shifted inventories from about 5% above normal to roughly 1% below normal for this time of year, tightening supply.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Weather is expected to turn mostly warmer nationwide through February 19, though the Northeast will remain colder for another week.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Weather is expected to turn mostly warmer nationwide through February 19, though the Northeast will remain colder for another week.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "strong LNG demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Gas flows to the eight largest US LNG export plants averaged 18.3 bcfd so far in February, up from 17.8 bcfd in January and near December\u2019s record 18.5 bcfd, reflecting strong global demand for US gas.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Russia\u2019s 2022 invasion of Ukraine",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The US became the world\u2019s largest LNG exporter in 2023 amid supply disruptions following Russia\u2019s 2022 invasion of Ukraine.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "tightening supply",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Analysts expect heavy withdrawals during last week\u2019s Arctic blast to have shifted inventories from about 5% above normal to roughly 1% below normal for this time of year, tightening supply.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6615,
+  "error_messages": []
+}

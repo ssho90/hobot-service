@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5476",
+  "extracted_at": "2026-02-08T01:16:01.637594",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Australian Dollar Rise",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Australian Dollar increased in value by 1.01%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Australian Dollar rose by 1.01%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australian Dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Australian Dollar Rises by 1.01%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Australian Dollar",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Australian Dollar Rises by 1.01%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 23688,
+  "error_messages": []
+}

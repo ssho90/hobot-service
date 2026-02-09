@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5599",
+  "extracted_at": "2026-02-07T16:30:00.921371",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Arctic cold spell",
+      "event_type": "other",
+      "event_date": null,
+      "description": "A recent period of extreme cold in the US that drove heating oil consumption.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Middle East geopolitical tensions",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Renewed tensions in the Middle East rebuilding risk premia in oil markets.",
+      "impact_level": "high",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Weekly Inventory Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Weekly data showing draws in crude and distillate inventories.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US heating oil futures rose toward $2.44 per gallon.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US heating oil futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US heating oil futures edged up toward $2.44 per gallon",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US crude inventories decreased by approximately 3.5 million barrels.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US crude inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "US crude inventories posted another weekly draw of roughly 3.5m barrels",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Distillate stocks recorded a draw of approximately 5.55 million barrels in the prior week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "distillate stocks"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "distillate stocks recorded a sharp ~5.55m barrel draw in the prior week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Warmer-than-normal weather forecasts are expected to limit heating demand through mid-month.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Warmer-than-normal forecasts through mid-month continue to limit expectations for additional heating demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Higher oil benchmarks have increased distillate prices due to geopolitical risk premia.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "higher oil benchmarks have lifted distillate prices as renewed geopolitical tensions in the Middle East rebuilt risk premia",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Market fundamentals for heating oil remain constructive.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Fundamentals remain constructive",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "crude feedstock costs",
+      "target_type": "Theme",
+      "target_ref": "heating oil futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "finding support after recent losses as firmer crude feedstock costs countered a softer near-term demand outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Middle East geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "renewed geopolitical tensions in the Middle East rebuilt risk premia",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Arctic cold spell",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signalling strong consumption that already materialised during the recent Arctic cold spell",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "warmer-than-normal forecasts",
+      "target_type": "Theme",
+      "target_ref": "heating demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Warmer-than-normal forecasts through mid-month continue to limit expectations for additional heating demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8947,
+  "error_messages": []
+}

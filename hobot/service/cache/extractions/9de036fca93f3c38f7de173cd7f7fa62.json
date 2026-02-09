@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5764",
+  "extracted_at": "2026-02-07T14:50:40.924539",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "KOSPI Market Slump",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The benchmark KOSPI fell more than 3% to around 4,995, dropping below the 5,000 mark.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wall Street Overnight Drop",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A decline in US tech stocks driven by concerns over AI-related capital spending.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "KOSPI 200 Futures Sidecar Trigger",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A sell-side sidecar was briefly triggered in KOSPI 200 futures during early trading due to intensified losses.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The KOSPI index fell more than 3% to approximately 4,995 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "KOSPI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The benchmark KOSPI fell more than 3% to around 4,995 on Friday, extending losses below the 5,000 mark",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Samsung Electronics and SK hynix shares both declined by more than 3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Samsung Electronics",
+        "SK hynix"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Samsung Electronics and SK hynix falling more than 3% each and dragging the index lower",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "A sell-side sidecar was triggered in KOSPI 200 futures during early trading.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "KOSPI 200 futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a sell-side sidecar briefly triggered in KOSPI 200 futures during early trading",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Hyundai Motor shares fell 5.1%, while SK Square fell 6.2% and Hanwha Aerospace fell 6.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hyundai Motor",
+        "SK Square",
+        "Hanwha Aerospace"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "notable decliners including Hyundai Motor (-5.1%), LG Energy Solution (-3.7%), SK Square (-6.2%), Hanwha Aerospace (-6.1%), and HD Hyundai Heavy Industries (-4.4%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Weakness in US tech stocks weighed on local semiconductor heavyweights.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "as weakness in US tech stocks weighed on local semiconductor heavyweights",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Excessive AI-related capital spending could pressure profitability and valuations across major tech names.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "driven by concerns that excessive AI-related capital spending could pressure profitability and valuations across major tech names",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US tech stocks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weakness in US tech stocks weighed on local semiconductor heavyweights",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Foreign investor selling",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "dragging the index lower amid heavy foreign investor selling",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI-related capital spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "concerns that excessive AI-related capital spending could pressure profitability and valuations",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Program-driven trades",
+      "target_type": "Theme",
+      "target_ref": "KOSPI",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Losses were further intensified by program-driven trades",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 18390,
+  "error_messages": []
+}

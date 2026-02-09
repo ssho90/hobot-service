@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5777",
+  "extracted_at": "2026-02-07T05:45:51.130409",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Vietnam's retail sales increased by 9.3% year-on-year in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Vietnam"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vietnam\u2019s retail sales increased by 9.3% year-on-year in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail sales growth eased from a 9.8% rise in the previous month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "easing from a 9.8% rise in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail of goods, accounting 77% of overall retail sales, grew by 9.3%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "retail of goods, accounting 77% of overall retail sales, grew by 9.3%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Retail of goods accelerated from an 8.6% rise in the prior period.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "accelerating from an 8.6% rise in the prior period.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, retail trade rose by 2.6% in January.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Retail Trade"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, retail trade rose by 2.6% in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly retail trade slowed from a 3.9% gain in the preceding month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Retail Trade"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "slowing from a 3.9% gain in the preceding month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the full year 2025, retail sales were up 9.2% compared with 2024.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Retail Sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the full year 2025, retail sales were up 9.2% compared with 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Retail Sales Growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vietnam\u2019s retail sales increased by 9.3% year-on-year in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Retail Sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "For the full year 2025, retail sales were up 9.2% compared with 2024.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4867,
+  "error_messages": []
+}

@@ -1,0 +1,255 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5637",
+  "extracted_at": "2026-02-07T16:21:00.812246",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indonesia 2025 GDP Growth Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Indonesia's annual GDP growth data for 2025.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Central Bank GDP Forecast",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The central bank's maintenance of the GDP growth forecast for 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Natural disasters in three provinces",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Natural disasters occurring in three provinces last year which impacted economic performance.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Imposition of new US tariffs",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "New tariffs imposed by the United States affecting trade dynamics.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Indonesia's economy expanded by 5.11% in 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s economy expanded by 5.11% in 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The official GDP growth target for 2025 was 5.2%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "missing the official target of 5.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private consumption grew by 4.98% in the latest period.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Private consumption"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "faster growth in private consumption (4.98% vs 4.94% in Q3)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Fixed investment growth reached 5.09%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Fixed investment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "fixed investment (5.09% vs 4.61%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Export growth accelerated to 7.03%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Exports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "export growth accelerated (7.03% vs 6.85%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Import growth eased to 4.77%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "import growth eased (4.77% vs 8.15%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The central bank maintained its 2026 GDP growth forecast at 4.9%\u20135.7%.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "central bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Last month, the central bank maintained its GDP growth forecast at 4.9%\u20135.7% for 2026.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The missing of the GDP target reflects the impact of natural disasters.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting the impact of natural disasters in three provinces last year",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Domestic demand is weakening due to softer purchasing power and a depreciating rupiah.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting weakening domestic demand pressured by softer purchasing power and a depreciating rupiah",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "natural disasters",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting the impact of natural disasters in three provinces last year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "depreciating rupiah",
+      "target_type": "Theme",
+      "target_ref": "domestic demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weakening domestic demand pressured by... a depreciating rupiah",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US tariffs",
+      "target_type": "Theme",
+      "target_ref": "export growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "export growth accelerated (7.03% vs 6.85%), despite the imposition of new US tariffs",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "softer purchasing power",
+      "target_type": "Theme",
+      "target_ref": "domestic demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weakening domestic demand pressured by softer purchasing power",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10203,
+  "error_messages": []
+}

@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5592",
+  "extracted_at": "2026-02-07T16:30:18.664093",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Uruguay January 2026 Inflation Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Uruguay's consumer price index data for January 2026, showing a continued slowdown in annual inflation to its lowest level since 2005.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation",
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Uruguay's annual inflation rate eased to 3.46% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Uruguay"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Uruguay\u2019s annual inflation eased to 3.46% in January 2026 from 3.65% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The annual inflation rate in January 2026 is the lowest since August 2005.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Uruguay"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the lowest level since August 2005.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly consumer prices in Uruguay rose by 0.9% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Uruguay"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose 0.9%, rebounding from a 0.1% decline in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Healthcare price inflation slowed to 1.7% from 5.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "healthcare"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "healthcare (1.7% vs 5.4%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Clothing and footwear prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices fell further in clothing and footwear (-3.3% vs -2.6%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Transport prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices fell further in... transport (-3.5% vs -1.4%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Healthcare sector",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Inflation also slowed for... healthcare (1.7% vs 5.4%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 16951,
+  "error_messages": []
+}

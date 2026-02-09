@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5831",
+  "extracted_at": "2026-02-07T14:31:47.905350",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "FAO Food Price Index January 2026 Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The FAO Food Price Index slipped 0.4% to 123.9 points in January 2026, marking a fifth consecutive monthly decline.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The FAO Food Price Index fell 0.4% to 123.9 points in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "FAO",
+        "FAO Food Price Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The FAO Food Price Index slipped 0.4% to 123.9 points in January 2026, marking a fifth consecutive monthly decline and a fresh low level since August 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Dairy costs declined by 5% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Dairy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Also, dairy cost tumbled 5%, the seventh consecutive monthly decline, driven largely by lower world cheese and butter prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Meat prices declined 0.4%, reaching their lowest level since May 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Meat"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meat declined 0.4%, the lowest since May 2025, mainly reflecting lower pig meat prices",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Cereal costs increased by 0.2% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Cereal"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In contrast, cereal costs edged up 0.2%, reaching the highest since May 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Oil prices rose 2.1% due to higher palm, soy, and sunflower oil prices.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Oil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Oil prices also jumped 2.1%, amid higher world prices of palm, soy and sunflower oils",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Global sugar supplies are expected to increase in the current season.",
+      "claim_type": "prediction",
+      "author": "FAO",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "driven by expectations of increased global sugar supplies in the current season",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A significant production rebound is anticipated for sugar in India.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "largely underpinned by a significant production rebound anticipated in India",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Thailand has favourable prospects for sugar production.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "and favourable prospects in Thailand.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "FAO Food Price Index",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The FAO Food Price Index slipped 0.4% to 123.9 points in January 2026, marking a fifth consecutive monthly decline",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "India production rebound",
+      "target_type": "Theme",
+      "target_ref": "Sugar prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sugar prices declined 1%... largely underpinned by a significant production rebound anticipated in India",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Thailand prospects",
+      "target_type": "Theme",
+      "target_ref": "Sugar prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sugar prices declined 1%... and favourable prospects in Thailand.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Increased global sugar supplies",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sugar prices declined 1%, driven by expectations of increased global sugar supplies in the current season",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 16142,
+  "error_messages": []
+}

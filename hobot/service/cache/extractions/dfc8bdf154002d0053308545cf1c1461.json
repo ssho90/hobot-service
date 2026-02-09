@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5652",
+  "extracted_at": "2026-02-07T15:44:22.448904",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indonesia 2025 GDP Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of Indonesia's annual economic growth data for 2025, showing 5.11% growth.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January Forex Reserves Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming release of Indonesia's foreign exchange reserves for January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Bank Indonesia Policy Easing",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Cumulative 150bp interest rate cut implemented by Bank Indonesia since September 2024.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Indonesian rupiah weakened toward IDR 16,830 per dollar on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesian rupiah",
+        "US dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Indonesian rupiah weakened toward IDR 16,830 per dollar on Thursday, continuing its decline from the prior session.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Indonesia\u2019s economy grew 5.11% in 2025, missing the government's 5.2% target.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "fresh data showed Indonesia\u2019s economy grew 5.11% in 2025, falling short of the government\u2019s 5.2% target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Bank Indonesia has cut rates by a cumulative 150bp since September 2024.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "even after a cumulative 150bp cut since September 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The dollar index reached a near two-week high.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "dollar index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the dollar index climbed to a near two-week high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Markets scaled back expectations for the pace of potential Fed rate cuts.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "markets scaled back expectations for the pace of potential Fed rate cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Bank Indonesia may have room to ease policy further this year.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The outcome reinforced bets that Bank Indonesia may have room to ease policy further this year",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A move toward IDR 15,000 per dollar is achievable under supportive policy measures.",
+      "claim_type": "opinion",
+      "author": "Purbaya Yudhi Sadewa",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Finance Minister Purbaya Yudhi Sadewa, who said a move toward IDR 15,000 per dollar is achievable under supportive policy measures",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Indonesian economic output remains below potential.",
+      "claim_type": "analysis",
+      "author": "Bank Indonesia",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "it has emphasized the need to support growth amid views that output remains below potential",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Firmer greenback",
+      "target_type": "Theme",
+      "target_ref": "Rupiah weakening",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The move largely tracked a firmer greenback, as the dollar index climbed to a near two-week high",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "GDP Data (5.11%)",
+      "target_type": "Theme",
+      "target_ref": "Bank Indonesia policy easing",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The outcome reinforced bets that Bank Indonesia may have room to ease policy further this year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Supportive policy measures",
+      "target_type": "Theme",
+      "target_ref": "IDR 15,000 exchange rate",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a move toward IDR 15,000 per dollar is achievable under supportive policy measures",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Fed rate cut expectations",
+      "target_type": "Theme",
+      "target_ref": "Dollar index",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the dollar index climbed to a near two-week high after markets scaled back expectations for the pace of potential Fed rate cuts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 17936,
+  "error_messages": []
+}

@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5875",
+  "extracted_at": "2026-02-09T01:11:01.441175",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "NZX 50 Monday Trade",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "New Zealand stocks extended losses for a second straight session.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "China CPI and PPI Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Key inflation readings from China due later this week.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Dow Jones topping 50,000",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Dow Jones Industrial Average reached the 50,000 mark for the first time.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "New Zealand Q1 Business Inflation Expectations",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming local data providing signals on domestic pricing pressures.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The NZX 50 slipped 50 points, or 0.4%, to 13,394 in early trade on Monday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "NZX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The NZX 50 slipped 50 points, or 0.4%, to 13,394 in early trade on Monday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Fisher & Paykel Healthcare shares declined by 2.3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Fisher & Paykel Healthcare"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Among notable laggards were Fisher & Paykel Healthcare (-2.3%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Dow Jones topped the 50,000 mark for the first time on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Dow Jones"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "with the Dow Jones topping the 50,000 mark for the first time",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Market sentiment remained cautious due to upcoming Chinese inflation data.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Sentiment remained cautious as traders waited for key inflation readings from China",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "U.S. equity gains were driven by optimism regarding growth and potential Fed rate cuts.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "boosted by optimism over U.S. growth prospects and the potential for Fed rate cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Upcoming local data could provide signals on domestic demand and pricing pressures.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "all of which could provide fresh signals on domestic demand and pricing pressures",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "China inflation data",
+      "target_type": "Theme",
+      "target_ref": "NZ market sentiment",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sentiment remained cautious as traders waited for key inflation readings from China, New Zealand\u2019s largest trading partner",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "U.S. equities rally",
+      "target_type": "Theme",
+      "target_ref": "NZX 50 performance",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Still, declines were limited by a rally on U.S. equities Friday",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Fed rate cuts",
+      "target_type": "Theme",
+      "target_ref": "U.S. growth prospects",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "boosted by optimism over U.S. growth prospects and the potential for Fed rate cuts",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14864,
+  "error_messages": []
+}

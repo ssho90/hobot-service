@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5672",
+  "extracted_at": "2026-02-07T15:42:02.344472",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Taiwan January 2026 Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Taiwan's annual inflation rate for January 2026, showing a significant slowdown.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Taiwan's annual inflation rate slowed to 0.69% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Taiwan",
+        "Inflation Rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The annual inflation rate in Taiwan slowed to 0.69% in January 2026, sharply down from 1.31% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation has remained below the central bank's 2% target for nine consecutive months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Central Bank",
+        "Inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This was also the ninth consecutive month below the central bank\u2019s 2% target.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Transportation and communication costs experienced a deflation of 1.95%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Transportation",
+        "Communication"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Downward pressures came from continued deflation in transportation and communication (-1.95% vs -1.34% in December)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Education and entertainment costs declined by 0.97%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Education",
+        "Entertainment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "declines in education and entertainment costs (-0.97% vs 1.69%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Seasonally adjusted monthly consumer prices rose by 0.10%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Consumer Prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted monthly basis, consumer prices rose 0.10%, following a 0.14% gain in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The January 2026 inflation rate is the lowest level since January 2021.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "marking the lowest level since January 2021.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Transportation and communication",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Downward pressures came from continued deflation in transportation and communication",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Education and entertainment costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Downward pressures came from... declines in education and entertainment costs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Central bank",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This was also the ninth consecutive month below the central bank\u2019s 2% target.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9611,
+  "error_messages": []
+}

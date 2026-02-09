@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5501",
+  "extracted_at": "2026-02-08T01:10:36.564756",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global Hong Kong SAR PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The S&P Global Hong Kong SAR PMI rose to 52.3 in January 2026, signaling a sixth consecutive month of private-sector growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global Hong Kong SAR PMI rose to 52.3 in January 2026 from 51.9 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "Hong Kong SAR"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global Hong Kong SAR PMI rose to 52.3 in January 2026 from December\u2019s three-month low of 51.9",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Foreign sales expanded at the fastest pace in nearly three years.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hong Kong private sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Foreign sales expanded at the fastest pace in nearly three years",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job shedding continued in the private sector, though it was marginal.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hong Kong private sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "continued job shedding, though marginal",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Supplier performance improved for the second straight month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Hong Kong private sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "supplier performance improved for the second straight month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Business confidence slipped to a five-month low.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, business confidence slipped to a five-month low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "U.S. trade policy and market competition are weighing down business confidence.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "weighed down by concerns over U.S. trade policy and intensifying market competition",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New business inflows",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signaling a sixth consecutive month of private-sector growth driven by stronger new business inflows",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "U.S. trade policy",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weighed down by concerns over U.S. trade policy",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Raw material and labor expenses",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input costs rose, reflecting higher raw material and labor expenses",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Job shedding",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "continued job shedding, though marginal",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12635,
+  "error_messages": []
+}

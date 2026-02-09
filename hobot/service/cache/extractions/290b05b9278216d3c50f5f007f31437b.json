@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5789",
+  "extracted_at": "2026-02-07T14:45:40.025758",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "RBI February 2026 Monetary Policy Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The first monetary policy decision of the year where the RBI maintained the key repo rate at 5.25%.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "December 2025 Rate Cut",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The RBI cut the repo rate by 25 bps in the final meeting of 2025.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Union Budget",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Government budget that boosted spending and influenced economic growth expectations.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Reserve Bank of India maintained its key repo rate at 5.25% in February 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank of India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Reserve Bank of India (RBI) maintained its key repo rate at 5.25% during its February 2026 meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "India's annual inflation was 1.33% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "India\u2019s annual inflation accelerated to 1.33% in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "India's GDP grew by 8.2% in the September quarter.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "GDP grew 8.2% in the September quarter.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The RBI kept the SDF rate at 5.0% and the MSF rate at 5.50%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Reserve Bank of India"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The RBI also kept the SDF rate at 5.0% and the MSF rate at 5.50%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The RBI raised its GDP growth forecast for FY2025/26 to 7.4%.",
+      "claim_type": "prediction",
+      "author": "Reserve Bank of India",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the RBI raised its GDP growth forecast for FY2025/26 to 7.4%, up from its earlier estimate of 7.3%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation for FY26 is projected to be 2.1%.",
+      "claim_type": "prediction",
+      "author": "Reserve Bank of India",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, inflation for FY26 is projected at 2.1%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Union Budget and US-India trade deals raised expectations for stronger economic growth.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The decision comes after the Union Budget boosted government spending and US\u2013India trade deals raised expectations of stronger economic growth.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Union Budget",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Union Budget boosted government spending ... raised expectations of stronger economic growth.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US\u2013India trade deals",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US\u2013India trade deals raised expectations of stronger economic growth.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation outlook",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "maintained its key repo rate ... amid confidence in a softer inflation outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "growth prospects",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "maintained its key repo rate ... amid confidence in ... improving growth prospects.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14063,
+  "error_messages": []
+}

@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5817",
+  "extracted_at": "2026-02-07T14:41:18.500905",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of German Export Data for December 2025",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Germany reported a significant rebound in export growth for December 2025, reaching a 20-month high.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Germany\u2019s exports grew 4.0% month-on-month to \u20ac133.3 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Germany\u2019s exports grew 4.0% month-on-month to a 20-month high of \u20ac133.3 billion in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports to the United States rose by 8.9% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany",
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "led by shipments to the US, Germany\u2019s largest market, which rose 8.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Germany's total exports for the full year of 2025 reached \u20ac1.57 trillion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Germany"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the full year of 2025, Germany\u2019s total exports reached \u20ac1.57 trillion, up 1.0% from 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The export growth in December 2025 significantly outperformed market expectations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "well above forecasts of a 1.0% increase",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The increase in exports was driven by stronger demand from both EU and non-EU regions.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Export growth was supported by stronger shipments to both EU and non-EU countries.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "German Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Germany\u2019s exports grew 4.0% month-on-month to a 20-month high of \u20ac133.3 billion",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Market",
+      "target_type": "Theme",
+      "target_ref": "German Exports",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "led by shipments to the US, Germany\u2019s largest market, which rose 8.9%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "EU and non-EU shipments",
+      "target_type": "Theme",
+      "target_ref": "Export growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Export growth was supported by stronger shipments to both EU and non-EU countries.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10872,
+  "error_messages": []
+}

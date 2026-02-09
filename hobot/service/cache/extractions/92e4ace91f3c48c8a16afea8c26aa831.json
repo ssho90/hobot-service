@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5685",
+  "extracted_at": "2026-02-07T15:06:33.534290",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England February Policy Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England kept its Bank Rate unchanged at 3.75% in February with a 5 to 4 vote.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Bank of England maintained the Bank Rate at 3.75% in February.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Bank of England kept its Bank Rate unchanged at 3.75% in February",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The interest rate decision was reached by a 5 to 4 vote.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Monetary Policy Committee"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "with a narrow 5 to 4 vote",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Bank Rate has been cut by 150 basis points since August 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Bank Rate has already been reduced by 150 basis points since August 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Inflation is expected to return to the 2% target starting in April.",
+      "claim_type": "prediction",
+      "author": "Bank of England policymakers",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Inflation remains above the 2% target but is expected to fall back to around that level from April",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Additional interest rate cuts are probable in the future.",
+      "claim_type": "prediction",
+      "author": "Monetary Policy Committee",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The committee signalled that further rate cuts are likely but will depend on incoming inflation data",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The danger of long-term persistent inflation has decreased.",
+      "claim_type": "analysis",
+      "author": "Policymakers",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Policymakers noted that risks of persistent inflation have diminished",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "energy price developments",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "expected to fall back to around that level from April due partly to energy price developments",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "subdued economic growth",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pay growth and services inflation have continued to ease, reflecting subdued economic growth and rising slack in the labour market",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "softening jobs market",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weaker demand and a softening jobs market pose downside risks",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10346,
+  "error_messages": []
+}

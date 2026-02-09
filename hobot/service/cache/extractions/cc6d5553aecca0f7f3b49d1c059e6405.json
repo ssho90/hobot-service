@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5506",
+  "extracted_at": "2026-02-08T01:09:17.879175",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P Global Russia Services PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the Russia Services PMI data for January 2026, showing an increase to 53.1.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P Global Russia Services PMI climbed to 53.1 in January 2026 from 52.3 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P Global",
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P Global Russia Services PMI climbed to 53.1 in January 2026 from 52.3 in December, signaling a fourth consecutive month of expansion.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation eased to its lowest level since May 2009.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "However, input cost inflation eased to its lowest level since May 2009, reflecting reduced wage bills following lower employment and a moderation in some material prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output inflation eased to a seven-month low and remained below its long-term average.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "That said, output inflation eased to a seven-month low and remained below its long-term average.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Growth in output and new orders gained momentum in January 2026.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The reading also marked the fastest expansion in the services sector since January 2025, as growth in output and new orders gained momentum.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business sentiment ticked down to its second-weakest level since January 2023.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, business sentiment ticked down to its second-weakest level since January 2023.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Stronger demand conditions",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Stronger demand conditions also supported a fresh rise in employment.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Higher value-added tax",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the price front, both input and output costs rose, partly driven by higher value-added tax.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Higher costs",
+      "target_type": "Theme",
+      "target_ref": "Output charges",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, output charges rose solidly as firms continued to pass higher costs on to customers.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "S&P Global Russia Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The S&P Global Russia Services PMI climbed to 53.1 in January 2026 from 52.3 in December, signaling a fourth consecutive month of expansion.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12766,
+  "error_messages": []
+}

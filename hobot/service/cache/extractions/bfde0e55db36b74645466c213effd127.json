@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5662",
+  "extracted_at": "2026-02-07T05:55:50.633970",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The HCOB Construction PMI in France was 43.5 in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "France",
+        "HCOB Construction PMI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Construction PMI in France came in at 43.5 in January 2026, broadly unchanged from December and November.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The construction sector in France has been in a severe downturn since June 2022.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "France",
+        "construction sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The data signaled another sharp contraction in construction sector activity, extending the severe downturn that began in June 2022.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New orders in the French construction sector fell significantly.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "France",
+        "construction sector",
+        "new orders"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "New orders fell significantly, though less than in December, prompting constructors to scale back material purchases; the reduction, however, was the softest since May 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Supplier delivery times lengthened for the eighth consecutive month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "supplier delivery times"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Supplier delivery times lengthened for the eighth consecutive month, though delays were moderate and the weakest since July.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment levels in the French construction sector continued to fall.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "France",
+        "construction sector",
+        "employment levels"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment levels continued to fall, but job losses eased for a second month and were only marginal overall.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Firms forecast a further decline in construction activity over the next 12 months.",
+      "claim_type": "prediction",
+      "author": "firms",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, expectations remained bleak, with firms forecasting a further decline in activity over the next 12 months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "HCOB Construction PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The HCOB Construction PMI in France came in at 43.5 in January 2026, broadly unchanged from December and November. The data signaled another sharp contraction in construction sector activity, extending the severe downturn that began in June 2022.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New orders",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "New orders fell significantly, though less than in December, prompting constructors to scale back material purchases; the reduction, however, was the softest since May 2024.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment levels",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment levels continued to fall, but job losses eased for a second month and were only marginal overall.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Supplier delivery times",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Supplier delivery times lengthened for the eighth consecutive month, though delays were moderate and the weakest since July.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7040,
+  "error_messages": []
+}

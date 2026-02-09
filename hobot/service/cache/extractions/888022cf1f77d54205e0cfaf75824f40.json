@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5694",
+  "extracted_at": "2026-02-07T15:05:10.876509",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Mexico November 2025 Gross Fixed Investment Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Mexico's gross fixed investment data for November 2025, showing a continued slump.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Mexico\u2019s gross fixed investment fell 6.4% year on year in November 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mexico"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mexico\u2019s gross fixed investment fell 6.4% year on year in November 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Investment in machinery and equipment decreased by 14.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "machinery and equipment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Spending on machinery and equipment plunged 14.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Construction activity rose by 1.3% in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "construction"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, construction rose 1.3%, rebounding from a 0.6% contraction in October",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Residential activity increased by 10.3% while non-residential building fell by 6.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "residential activity",
+        "non-residential building"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "as a 10.3% surge in residential activity offset a 6.5% fall in non-residential building",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The 6.4% decline in fixed investment was worse than market expectations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "missing forecasts of a 5.6% decline",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The month-on-month investment growth showed a deceleration in momentum.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "investment edged up 0.4% month on month, slowing from October\u2019s 0.9% gain",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Gross fixed investment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Mexico\u2019s gross fixed investment fell 6.4% year on year in November 2025... marking the 15th straight month of contraction.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Machinery and equipment spending",
+      "target_type": "Theme",
+      "target_ref": "Gross fixed investment",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Spending on machinery and equipment plunged 14.5%, led by a 19.5% fall in both domestic and imported transport equipment.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Residential activity",
+      "target_type": "Theme",
+      "target_ref": "Construction",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "as a 10.3% surge in residential activity offset a 6.5% fall in non-residential building",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10343,
+  "error_messages": []
+}

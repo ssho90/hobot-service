@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5556",
+  "extracted_at": "2026-02-08T00:57:55.913179",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Corporate Earnings Season",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "A fresh wave of corporate earnings reports from major companies including Eli Lilly, AMD, and Uber.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ADP Employment Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming report providing data on US private sector employment for January.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor",
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "S&P 500 futures rose 0.3%, Nasdaq 100 futures gained 0.2%, and Dow Jones futures rose by nearly 200 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq 100",
+        "Dow Jones"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "S&P 500 futures up 0.3%, Nasdaq 100 futures gaining 0.2%, and Dow Jones futures rising by nearly 200 points",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Eli Lilly shares increased by over 6% in premarket trading after exceeding earnings and revenue expectations.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Eli Lilly"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Eli Lilly shares surged more than 6% in premarket trading after the company reported earnings and revenue above expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "AMD shares dropped nearly 9% following the release of their financial forecast.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "AMD"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "AMD plunged nearly 9% after the company\u2019s forecast disappointed",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Uber shares fell 7.5% after missing both earnings and guidance targets.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Uber"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Uber fell 7.5% following a miss on both earnings and guidance",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Eli Lilly provided a positive financial outlook for the year 2026.",
+      "claim_type": "prediction",
+      "author": "Eli Lilly",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "issued upbeat 2026 guidance",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The ADP employment report will offer valuable data regarding the state of the US labor market.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Traders are now awaiting the ADP employment report for further insight into US labour market conditions in January",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "AMD's future outlook was considered unsatisfactory by the market.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "the company\u2019s forecast disappointed",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Corporate earnings",
+      "target_type": "Theme",
+      "target_ref": "US Futures",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Investors turned their attention to a fresh wave of corporate earnings. Eli Lilly shares surged... US futures were higher",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ADP employment report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "awaiting the ADP employment report for further insight into US labour market conditions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AMD forecast",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "AMD plunged nearly 9% after the company\u2019s forecast disappointed",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10554,
+  "error_messages": []
+}

@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5876",
+  "extracted_at": "2026-02-09T01:10:45.896600",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan December 2025 Current Account Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Japan's current account data for December 2025, showing a surplus below market expectations.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s current account surplus fell to JPY 728.8 billion in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "Current Account Surplus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s current account surplus fell to JPY 728.8 billion in December 2025 from JPY 1,071.8 billion in the same month a year earlier",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The primary income surplus decreased to JPY 1,189.4 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Primary income surplus"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The primary income surplus inched lower to JPY 1,189.4 billion from 1,248.9 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The services account recorded a deficit of JPY 340.1 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Services account"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the services account shifted to a deficit of JPY 340.1 billion from a small surplus of JPY 0.11 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The goods account surplus rose to JPY 134.9 billion with exports growing at 4.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Goods account",
+        "Exports",
+        "Imports"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the surplus of goods account surged to JPY 134.9 billion from JPY 0.54 billion in the previous year, as exports (4.5%) rose faster than imports (3.7%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The current account surplus was lower than what market analysts had predicted.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "falling short of market forecasts of JPY 1,060 billion",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "Goods account surplus",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the surplus of goods account surged to JPY 134.9 billion... as exports (4.5%) rose faster than imports (3.7%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Services account deficit",
+      "target_type": "Theme",
+      "target_ref": "Current account surplus",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the services account shifted to a deficit of JPY 340.1 billion... Japan\u2019s current account surplus fell to JPY 728.8 billion",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Current account surplus",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan\u2019s current account surplus fell to JPY 728.8 billion in December 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14351,
+  "error_messages": []
+}

@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5812",
+  "extracted_at": "2026-02-07T14:35:35.947523",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of France's January 2026 Official Reserve Assets",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "France reported its official reserve assets for January 2026, showing a record high of \u20ac409.26 billion.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "France's official reserve assets reached a record high of \u20ac409.26 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "France"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "France\u2019s official reserve assets increased to \u20ac409.26 billion in January 2026, reaching a fresh record high, from \u20ac362.74 billion in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Gold reserves increased to \u20ac334.05 billion in January from \u20ac287.48 billion in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Gold reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "driven by increases in gold reserves (\u20ac334.05 billion vs \u20ac287.48 billion in December)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Foreign currency reserves rose to \u20ac30.55 billion in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Foreign currency reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "and foreign currency reserves (\u20ac30.55 billion vs \u20ac30.36 billion)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Claims on the IMF and other reserve assets saw declines in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "IMF"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the other hand, declines were seen in claims on the IMF (\u20ac38.20 billion vs \u20ac38.41 billion) and other reserve assets (\u20ac6.46 billion vs \u20ac6.49 billion).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The rise in total reserves was primarily driven by the increase in gold and foreign currency reserves.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "This represents a rise of \u20ac46.52 billion, driven by increases in gold reserves (\u20ac334.05 billion vs \u20ac287.48 billion in December) and foreign currency reserves (\u20ac30.55 billion vs \u20ac30.36 billion).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Gold reserves",
+      "target_type": "Theme",
+      "target_ref": "France's official reserve assets",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by increases in gold reserves (\u20ac334.05 billion vs \u20ac287.48 billion in December)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Foreign currency reserves",
+      "target_type": "Theme",
+      "target_ref": "France's official reserve assets",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "and foreign currency reserves (\u20ac30.55 billion vs \u20ac30.36 billion)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "France's official reserve assets",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "France\u2019s official reserve assets increased to \u20ac409.26 billion in January 2026",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10746,
+  "error_messages": []
+}

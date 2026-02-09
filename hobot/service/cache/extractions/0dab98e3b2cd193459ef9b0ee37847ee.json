@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5769",
+  "extracted_at": "2026-02-07T14:47:27.935525",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Indonesia Foreign Exchange Reserves Decline (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Indonesia's foreign exchange reserves fell to USD 154.6 billion from a nine-month high.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Rupiah Exchange Rate Stabilization",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Measures implemented by Bank Indonesia to stabilize the rupiah amid global market uncertainty.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Indonesia's foreign exchange reserves stood at USD 154.6 billion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia",
+        "Bank Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s foreign exchange reserves declined to USD 154.6 billion in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Foreign exchange reserves in December were USD 156.5 billion.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "down from a nine-month high of USD 156.5 billion in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The reserve level covers 6.3 months of imports.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The current level is sufficient to cover 6.3 months of imports",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The international adequacy benchmark for reserves is approximately three months of imports.",
+      "fact_type": "market_data",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "well above the international adequacy benchmark of around three months of imports",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The decline in reserves was primarily caused by government debt payments and currency stabilization.",
+      "claim_type": "analysis",
+      "author": "Bank Indonesia",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The decline was primarily driven by the government\u2019s foreign debt payments and rupiah exchange rate stabilization measures implemented by Bank Indonesia",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There is increasing uncertainty in global financial markets.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "in response to rising uncertainty in global financial markets",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Indonesia's current reserve levels are well above international adequacy standards.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "well above the international adequacy benchmark of around three months of imports",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "government\u2019s foreign debt payments",
+      "target_type": "Theme",
+      "target_ref": "foreign exchange reserves",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The decline was primarily driven by the government\u2019s foreign debt payments",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "rupiah exchange rate stabilization measures",
+      "target_type": "Theme",
+      "target_ref": "foreign exchange reserves",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The decline was primarily driven by... rupiah exchange rate stabilization measures implemented by Bank Indonesia",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "rising uncertainty in global financial markets",
+      "target_type": "Theme",
+      "target_ref": "rupiah exchange rate stabilization measures",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "stabilization measures implemented by Bank Indonesia in response to rising uncertainty in global financial markets",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "foreign exchange reserves",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The current level is sufficient to cover 6.3 months of imports",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11638,
+  "error_messages": []
+}

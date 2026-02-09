@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5818",
+  "extracted_at": "2026-02-07T14:41:32.085601",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Shanghai Composite Friday Close",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Shanghai Composite slipped 0.25% to close at 4,066 on Friday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Global Technology Share Selloff",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A global selloff in technology shares spilled into the Chinese market.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "BYD Sales Data Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Release of disappointing sales data from BYD affecting the EV sector.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Shanghai Composite slipped 0.25% to close at 4,066, while the Shenzhen Component fell 0.33% to 13,907 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shanghai Composite",
+        "Shenzhen Component"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Shanghai Composite slipped 0.25% to close at 4,066, while the Shenzhen Component fell 0.33% to 13,907 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Specific Chinese tech stocks including Zhongji Innolight, Eoptolink Technology, and Cambricon Technologies recorded declines.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Zhongji Innolight",
+        "Eoptolink Technology",
+        "BlueFocus Intelligent",
+        "Leo Group",
+        "Cambricon Technologies"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Chinese tech stocks recorded sharp declines, including Zhongji Innolight (-3.9%), Eoptolink Technology (-5%), BlueFocus Intelligent (-0.8%), Leo Group (-4.1%), and Cambricon Technologies (-2%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "For the week, the Shanghai and Shenzhen indexes fell 1.27% and 2.11%, respectively.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shanghai index",
+        "Shenzhen index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the week, the Shanghai and Shenzhen indexes fell 1.27% and 2.11%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The tech rout is driven by concerns over massive AI spending and disruption of software business models.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The tech rout has been driven by concerns over massive AI spending and the potential disruption of traditional software business models.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Volatility in metals and cryptocurrency markets dampened risk appetite.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Heightened volatility in metals and cryptocurrency markets further dampened risk appetite.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "BYD's disappointing sales data raised concerns about profit prospects for the Chinese EV sector.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "disappointing sales data from BYD raised concerns about profit prospects across China\u2019s electric vehicle sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Global selloff in technology shares",
+      "target_type": "Theme",
+      "target_ref": "Mainland stocks",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mainland stocks extending losses for a second straight session as a global selloff in technology shares spilled into China.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI spending concerns",
+      "target_type": "Theme",
+      "target_ref": "Tech rout",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The tech rout has been driven by concerns over massive AI spending",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Metals and cryptocurrency volatility",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Heightened volatility in metals and cryptocurrency markets further dampened risk appetite.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Slowing domestic demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "profit prospects across China\u2019s electric vehicle sector amid slowing domestic demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13105,
+  "error_messages": []
+}

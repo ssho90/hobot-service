@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5491",
+  "extracted_at": "2026-02-08T01:12:55.289925",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of RatingDog China General Composite PMI (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The RatingDog China General Composite PMI rose to 51.6 in January 2026, marking a 3-month peak.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The RatingDog China General Composite PMI rose to 51.6 in January 2026 from 51.3 in the previous month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "RatingDog",
+        "China"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The RatingDog China General Composite PMI rose to 51.6 in January 2026 from 51.3 in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private-sector activity in China has expanded for eight consecutive months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China",
+        "private-sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The index signaled an eighth consecutive month of expansion in private-sector activity",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Composite output charges increased for the first time in 14 months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, composite output charges increased for the first time in 14 months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The increase in total new business was supported by a renewed rise in overseas demand.",
+      "claim_type": "analysis",
+      "author": "RatingDog",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Total new business increased at a faster pace, supported by a renewed rise in overseas demand.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Stronger inflows of new work prompted firms to resume hiring.",
+      "claim_type": "analysis",
+      "author": "RatingDog",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Stronger inflows of new work prompted firms to resume hiring",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RatingDog China General Composite PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The index signaled an eighth consecutive month of expansion in private-sector activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Overseas demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Total new business increased at a faster pace, supported by a renewed rise in overseas demand.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New work",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Stronger inflows of new work prompted firms to resume hiring",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting continued rises in input costs, although the pace of cost inflation eased compared with December.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13812,
+  "error_messages": []
+}

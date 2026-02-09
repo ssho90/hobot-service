@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5866",
+  "extracted_at": "2026-02-07T05:40:55.366414",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Total US consumer credit rose by $24.05 billion in December 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "US Consumer Credit"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Total US consumer credit rose by $24.05 billion in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The increase in consumer credit is equivalent to an increase of about 5.7% at an annual rate.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "US Consumer Credit"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "It is equivalent to an increase of about 5.7% at an annual rate.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Revolving credit increased by $13.85 billion in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Revolving credit"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Revolving credit increased by $13.85 billion in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Nonrevolving credit rose $10.20 billion in December.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Nonrevolving credit"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Nonrevolving credit, which includes auto and student loans, rose $10.20 billion in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US Consumer Credit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Total US consumer credit rose by $24.05 billion in December 2025, following an upwardly revised $4.70 billion gain in November and way above market expectations of an $8 billion increase.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 3611,
+  "error_messages": []
+}

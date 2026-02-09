@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5523",
+  "extracted_at": "2026-02-08T01:05:41.906046",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Sweden Services PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Services PMI in Sweden fell to 54.3 in January 2026, indicating a slowdown in growth.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Services PMI in Sweden fell to 54.3 in January 2026 from 56.3 in the previous month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Sweden",
+        "Services PMI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Services PMI in Sweden fell to 54.3 in January 2026 from a downwardly revised 56.3 in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The new orders sub-index dropped to 55.2 in January, a six-month low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "new orders"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "new orders, which dropped to 55.2 from 59.5 in December, reaching a six-month low.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The employment index fell to 49.7 in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "employment index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment index (49.7 vs 49.8)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The index for raw and intermediate goods prices rose to 60.1, the highest level in a year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "raw and intermediate goods prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the index for raw and intermediate goods prices rising to 60.1, the highest level in a year, from 59.5 in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "It is too early to determine if the current slump in services activity is temporary.",
+      "claim_type": "analysis",
+      "author": "J\u00f6rgen Kennemar",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "It is too early to determine whether it is a temporary slump or not.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The current slowdown in services activity is likely temporary due to company optimism.",
+      "claim_type": "prediction",
+      "author": "J\u00f6rgen Kennemar",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Companies are still optimistic in their business plans, which suggests that it is a temporary slowdown.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This marked the softest pace of growth since August 2025 and brought the index below its historical average of 55.6.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "price pressures",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Additionally, price pressures in the services sector intensified, with the index for raw and intermediate goods prices rising to 60.1",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "employment index",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment index (49.7 vs 49.8)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "new orders",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "All major sub-indices declined, led by new orders, which dropped to 55.2 from 59.5 in December",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11009,
+  "error_messages": []
+}

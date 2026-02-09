@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5497",
+  "extracted_at": "2026-02-08T01:11:35.656426",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan's snap lower house election",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "A national election where Prime Minister Sanae Takaichi's ruling LDP seeks voter backing for new fiscal and security strategies.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan's 10-year bond auction",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A government bond auction that showed softer demand and higher yields compared to previous sessions.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s 10-year government bond yield held steady around 2.25% on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "10-year government bond"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s 10-year government bond yield held steady around 2.25% on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 10-year bond auction produced an average yield of 2.249%, higher than the previous 2.095%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "10-year bonds"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The sale produced an average yield of 2.249%, sharply higher than the 2.095% recorded at the previous auction.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The bid-to-cover ratio for the bond auction was 3.02.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The bid-to-cover ratio stood at 3.02, below both last month\u2019s level and the 12-month average.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ruling LDP is expected to gain more seats in the national election.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Prime Minister Sanae Takaichi\u2019s ruling LDP is expected to gain more seats in the national election",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Japanese bonds and the yen have come under pressure due to expansionary fiscal policies.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Japanese bonds and the yen have come under pressure since Takaichi took office as she pushes for expansionary fiscal policies",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Expansionary policies are raising concerns about Japan\u2019s fiscal outlook due to fears of debt-funded spending.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "raising concerns about Japan\u2019s fiscal outlook on fears of debt-funded spending.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The bond auction showed softer demand because of election jitters.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "an auction of Japan\u2019s 10-year bonds this week showed softer demand on election jitters.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Japan's snap lower house election",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan\u2019s 10-year government bond yield held steady around 2.25% on Wednesday, remaining range-bound for the past two weeks as investors prepared for this weekend\u2019s snap lower house election.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Sanae Takaichi",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "she seeks voter backing for increased spending, tax cuts and a new security strategy.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Expansionary fiscal policies",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "raising concerns about Japan\u2019s fiscal outlook on fears of debt-funded spending.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Election jitters",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "an auction of Japan\u2019s 10-year bonds this week showed softer demand on election jitters.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 16653,
+  "error_messages": []
+}

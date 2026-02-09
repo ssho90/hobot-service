@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5659",
+  "extracted_at": "2026-02-07T15:43:24.495620",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ECB Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank's scheduled meeting to decide on interest rates.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Euro Area Inflation Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of January inflation data for the euro area.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Euro area inflation eased to 1.7% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Euro area"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Data released Wednesday showed euro area inflation eased to 1.7% in January, the lowest since September 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Core inflation in the euro area slipped to 2.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Euro area"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "core inflation unexpectedly slipped to 2.2%, its lowest level since October 2021",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ECB has maintained its current policy since June.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECB"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The ECB has held policy steady since June",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The ECB is expected to keep interest rates unchanged.",
+      "claim_type": "prediction",
+      "author": "Market consensus",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The European Central Bank is widely expected to keep interest rates unchanged on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Further euro appreciation could lead the ECB to resume rate cuts.",
+      "claim_type": "analysis",
+      "author": "Martin Kocher",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Austria\u2019s Martin Kocher warned that further appreciation could push the ECB to resume rate cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The ECB's current policy is in a 'good place'.",
+      "claim_type": "opinion",
+      "author": "Christine Lagarde",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "President Christine Lagarde expected to reiterate that policy is in a \u201cgood place.\u201d",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Dollar depreciation is a key factor for the ECB's outlook.",
+      "claim_type": "analysis",
+      "author": "Fran\u00e7ois Villeroy de Galhau",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "France\u2019s Fran\u00e7ois Villeroy de Galhau pointed to the dollar\u2019s recent depreciation as a key factor shaping the bank\u2019s outlook",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Stronger euro",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "policymakers weigh the impact of a stronger euro... on the inflation outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Chinese imports",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a wave of low-priced Chinese imports on the inflation outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Euro appreciation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "further appreciation could push the ECB to resume rate cuts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Dollar depreciation",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pointed to the dollar\u2019s recent depreciation as a key factor shaping the bank\u2019s outlook",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12274,
+  "error_messages": []
+}

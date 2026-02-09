@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5699",
+  "extracted_at": "2026-02-07T15:06:22.680941",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England left interest rates unchanged at 3.75% with a narrow 5-4 vote split.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Appointment of Peter Mandelson as UK ambassador to the US",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Prime Minister Keir Starmer appointed Peter Mandelson as the UK ambassador to the US, leading to political scrutiny.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The British pound fell below $1.36, reaching its lowest point since January 22.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "British pound",
+        "Sterling"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The British pound fell below $1.36, its weakest level since January 22",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Bank of England maintained interest rates at 3.75%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Bank of England left interest rates unchanged at 3.75%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Monetary Policy Committee vote was split 5-4.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "MPC",
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "policymakers narrowly voting 5\u20134 in favor of keeping rates steady",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The Bank of England's tone was more dovish than market expectations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "struck a more dovish tone than markets had anticipated",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "CPI inflation is projected to return to the 2% target beginning in April.",
+      "claim_type": "prediction",
+      "author": "Four MPC members",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "arguing that CPI inflation is expected to fall back towards the 2% target from April",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Risks to the economy from weak demand and a loosening labor market are becoming more significant.",
+      "claim_type": "analysis",
+      "author": "Bank of England",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "downside risks linked to weaker demand and a loosening labor market have become more prominent",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Political uncertainty regarding Keir Starmer's leadership is putting downward pressure on the pound.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Sterling was also pressured by rising political uncertainty, as questions emerged over the durability of Prime Minister Keir Starmer\u2019s leadership",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England Interest Rate Decision",
+      "target_type": "Theme",
+      "target_ref": "Sterling",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sterling Slides as BoE Turns More Dovish",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Four MPC members backed an immediate 25 basis point cut... arguing that CPI inflation is expected to fall back towards the 2% target",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "labor",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "downside risks linked to weaker demand and a loosening labor market have become more prominent",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Political uncertainty",
+      "target_type": "Theme",
+      "target_ref": "Sterling",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Sterling was also pressured by rising political uncertainty",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14540,
+  "error_messages": []
+}

@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5483",
+  "extracted_at": "2026-02-08T01:14:30.014150",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan S&P Global Services PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the revised services purchasing managers' index for Japan in January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan\u2019s S&P Global Services PMI rose to 53.7 in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan",
+        "S&P Global"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s S&P Global Services PMI rose to 53.7 in January 2026, surpassing the flash estimate of 53.4 and December\u2019s 51.6.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation in Japan's services sector reached its lowest level in nearly two years.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "input cost inflation eased to its lowest in nearly two years",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Selling price inflation for Japanese services firms reached a seven-month high.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "selling price inflation climbed to a seven-month high as firms passed on costs.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Business confidence in Japan's services sector has weakened to its lowest level since July.",
+      "claim_type": "analysis",
+      "author": "S&P Global",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, business confidence weakened to its lowest since July, reflecting concerns over global conditions, softer tourism demand, and persistent labor shortages.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New orders",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Growth was fueled by stronger new orders, the quickest in four months, supported by marketing successes, new client wins, and firmer foreign demand.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Backlogs",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "backlogs accumulated at the sharpest rate since last September, prompting firms to expand capacity through hiring.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input cost inflation eased to its lowest in nearly two years, but selling price inflation climbed to a seven-month high as firms passed on costs.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Labor shortages",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "business confidence weakened to its lowest since July, reflecting concerns over global conditions, softer tourism demand, and persistent labor shortages.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9033,
+  "error_messages": []
+}

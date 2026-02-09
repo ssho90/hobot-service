@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5874",
+  "extracted_at": "2026-02-07T05:40:31.711511",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "China\u2019s foreign exchange reserves increased by USD 41.2 billion to USD 3.399 trillion in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "China",
+        "foreign exchange reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "China\u2019s foreign exchange reserves increased by USD 41.2 billion to USD 3.399 trillion in January 2026, up from USD 3.358 trillion in December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "China's foreign exchange reserves reached the highest level since November 2015.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "China",
+        "foreign exchange reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This marked the seventh consecutive monthly rise and the highest level since November 2015, supported by a persistently weaker U.S. dollar.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The People\u2019s Bank of China increased its gold holdings for the fifteenth consecutive month.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "People\u2019s Bank of China",
+        "gold holdings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, the People\u2019s Bank of China continued to add to its gold holdings for the fifteenth consecutive month, with reserves rising slightly to 74.19 million fine troy ounces in January from 74.15 million in December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "China\u2019s gold reserves rose to 74.19 million fine troy ounces in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "China",
+        "gold reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, the People\u2019s Bank of China continued to add to its gold holdings for the fifteenth consecutive month, with reserves rising slightly to 74.19 million fine troy ounces in January from 74.15 million in December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The value of China's gold holdings climbed to USD 369.58 billion in January 2026.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "China",
+        "gold holdings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The value of these holdings climbed to USD 369.58 billion, up from USD 319.45 billion a month earlier.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "In 2025, China\u2019s foreign exchange reserves increased in 11 months, rising by USD 155.512 billion over the year.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "China",
+        "foreign exchange reserves"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In 2025, China\u2019s foreign exchange reserves increased in 11 months, rising by USD 155.512 billion over the year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "China's foreign exchange reserves",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "China\u2019s foreign exchange reserves increased by USD 41.2 billion to USD 3.399 trillion in January 2026, up from USD 3.358 trillion in December 2025.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "weaker U.S. dollar",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "This marked the seventh consecutive monthly rise and the highest level since November 2015, supported by a persistently weaker U.S. dollar.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7274,
+  "error_messages": []
+}

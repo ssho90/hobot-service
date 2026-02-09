@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5505",
+  "extracted_at": "2026-02-08T01:09:35.276671",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P/ASX 200 Wednesday Trading Session",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Australian stock market finished higher on Wednesday, driven by commodity-linked shares.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran Tensions",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Escalating tensions between the US and Iran impacting bullion and oil prices.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "China Metals Stockpiling",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "China's activity in stockpiling metals contributing to a rebound in copper prices.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P/ASX 200 finished 0.8% higher at 8,928 on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P/ASX 200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P/ASX 200 finished 0.8% higher at 8,928 on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The mining sub-index jumped 3.7%, its biggest intraday gain since April 10, 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "mining sub-index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The heavyweight mining sub-index jumped 3.7%, its biggest intraday gain since April 10, 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BHP shares reached a record high of A$52.27.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BHP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BHP, Australia\u2019s largest listed company, climbed as much as 4.5% to a record A$52.27",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Tech stocks fell 9.4% to a two-year low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "tech stocks"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, tech stocks plunged 9.4% to a two-year low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Higher interest rates support bank profitability in the long-term.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "expectations that higher interest rates support bank profitability in long-term",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "AI is creating more competition for software makers.",
+      "claim_type": "opinion",
+      "author": "investors",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "investors worried about AI creating more competition for software makers",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Improved risk sentiment contributed to the metals rally.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "copper rebounding on China stockpiling and improved risk sentiment",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US-Iran tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Gold miners and energy firms also advanced as bullion and oil prices rose amid escalating US-Iran tensions.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "interest rates",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "expectations that higher interest rates support bank profitability in long-term",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "China stockpiling",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "copper rebounding on China stockpiling",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI competition",
+      "target_type": "Theme",
+      "target_ref": "tech stocks",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "tech stocks plunged 9.4%... as investors worried about AI creating more competition for software makers",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 16800,
+  "error_messages": []
+}

@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5791",
+  "extracted_at": "2026-02-07T14:43:35.268531",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "RBI Policy Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of India held its policy rate at 5.25% following a previous cut.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-India Trade Deals",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Trade agreements signed between the US and India earlier in the week.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Government Budget Measures",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Budget measures aimed at boosting manufacturing and exports.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wall Street Tech Rout",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A persistent decline in technology stocks on Wall Street overnight.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Sensex fell 386 points, or 0.5%, to 82,928 in Friday morning deals.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Sensex"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Sensex fell 386 points, or 0.5%, to 82,928 in Friday morning deals",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The RBI held its policy rate at 5.25% following a 25 bps cut at the December meeting.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "RBI"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the RBI held its policy rate at 5.25% following a 25 bps cut at the December meeting",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The RBI upwardly revised its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "RBI",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the RBI\u2019s upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Technology stocks fell 2.1%, with TCS down 2.4% and Tech Mahindra down 2.1%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "TCS",
+        "Tech Mahindra"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "technology stocks, which fell 2.1% amid the global rout, weighed down by TCS (-2.4%) and Tech Mahindra (-2.1%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The broader Indian market tracked a downbeat session on Wall Street due to a tech rout.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The broader market tracked a downbeat session on Wall Street overnight amid a persistent tech rout.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "US-India trade deals and budget measures helped limit the market's losses.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "US\u2013India trade deals earlier this week and the government\u2019s budget measures to boost manufacturing and exports helped cap losses.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The RBI's GDP growth forecast revision prevented the stock market from falling further.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the RBI\u2019s upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326 prevented deeper declines.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "RBI Policy Rate Decision",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the RBI held its policy rate at 5.25% following a 25 bps cut at the December meeting.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street Tech Rout",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The broader market tracked a downbeat session on Wall Street overnight amid a persistent tech rout.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "GDP growth forecast",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the RBI\u2019s upward revision of its GDP growth forecast to 7.4% from 7.3% for FY2025\u201326",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Government Budget Measures",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "government\u2019s budget measures to boost manufacturing and exports helped cap losses.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13658,
+  "error_messages": []
+}

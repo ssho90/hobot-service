@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5718",
+  "extracted_at": "2026-02-07T05:50:17.640771",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "South African Rand eased toward 16.2 per USD, the lowest since January 21.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "South African Rand",
+        "USD"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The South African rand eased toward 16.2 per USD, the lowest since January 21",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "stronger US dollar",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "South African Rand at Over 2-Week Low The South African rand eased toward 16.2 per USD, the lowest since January 21, pressured by a stronger US dollar and lower prices of precious metals, particularly gold and platinum, South Africa's two key exports. Broader risk-off sentiment weighed, as volatility in global markets persisted and investors often reduced exposure to emerging markets during such periods.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "lower prices of precious metals",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "South African Rand at Over 2-Week Low The South African rand eased toward 16.2 per USD, the lowest since January 21, pressured by a stronger US dollar and lower prices of precious metals, particularly gold and platinum, South Africa's two key exports. Broader risk-off sentiment weighed, as volatility in global markets persisted and investors often reduced exposure to emerging markets during such periods.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "volatility in global markets",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Broader risk-off sentiment weighed, as volatility in global markets persisted and investors often reduced exposure to emerging markets during such periods.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "South African Rand",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Broader risk-off sentiment weighed, as volatility in global markets persisted and investors often reduced exposure to emerging markets during such periods.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 3805,
+  "error_messages": []
+}

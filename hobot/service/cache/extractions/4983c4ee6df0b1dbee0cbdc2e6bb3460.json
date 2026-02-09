@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5529",
+  "extracted_at": "2026-02-08T01:04:31.686731",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Eurozone flash CPI release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming release of inflation data for the Eurozone.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US ADP jobs report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming private payrolls data from the United States.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor",
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The European Central Bank's scheduled interest rate announcement.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Bank of England rate decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England's scheduled interest rate announcement.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Credit Agricole Q4 earnings",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Fourth-quarter financial results for Credit Agricole.",
+      "impact_level": "medium",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The STOXX 50 index increased by 0.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "STOXX 50 up 0.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The broader STOXX 600 index decreased by 0.2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "broader STOXX 600 slipped 0.2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Credit Agricole's fourth-quarter profit was lower than what analysts had predicted.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Credit Agricole"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Credit Agricole fell more than 2% after posting fourth-quarter profit that missed analysts\u2019 forecasts.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Market participants anticipate Eurozone inflation to have slowed to 1.7%.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Markets expect inflation in the bloc to have eased to 1.7% last month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The ECB and the Bank of England are expected to maintain current interest rates on Thursday.",
+      "claim_type": "prediction",
+      "author": "Markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Both the ECB and the Bank of England are widely expected to leave rates unchanged on Thursday.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A significant downside surprise in inflation could cause concern for policymakers due to the euro's strength.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "a sharper downside surprise could fuel concerns among policymakers already wary of the euro\u2019s rapid appreciation.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Eurozone flash CPI",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors awaited major releases including the Eurozone flash CPI",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US ADP jobs report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "investors awaited major releases including... the US ADP jobs report.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "ECB",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ECB... widely expected to leave rates unchanged",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "euro\u2019s rapid appreciation",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "policymakers already wary of the euro\u2019s rapid appreciation.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13523,
+  "error_messages": []
+}

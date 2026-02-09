@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5608",
+  "extracted_at": "2026-02-07T16:28:10.837341",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Alphabet Earnings Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Alphabet reported earnings and flagged a sharp increase in AI spending for the year.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ADP Employment Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Report showing private payroll growth for January.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth",
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wednesday Trading Session",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A session characterized by heavy selling in technology stocks and a rotation into other sectors.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "S&P 500 and Nasdaq 100 futures rose on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq 100"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "S&P 500 and Nasdaq 100 futures rose on Thursday following two straight days of heavy selling",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Alphabet shares fell more than 1% in extended trading.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Alphabet"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In extended trading, Google-parent Alphabet slid more than 1%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ADP report showed private payroll growth of 22K in January.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "ADP",
+        "private payroll"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ADP report showing private payroll growth slowed sharply to just 22K in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The S&P 500 and Nasdaq Composite fell 0.51% and 1.51% respectively on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "In regular trading on Wednesday, the S&P 500 and Nasdaq Composite fell 0.51% and 1.51%, respectively",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Dip buyers entered the market following tech stock selling.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "as dip buyers stepped in and as investors weighed the latest earnings results",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Alphabet's increased AI spending plans supported the stock prices of Nvidia and Broadcom.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "a move that nonetheless buoyed AI-linked names such as Nvidia (1.9%) and Broadcom (6.5%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Investors are rotating out of the technology sector into more reasonably valued sectors.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "as investors rotated out of tech and into more reasonably valued sectors",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The ADP data indicates that labor demand is cooling.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reinforcing signs of cooling labor demand",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ADP report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "ADP report showing private payroll growth slowed sharply... reinforcing signs of cooling labor demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI disruption concerns",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "dragged down by losses in software stocks amid concerns that AI could disrupt the sector\u2019s business models",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Alphabet AI spending",
+      "target_type": "Theme",
+      "target_ref": "Nvidia",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "flagging a sharp increase in AI spending this year, a move that nonetheless buoyed AI-linked names such as Nvidia",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Investor rotation",
+      "target_type": "Theme",
+      "target_ref": "Dow Jones",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Dow Jones rose 0.53% as investors rotated out of tech and into more reasonably valued sectors",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13487,
+  "error_messages": []
+}

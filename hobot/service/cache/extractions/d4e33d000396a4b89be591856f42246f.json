@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5775",
+  "extracted_at": "2026-02-07T05:45:40.978265",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Vietnam\u2019s annual inflation rate slowed to 2.53% in January 2026, the lowest since July 2023, down from 3.48% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Vietnam",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vietnam\u2019s annual inflation rate slowed to 2.53% in January 2026, the lowest since July 2023, down from 3.48% in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Inflation eased across most sub-components, particularly food and foodstuff services (3.64% vs 4.20% in December), driven by a decline in food costs (-1.22%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "inflation",
+        "food costs"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Inflation eased across most sub-components, particularly food and foodstuff services (3.64% vs 4.20% in December), driven by a decline in food costs (-1.22%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Deflation deepened for transport (-3.76% vs -0.55%) and information and communication (-0.28% vs -0.25%).",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "deflation",
+        "transport",
+        "information",
+        "communication"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Deflation deepened for transport (-3.76% vs -0.55%) and information and communication (-0.28% vs -0.25%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On a monthly basis, consumer prices inched up 0.05%, following a 0.19% gain in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "consumer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices inched up 0.05%, following a 0.19% gain in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The core inflation rate eased to 3.19% from 3.27% in December.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "core inflation rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The core inflation rate eased to 3.19% from 3.27% in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Vietnam\u2019s annual inflation rate slowed to 2.53% in January 2026, the lowest since July 2023, down from 3.48% in December.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "food costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Inflation eased across most sub-components, particularly food and foodstuff services (3.64% vs 4.20% in December), driven by a decline in food costs (-1.22%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "transport",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Deflation deepened for transport (-3.76% vs -0.55%) and information and communication (-0.28% vs -0.25%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "information and communication",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Deflation deepened for transport (-3.76% vs -0.55%) and information and communication (-0.28% vs -0.25%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6391,
+  "error_messages": []
+}

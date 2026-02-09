@@ -1,0 +1,234 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5618",
+  "extracted_at": "2026-02-07T16:25:13.805017",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ADP report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Report on private employment growth",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth",
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Kevin Warsh\u2019s nomination",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Nomination for Fed chair",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "ECB policy meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Upcoming European Central Bank policy meeting",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "BOE policy meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Upcoming Bank of England policy meeting",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan\u2019s lower house election",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Election in Japan influencing fiscal policy expectations",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The dollar index held above 97.5 on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "dollar index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The dollar index held above 97.5 on Thursday, near a two-week high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The ADP report showed private employment growth fell well below expectations.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "ADP",
+        "private employment"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the ADP report showed private employment growth fell well below expectations",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Services activity exceeded forecasts.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "services activity"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while services activity exceeded forecasts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Markets priced in a slower pace for potential Federal Reserve rate cuts.",
+      "claim_type": "analysis",
+      "author": "markets",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "as markets priced in a slower pace for potential Federal Reserve rate cuts",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Fed Governor Lisa Cook would not support a rate cut until price pressures ease.",
+      "claim_type": "opinion",
+      "author": "Lisa Cook",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "suggesting she would not support a rate cut until price pressures ease",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Kevin Warsh would be less aggressive on rate reductions.",
+      "claim_type": "prediction",
+      "author": "Investors",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "expectations that he would be less aggressive on rate reductions",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "ECB and BOE policy meetings are both expected to hold rates steady.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "upcoming ECB and BOE policy meetings, which are both expected to hold rates steady",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Hawkish Fed Signals",
+      "target_type": "Theme",
+      "target_ref": "Dollar",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Dollar Strengthens on Hawkish Fed Signals",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Lisa Cook",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Fed Governor Lisa Cook emphasized concerns over stalled inflation progress",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Japan\u2019s lower house election",
+      "target_type": "Theme",
+      "target_ref": "yen",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan\u2019s lower house election this weekend continued to weigh on the yen",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "noting his preference for a smaller Fed balance sheet",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11708,
+  "error_messages": []
+}

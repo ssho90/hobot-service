@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5881",
+  "extracted_at": "2026-02-09T01:09:32.041577",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver Price Gain",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver rose more than 2% toward $80 per ounce on Monday following a previous 10% jump.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japan's Weekend Elections",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Landslide victory for Prime Minister Sanae Takaichi\u2019s ruling coalition.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran Talks in Oman",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Talks held to ease tensions, though nuclear enrichment issues remain.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Jobs and Inflation Reports",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming key economic data releases for guidance on Fed policy.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "rates",
+        "labor",
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver rose more than 2% toward $80 per ounce on Monday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver rose more than 2% toward $80 per ounce on Monday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Prime Minister Sanae Takaichi\u2019s ruling coalition won a landslide victory in Japan\u2019s weekend elections.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Sanae Takaichi",
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "landslide victory of Prime Minister Sanae Takaichi\u2019s ruling coalition in Japan\u2019s weekend elections",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US and Iran held talks in Oman on Friday.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "US",
+        "Iran",
+        "Oman"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the US and Iran held talks in Oman on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Tehran maintained its refusal to halt nuclear fuel enrichment.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Tehran",
+        "Iran"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Tehran maintained its refusal to halt nuclear fuel enrichment",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The election victory paves the way for expansionary fiscal policies in Japan.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "which paves the way for her expansionary fiscal policies",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Last week\u2019s extreme swings in precious metals were caused by Chinese traders.",
+      "claim_type": "opinion",
+      "author": "Scott Bessent",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "US Treasury Secretary Scott Bessent attributed last week\u2019s extreme swings in precious metals to Chinese traders",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The recent top in precious metals was a speculative blowoff.",
+      "claim_type": "analysis",
+      "author": "Scott Bessent",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "describing the recent top as a speculative blowoff",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Investors are awaiting jobs and inflation reports for guidance on Federal Reserve policy.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Investors are also awaiting key US jobs and inflation reports this week for guidance on Federal Reserve policy",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Japan's weekend elections",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "paves the way for her expansionary fiscal policies",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US jobs and inflation reports",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "for guidance on Federal Reserve policy",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Chinese traders",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "attributed last week\u2019s extreme swings in precious metals to Chinese traders",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US-Iran talks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "in an effort to ease tensions",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15651,
+  "error_messages": []
+}

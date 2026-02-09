@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5705",
+  "extracted_at": "2026-02-07T05:52:30.304332",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The STOXX 50 fell 0.6%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Both the STOXX 50 and the STOXX 600 extended losses on Thursday, falling 0.6% and 0.7%, respectively",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The STOXX 600 fell 0.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "STOXX 600"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Both the STOXX 50 and the STOXX 600 extended losses on Thursday, falling 0.6% and 0.7%, respectively",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shell fell 1% after missing profit estimates.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Shell"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shell fell 1% after missing profit estimates amid lower crude prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BBVA tumbled more than 6% as its results failed to meet investor expectations.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "BBVA"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BBVA tumbled more than 6% as its results failed to meet investor expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Maersk plunged 4.5% after warning of a decline in earnings in 2026.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Maersk"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Maersk plunged 4.5 after warning of a decline in earnings in 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Vestas slid 7.8% following a profit miss.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Vestas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Vestas slid 7.8% following a profit miss.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Rheinmetall also dropped 7% after cutting its guidance.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "Rheinmetall"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rheinmetall also dropped 7% after cutting its guidance.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BNP Paribas gained 2.7% after raising its outlook for shareholder returns.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "BNP Paribas"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "BNP Paribas gained 2.7% after raising its outlook for shareholder returns",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "ArcelorMittal was up 1% after reporting a stronger-than-expected Q4 profit.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "ArcelorMittal"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "ArcelorMittal was up 1% after reporting a stronger-than-expected Q4 profit.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "global tech sell-off",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "European Stocks Extend Losses Both the STOXX 50 and the STOXX 600 extended losses on Thursday, falling 0.6% and 0.7%, respectively, as a global tech sell-off resumed amid persistent concerns over AI-related disruption and elevated valuations.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England and the ECB monetary policy decisions",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Traders were also digesting a fresh round of corporate earnings and monetary policy decisions from the Bank of England and the ECB that left borrowing costs unchanged as expected.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Shell missing profit estimates",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Shell fell 1% after missing profit estimates amid lower crude prices.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Maersk warning of a decline in earnings in 2026",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Maersk plunged 4.5 after warning of a decline in earnings in 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Rheinmetall cutting its guidance",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Rheinmetall also dropped 7% after cutting its guidance.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7376,
+  "error_messages": []
+}

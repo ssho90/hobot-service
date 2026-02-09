@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5804",
+  "extracted_at": "2026-02-07T14:43:09.434831",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "S&P/ASX 200 Friday Sell-Off",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The S&P/ASX 200 dropped 2% to close at 8,708 on Friday, reaching a one-month low.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "RBA February Rate Cut",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Reserve Bank of Australia cut interest rates in February.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Rio Tinto and Glencore Merger Termination",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Merger talks between Rio Tinto and Glencore ended after failing to agree on valuation.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P/ASX 200 index closed at 8,708 on Friday, a 2% drop.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P/ASX 200"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P/ASX 200 dropped 2% to close at 8,708 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Australian technology stocks fell 3.4% to a more than two-year low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Wisetech Global",
+        "Technology One"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Local technology stocks tumbled 3.4% to a more than two-year low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "BHP and Fortescue shares declined by 3.1% and 1.2% respectively.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "BHP",
+        "Fortescue"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Heavyweight miners BHP and Fortescue declined 3.1% and 1.2%, respectively.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The global stock market rout was driven by concerns over heavy AI-related spending.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "global stock market rout driven by concerns over heavy AI-related spending",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The Reserve Bank of Australia signalled further rate easing this year.",
+      "claim_type": "prediction",
+      "author": "Reserve Bank of Australia",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "signalled further easing this year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Local tech stocks were weighed down by capital expenditure plans from US tech giants.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "weighed down by hefty capital expenditure plans from US tech giants",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "AI-related spending",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "global stock market rout driven by concerns over heavy AI-related spending",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Reserve Bank of Australia",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the Reserve Bank of Australia cut rates in February and signalled further easing this year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US tech giants",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weighed down by hefty capital expenditure plans from US tech giants",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Base metals weakness",
+      "target_type": "Theme",
+      "target_ref": "mining sector",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "dragging the broader mining sector down 2.7% amid ongoing weakness in base metals",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14832,
+  "error_messages": []
+}

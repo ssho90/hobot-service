@@ -15,6 +15,8 @@ from service.macro_trading.config.config_loader import get_config
 from service.macro_trading.config.config_loader import get_config
 from service.macro_trading.ai_strategist import run_ai_analysis
 from service.macro_trading.account_service import save_daily_account_snapshot
+from service.graph.scheduler import run_phase_c_weekly_jobs
+from service.graph.news_loader import sync_news_with_extraction
 
 logger = logging.getLogger(__name__)
 
@@ -282,6 +284,89 @@ def setup_news_scheduler():
         raise
 
 
+@retry_on_failure(max_retries=2, delay=120)
+def run_graph_news_extraction_sync():
+    """
+    Macro Graph 뉴스 동기화 + LLM 추출 적재를 실행합니다.
+    최근 2일 범위의 최신 뉴스를 대상으로 Document/Event/Fact/Claim/Evidence/AFFECTS를 업데이트합니다.
+    """
+    logger.info("=" * 60)
+    logger.info("Macro Graph 뉴스 추출 적재 시작")
+    logger.info("=" * 60)
+
+    result = sync_news_with_extraction(limit=200, days=2)
+    sync_result = result.get("sync_result", {})
+    extraction_result = sync_result.get("extraction", {})
+    logger.info(
+        "Macro Graph 뉴스 추출 적재 완료: docs=%s, extracted=%s, failed=%s",
+        sync_result.get("documents"),
+        extraction_result.get("success_docs"),
+        extraction_result.get("failed_docs"),
+    )
+    return result
+
+
+def setup_graph_news_extraction_scheduler():
+    """
+    Macro Graph 뉴스 추출 적재 스케줄을 설정합니다.
+    매 2시간마다 실행되도록 등록합니다.
+    """
+    try:
+        existing_jobs = schedule.get_jobs()
+        for job in existing_jobs:
+            if "graph_news_extraction" in job.tags:
+                schedule.cancel_job(job)
+                logger.info(f"기존 Macro Graph 뉴스 추출 스케줄 제거: {job}")
+
+        schedule.every(2).hours.do(
+            run_threaded, run_graph_news_extraction_sync
+        ).tag("graph_news_extraction")
+        logger.info("Macro Graph 뉴스 추출 스케줄 등록: 매 2시간마다 실행")
+    except Exception as e:
+        logger.error(f"Macro Graph 뉴스 추출 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
+@retry_on_failure(max_retries=2, delay=120)
+def run_phase_c_weekly_batch():
+    """
+    Phase C 배치를 실행합니다.
+    Event impact / 가중치 재계산 / 상관 엣지 / Story 클러스터링을 수행합니다.
+    """
+    logger.info("=" * 60)
+    logger.info("Phase C 주간 배치 시작")
+    logger.info("=" * 60)
+    result = run_phase_c_weekly_jobs()
+    logger.info(
+        "Phase C 배치 완료: corr=%s, leads=%s, stories=%s",
+        result.get("correlation", {}).get("correlation_edges"),
+        result.get("correlation", {}).get("lead_edges"),
+        result.get("story_cluster", {}).get("stories_created"),
+    )
+    return result
+
+
+def setup_phase_c_weekly_scheduler():
+    """
+    Phase C 주간 배치 스케줄을 설정합니다.
+    매주 일요일 03:30(KST)에 실행되도록 등록합니다.
+    """
+    try:
+        existing_jobs = schedule.get_jobs()
+        for job in existing_jobs:
+            if "phase_c_weekly" in job.tags:
+                schedule.cancel_job(job)
+                logger.info(f"기존 Phase C 주간 배치 스케줄 제거: {job}")
+
+        schedule.every().sunday.at("03:30").do(
+            run_threaded, run_phase_c_weekly_batch
+        ).tag("phase_c_weekly")
+        logger.info("Phase C 주간 배치 스케줄 등록: 매주 일요일 03:30 KST")
+    except Exception as e:
+        logger.error(f"Phase C 주간 배치 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
 @retry_on_failure(max_retries=3, delay=60)
 def run_ai_strategy_analysis():
     """
@@ -387,12 +472,14 @@ def start_fred_scheduler_thread():
 def start_news_scheduler_thread():
     """
     뉴스 수집 스케줄러를 별도 스레드에서 시작합니다.
+    (뉴스 수집 + Macro Graph 뉴스 추출 적재)
     
     Returns:
         threading.Thread: 스케줄러 스레드
     """
     # 스케줄 설정
     setup_news_scheduler()
+    setup_graph_news_extraction_scheduler()
     
     # 스케줄러 스레드 생성 및 시작
     scheduler_thread = threading.Thread(
@@ -442,6 +529,12 @@ def start_all_schedulers():
         logger.info("뉴스 스케줄 설정 완료")
     except Exception as e:
         logger.error(f"뉴스 스케줄 설정 실패: {e}")
+
+    try:
+        setup_graph_news_extraction_scheduler()
+        logger.info("Macro Graph 뉴스 추출 스케줄 설정 완료")
+    except Exception as e:
+        logger.error(f"Macro Graph 뉴스 추출 스케줄 설정 실패: {e}")
     
     try:
         setup_ai_analysis_scheduler()
@@ -454,6 +547,12 @@ def start_all_schedulers():
         logger.info("계좌 스냅샷 스케줄 설정 완료")
     except Exception as e:
         logger.error(f"계좌 스냅샷 스케줄 설정 실패: {e}")
+
+    try:
+        setup_phase_c_weekly_scheduler()
+        logger.info("Phase C 주간 배치 스케줄 설정 완료")
+    except Exception as e:
+        logger.error(f"Phase C 주간 배치 스케줄 설정 실패: {e}")
     
     # 하나의 통합 스케줄러 스레드에서 모든 스케줄 실행
     try:

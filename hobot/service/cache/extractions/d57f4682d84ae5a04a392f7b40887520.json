@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5602",
+  "extracted_at": "2026-02-07T16:28:33.281897",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "NZX 50 Morning Trade",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The NZX 50 index fell 39 points in morning trade on Thursday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "New Zealand Q4 Jobs Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of unemployment and employment figures for the fourth quarter in New Zealand.",
+      "impact_level": "high",
+      "related_themes": [
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wall Street Overnight Trade",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The S&P 500 and Nasdaq experienced declines overnight due to a tech sell-off.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Upcoming Central Bank Meeting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The next meeting where interest rate decisions will be made.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The NZX 50 fell 39 points, or 0.3%, to 13,428 in morning trade.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "NZX 50"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The NZX 50 fell 39 points, or 0.3%, to 13,428 in morning trade on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New Zealand's unemployment rate rose to 5.4% in Q4.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "New Zealand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The latest data showed the unemployment rate in New Zealand rose to 5.4% in Q4",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment in New Zealand increased by 0.5% in Q4.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "New Zealand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "employment increased 0.5%, above estimates of 0.3% after being flat in Q3",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Freightways Group shares fell 1.7%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Freightways Group"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Among early losers were Freightways Group (-1.7%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The latest jobs data raised questions about whether the central bank will cut interest rates.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The latest figures raised questions over whether the central bank will cut interest rates at the upcoming meeting.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The NZX 50 decline was influenced by the performance of Wall Street.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The broader index tracked a fall on Wall Street\u2019s S&P 500 and Nasdaq overnight",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The tech stock sell-off on Wall Street is persistent.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "amid a persistent tech stock sell-off",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Q4 Jobs Data Release",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The latest figures raised questions over whether the central bank will cut interest rates at the upcoming meeting.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street Overnight Trade",
+      "target_type": "Theme",
+      "target_ref": "NZX 50 Morning Trade",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The broader index tracked a fall on Wall Street\u2019s S&P 500 and Nasdaq overnight",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New Zealand Q4 Jobs Data Release",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The latest data showed the unemployment rate in New Zealand rose to 5.4% in Q4",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Tech stock sell-off",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The broader index tracked a fall on Wall Street\u2019s S&P 500 and Nasdaq overnight, amid a persistent tech stock sell-off.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11439,
+  "error_messages": []
+}

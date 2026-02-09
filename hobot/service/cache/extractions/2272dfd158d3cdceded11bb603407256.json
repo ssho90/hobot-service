@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5846",
+  "extracted_at": "2026-02-07T14:28:35.680645",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Wheat futures price peak",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Wheat futures reached a two-month high of $5.4 on January 29th.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Severe cold across US Plains and southern Russia",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Renewed bouts of severe cold threatening winter crops.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Russia-Ukraine military strikes",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Ongoing military conflict impacting Black Sea grain exports.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US wheat futures were trading above $5.35 per bushel.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Wheat futures",
+        "US"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Wheat futures in the US were above $5.35 per bushel",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The two-month high for wheat futures was $5.4 on January 29th.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Wheat futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "not far from the two-month high of $5.4 on January 29th",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US export aggregates for wheat remained high.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US",
+        "export aggregates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "export aggregates from the US remained high",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Severe cold has revived concerns over winterkill for stressed crops.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Renewed bouts of severe cold across the US Plains and parts of southern Russia revived concerns over winterkill for already stressed crops",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Global wheat availability could tighten later in the marketing year.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "uncertainty around Russia\u2019s upcoming export quota reinforced expectations that global availability could tighten later in the marketing year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Consumers are diversifying away from Black Sea grains due to military risks.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "consumers were forced to diversify away from Black Sea gains due to military risk on strikes between Russia and Ukraine",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Severe cold",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "revived concerns over winterkill for already stressed crops, tightening supply expectations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Military risk",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "consumers were forced to diversify away from Black Sea gains due to military risk on strikes between Russia and Ukraine",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Russia\u2019s upcoming export quota",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "uncertainty around Russia\u2019s upcoming export quota reinforced expectations that global availability could tighten",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Weather disruptions",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weather disruptions and lingering logistical frictions continued to constrain export flows",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12194,
+  "error_messages": []
+}

@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5568",
+  "extracted_at": "2026-02-07T17:51:37.174943",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "ADP National Employment Report (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of private sector employment data for January 2026 showing an addition of 22,000 jobs.",
+      "impact_level": "medium",
+      "related_themes": [
+        "labor",
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "US private businesses added 22,000 jobs in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US Private Sector",
+        "ADP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Private businesses in the US added 22K jobs in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The health care sector added 74,000 jobs in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "health care"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "health care was a standout, adding 74K jobs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Professional and business services lost 57,000 jobs in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Professional and business services"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Professional and business services shed 57K jobs",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The manufacturing sector has lost jobs every month since March 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "manufacturing"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "manufacturing was down 8K, which has lost jobs every month since March 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private employers added 398,000 jobs in 2025, down from 771,000 in 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "private employers"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "private employers adding 398K jobs, down from 771K in 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "January 2026 was a lackluster month for hiring.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "In a lackluster month for hiring",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There has been a continuous and dramatic slowdown in job creation for the past three years.",
+      "claim_type": "analysis",
+      "author": "Dr. Nela Richardson",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "While we've seen a continuous and dramatic slowdown in job creation for the past three years",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Wage growth has remained stable despite the slowdown in hiring.",
+      "claim_type": "analysis",
+      "author": "Dr. Nela Richardson",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "wage growth has remained stable",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "ADP National Employment Report",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US Private Sector Adds 22K Jobs in January: ADP",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Job creation slowdown",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Job creation took a step back in 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing job losses",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "manufacturing was down 8K, which has lost jobs every month since March 2024",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Wage growth",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "wage growth has remained stable",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 18047,
+  "error_messages": []
+}

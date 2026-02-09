@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5512",
+  "extracted_at": "2026-02-08T01:07:59.485316",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Lunar New Year slowdown",
+      "event_type": "other",
+      "event_date": null,
+      "description": "A seasonal holiday period in China leading to a suspension of construction work and reduced industrial activity.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Iron ore price decline",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Iron ore futures fell toward CNY 780 per ton, reaching a six-week low.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Gara Djebilet mine reopening",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "China is assisting Algeria in reopening North Africa\u2019s largest iron ore deposit.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Iron ore futures fell toward CNY 780 per ton on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Iron ore"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Iron ore futures fell toward CNY 780 per ton on Wednesday, hovering near a six-week low",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Production of rebar and hot-rolled coil in Chinese steel mills accelerated last week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Chinese steel mills",
+        "rebar",
+        "hot-rolled coil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Chinese steel mills remain active, with production of finished products such as rebar and hot-rolled coil accelerating last week.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Iron ore shipments from Australia and Brazil increased in late January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia",
+        "Brazil"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "shipments from Australia and Brazil accelerated in late January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Iron ore prices are being pressured by weak demand.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Iron Ore Pressured by Weak Demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Increased shipments from major exporters are adding to near-term supply pressure.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "shipments from Australia and Brazil accelerated in late January, adding to near-term supply pressure.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Demand for iron ore is softening ahead of the holiday period.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "signs of softening demand emerged ahead of the Lunar New Year slowdown",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Lunar New Year slowdown",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "signs of softening demand emerged ahead of the Lunar New Year slowdown",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Construction sites suspension",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "mill restocking has paused as construction sites suspend work for the holiday period.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Australia and Brazil shipments",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "shipments from Australia and Brazil accelerated in late January, adding to near-term supply pressure.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12363,
+  "error_messages": []
+}

@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5772",
+  "extracted_at": "2026-02-07T14:48:06.124548",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Moody's Sovereign Credit Rating Outlook Change",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Moody's Investors Service changed Indonesia's sovereign credit rating outlook from stable to negative.",
+      "impact_level": "high",
+      "related_themes": [
+        "risk"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "2025 GDP Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Official data release showing Indonesia's economic growth for 2025.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "President Prabowo's Inauguration",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "President Prabowo took office in October 2024.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The IDX Composite fell 130 points (1.5%) to 7,976 during Friday morning trade.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "IDX Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s IDX Composite tumbled 130 points, or 1.5%, to 7,976 in Friday morning trade",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Moody's affirmed Indonesia's Baa2 rating despite the outlook change.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Moody's Investors Service",
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The agency, meanwhile, affirmed the Baa2 rating.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Indonesian economy grew by 5.11% in 2025, missing the 5.2% target.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "official data released showed the economy grew 5.11% in 2025, below the government\u2019s 5.2% target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Specific stocks including Impact Pratama Industri and Merdeka Copper Gold saw significant declines.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Impact Pratama Industri",
+        "Merdeka Copper Gold",
+        "Vale Indonesia",
+        "Astra Intl."
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Steep decliners included Impact Pratama Industri (-4.7%), Merdeka Copper Gold (-4.3%), Vale Indonesia (-3.6%), and Astra Intl. (-2.2%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Moody's believes policy predictability has reduced and governance has weakened under President Prabowo.",
+      "claim_type": "analysis",
+      "author": "Moody's Investors Service",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "citing reduced policy predictability and weaker governance under President Prabowo, who took office in October 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Fiscal rhetoric from officials helped limit the market's downward movement.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Still, weakness was capped by fiscal rhetoric, with officials trying to push back against pessimistic deficit narratives",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Officials suggest there is still available policy space to manage the economy.",
+      "claim_type": "statement",
+      "author": "Indonesian Officials",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "suggesting available policy space",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Moody's Investors Service",
+      "target_type": "Theme",
+      "target_ref": "IDX Composite",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Indonesia\u2019s IDX Composite tumbled... after Moody\u2019s Investors Service changed the country\u2019s sovereign credit rating outlook",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "President Prabowo",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "citing reduced policy predictability and weaker governance under President Prabowo",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "GDP growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the economy grew 5.11% in 2025, below the government\u2019s 5.2% target",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Fiscal rhetoric",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weakness was capped by fiscal rhetoric, with officials trying to push back against pessimistic deficit narratives",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13818,
+  "error_messages": []
+}

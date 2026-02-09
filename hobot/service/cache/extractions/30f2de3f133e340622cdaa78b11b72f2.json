@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5551",
+  "extracted_at": "2026-02-08T00:59:05.951325",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Eurozone Industrial Producer Prices Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of industrial producer price data for the Euro Area for the month of December 2025.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Industrial producer prices in the Euro Area decreased 0.3% month-over-month in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Euro Area"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Industrial producer prices in the Euro Area decreased 0.3% month-over-month in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Energy costs fell by 1.2% in December compared to a 2.7% increase in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "energy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Cost fell for energy (-1.2% vs 2.7% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "On an annual basis, producer prices fell 1.7% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "producer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On an annual basis, producer prices fell 1.7%, marking the fourth consecutive month of year-on-year decline.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The price decrease in December was consistent with what the market anticipated.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "market expectations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "in line with market expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Price growth for durable consumer goods slowed down in December.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Also, prices eased for durable consumer goods (0.2% vs 0.3%)",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "energy",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Cost fell for energy (-1.2% vs 2.7% in November)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Industrial producer prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Industrial producer prices in the Euro Area decreased 0.3% month-over-month in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 8847,
+  "error_messages": []
+}

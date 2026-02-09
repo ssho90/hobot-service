@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5703",
+  "extracted_at": "2026-02-07T05:52:14.371010",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [
+    {
+      "event_name": "Czech National Bank Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Czech National Bank kept its two-week repo rate unchanged at 3.5% in February 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity",
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Czech National Bank kept its two-week repo rate unchanged at 3.5% in February 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Czech National Bank",
+        "interest rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Czech National Bank kept its two-week repo rate unchanged at 3.5% in February 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The rate has been maintained at 3.5% since May 2025.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "interest rate"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "maintaining the level seen since May 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Headline inflation eased to 1.6% in January, a nine-year low.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "headline inflation eased more than expected to a nine-year low of 1.6% in January, down from 2.1% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Headline inflation was 2.1% in December.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "down from 2.1% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Services inflation remained elevated at 4.7%.",
+      "fact_type": "economic_release",
+      "entities_mentioned": [
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "closely monitored services inflation remained elevated at 4.7%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Czech policymakers may have scope to cut rates this year.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Czech policymakers may have scope to cut rates this year, though further evidence of easing inflationary pressures will be needed to justify such a move.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Further evidence of easing inflationary pressures will be needed to justify a rate cut.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "though further evidence of easing inflationary pressures will be needed to justify such a move.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Czech National Bank",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Czech National Bank Leaves Interest Rates Steady",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "though further evidence of easing inflationary pressures will be needed to justify such a move.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "domestic risks",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Policymakers have repeatedly cited domestic risks, including the budget deficit, rapidly rising service and housing costs, and wage growth, as obstacles to further monetary easing.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5972,
+  "error_messages": []
+}

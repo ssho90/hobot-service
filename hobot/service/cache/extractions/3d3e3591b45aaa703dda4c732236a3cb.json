@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5860",
+  "extracted_at": "2026-02-07T14:26:25.860909",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Natural Gas UK Price Surge",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The price of Natural Gas in the UK experienced a significant daily increase.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Natural Gas UK prices increased by 5.26%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Natural Gas UK"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Natural Gas UK Soars by 5.26%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Natural Gas UK",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Natural Gas UK Soars by 5.26%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Natural Gas UK",
+      "target_type": "Theme",
+      "target_ref": "Energy Commodities",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Energy Commodities Updates: Natural Gas UK Soars by 5.26%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11093,
+  "error_messages": []
+}

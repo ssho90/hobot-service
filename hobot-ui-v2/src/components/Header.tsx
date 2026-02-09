@@ -11,6 +11,7 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const isArchitect = user?.role === 'architect' || isAdmin;
 
   const navItems = [
     { path: '/about', label: 'About' },
@@ -20,8 +21,8 @@ export const Header: React.FC = () => {
   ];
 
   const ontologyItems = [
-    { path: '/ontology/architecture', label: 'Architecture Graph' },
-    { path: '/ontology/macro', label: 'Macro Graph' },
+    { path: '/ontology/macro', label: 'Macro Graph', requiredRole: null },  // 모든 사용자
+    { path: '/ontology/architecture', label: 'Architecture Graph', requiredRole: 'architect' },  // Architect/Admin만
   ];
 
   const adminItems = [
@@ -77,15 +78,17 @@ export const Header: React.FC = () => {
                 {/* Dropdown Menu */}
                 <div className="absolute left-0 mt-0 w-48 bg-black border border-zinc-800 rounded-xl shadow-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left">
                   <div className="py-1">
-                    {ontologyItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
+                    {ontologyItems
+                      .filter(item => !item.requiredRole || (item.requiredRole === 'architect' && isArchitect))
+                      .map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
                   </div>
                 </div>
               </div>

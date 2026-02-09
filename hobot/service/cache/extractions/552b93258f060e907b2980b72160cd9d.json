@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5714",
+  "extracted_at": "2026-02-07T15:02:12.058389",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January 2026 Ecuador Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of Ecuador's consumer price index data for January 2026, showing an acceleration in annual inflation.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Ecuador's annual inflation reached 2.44% in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ecuador",
+        "inflation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ecuador\u2019s annual inflation accelerated to 2.44% in January 2026 from 1.91% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Housing and utilities costs increased by 20.79%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "housing",
+        "utilities"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The largest increases were recorded in housing and utilities (20.79%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Consumer prices rose 0.37% on a monthly basis in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "consumer prices"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices rose 0.37% in January, following a 0.14% decline in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Clothing and footwear experienced deflation of 4.89%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "clothing",
+        "footwear"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Deflation was recorded in clothing and footwear (-4.89%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The rise in inflation in January 2026 was the most significant in 20 months.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Ecuador Inflation Accelerates the Most in 20 Months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "housing and utilities",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The largest increases were recorded in housing and utilities (20.79%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "clothing and footwear",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Deflation was recorded in clothing and footwear (-4.89%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "January 2026 Ecuador Inflation Release",
+      "target_type": "Theme",
+      "target_ref": "Ecuador",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ecuador\u2019s annual inflation accelerated to 2.44% in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11092,
+  "error_messages": []
+}

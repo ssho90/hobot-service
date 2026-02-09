@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5495",
+  "extracted_at": "2026-02-08T01:12:03.817716",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver price rise above $86",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver climbed above $86 per ounce on Wednesday, marking its second consecutive session of gains.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US Navy shoots down Iranian drone",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "The US Navy shot down an Iranian drone in the Arabian Sea, increasing geopolitical tensions.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Nuclear talks",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "A new round of nuclear talks is scheduled for Friday.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Historic silver selloff",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A recent selloff that wiped out 40% of silver's value in two days.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver climbed above $86 per ounce on Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver climbed above $86 per ounce on Wednesday, rising for the second straight session",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "A recent selloff reduced silver's value by 40% in two days.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a historic selloff that wiped out as much as 40% in silver\u2019s value in just two days",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The US Navy shot down an Iranian drone in the Arabian Sea.",
+      "fact_type": "other",
+      "entities_mentioned": [
+        "US Navy",
+        "Iran"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the US Navy shot down an Iranian drone in the Arabian Sea",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Forced liquidations in the silver market appear to have subsided.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Forced liquidations appear to have subsided, while dip buyers stepped in to capitalize on lower prices.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Geopolitical tensions supported demand for safe-haven assets.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Geopolitical tensions also supported demand for safe-haven assets after the US Navy shot down an Iranian drone",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "January's rally was fueled by concerns over currency debasement and the Federal Reserve's independence.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "January\u2019s rally in silver and other metals was fueled by geopolitical and economic uncertainty, concerns over currency debasement, and worries about the Federal Reserve\u2019s independence.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Speculative buying from Chinese traders amplified the silver rally.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Speculative buying, particularly from Chinese traders, further amplified the rally",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Geopolitical tensions",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Geopolitical tensions also supported demand for safe-haven assets",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Federal Reserve\u2019s independence",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "worries about the Federal Reserve\u2019s independence",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Structural supply deficit",
+      "target_type": "Theme",
+      "target_ref": "Silver prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "a persistent structural supply deficit and steady industrial demand continued to underpin silver prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Currency debasement",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "concerns over currency debasement",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11632,
+  "error_messages": []
+}

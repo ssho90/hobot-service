@@ -1,0 +1,261 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5743",
+  "extracted_at": "2026-02-07T14:56:30.899877",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Thursday US Market Session",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A tech-led pullback resulting in heavy losses across major US indices.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Alphabet Capex Guidance",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Alphabet flagged a sharp rise in AI-related capital spending for 2026.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Qualcomm Outlook Release",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Qualcomm issued a cautious outlook due to soft memory demand and inventory strains.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Weekly Initial Jobless Claims Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Report showing jobless claims rising to 231K for the week ended January 31.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January Corporate Layoff Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Report showing corporate layoffs reached the highest January total since 2009.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The S&P 500 fell 1% and the Nasdaq slid 1.1% on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P 500 fell 1% and the Nasdaq slid 1.1% on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Alphabet guided 2026 capex toward the upper end of a $175 to $185 billion range.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "Alphabet"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "with 2026 capex guided toward the upper end of a $175 to $185 billion range",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Qualcomm shares tumbled 8.4%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Qualcomm"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Qualcomm tumbled 8.4%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Weekly initial jobless claims rose to 231K in the week ended January 31.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US Labor Market"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "weekly initial jobless claims rising to 231K in the week ended January 31",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Corporate layoff announcements reached 108K in January, the highest since 2009.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "US Labor Market"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "corporate layoff announcements jumping to 108K in January, the highest January total since 2009",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Investors trimmed exposure to crowded big cap positions.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "investors trimmed exposure to crowded big cap positions",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Alphabet's capex guidance revived doubts over how quickly AI investment will translate into earnings.",
+      "claim_type": "opinion",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reviving doubts over how quickly heavy AI investment will translate into earnings",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Macro data points to cooling labour conditions.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "pointing to cooling labour conditions",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The risk-off tone was reinforced by macro data.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The risk off tone was reinforced by macro data",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Alphabet Capex Guidance",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reviving doubts over how quickly heavy AI investment will translate into earnings",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Qualcomm Outlook",
+      "target_type": "Theme",
+      "target_ref": "market_event",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "deepening losses across the chip complex",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Jobless claims and Layoffs",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pointing to cooling labour conditions",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Macro data",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The risk off tone was reinforced by macro data",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12536,
+  "error_messages": []
+}

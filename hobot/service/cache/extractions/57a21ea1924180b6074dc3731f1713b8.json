@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5730",
+  "extracted_at": "2026-02-07T14:58:13.905977",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Wheat futures price rebound",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Wheat futures rose past $5.35 per bushel, reaching levels last seen in late January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Severe cold in US Plains and Southern Russia",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Bouts of severe cold weather impacting key wheat-growing regions.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Russia's upcoming export quota announcement",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Forthcoming decision on export limits for Russian wheat.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Wheat futures rose past $5.35 per bushel.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Wheat futures"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Wheat futures rose past $5.35 per bushel rebounding toward eight week highs last seen January 29th",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "US export sales remained steady.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US export sales"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the demand side, US export sales remained steady",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Global wheat inventories remain elevated.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Global inventories"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Although global inventories remain elevated",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Severe cold revived concerns over winterkill for already stressed crops.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Renewed bouts of severe cold across the US Plains and parts of southern Russia revived concerns over winterkill for already stressed crops",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Global availability could tighten later in the marketing year.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "uncertainty around Russia\u2019s upcoming export quota reinforced expectations that global availability could tighten later in the marketing year",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The price rebound reflects a repricing of downside risk to production.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "the rebound reflects a repricing of downside risk to production and exportable supply",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Severe cold",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Renewed bouts of severe cold... revived concerns over winterkill for already stressed crops, tightening supply expectations",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Russia's export quota",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "uncertainty around Russia\u2019s upcoming export quota reinforced expectations that global availability could tighten",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Wheat futures price",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Wheat futures rose past $5.35 per bushel... lending support to nearby prices",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Logistical frictions",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weather disruptions and lingering logistical frictions continued to constrain export flows",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13752,
+  "error_messages": []
+}

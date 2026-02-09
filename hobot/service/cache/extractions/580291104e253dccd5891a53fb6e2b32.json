@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5760",
+  "extracted_at": "2026-02-07T05:47:48.717399",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Silver slid as much as 9.6% to below $64.1 per ounce on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver slid as much as 9.6% to below $64.1 per ounce on Friday, sinking to its lowest level in seven weeks amid widespread deleveraging and a deepening selloff across financial markets.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Silver is down roughly 45% from its Jan. 29 peak.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The white metal is now down roughly 45% from its Jan. 29 peak, wiping out all gains for the year and marking its steepest collapse since 1980.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Silver's collapse is the steepest since 1980.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The white metal is now down roughly 45% from its Jan. 29 peak, wiping out all gains for the year and marking its steepest collapse since 1980.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Speculative buying, particularly from Chinese traders, added froth to the rally, leaving prices vulnerable to a sharp reversal as sentiment turned.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Speculative buying, particularly from Chinese traders, added froth to the rally, leaving prices vulnerable to a sharp reversal as sentiment turned.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Pressure on precious metals increased further after a sharp rebound in the dollar following the nomination of Kevin Warsh as the next Fed chair, widely seen as the more hawkish choice.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Pressure on precious metals increased further after a sharp rebound in the dollar following the nomination of Kevin Warsh as the next Fed chair, widely seen as the more hawkish choice.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Silver's volatility outpaced other metals as heavy speculative flows overshadowed its supply-demand fundamentals.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Silver\u2019s volatility outpaced other metals as heavy speculative flows overshadowed its supply-demand fundamentals.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "geopolitical risks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver and other precious metals had surged to record highs in January, driven by heightened geopolitical risks, economic uncertainty, and concerns over the US Federal Reserve\u2019s independence that fueled safe-haven demand.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "economic uncertainty",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver and other precious metals had surged to record highs in January, driven by heightened geopolitical risks, economic uncertainty, and concerns over the US Federal Reserve\u2019s independence that fueled safe-haven demand.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Federal Reserve\u2019s independence",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver and other precious metals had surged to record highs in January, driven by heightened geopolitical risks, economic uncertainty, and concerns over the US Federal Reserve\u2019s independence that fueled safe-haven demand.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "speculative flows",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Silver\u2019s volatility outpaced other metals as heavy speculative flows overshadowed its supply-demand fundamentals.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh nomination",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Pressure on precious metals increased further after a sharp rebound in the dollar following the nomination of Kevin Warsh as the next Fed chair, widely seen as the more hawkish choice.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5902,
+  "error_messages": []
+}

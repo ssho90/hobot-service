@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5621",
+  "extracted_at": "2026-02-07T16:25:53.397523",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "AIB Ireland Services PMI Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the monthly Purchasing Managers' Index for the Irish services sector showing a decline to 54.5.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The AIB Ireland Services PMI declined to 54.5 in January 2026 from 54.8 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "AIB",
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The AIB Ireland Services PMI declined slightly to 54.5 in January 2026, down from December\u2019s 54.8",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New business growth in the Irish services sector slowed to a five-month low.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "new business growth slowed to a five-month low.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation reached a three-month high and exceeded the long-run trend.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "input cost inflation accelerated to a three-month high and above the long-run trend",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output price inflation reached its highest level since May 2024.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "output price inflation accelerated to the highest since May 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment growth was stronger than the long-run survey average.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "firms continued to raise employment solidly, and at a rate stronger than the long-run survey average.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Business sentiment in the services sector remains optimistic despite moderating from December.",
+      "claim_type": "opinion",
+      "author": "AIB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Looking ahead, business sentiment remained optimistic, but moderated from December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The expansion in the services sector was the softest since September.",
+      "claim_type": "analysis",
+      "author": "AIB",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "marking the softest expansion since September.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "New business growth",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "In response to the rise in new business, firms continued to raise employment solidly",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input cost inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input cost inflation accelerated to a three-month high and above the long-run trend",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AIB Ireland Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The moderation in services sector growth came as new business growth slowed to a five-month low.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12620,
+  "error_messages": []
+}

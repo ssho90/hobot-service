@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5820",
+  "extracted_at": "2026-02-07T14:42:00.447752",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Halifax House Price Index Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of UK house price data for January 2026 showing a 1% year-on-year increase.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "UK house prices rose 1% year-on-year in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK",
+        "Halifax"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Halifax House Price Index showed UK house prices rose 1% year-on-year in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The average UK home price reached \u00a3300,077, surpassing \u00a3300,000 for the first time.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The average UK home surpassed \u00a3300,000 for the first time, reaching \u00a3300,077.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly house prices rose 0.7% in January, exceeding the expected 0.1% growth.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, prices rose 0.7%, more than the expected 0.1% growth",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Northern Ireland recorded the highest regional growth at 5.9%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Northern Ireland"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Regionally, Northern Ireland led growth at 5.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The UK housing market entered 2026 on a steady footing.",
+      "claim_type": "analysis",
+      "author": "Amanda Bryden",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Amanda Bryden, Head of Mortgages at Halifax, said the market entered 2026 on a steady footing",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "UK house prices are expected to increase by 1% to 3% in 2026.",
+      "claim_type": "prediction",
+      "author": "Halifax",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Halifax expects prices to edge up 1%\u20133% in 2026.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Price declines in Southern regions reflect higher borrowing costs and affordability pressures.",
+      "claim_type": "analysis",
+      "author": "Halifax",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Southern regions... saw annual declines of over 1%, reflecting higher borrowing costs and affordability pressures.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "wage growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Stronger wage growth and more mortgage deals below 4% are supporting buyers",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "mortgage deals",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Stronger wage growth and more mortgage deals below 4% are supporting buyers",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "borrowing costs",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Southern regions... saw annual declines of over 1%, reflecting higher borrowing costs and affordability pressures.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11252,
+  "error_messages": []
+}

@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5793",
+  "extracted_at": "2026-02-07T14:43:59.392077",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Trump-Xi call",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "A phone call between US President Donald Trump and Chinese President Xi Jinping described as excellent.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Lunar New Year holiday",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Upcoming seasonal holiday in China affecting corporate currency conversions.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "PBOC daily midpoint setting",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The People's Bank of China set the daily reference rate for the yuan.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "China inflation data release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Upcoming release of inflation data to assess China's economic health.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The offshore yuan held around 6.93 per dollar on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Offshore Yuan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The offshore yuan held around 6.93 per dollar on Friday, heading for its strongest weekly gain since May 2023",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The PBOC set the daily midpoint at 6.9590 per dollar.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "PBOC",
+        "Yuan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "PBOC, which set the daily midpoint at 6.9590 per dollar, weaker than a Reuters estimate",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Companies increase dollar-to-yuan conversions ahead of the Lunar New Year.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Lunar New Year",
+        "Yuan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ahead of the Lunar New Year holiday, companies typically increase dollar-to-yuan conversions to meet payroll and bonus obligations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Yuan gains may slow due to US dollar strength and thinner trading.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "yuan gains may slow amid near-term US dollar strength and thinner trading as the holiday approaches.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "There are expectations of a possible visit to China by Trump in April.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "expectations of a possible visit to China in April and emphasis on his personal rapport with Xi.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Trump-Xi call",
+      "target_type": "Theme",
+      "target_ref": "Market sentiment",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Market sentiment was further boosted after US President Donald Trump described an \u201cexcellent\u201d phone call with Chinese President Xi Jinping",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Lunar New Year holiday",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ahead of the Lunar New Year holiday, companies typically increase dollar-to-yuan conversions to meet payroll and bonus obligations.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "inflation data",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Markets now await next week\u2019s inflation data for China\u2019s economic health and the outlook for monetary policy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12769,
+  "error_messages": []
+}

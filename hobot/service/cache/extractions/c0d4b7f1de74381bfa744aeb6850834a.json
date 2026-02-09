@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5869",
+  "extracted_at": "2026-02-07T05:33:46.022462",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Coffee prices fell by 3.90%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Coffee"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Coffee Falls by 3.90%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Coffee",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Coffee Falls by 3.90%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 1718,
+  "error_messages": []
+}

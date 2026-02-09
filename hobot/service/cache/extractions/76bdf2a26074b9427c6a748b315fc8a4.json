@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5721",
+  "extracted_at": "2026-02-07T15:00:23.652217",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Greece 10Y Bond Yield Rise",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The yield on Greece's 10-year government bond increased by 10 basis points.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Greece 10Y Bond Yield rose by 10 bps",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Greece",
+        "10Y Bond"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Greece 10Y Bond Yield Rises by 10 bps",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Greece 10Y Bond Yield",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Greece 10Y Bond Yield Rises by 10 bps",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7983,
+  "error_messages": []
+}

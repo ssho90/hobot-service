@@ -1,0 +1,236 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5723",
+  "extracted_at": "2026-02-07T15:00:42.180053",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Silver Market Slump",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Silver prices dropped significantly, falling as much as 16.5% to approximately $73.5 per ounce.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January US Labor Report",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Release of labor data showing 108.4K job cuts and initial claims rising to 231K.",
+      "impact_level": "high",
+      "related_themes": [
+        "liquidity",
+        "labor"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Kevin Warsh Fed Chair Nomination",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The nomination of Kevin Warsh as Fed chair, introducing policy uncertainty regarding balance sheet size and easing pace.",
+      "impact_level": "medium",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "US-Iran Talks Confirmation",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Confirmation of upcoming talks between the US and Iran, reducing geopolitical tension.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Silver prices fell by 16.5% to around $73.5 per ounce.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Silver"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Silver slumped as much as 16.5% to around $73.5 per ounce",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "There were 108.4K job cuts in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "US labor market"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "108.4K job cuts in January",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Initial unemployment claims rose to 231K.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "initial claims"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "a jump in initial claims to 231K",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Upcoming talks between the US and Iran have been confirmed.",
+      "fact_type": "statement",
+      "entities_mentioned": [
+        "US",
+        "Iran"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "confirmation of upcoming US Iran talks",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Deteriorating labor signals have increased the likelihood of Federal Reserve rate cuts in 2024.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "deteriorating US labour signals... reinforced expectations for Federal Reserve rate cuts later this year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Market participants prioritized reducing risk over seeking safe-haven assets during the silver price drop.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "the immediate response favoured risk reduction rather than defensive inflows",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Kevin Warsh is perceived as favoring a smaller balance sheet and a cautious approach to monetary easing.",
+      "claim_type": "opinion",
+      "author": "Market participants",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "given his preference for a smaller balance sheet and a more cautious approach to easing",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The confirmation of US-Iran talks has lowered the demand for safe-haven investments.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "easing geopolitical risk after confirmation of upcoming US Iran talks reduced near term safe haven demand",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US labour signals",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "deteriorating US labour signals... reinforced expectations for Federal Reserve rate cuts",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Kevin Warsh nomination",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Policy uncertainty also lingered as markets weighed Kevin Warsh\u2019s nomination",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Iran talks",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "easing geopolitical risk after confirmation of upcoming US Iran talks reduced near term safe haven demand",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "volatility",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "pressuring silver through margin driven selling after last week\u2019s sharp rally",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9309,
+  "error_messages": []
+}

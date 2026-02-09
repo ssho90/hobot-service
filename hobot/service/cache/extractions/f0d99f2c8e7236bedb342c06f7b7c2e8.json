@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5766",
+  "extracted_at": "2026-02-07T14:52:58.636866",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January 2026 Tourist Arrivals Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Sri Lanka reported record-breaking foreign tourist arrivals for the month of January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "liquidity"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Foreign tourist arrivals in Sri Lanka reached an all-time high of 277,327 in January 2026, a 9.7% year-on-year increase.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Sri Lanka"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of foreign tourist arrivals in Sri Lanka rose by 9.7% year-on-year to an all-time high of 277,327 in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "India contributed 52,061 tourists, representing 19% of total arrivals and a 20% increase from the previous year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "India",
+        "Sri Lanka"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "India remained the largest source market, contributing 52,061 tourists, up 20% year-on-year and accounting for 19% of total arrivals.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Arrivals from the Russian Federation contracted by 13.4% year-on-year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Russian Federation"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Russian Federation, despite remaining the second-largest source market with 29,540 arrivals, saw a contraction of 13.4% compared to a year ago.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The UK market grew by 24.9% to 27,134 visitors.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The UK rose to third place with 27,134 visitors, up 24.9%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The winter tourism season peaked later and stronger than usual in 2026.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The strong performance suggested the winter season peaked later and stronger than usual, as the month outperformed December 2025, defying the typical holiday-driven pattern.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "January's arrival figures provide a solid start toward the annual target of 3 million visitors.",
+      "claim_type": "prediction",
+      "author": "Tourism authorities",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Tourism authorities have set a 2026 target of 3 million visitors, and January\u2019s figure already accounts for about 9.2% of that goal, offering a solid start to the year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Tourist Arrivals",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The strong performance suggested the winter season peaked later and stronger than usual, as the month outperformed December 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "India",
+      "target_type": "Theme",
+      "target_ref": "Tourist Arrivals",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "India remained the largest source market, contributing 52,061 tourists, up 20% year-on-year",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Russian Federation",
+      "target_type": "Theme",
+      "target_ref": "Tourist Arrivals",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Russian Federation... saw a contraction of 13.4% compared to a year ago.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 123187,
+  "error_messages": []
+}

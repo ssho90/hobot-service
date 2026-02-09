@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5563",
+  "extracted_at": "2026-02-08T00:55:18.379805",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Latvia Industrial Output Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of industrial production data for Latvia for the month of December 2025.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Latvia's industrial production rose by 1% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Latvia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Latvia\u2019s industrial production rose by 1% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing output growth slowed to 0.3% in December from 9.1% in November.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Manufacturing sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Output growth slowed in manufacturing (0.3% vs 9.1% in November)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Seasonally adjusted industrial production fell by 1.4% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Latvia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a seasonally adjusted basis, industrial production fell by 1.4% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Textile production decreased by 12.3% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Textiles"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "particularly in textiles (-12.3% vs -8.5%)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Industrial output growth eased sharply in December compared to the previous month.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Latvia\u2019s industrial production rose by 1% year-on-year in December 2025, easing sharply from an upwardly revised 7.2% in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Industrial production",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Latvia\u2019s industrial production rose by 1% year-on-year in December 2025, easing sharply from an upwardly revised 7.2% in the previous month.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing",
+      "target_type": "Theme",
+      "target_ref": "Industrial production",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Output growth slowed in manufacturing (0.3% vs 9.1% in November)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Electricity and gas supply",
+      "target_type": "Theme",
+      "target_ref": "Industrial production",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "On the other hand, activity increased in electricity and gas supply (8.8% vs 3.6%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10673,
+  "error_messages": []
+}

@@ -51,7 +51,7 @@ export interface MacroReport {
 export interface User {
     id: string;
     username: string;
-    role: 'admin' | 'user';
+    role: 'admin' | 'architect' | 'user';
 }
 
 export interface AuthContextType {

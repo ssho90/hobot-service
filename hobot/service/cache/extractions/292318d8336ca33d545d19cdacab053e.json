@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5660",
+  "extracted_at": "2026-02-07T15:39:50.938399",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "British Pound Depreciation",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The British Pound experienced a depreciation of 0.38%.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The British Pound depreciated by 0.38%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "British Pound"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "British Pound Depreciates by 0.38%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "British Pound",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "British Pound Depreciates by 0.38%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6177,
+  "error_messages": []
+}

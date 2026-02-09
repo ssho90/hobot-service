@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5848",
+  "extracted_at": "2026-02-07T14:28:58.119608",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Bank of England Interest Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Bank of England left interest rates unchanged with a narrow 5\u20134 vote to hold.",
+      "impact_level": "high",
+      "related_themes": [
+        "rates"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Appointment of Peter Mandelson as UK Ambassador",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Prime Minister Keir Starmer appointed Peter Mandelson as UK ambassador to the US, causing political scrutiny.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Sterling edged back toward $1.36 at the end of the week.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Sterling"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Sterling edged back toward $1.36 at the end of a volatile week",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Bank of England left interest rates unchanged.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the policy front, the BoE left interest rates unchanged",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The BoE vote to hold rates was 5\u20134.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Bank of England",
+        "MPC"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "surprised markets with a narrow 5\u20134 vote to hold",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Four MPC members supported an immediate 25 bp cut.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "MPC"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Four MPC members supported an immediate 25 bp cut",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Sterling is on track for its sharpest weekly decline against the dollar since late October.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "put sterling on track for its sharpest weekly decline against the dollar since late October",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Political uncertainty flared due to the appointment of Peter Mandelson.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Sterling came under pressure as political uncertainty flared on Thursday, with questions raised over the durability of Prime Minister Keir Starmer\u2019s leadership following his appointment of Peter Mandelson",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Inflation will fall back toward the 2% target from April.",
+      "claim_type": "prediction",
+      "author": "Four MPC members",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "citing expectations that inflation will fall back toward the 2% target from April",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Risks from persistent inflation have eased.",
+      "claim_type": "analysis",
+      "author": "Bank of England",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "The Bank noted that risks from persistent inflation have eased",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Downside risks from weaker demand and a softening labor market have become more pronounced.",
+      "claim_type": "analysis",
+      "author": "Bank of England",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "downside risks from weaker demand and a softening labor market have become more pronounced",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Political turbulence",
+      "target_type": "Theme",
+      "target_ref": "Sterling",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by a mix of political turbulence",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Bank of England message",
+      "target_type": "Theme",
+      "target_ref": "Sterling",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven by... a more dovish-than-expected message from the Bank of England",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "citing expectations that inflation will fall back toward the 2% target from April",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Labor market",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "downside risks from... a softening labor market have become more pronounced",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12525,
+  "error_messages": []
+}

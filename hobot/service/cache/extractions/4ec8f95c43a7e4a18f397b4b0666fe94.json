@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5638",
+  "extracted_at": "2026-02-07T16:21:13.286160",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Thailand January 2026 CPI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Thailand's consumer price index data for January 2026 showed a 0.66% year-on-year decline, marking the tenth consecutive month of deflation.",
+      "impact_level": "high",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Thailand consumer prices fell 0.66% year-on-year in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Thailand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Consumer prices in Thailand fell 0.66% year-on-year in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "January 2026 marked the tenth consecutive month of deflation in Thailand.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Thailand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "This marked the tenth consecutive month of deflation",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Core consumer prices in Thailand rose 0.60% annually in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Thailand"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "core consumer prices, which exclude volatile items such as food and energy, continued to rise, up 0.60% annually",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Thai central bank's inflation target range is 1%\u20133%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Thailand Central Bank"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "keeping inflation well below the central bank\u2019s 1%\u20133% target range.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Headline consumer prices are expected to remain negative through April before turning positive.",
+      "claim_type": "prediction",
+      "author": "Commerce ministry",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Headline consumer prices are expected to remain negative through April before turning positive.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The decline in consumer prices was driven by lower energy prices and government measures to ease living costs.",
+      "claim_type": "analysis",
+      "author": "Commerce ministry",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The commerce ministry said the decline was driven by lower energy prices and government measures to ease living costs.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Energy prices",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the decline was driven by lower energy prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Government measures",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "government measures to ease living costs",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Thailand January 2026 CPI Release",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Consumer prices in Thailand fell 0.66% year-on-year in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11820,
+  "error_messages": []
+}

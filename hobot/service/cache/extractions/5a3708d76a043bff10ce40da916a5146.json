@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5538",
+  "extracted_at": "2026-02-08T01:01:28.489121",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "HCOB Italy Services PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the Italy Services Purchasing Managers' Index for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Italy Services PMI rose to 52.9 in January 2026 from 51.5 in the previous month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Italy Services PMI rose to 52.9 in January 2026 from a fourth-month low of 51.5 in the previous month, beating market forecasts of 51.4.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Italy's services sector has seen growth for fourteen consecutive months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "extended the current growth sequence to fourteen months.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation eased to a three-month low.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "input cost inflation eased to a three-month low, even as staffing and energy expenses rose further.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Output charge inflation accelerated to a six-month high.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "output charge inflation accelerated to a six-month high.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Capacity in the services sector is broadly aligned with current workloads.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Backlogs of work fell slightly again, suggesting that capacity is broadly aligned with current workloads.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business expectations weakened due to competitive pressures and subdued economic prospects.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "business expectations weakened for a second consecutive month, reaching a five-month low amid concerns over competitive pressures and subdued economic prospects.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "HCOB Italy Services PMI",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The pickup in activity lifted the headline index back above its historical trend and extended the current growth sequence to fourteen months.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Employment",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "employment continued to rise, with firms hiring across a wide range of roles, though the pace of job creation was marginal.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Output charge inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "However, output charge inflation accelerated to a six-month high.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Business expectations",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "business expectations weakened for a second consecutive month, reaching a five-month low amid concerns over competitive pressures and subdued economic prospects.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 9486,
+  "error_messages": []
+}

@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5726",
+  "extracted_at": "2026-02-07T05:51:03.992143",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "US job openings fell to 6.542 million in December 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "US",
+        "job openings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Job openings in the US fell by 386,000 to 6.542 million in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "December 2025 job openings were the lowest since September 2020.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the lowest since September 2020",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings decreased in professional and business services by 257,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "professional and business services"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The number of job openings decreased in professional and business services (-257,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings decreased in retail trade by 195,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "retail trade"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "retail trade (-195,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings decreased in finance and insurance by 120,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "finance and insurance"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "finance and insurance (-120,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings fell in the Northeast by 210,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "Northeast"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Regionally, openings fell in the Northeast (-210,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings fell in the South by 58,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "South"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the South (-58,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings fell in the Midwest by 18,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "Midwest"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the Midwest (-18,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Job openings fell in the West by 100,000.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "job openings",
+        "West"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the West (-100,000)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Hires and total separations were little changed at 5.3 million each.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "hires",
+        "total separations"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, hires and total separations were little changed at 5.3 million each.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Quits were unchanged at 3.2 million.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "quits"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Within separations, quits (3.2 million) were unchanged",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Layoffs and discharges were little changed at 1.8 million.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "layoffs",
+        "discharges"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "layoffs and discharges (1.8 million) were little changed.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "US Job Openings",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US Job Openings Lowest since 2020",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US Job Openings",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US Job Openings Lowest since 2020",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 6928,
+  "error_messages": []
+}

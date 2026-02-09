@@ -17,6 +17,23 @@ from service.llm_monitoring import track_llm_call
 
 logger = logging.getLogger(__name__)
 
+ALLOWED_PHASE_A_TO_E_LLM_MODELS = {"gemini-3-flash-preview", "gemini-3-pro-preview"}
+DEFAULT_NEWS_SUMMARY_MODEL = "gemini-3-pro-preview"
+DEFAULT_MARKET_BRIEFING_MODEL = "gemini-3-flash-preview"
+DEFAULT_STRATEGY_MODEL = "gemini-3-pro-preview"
+
+
+def _resolve_phase_llm_model(requested_model: Optional[str], default_model: str) -> str:
+    model_name = (requested_model or "").strip()
+    if model_name in ALLOWED_PHASE_A_TO_E_LLM_MODELS:
+        return model_name
+    logger.warning(
+        "Unsupported LLM model '%s' for Phase A-E. Fallback to '%s'.",
+        requested_model,
+        default_model,
+    )
+    return default_model
+
 
 # ============================================================================
 # 모델 포트폴리오 (MP) 시나리오 정의
@@ -453,7 +470,7 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
 def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) -> Optional[str]:
     """
     LLM을 사용하여 뉴스를 정제하고 요약
-    gemini-3.0-pro를 사용하여 주요 경제 지표와 흐름을 도출
+    gemini-3-pro-preview를 사용하여 주요 경제 지표와 흐름을 도출
     """
     try:
         if not news_list:
@@ -494,12 +511,15 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
 한국어로 요약해주세요 (1500자 이내).
 """
         
-        # gemini-3.0-pro-preview 사용
-        logger.info("Gemini 3.0 Pro로 뉴스 요약 중...")
-        llm = llm_gemini_pro()
+        summary_model = _resolve_phase_llm_model(
+            "gemini-3-pro-preview",
+            default_model=DEFAULT_NEWS_SUMMARY_MODEL,
+        )
+        logger.info("뉴스 요약 LLM 실행 중... model=%s", summary_model)
+        llm = llm_gemini_pro(model=summary_model)
         
         with track_llm_call(
-            model_name="gemini-3-pro-preview",
+            model_name=summary_model,
             provider="Google",
             service_name="ai_strategist_news_summary",
             request_prompt=prompt
@@ -551,14 +571,18 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
 
 def generate_market_briefing(summary_text: str) -> str:
     """
-    gemini-2.5-flash를 사용하여 Market Briefing용 2차 요약 생성
+    gemini-3-flash-preview를 사용하여 Market Briefing용 2차 요약 생성
     """
     try:
         if not summary_text:
             return ""
             
         logger.info("Market Briefing용 2차 요약 생성 중...")
-        llm = llm_gemini_flash(model="gemini-2.5-flash")
+        briefing_model = _resolve_phase_llm_model(
+            "gemini-3-flash-preview",
+            default_model=DEFAULT_MARKET_BRIEFING_MODEL,
+        )
+        llm = llm_gemini_flash(model=briefing_model)
         
         prompt = f"""당신은 글로벌 금융 시장 뉴스 에디터입니다. 
 아래의 거시경제 분석 리포트를 바탕으로, 일반 투자자가 Dashboard에서 빠르게 읽을 수 있는 3~4문장의 'Market Briefing'을 작성해주세요.
@@ -576,7 +600,7 @@ def generate_market_briefing(summary_text: str) -> str:
 """
 
         with track_llm_call(
-            model_name="gemini-2.5-flash",
+            model_name=briefing_model,
             provider="Google",
             service_name="market_briefing_generation",
             request_prompt=prompt
@@ -990,12 +1014,28 @@ def _format_economic_news_data(economic_news: Dict) -> str:
     return news_summary
 
 
-def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_mp_id: Optional[str] = None) -> str:
+def create_mp_analysis_prompt(
+    fred_signals: Dict,
+    economic_news: Dict,
+    previous_mp_id: Optional[str] = None,
+    graph_context: Optional[str] = None,
+) -> str:
+    """MP 분석용 프롬프트 생성
+    
+    Args:
+        fred_signals: FRED 시그널 데이터
+        economic_news: 경제 뉴스 데이터
+        previous_mp_id: 이전 MP ID
+        graph_context: Macro Graph 근거 블록 (선택)
+    """
     # FRED 데이터 포맷팅
     fred_summary = _format_fred_dashboard_data(fred_signals)
     
     # 경제 뉴스 포맷팅
     news_summary = _format_economic_news_data(economic_news)
+    
+    # 그래프 근거 블록 (없으면 빈 문자열)
+    graph_context_block = graph_context or ""
     
     # 이전 MP 정보
     previous_mp_info = ""
@@ -1028,6 +1068,7 @@ def create_mp_analysis_prompt(fred_signals: Dict, economic_news: Dict, previous_
 {fred_summary}
 
 {news_summary}
+{graph_context_block}
 
 ## 분석 지침:
 1. **정량 데이터(FRED) 절대 우선:** 뉴스 텍스트(심리)와 FRED 데이터(수치)가 상충할 경우(예: 뉴스에서는 실업률 하락을 강조하나, 데이터 추세는 상승인 경우), 반드시 **FRED 데이터의 수치와 추세**를 기준으로 판단하세요.
@@ -1067,7 +1108,8 @@ def create_sub_mp_analysis_prompt(
     fred_signals: Dict, 
     economic_news: Dict, 
     mp_id: str,
-    previous_sub_mp: Optional[Dict[str, str]] = None
+    previous_sub_mp: Optional[Dict[str, str]] = None,
+    graph_context: Optional[str] = None,
 ) -> str:
     """Sub-MP 분석용 프롬프트 생성
     
@@ -1076,6 +1118,7 @@ def create_sub_mp_analysis_prompt(
         economic_news: 경제 뉴스 데이터
         mp_id: 선택된 MP ID
         previous_sub_mp: 이전 Sub-MP 정보 ({"stocks": "Eq-A", "bonds": "Bnd-L", "alternatives": "Alt-I", "cash": "Cash-N"} 형태)
+        graph_context: Macro Graph 근거 블록 (선택)
     """
     
     # FRED 데이터 포맷팅 (공통 함수 사용)
@@ -1083,6 +1126,9 @@ def create_sub_mp_analysis_prompt(
     
     # 경제 뉴스 포맷팅 (공통 함수 사용)
     news_summary = _format_economic_news_data(economic_news)
+    
+    # 그래프 근거 블록 (없으면 빈 문자열)
+    graph_context_block = graph_context or ""
     
     # 선택된 MP 정보
     portfolios = get_model_portfolios()
@@ -1186,7 +1232,7 @@ def create_sub_mp_analysis_prompt(
 {fred_summary}
 
 {news_summary}
-
+{graph_context_block}
 ## 분석 지침:
 1. **선택된 MP의 논리**를 바탕으로, 현재의 특수한 시장 상황(Curve, Valuation 등)을 반영하여 Sub-MP를 선택하세요.
 2. **주식 Sub-MP 선택 기준:**
@@ -1354,12 +1400,39 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         # 설정에서 모델명 가져오기
         from service.macro_trading.config.config_loader import get_config
         config = get_config()
-        model_name = config.llm.model
-        llm = llm_gemini_pro(model=model_name)
+        model_name = _resolve_phase_llm_model(
+            config.llm.model,
+            default_model=DEFAULT_STRATEGY_MODEL,
+        )
+        llm = (
+            llm_gemini_flash(model=model_name)
+            if "flash" in model_name
+            else llm_gemini_pro(model=model_name)
+        )
+        
+        # ===== Macro Graph 근거 컨텍스트 생성 (E-3) =====
+        graph_context = ""
+        try:
+            from service.graph.strategy import build_strategy_graph_context
+            graph_context = build_strategy_graph_context(
+                time_range_days=7,
+                max_events=5,
+                max_stories=3,
+                max_evidences=5,
+            )
+            if graph_context:
+                logger.info(f"[Phase E] Macro Graph 컨텍스트 생성 완료 (길이: {len(graph_context)}자)")
+            else:
+                logger.info("[Phase E] Macro Graph 컨텍스트 없음 (빈 그래프 또는 연결 불가)")
+        except Exception as e:
+            logger.warning(f"[Phase E] Macro Graph 컨텍스트 생성 실패 (폴백: 빈 컨텍스트): {e}")
+            graph_context = ""
         
         # ===== 1단계: MP 분석 =====
         logger.info("1단계: MP 분석 중...")
-        mp_prompt = create_mp_analysis_prompt(fred_signals, economic_news, previous_mp_id)
+        mp_prompt = create_mp_analysis_prompt(
+            fred_signals, economic_news, previous_mp_id, graph_context=graph_context
+        )
         
         with track_llm_call(
             model_name=model_name,
@@ -1387,7 +1460,9 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         # ===== 2단계: Sub-MP 분석 =====
         logger.info("2단계: Sub-MP 분석 중...")
         try:
-            sub_mp_prompt = create_sub_mp_analysis_prompt(fred_signals, economic_news, mp_id, previous_sub_mp)
+            sub_mp_prompt = create_sub_mp_analysis_prompt(
+                fred_signals, economic_news, mp_id, previous_sub_mp, graph_context=graph_context
+            )
             logger.info(f"Sub-MP 프롬프트 생성 완료 (길이: {len(sub_mp_prompt)}자)")
             
             with track_llm_call(

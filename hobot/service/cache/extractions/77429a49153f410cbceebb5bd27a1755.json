@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5553",
+  "extracted_at": "2026-02-08T00:58:44.457619",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "UK S&P Global Composite PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the UK S&P Global Composite PMI for January 2026, which showed the sharpest expansion in private sector output in 21 months.",
+      "impact_level": "high",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The UK S&P Global Composite PMI rose to 53.7 in January 2026 from 51.4 in the previous month.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "UK",
+        "S&P Global"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The UK S&P Global Composite PMI rose to 53.7 in January of 2026 from 51.4 in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The services sector PMI rose to 54 in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "services sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "supported by both the services sector (54 vs 51.4 in December 2025)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing output reached a 17-month high of 51.8.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "manufacturers"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "while that for manufacturers rose markedly to a 17-month high (51.8 vs 50.6)",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Private sector job counts fell at a faster pace due to rising labor costs.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "UK private sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "rising labor costs drove private sector job counts to fall at a faster pace",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation slowed compared to the end of 2025.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "UK private sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On the price front, input cost inflation slowed compared to the end of the previous year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Business activity expectations improved for a second straight month.",
+      "claim_type": "prediction",
+      "author": "S&P Global",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Looking forward, business activity expectations improved for a second straight month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "labor costs",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rising labor costs drove private sector job counts to fall at a faster pace",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "demand conditions",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "improving demand conditions drove output charges to accelerate",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "export sales",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Total new orders received by the private sector rose to a third month in the last four, supported by an improvement in export sales.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 19944,
+  "error_messages": []
+}

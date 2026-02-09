@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5741",
+  "extracted_at": "2026-02-07T14:56:53.569965",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Banxico Policy Rate Decision",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "Banco de M\u00e9xico decided to hold the policy rate at 7.00% and signaled caution on future easing.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Q4 Growth Rebound",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "A rebound in domestic growth during the fourth quarter.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January Peso Appreciation",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A period of strong appreciation for the Mexican peso in January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Banco de M\u00e9xico held the policy rate at 7.00%.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Banco de M\u00e9xico",
+        "Banxico"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Banco de M\u00e9xico\u2019s decision to hold the policy rate at 7.00%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Mexican peso retreated past 17.40 per US dollar.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Mexican peso",
+        "US dollar"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Mexican peso retreated past 17.40 per US dollar",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Banxico revised its inflation path higher through 2026.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Banxico"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "revised its inflation path higher through 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Real yield support for the peso will narrow only slowly.",
+      "claim_type": "prediction",
+      "author": "Market expectations",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "reinforcing expectations that real yield support will narrow only slowly rather than remain firmly anchored",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The peso is vulnerable to external pressure from a firmer US dollar and elevated US yields.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "the peso remained vulnerable to external pressure as a firmer US dollar and elevated US yields continued to raise the opportunity cost of peso exposure",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Domestic growth remains modest despite a recent rebound.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "evidence that growth remains modest despite a Q4 rebound",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Trade-related uncertainty and modest growth capped the peso's upside.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "lingering trade related uncertainty capped upside",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Banxico Policy Rate Decision",
+      "target_type": "Theme",
+      "target_ref": "Mexican Peso",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Mexican peso retreated past 17.40 per US dollar giving back part of its recent gains, as markets digested Banco de M\u00e9xico\u2019s decision",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Inflation risks",
+      "target_type": "Theme",
+      "target_ref": "Banxico caution",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Banxico acknowledged firmer inflation risks... and emphasised graduality",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "US yields",
+      "target_type": "Theme",
+      "target_ref": "Peso exposure",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "elevated US yields continued to raise the opportunity cost of peso exposure",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade related uncertainty",
+      "target_type": "Theme",
+      "target_ref": "Peso upside",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "lingering trade related uncertainty capped upside",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 13133,
+  "error_messages": []
+}

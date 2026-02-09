@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5724",
+  "extracted_at": "2026-02-07T05:50:50.292820",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The Baltic Exchange\u2019s dry bulk index decreased for a fourth straight session on Thursday, falling about 1% to a new low since January 26 at 1,936 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Baltic Exchange",
+        "dry bulk index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Baltic Exchange\u2019s dry bulk index, which tracks rates for vessels transporting dry commodities, retreated for a fourth straight session on Thursday, falling about 1% to a new low since January 26 at 1,936 points.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The capesize index decreased by 1.4% to 2,951 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "capesize index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The capesize index, which typically transports 150,000-ton cargoes such as iron ore and coal, decreased by 1.4% to 2,951 points",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The panamax index slumped by 1.5% to 1,659 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "panamax index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the panamax index, which usually carries 60,000-70,000 tons of coal or grain, slumped by 1.5% to 1,659 points.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The suprmax index rose 0.9% to its highest since December 24 last year at 1,102 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "suprmax index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Conversely, the smaller suprmax index rose 0.9% to its highest since December 24 last year at 1,102 points.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Baltic Dry Index",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Baltic Exchange\u2019s dry bulk index, which tracks rates for vessels transporting dry commodities, retreated for a fourth straight session on Thursday, falling about 1% to a new low since January 26 at 1,936 points.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4385,
+  "error_messages": []
+}

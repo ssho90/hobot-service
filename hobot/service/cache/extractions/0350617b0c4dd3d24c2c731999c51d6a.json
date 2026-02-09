@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5805",
+  "extracted_at": "2026-02-07T14:34:20.734631",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Czech Construction Output Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of construction output data for the Czech Republic for the month of December 2025.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Czech construction output rose by 5.3% year-on-year in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Czech Republic",
+        "Construction output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Construction output in the Czech Republic rose by 5.3% year-on-year in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The value of building permits granted in December was CZK 36 billion, a 54.7% year-on-year increase.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Building permits",
+        "CZK"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The approximate value of building permits granted surged by 54.7% year-on-year to CZK 36 billion in December.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Completed dwellings increased by 56.1% to 2,988 units.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Completed dwellings"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "completed dwellings jumped by 56.1% to 2,988.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Civil engineering output grew by 10.9% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Civil engineering works"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, output grew in civil engineering works (10.9% vs 3.3%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Growth in building constructions slowed sharply in December compared to November.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Growth slowed sharply in building constructions (2.3% vs 8.1% in November).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Construction output growth eased from the previous month's revised figures.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "easing from an upwardly revised 6.2% increase in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Construction output",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Construction output in the Czech Republic rose by 5.3% year-on-year in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Civil engineering works",
+      "target_type": "Theme",
+      "target_ref": "Construction output",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Meanwhile, output grew in civil engineering works (10.9% vs 3.3%).",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Building permits",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The approximate value of building permits granted surged by 54.7% year-on-year to CZK 36 billion in December.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11030,
+  "error_messages": []
+}

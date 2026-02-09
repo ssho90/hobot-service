@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5839",
+  "extracted_at": "2026-02-07T14:30:17.998905",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "US Equity Futures Rebound",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "US equity futures rebounded on Friday after steep losses in the previous session.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Amazon AI Infrastructure Investment Announcement",
+      "event_type": "corporate",
+      "event_date": null,
+      "description": "Amazon announced plans to invest $200 billion in AI infrastructure this year.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "S&P 500 futures rose 0.6%, Nasdaq 100 futures advanced 0.8%, and Dow Jones futures gained nearly 180 points.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P 500",
+        "Nasdaq 100",
+        "Dow Jones"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "S&P 500 futures rose 0.6%, Nasdaq 100 futures advanced 0.8%, and Dow Jones futures gained nearly 180 points, following declines of more than 1% on Thursday.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Amazon shares fell nearly 8% in premarket trading.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Amazon"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Amazon shares slid nearly 8% in premarket trading after the company announced plans to invest $200 billion in AI infrastructure this year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Nvidia rose 3.4%, Broadcom 3.2%, AMD 3.9%, and Micron Technology 4% in premarket trading.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nvidia",
+        "Broadcom",
+        "AMD",
+        "Micron Technology"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "AI-linked stocks led the recovery in premarket trading, with Nvidia up 3.4%, Broadcom gaining 3.2%, AMD rising 3.9%, and Micron Technology climbing 4%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Concerns over AI-driven disruption eased.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "as concerns over AI-driven disruption eased",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Amazon's pace of spending outstripped growth in its cloud revenue.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "a pace of spending that outstripped growth in its cloud revenue",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "AI-driven disruption concerns",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "US equity futures rebounded on Friday... as concerns over AI-driven disruption eased.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Amazon AI infrastructure investment",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Amazon shares slid nearly 8% in premarket trading after the company announced plans to invest $200 billion in AI infrastructure this year, a pace of spending that outstripped growth in its cloud revenue.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Digital assets recovery",
+      "target_type": "Theme",
+      "target_ref": "Coinbase",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Crypto-related stocks also traded higher as digital assets recovered, with Coinbase jumping 6.1%.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11275,
+  "error_messages": []
+}

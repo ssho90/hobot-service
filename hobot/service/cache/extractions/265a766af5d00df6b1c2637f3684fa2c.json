@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5711",
+  "extracted_at": "2026-02-07T05:51:11.587687",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "The S&P TSX Composite fell about 0.8% to below the 32,300 level.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "S&P TSX Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The S&P TSX Composite fell about 0.8% to below the 32,300 level",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Shopify dropped roughly 2.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Shopify"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Shopify dropped roughly 2.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Constellation Software rose about 2.5% after earnings.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Constellation Software"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Constellation Software rose about 2.5% after earnings",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Barrick Gold falling over 3.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Barrick Gold"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Barrick Gold falling over 3.5%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Agnico Eagle losing around 3%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Agnico Eagle"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Agnico Eagle losing around 3%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Wheaton Precious Metals down about 2%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Wheaton Precious Metals"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Wheaton Precious Metals down about 2%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "technology",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Shopify dropped roughly 2.5%, extending losses in growth and software names",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "precious metals",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Gold\u2019s sharp decline weighed heavily on miners, with Barrick Gold falling over 3.5%, Agnico Eagle losing around 3%, and Wheaton Precious Metals down about 2%, as lower bullion prices pressured revenue outlooks.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Financials",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Financials also contributed to the downside, with Royal Bank, TD Bank, Bank of Montreal, and CIBC all trading firmly in the red.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Energy stocks",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Energy stocks were mixed as softer crude benchmarks weighed on producers such as Imperial Oil and Cenovus, though pipeline operators including Enbridge and TC Energy posted modest gains.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 4881,
+  "error_messages": []
+}

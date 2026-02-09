@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5534",
+  "extracted_at": "2026-02-08T01:02:13.194181",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "January 2026 HCOB France Composite PMI Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the revised Composite PMI data for France in January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    },
+    {
+      "event_name": "January 2026 Services Business Activity Index Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the services sector specific activity index for January.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB France Composite PMI for January 2026 was 49.1, down from 50.0 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "France"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB France Composite PMI for January 2026 was revised higher to 49.1 from a flash estimate of 48.6, but remained below December\u2019s 50.0.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The Services Business Activity Index fell to 48.4 in January from 50.1 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "services sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "the services sector, where the Business Activity Index slipped from 50.1 in December to 48.4 in January, marking the first contraction since October.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation reached a five-month high in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "France"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Meanwhile, input cost inflation edged up to a five-month high, prompting firms to raise output charges modestly.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New orders in the private sector declined at the fastest rate in six months.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "private sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "New orders across the private sector fell at the fastest pace in six months, while employment recorded only marginal growth.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The French private sector is experiencing renewed weakness.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The latest reading pointed to renewed weakness in private sector activity, with the downturn driven mainly by the services sector",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Manufacturing is showing tentative signs of stabilization despite subdued demand.",
+      "claim_type": "analysis",
+      "author": "HCOB",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "Manufacturing showed only tentative signs of stabilization, with capacity pressures rising but overall demand still subdued.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Business confidence for the year ahead is at its highest level since late 2024.",
+      "claim_type": "prediction",
+      "author": "HCOB",
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Finally, business confidence improved, with year-ahead growth expectations rising to their strongest level since September 2024.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "services sector",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the downturn driven mainly by the services sector, where the Business Activity Index slipped from 50.1 in December to 48.4 in January",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "input cost inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "input cost inflation edged up to a five-month high, prompting firms to raise output charges modestly.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "overseas demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports continued to weigh on activity, as overseas demand for services remained in contraction.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "new orders",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "New orders across the private sector fell at the fastest pace in six months, while employment recorded only marginal growth.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10272,
+  "error_messages": []
+}

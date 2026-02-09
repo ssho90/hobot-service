@@ -13,12 +13,28 @@
 **예상 시간**: 1.5일
 
 #### 작업 내용
-- [ ] 입력: `question`, `time_range(7/30/90d)`, `country?`, `as_of_date?`
-- [ ] 처리 흐름:
+- [x] 입력: `question`, `time_range(7/30/90d)`, `country?`, `as_of_date?`
+- [x] 처리 흐름:
   1. 키워드/엔티티/지표 후보 매칭
   2. 후보에서 최근 Event/Document/Story 확장
   3. Evidence 포함 컨텍스트 패키징
-- [ ] 출력: 서브그래프(nodes/links) + 근거텍스트 + 추천쿼리
+- [x] 출력: 서브그래프(nodes/links) + 근거텍스트 + 추천쿼리
+
+#### 구현 메모 (2026-02-07)
+- 신규 파일: `hobot/service/graph/rag/context_api.py`
+- 라우터 연결: `hobot/main.py`에서 `graph_rag_router`를 `api_router`에 include
+- 테스트 추가: `hobot/tests/test_phase_d_context_api.py`
+- 응답 확장: `meta`(기간/매칭테마/카운트) 포함
+
+#### Hybrid Search 개선 (2026-02-08)
+- **Full-text Index 도입**: `document_fulltext` 인덱스 생성 (`cjk` analyzer 적용, 한글/영어 혼용 지원)
+- **기존 CONTAINS 스캔 → BM25 랭킹 기반 검색으로 교체**
+  - 속도: 데이터 증가에도 안정적인 인덱스 기반 검색
+  - 정확도: BM25 점수로 관련도 높은 문서 우선 순위 부여
+  - 유연성: 구문/다중 토큰 검색 (예: "Kevin Warsh Fed chair") 강화
+- **Hybrid Pipeline**: Full-text로 후보 회수 → 그래프 관계로 필터링
+- **Fallback 지원**: Full-text Index 미존재 시 기존 CONTAINS 방식으로 자동 폴백
+- 검색 대상 속성: `title`, `text`, `title_ko`, `description_ko`
 
 #### API 엔드포인트
 ```
@@ -48,12 +64,19 @@ Response:
 **예상 시간**: 1일
 
 #### 작업 내용
-- [ ] LLM 프롬프트에 그래프 노드/관계/근거 주입
-- [ ] 응답 포맷:
+- [x] LLM 프롬프트에 그래프 노드/관계/근거 주입
+- [x] 응답 포맷:
   - 핵심 결론 (불확실성/대안 포함)
   - 근거: `Document.url + Evidence.text + 노드id`
   - 영향 경로: Event → Theme → Indicator
-- [ ] 할루시네이션 방지: Evidence에 없는 사실 금지
+- [x] 할루시네이션 방지: Evidence에 없는 사실 금지
+
+#### 구현 메모 (2026-02-07)
+- 신규 파일: `hobot/service/graph/rag/response_generator.py`
+- 신규 API: `POST /api/graph/rag/answer`
+- 모델 제한: `gemini-3-flash-preview`, `gemini-3-pro-preview`만 허용 (그 외 입력 시 `gemini-3-pro-preview` 폴백)
+- 출력 구성: `answer(conclusion/uncertainty/key_points/impact_pathways)` + `citations(evidence/doc)` + `suggested_queries`
+- 테스트 추가: `hobot/tests/test_phase_d_response_generator.py`
 
 #### 프롬프트 구조
 ```
@@ -79,12 +102,23 @@ Response:
 **예상 시간**: 1.5일
 
 #### 작업 내용
-- [ ] 필터: 기간/국가/카테고리/테마/신뢰도
-- [ ] 노드 패널:
+- [x] 필터: 기간/국가/카테고리/테마/신뢰도
+- [x] 노드 패널:
   - Document 클릭: 원문링크, 요약, Evidence/Fact/Claim 목록
   - Indicator 클릭: 최신값/변화, 미니차트 링크
-- [ ] 경로 탐색: 관련 경로 하이라이트 + Evidence 표시
-- [ ] 질문 템플릿: 자주 쓰는 질의 5~10개 버튼화
+- [x] 경로 탐색: 관련 경로 하이라이트 + Evidence 표시
+- [x] 질문 템플릿: 자주 쓰는 질의 5~10개 버튼화
+
+#### 구현 메모 (2026-02-07)
+- 메인 구현: `hobot-ui-v2/src/components/OntologyPage.tsx`
+  - Macro Graph 전용 필터 바(기간/국가/카테고리/테마/신뢰도/기준일)
+  - Path Explorer(경로 버튼 선택 시 그래프 하이라이트)
+  - Document 노드 패널(Evidence/Claim 표시 + 원문 링크)
+  - Indicator 노드 패널(최근 Observation 요약 + 미니차트 + FRED 링크)
+  - 질문 템플릿 8개 버튼 + 추천 질의 칩 UI
+- API 연동 서비스 추가: `hobot-ui-v2/src/services/graphRagService.ts`
+  - `POST /api/graph/rag/context`
+  - `POST /api/graph/rag/answer`
 
 #### 템플릿 예시
 - "최근 인플레 관련 이벤트 Top 10"
@@ -101,11 +135,20 @@ Response:
 **예상 시간**: 1일
 
 #### 작업 내용
-- [ ] `MacroState(date)`: 당일 주요 시그널/테마 요약
+- [x] `MacroState(date)`: 당일 주요 시그널/테마 요약
   - `(MacroState)-[:HAS_SIGNAL]->(DerivedFeature)`
   - `(MacroState)-[:DOMINANT_THEME]->(MacroTheme)`
-- [ ] `AnalysisRun`: 질문/응답/모델/소요시간/근거노드 저장
-- [ ] `as_of_date` 기록 필수
+- [x] `AnalysisRun`: 질문/응답/모델/소요시간/근거노드 저장
+- [x] `as_of_date` 기록 필수
+
+#### 구현 메모 (2026-02-07)
+- 신규 파일: `hobot/service/graph/state/macro_state_generator.py`
+  - `MacroStateGenerator`: 최근 뉴스 테마/파생시그널 집계 후 `MacroState` + `DOMINANT_THEME` + `HAS_SIGNAL` 저장
+  - `AnalysisRunWriter`: `AnalysisRun` + `USED_EVIDENCE` + `USED_NODE` 저장
+- GraphRAG 연동: `hobot/service/graph/rag/response_generator.py`
+  - `POST /api/graph/rag/answer` 호출 시 D-4 저장 로직 자동 수행
+  - 요청 파라미터로 `persist_macro_state`, `persist_analysis_run` 토글 가능
+- 테스트 추가: `hobot/tests/test_phase_d_state_persistence.py`
 
 #### Cypher 예시
 ```cypher
@@ -140,9 +183,22 @@ CREATE (ar)-[:USED_EVIDENCE]->(e);
 **예상 시간**: 0.5일
 
 #### 모니터링 지표
-- [ ] GraphRAG 품질: 근거 링크 포함률, 질문 재현성, 응답 일관성
-- [ ] UI 성능: 큰 서브그래프 Top-K/페이지네이션
-- [ ] API 응답시간/에러율
+- [x] GraphRAG 품질: 근거 링크 포함률, 질문 재현성, 응답 일관성
+- [x] UI 성능: 큰 서브그래프 Top-K/페이지네이션
+- [x] API 응답시간/에러율
+
+#### 구현 메모 (2026-02-07)
+- 백엔드 모니터링 모듈 추가: `hobot/service/graph/monitoring/graphrag_metrics.py`
+  - `GraphRagApiCallLogger`: `/api/graph/rag/answer` 호출 성공/실패 로그(`GraphRagApiCall`) 저장
+  - `GraphRagMonitoringMetrics`: 품질/재현성/일관성/성능 집계
+  - 신규 API: `GET /api/graph/rag/metrics?days=7`
+- 응답 API 연동: `hobot/service/graph/rag/response_generator.py`
+  - 성공/에러 시 호출 로그 자동 기록
+- UI 성능 보강: `hobot-ui-v2/src/components/OntologyPage.tsx`
+  - Top-K 제어(30/50/80/100)
+  - Evidence Explorer 페이지네이션(이전/다음)
+  - 필터 연동된 근거 건수 표시
+- 테스트 추가: `hobot/tests/test_phase_d_monitoring.py`
 
 ---
 
@@ -150,11 +206,35 @@ CREATE (ar)-[:USED_EVIDENCE]->(e);
 **예상 시간**: 0.5일
 
 #### DoD 체크리스트
-- [ ] 질문 10개를 "그래프 근거 + 문서 링크"로 답변 가능
-- [ ] UI에서 Document→Evidence→Claim 경로 탐색 가능
-- [ ] MacroState 일일 생성 확인
-- [ ] AnalysisRun 저장 및 재현 가능
-- [ ] (범위 확인) MP/Sub-MP 선택 및 리밸런싱 비율 산출/저장은 Phase E에서 수행
+- [x] 질문 10개를 "그래프 근거 + 문서 링크"로 답변 가능 (실측: 근거 10/10, 문서 링크 10/10)
+- [x] UI에서 Document→Evidence→Claim 경로 탐색 가능 (실측 경로 수: 2,950)
+- [x] MacroState 일일 생성 확인 (실측: 2026-02-08 기준 1건)
+- [x] AnalysisRun 저장 및 재현 가능 (실측: 전체 20건, 2026-02-08 당일 2건, 재현성 84.62%)
+- [x] (범위 확인) MP/Sub-MP 선택 및 리밸런싱 비율 산출/저장은 Phase E에서 수행
+
+#### 검증 실행 결과 (2026-02-08, 최신 기준)
+- 실행 커맨드:
+  - `run_phase_c_weekly_jobs` 실행 후 최신 그래프 상태 반영
+  - `GraphRagAnswerRequest(question='최근 7일 인플레이션 리스크를 높인 핵심 이벤트와 근거를 요약해줘', time_range='7d', model='gemini-3-flash-preview')` 스모크 1회
+- 모델: `gemini-3-flash-preview`
+- 회귀 기준 유지:
+  - 질문 10개 성공률 `10/10 (100%)`
+  - Evidence 포함률 `10/10 (100%)`
+  - Document 링크 포함률 `10/10 (100%)` (`coalesce(d.url, d.link)` 반영)
+- 2026-02-08 스모크 결과:
+  - 응답 성공 + 근거 포함 (`citation_count=2`)
+  - 컨텍스트 구성 (`nodes=92`, `links=517`, `events=25`, `documents=35`, `stories=12`, `evidences=40`)
+  - 상태 저장 성공 (`analysis_run_id=ar_38fd990e5ec04781`, `persistence_keys=['analysis_run','macro_state']`)
+  - MacroState 생성 확인 (`date=2026-02-08`, `count=1`)
+  - AnalysisRun 저장 확인 (`as_of_date=2026-02-08`, `count=2`, 누적 `20`)
+- 운영 지표(최근 1일):
+  - `total_calls=35`, `success=32`, `error=3`
+  - `evidence_link_rate=100.0%`, `api_error_rate=8.57%`
+  - `reproducibility=84.62%`, `consistency=84.62%`
+
+#### 반영된 보완사항
+1. Citation 문서 링크 조회를 `url/link` 병행 조회로 수정
+2. 동일 질문/조건의 최근 성공 `AnalysisRun` 재사용(`reuse_cached_run`) 경로 추가
 
 #### 샘플 질문 (검증용)
 1. "최근 7일간 인플레이션 리스크를 높인 이벤트/뉴스는?"

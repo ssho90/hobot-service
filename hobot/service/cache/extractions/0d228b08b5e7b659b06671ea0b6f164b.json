@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5756",
+  "extracted_at": "2026-02-07T14:53:53.830528",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japan Foreign Reserves Release (January 2026)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Japan's foreign reserves reached a 4-year high of $1.39 trillion in January 2026.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "FX Intervention Confirmation",
+      "event_type": "policy",
+      "event_date": null,
+      "description": "The Finance Ministry confirmed the status of foreign exchange interventions for the period of October to December 2025.",
+      "impact_level": "low",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Japan's foreign reserves rose by $24.98 billion to $1.39 trillion in January 2026.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Japan\u2019s foreign reserves rose by $24.98 billion to $1.39 trillion in January 2026",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The foreign reserve level in January 2026 is the highest since January 2022.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "reaching the highest level since January 2022.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Japan conducted no foreign exchange interventions between October and December 2025.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "Finance Ministry"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Finance Ministry also confirmed that no foreign exchange interventions occurred between October and December 2025.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Japan's gold reserves were valued at $135.5 billion as of the January 2026 report.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Japan"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "$135.5 billion in gold",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Japan's Foreign Reserves",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Japan\u2019s foreign reserves rose by $24.98 billion to $1.39 trillion in January 2026",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Finance Ministry",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The Finance Ministry also confirmed that no foreign exchange interventions occurred",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11053,
+  "error_messages": []
+}

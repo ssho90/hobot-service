@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5772",
+  "extracted_at": "2026-02-07T05:45:19.219243",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Indonesia's IDX Composite tumbled 130 points, or 1.5%, to 7,976 in Friday morning trade.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Indonesia",
+        "IDX Composite"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Indonesia\u2019s IDX Composite tumbled 130 points, or 1.5%, to 7,976 in Friday morning trade",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Moody\u2019s Investors Service changed Indonesia\u2019s sovereign credit rating outlook from stable to negative.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Moody\u2019s Investors Service",
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Moody\u2019s Investors Service changed the country\u2019s sovereign credit rating outlook from stable to negative",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Moody's affirmed Indonesia's Baa2 rating.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Moody\u2019s",
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The agency, meanwhile, affirmed the Baa2 rating.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Indonesia's economy grew 5.11% in 2025, below the government\u2019s 5.2% target.",
+      "fact_type": "economic_event",
+      "entities_mentioned": [
+        "Indonesia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Earlier on Thursday, official data released showed the economy grew 5.11% in 2025, below the government\u2019s 5.2% target",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Weekly, markets are poised for their third straight drop, down 4% so far.",
+      "fact_type": "market_data",
+      "entities_mentioned": [],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Weekly, markets are poised for their third straight drop, down 4% so far.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Moody\u2019s Investors Service",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Moody\u2019s Investors Service changed the country\u2019s sovereign credit rating outlook from stable to negative, citing reduced policy predictability and weaker governance under President Prabowo, who took office in October 2024.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Indonesia's economy growth",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Earlier on Thursday, official data released showed the economy grew 5.11% in 2025, below the government\u2019s 5.2% target despite robust Q4 growth.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 5238,
+  "error_messages": []
+}

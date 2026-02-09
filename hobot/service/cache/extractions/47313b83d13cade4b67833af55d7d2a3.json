@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5757",
+  "extracted_at": "2026-02-07T14:54:08.351630",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Japanese Market Decline",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "The Nikkei 225 and Topix Index fell significantly on Friday, extending losses from the previous session.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Wall Street Tech Selloff",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "A tech-led selloff on Wall Street that influenced Japanese markets.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Japanese Lower House Elections",
+      "event_type": "geopolitical",
+      "event_date": null,
+      "description": "Upcoming elections where the ruling LDP is expected to gain seats.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Nikkei 225 fell 0.7% to below 53,500, while the broader Topix Index also dropped 0.7% to 3,626 on Friday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nikkei 225",
+        "Topix Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Nikkei 225 fell 0.7% to below 53,500, while the broader Topix Index also dropped 0.7% to 3,626 on Friday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Kioxia Holdings shares decreased by 5.6%, SoftBank Group fell 1.7%, and Advantest slid 3.5%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Kioxia Holdings",
+        "SoftBank Group",
+        "Advantest"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Technology stocks led the losses in Japan, with Kioxia Holdings down 5.6%, SoftBank Group falling 1.7%, and Advantest sliding 3.5%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Nintendo and Mitsubishi UFJ shares fell by 3.7% and 1.8% respectively.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Nintendo",
+        "Mitsubishi UFJ"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Consumer and financial firms also came under pressure, including Nintendo (-3.7%) and Mitsubishi UFJ (-1.8%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Concerns over massive artificial intelligence spending and potential disruption to software companies drove the decline.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Concerns over massive artificial intelligence spending and potential disruption to software companies drove the decline.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "A broader selloff in metals and cryptocurrencies reflected widespread deleveraging across financial markets.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "A broader selloff in metals and cryptocurrencies further weighed on risk sentiment, reflecting widespread deleveraging across financial markets.",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The ruling LDP is expected to gain seats and pursue expansionary fiscal policies under Prime Minister Sane Takaichi.",
+      "claim_type": "prediction",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "the ruling LDP is expected to gain seats and pursue expansionary fiscal policies under Prime Minister Sane Takaichi.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Wall Street tech-led selloff",
+      "target_type": "Theme",
+      "target_ref": "Japanese Shares",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "extending losses from the previous session amid a tech-led selloff on Wall Street.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "AI spending concerns",
+      "target_type": "Theme",
+      "target_ref": "risk",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Concerns over massive artificial intelligence spending and potential disruption to software companies drove the decline.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Deleveraging",
+      "target_type": "Theme",
+      "target_ref": "liquidity",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting widespread deleveraging across financial markets.",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "LDP election victory",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CAUSES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "the ruling LDP is expected to gain seats and pursue expansionary fiscal policies",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 14084,
+  "error_messages": []
+}

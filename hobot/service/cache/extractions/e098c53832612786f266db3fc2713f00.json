@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5868",
+  "extracted_at": "2026-02-07T05:33:43.851081",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Ripple appreciated by 20.18%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ripple"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Ripple Appreciates largely by 20.18%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Ripple",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Ripple Appreciates largely by 20.18%",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 1812,
+  "error_messages": []
+}

@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5477",
+  "extracted_at": "2026-02-08T01:15:37.349471",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Release of Ai Group Australian Industry Index (December/January)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The Ai Group released its industry index data for the December/January period, showing a slight improvement in activity.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The Ai Group Australian Industry Index rose 0.2 points to -12.3 in December/January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Ai Group",
+        "Australian Industry Index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Ai Group Australian Industry Index edged up 0.2 points to -12.3 seasonally adjusted in December/January.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The employment index remained stable at -4.7.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "employment index"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The employment index was broadly stable at -4.7",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "New orders increased by 4.1 points to -14.2.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "new orders"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "New orders improved in December/January, rising 4.1 points to -14.2",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input and sales prices declined while wages remained elevated.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "input prices",
+        "sales prices",
+        "wages"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Pricing indicators eased modestly, with both input and sales prices declining, while wages remained elevated.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Australian industry activity remains mixed despite a slight recovery trend.",
+      "claim_type": "analysis",
+      "author": "Ai Group",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "The indicator has continued to recover through 2025, but activity remains mixed.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Domestic demand is being suppressed by seasonal challenges.",
+      "claim_type": "analysis",
+      "author": "Ai Group",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "Domestic demand remained subdued amid seasonal challenges",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Persistent skill shortages are forcing firms to scale back operations or leave positions vacant.",
+      "claim_type": "analysis",
+      "author": "Ai Group",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting ongoing difficulties in securing suitable staff, with some firms scaling back operations and others holding vacancies amid persistent skill shortages.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Labour shortages",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting ongoing difficulties in securing suitable staff, with some firms scaling back operations and others holding vacancies amid persistent skill shortages.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input costs",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "rising input costs, regulatory pressures and labour shortages continued to weigh on activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "New orders",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "New orders improved in December/January, rising 4.1 points to -14.2 as the 2026 work pipeline began to flow through",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Domestic demand",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Domestic demand remained subdued amid seasonal challenges... continued to weigh on activity",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11886,
+  "error_messages": []
+}

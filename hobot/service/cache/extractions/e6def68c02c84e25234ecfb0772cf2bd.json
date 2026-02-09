@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5548",
+  "extracted_at": "2026-02-08T00:59:37.594525",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Italy January 2026 Inflation Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "Preliminary estimates of Italy's annual and monthly inflation rates for January 2026.",
+      "impact_level": "medium",
+      "related_themes": [
+        "inflation"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Italy's annual inflation rate fell to 1% in January 2026 from 1.2% in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Italy\u2019s annual inflation rate edged down to 1% in January 2026 from 1.2% in the previous month",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The core inflation rate, excluding energy and fresh food, remained at 1.8%.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The core inflation rate, which excludes energy and fresh food, held steady at 1.8%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Italy adopted the ECOICOP version 2 classification and a new 2025=100 reference base.",
+      "fact_type": "policy_action",
+      "entities_mentioned": [
+        "ECOICOP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following the adoption of the ECOICOP version 2 classification and a new 2025=100 reference base for consumer prices.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Monthly consumer prices rose by 0.4% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On a monthly basis, consumer prices increased marginally to 0.4%, from 0.2% in December",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The EU-harmonized inflation rate decreased to 1% in January.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "European Union",
+        "Italy"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The EU-harmonized inflation rate eased slightly to 1% in January 2026, from 1.2% in the previous month.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The annual inflation rate was in line with market expectations.",
+      "claim_type": "analysis",
+      "author": "Market Analysts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "in line with market expectations, preliminary estimates showed.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The monthly increase in consumer prices matched market expectations.",
+      "claim_type": "analysis",
+      "author": "Market Analysts",
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "matching market expectations.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Food products",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Prices for food products rose at a faster pace, supported by both unprocessed (2.5%) and processed (2.2%) items.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Housing-related services",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Costs also accelerated for housing-related services (4.4%)",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Energy and fresh food",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The core inflation rate, which excludes energy and fresh food, held steady at 1.8%",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 10060,
+  "error_messages": []
+}

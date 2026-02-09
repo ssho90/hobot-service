@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5631",
+  "extracted_at": "2026-02-07T16:22:16.667420",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Lunar New Year holidays",
+      "event_type": "other",
+      "event_date": null,
+      "description": "Upcoming holidays in China affecting business activity and demand.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    },
+    {
+      "event_name": "Copper price drop",
+      "event_type": "market_event",
+      "event_date": null,
+      "description": "Copper lost nearly 4% in the session prior to Thursday.",
+      "impact_level": "high",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Copper prices held below $5.85 per pound on Thursday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Copper"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Copper held below $5.85 per pound on Thursday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "China's refined copper output increased by 10% last year.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China",
+        "Copper"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "following a 10% increase last year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Stockpiles in LME warehouses in Asia have been rising.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "LME",
+        "Asia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Rising stockpiles in major trading hubs, particularly LME warehouses in Asia",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Purchases from Chinese fabricators and manufacturers slowed for two consecutive days as of Wednesday.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "China"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "purchases from Chinese fabricators and manufacturers slowed for a second consecutive day on Wednesday",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "China's refined copper output is expected to rise by approximately 5% this year.",
+      "claim_type": "prediction",
+      "author": "An industry group",
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "An industry group has forecasted that the country\u2019s refined copper output will likely rise by about 5% this year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Supplies originally intended for the US might have been moved to other locations.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "signaling that supplies initially destined for the US may have been redirected elsewhere",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Dip-buying in copper faded due to selling pressure in gold and silver.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "The dip-buying earlier this week also faded as precious metals, especially gold and silver, came under renewed selling pressure",
+          "source_sentence": null,
+          "confidence": "medium",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Rising supplies in China",
+      "target_type": "Theme",
+      "target_ref": "Copper prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "weighed down rising supplies in top consumer China",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "LME warehouse stockpiles",
+      "target_type": "Theme",
+      "target_ref": "Copper prices",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Rising stockpiles in major trading hubs, particularly LME warehouses in Asia, also weighed on prices",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Lunar New Year holidays",
+      "target_type": "Theme",
+      "target_ref": "Copper demand",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "purchases from Chinese fabricators and manufacturers slowed... as businesses prepare for the Lunar New Year holidays",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Precious metals selling pressure",
+      "target_type": "Theme",
+      "target_ref": "Copper dip-buying",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "The dip-buying earlier this week also faded as precious metals, especially gold and silver, came under renewed selling pressure",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11143,
+  "error_messages": []
+}

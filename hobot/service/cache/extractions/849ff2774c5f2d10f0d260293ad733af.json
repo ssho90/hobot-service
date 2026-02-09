@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5872",
+  "extracted_at": "2026-02-07T05:41:12.843829",
+  "extractor_version": "1.0",
+  "model_name": "gemini-2.0-flash",
+  "events": [],
+  "facts": [
+    {
+      "fact_text": "Russian GDP grew by 1% in 2025.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Russia",
+        "GDP"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The Russian gross domestic product expanded by 1% in 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The 1% GDP growth in 2025 was an aggressive slowdown from the 4.9% expansion in the previous year.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "GDP",
+        "Russia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Still, the result marked an aggressive slowdown from the 4.9% expansion in the previous year",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Manufacturing output in Russia expanded by 3.9%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Russia",
+        "Manufacturing output"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Manufacturing output expanded by 3.9%",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Extractive industries in Russia declined by 1.7%.",
+      "fact_type": "data_release",
+      "entities_mentioned": [
+        "Russia",
+        "Extractive industries"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "offsetting the 1.7% decline in that of extractive industries.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Russia's GDP growth of 1% in 2025 was ahead of the IMF's warning that it would drop to 0.6%.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "but ahead of the IMF's warning that it would drop to 0.6%.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "Russia's economic underperformance is due to the Kremlin's prolonged invasion of Ukraine.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "significantly underperforming other emerging markets as the Kremlin's prolonged invasion of Ukraine allocated government spending in the military instead of investments that stimulate the economy.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Kremlin's prolonged invasion of Ukraine",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Kremlin's prolonged invasion of Ukraine allocated government spending in the military instead of investments that stimulate the economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Low crude oil prices",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Low crude oil prices, softening natural gas exports due to European sanctions, muted trade with China due to their anti-involution campaign, and a strong ruble amid soaring interest rates by the Bank of Russia also pressured the Russian economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Softening natural gas exports due to European sanctions",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Low crude oil prices, softening natural gas exports due to European sanctions, muted trade with China due to their anti-involution campaign, and a strong ruble amid soaring interest rates by the Bank of Russia also pressured the Russian economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Muted trade with China due to their anti-involution campaign",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Low crude oil prices, softening natural gas exports due to European sanctions, muted trade with China due to their anti-involution campaign, and a strong ruble amid soaring interest rates by the Bank of Russia also pressured the Russian economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Strong ruble amid soaring interest rates by the Bank of Russia",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Low crude oil prices, softening natural gas exports due to European sanctions, muted trade with China due to their anti-involution campaign, and a strong ruble amid soaring interest rates by the Bank of Russia also pressured the Russian economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Soaring interest rates by the Bank of Russia",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Low crude oil prices, softening natural gas exports due to European sanctions, muted trade with China due to their anti-involution campaign, and a strong ruble amid soaring interest rates by the Bank of Russia also pressured the Russian economy.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 7541,
+  "error_messages": []
+}

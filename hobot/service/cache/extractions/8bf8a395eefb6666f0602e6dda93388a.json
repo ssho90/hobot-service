@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5841",
+  "extracted_at": "2026-02-07T14:30:45.133071",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "North Macedonia December 2025 Trade Data Release",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of trade balance figures for North Macedonia for December 2025 and the full year summary.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "North Macedonia's trade deficit narrowed to $295 million in December 2025 from $388 million in December 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "North Macedonia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "North Macedonia\u2019s trade deficit narrowed to $295 million in December 2025 from $388 million in the same month of the previous year.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Exports increased by 21% year-on-year to $717 million in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "North Macedonia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Exports climbed 21% year-on-year to $717 million",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Imports rose by 20% year-on-year to $1,181 million in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "North Macedonia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "imports rose at a slightly slower pace of 20% to $1,181 million.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The total trade deficit for the full year reached $3,504 million.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "North Macedonia"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "For the whole year, the country\u2019s trade deficit reached $3,504 million.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The growth in exports was primarily driven by the beverages, tobacco, machinery, and transport equipment sectors.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "attributed to an increase in sales of beverages and tobacco (38.2%), machinery and transport equipment (16.1%), miscellaneous manufactured articles (3.6%), and crude materials (9.1%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "claim_text": "The rise in imports was largely influenced by increased purchases of food, oils, and chemical products.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "neutral",
+      "evidences": [
+        {
+          "evidence_text": "driven largely by higher purchases of food and live animals (10.8%), animal and vegetable oil and fats and waxes (23.6%), chemical and related products (9.3%), and miscellaneous manufactured articles (9%).",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Exports",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Exports climbed 21% year-on-year to $717 million",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Trade Deficit",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "North Macedonia\u2019s trade deficit narrowed to $295 million in December 2025",
+        "source_sentence": null,
+        "confidence": "medium",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Imports",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "driven largely by higher purchases of food and live animals (10.8%), animal and vegetable oil and fats and waxes (23.6%)",
+        "source_sentence": null,
+        "confidence": "low",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 12684,
+  "error_messages": []
+}

@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5884",
+  "extracted_at": "2026-02-09T01:08:52.699516",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Australia Household Spending Release (December 2025)",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of monthly household spending data for Australia, showing an unexpected decline of 0.4%.",
+      "impact_level": "medium",
+      "related_themes": [],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "Household spending in Australia dropped 0.4% month-on-month in December 2025.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Australia",
+        "Household spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Household spending in Australia dropped 0.4% mom in December 2025",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "The spending data missed market estimates of a 0.2% increase.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Market estimates"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "missing market estimates of a 0.2% increase",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "December 2025 marked the first monthly contraction in household spending since March 2024.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Household spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The latest result marked the first monthly contraction since March 2024",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Annual household spending growth slowed to 5.0% in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Household spending"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "On an annual basis, household spending grew 5.0%, the softest in four months",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "The decline in spending reflects the impact of cost pressures and elevated interest rates.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "negative",
+      "evidences": [
+        {
+          "evidence_text": "reflecting the impact of cost pressures and elevated interest rates",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Elevated interest rates",
+      "target_type": "Theme",
+      "target_ref": "rates",
+      "link_type": "MENTIONS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting the impact of cost pressures and elevated interest rates",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Cost pressures",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting the impact of cost pressures and elevated interest rates",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Household spending",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Household spending in Australia dropped 0.4% mom in December 2025",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Elevated interest rates",
+      "target_type": "Theme",
+      "target_ref": "Household spending",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "reflecting the impact of cost pressures and elevated interest rates",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 15163,
+  "error_messages": []
+}

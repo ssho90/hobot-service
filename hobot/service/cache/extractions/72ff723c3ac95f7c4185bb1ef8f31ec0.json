@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "doc_id": "te:5541",
+  "extracted_at": "2026-02-08T01:01:00.146030",
+  "extractor_version": "1.0",
+  "model_name": "gemini-3-flash-preview",
+  "events": [
+    {
+      "event_name": "Spain Composite PMI Release January 2026",
+      "event_type": "economic_release",
+      "event_date": null,
+      "description": "The release of the HCOB Spain Composite PMI data for January 2026, showing a decline to 52.9.",
+      "impact_level": "medium",
+      "related_themes": [
+        "growth"
+      ],
+      "related_indicators": []
+    }
+  ],
+  "facts": [
+    {
+      "fact_text": "The HCOB Spain Composite PMI fell to 52.9 in January 2026 from 55.6 in December.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "HCOB",
+        "Spain"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "The HCOB Spain Composite PMI fell to 52.9 in January 2026 from 55.6 in December, marking the slowest pace of growth since last June.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Employment in Spain rose sharply, particularly in the services sector.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Spain",
+        "services sector"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Employment, however, rose more sharply, driven by strong gains in the services sector.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "fact_text": "Input cost inflation reached its highest level since August.",
+      "fact_type": "market_data",
+      "entities_mentioned": [
+        "Spain"
+      ],
+      "date_mentioned": null,
+      "evidences": [
+        {
+          "evidence_text": "Input cost inflation accelerated to its highest level since August",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_text": "Business confidence in the year-ahead outlook strengthened to a 12-month high.",
+      "claim_type": "analysis",
+      "author": null,
+      "sentiment": "positive",
+      "evidences": [
+        {
+          "evidence_text": "Business confidence in the year-ahead outlook strengthened to a 12-month high.",
+          "source_sentence": null,
+          "confidence": "high",
+          "language": "en"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source_type": "Event",
+      "source_ref": "Manufacturing new orders",
+      "target_type": "Theme",
+      "target_ref": "growth",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Private sector new work expanded at a reduced rate, weighed down by a decline in manufacturing new orders",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Services sector",
+      "target_type": "Theme",
+      "target_ref": "labor",
+      "link_type": "AFFECTS",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Employment, however, rose more sharply, driven by strong gains in the services sector.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    },
+    {
+      "source_type": "Event",
+      "source_ref": "Input cost inflation",
+      "target_type": "Theme",
+      "target_ref": "inflation",
+      "link_type": "CORRELATES",
+      "strength": 0.5,
+      "evidence": {
+        "evidence_text": "Input cost inflation accelerated to its highest level since August, while output prices increased at the fastest pace in three months.",
+        "source_sentence": null,
+        "confidence": "high",
+        "language": "en"
+      }
+    }
+  ],
+  "extraction_confidence": 0.5,
+  "processing_time_ms": 11213,
+  "error_messages": []
+}
