@@ -139,7 +139,8 @@ async def get_overview_data() -> Dict[str, Any]:
     if sub_mp_details:
         # current sub_mp IDs 추출
         current_ids = {}
-        for k, v in sub_mp_details.items():
+        for k in ("stocks", "bonds", "alternatives", "cash"):
+            v = sub_mp_details.get(k)
             if isinstance(v, dict):
                 current_ids[k] = v.get("sub_mp_id")
             else:
@@ -199,9 +200,11 @@ def _get_from_graph() -> Optional[Dict[str, Any]]:
         # Graph DB에는 ID 매핑만 있을 수 있으므로 get_sub_mp_details로 확장 시도
         sub_mp_details = sub_mp_json
         if sub_mp_json and isinstance(sub_mp_json, dict):
-            # 간단한 체크: 값 중에 문자열이 있다면 ID 매핑으로 간주하고 확장 시도
-            # (이미 확장된 데이터는 dict 값을 가짐)
-            is_simple_mapping = any(isinstance(v, str) for v in sub_mp_json.values())
+            # 자산군 키에 문자열 ID가 있으면 단순 ID 매핑으로 간주하고 확장 시도
+            is_simple_mapping = any(
+                isinstance(sub_mp_json.get(asset_key), str)
+                for asset_key in ("stocks", "bonds", "alternatives", "cash")
+            )
             if is_simple_mapping:
                 try:
                     sub_mp_details = get_sub_mp_details(sub_mp_json)
@@ -222,11 +225,19 @@ def _get_from_graph() -> Optional[Dict[str, Any]]:
 
         # sub_mp_reasoning 추출
         sub_mp_reasoning = None
+        sub_mp_reasoning_by_asset = None
         if isinstance(sub_mp_details, dict):
             sub_mp_reasoning = sub_mp_details.get("reasoning")
+            candidate_reasoning_map = sub_mp_details.get("reasoning_by_asset")
+            if isinstance(candidate_reasoning_map, dict):
+                sub_mp_reasoning_by_asset = candidate_reasoning_map
             # 만약 reasoning이 없으면 원래 sub_mp_json에서 찾아봄 (ETFs 확장 과정에서 유실 가능성 대비)
             if not sub_mp_reasoning and isinstance(sub_mp_json, dict):
                  sub_mp_reasoning = sub_mp_json.get("reasoning")
+            if not sub_mp_reasoning_by_asset and isinstance(sub_mp_json, dict):
+                fallback_reasoning_map = sub_mp_json.get("reasoning_by_asset")
+                if isinstance(fallback_reasoning_map, dict):
+                    sub_mp_reasoning_by_asset = fallback_reasoning_map
 
         return {
             "decision_date": row.get("decision_date"),
@@ -237,6 +248,7 @@ def _get_from_graph() -> Optional[Dict[str, Any]]:
             "target_allocation": target_allocation,
             "sub_mp": sub_mp_details,
             "sub_mp_reasoning": sub_mp_reasoning,
+            "sub_mp_reasoning_by_asset": sub_mp_reasoning_by_asset,
             "recommended_stocks": None, 
             "created_at": row.get("created_at")
         }
@@ -302,8 +314,12 @@ def _get_from_mysql() -> Optional[Dict[str, Any]]:
             
             # Sub-MP Reasoning
             sub_mp_reasoning = None
+            sub_mp_reasoning_by_asset = None
             if isinstance(sub_mp_data, dict):
                 sub_mp_reasoning = sub_mp_data.get("reasoning")
+                candidate_reasoning_map = sub_mp_data.get("reasoning_by_asset")
+                if isinstance(candidate_reasoning_map, dict):
+                    sub_mp_reasoning_by_asset = candidate_reasoning_map
             
             return {
                 "decision_date": row['decision_date'].strftime('%Y-%m-%d %H:%M:%S') if row['decision_date'] else None,
@@ -314,6 +330,7 @@ def _get_from_mysql() -> Optional[Dict[str, Any]]:
                 "target_allocation": target_allocation,
                 "sub_mp": sub_mp_details,
                 "sub_mp_reasoning": sub_mp_reasoning,
+                "sub_mp_reasoning_by_asset": sub_mp_reasoning_by_asset,
                 "recommended_stocks": recommended_stocks,
                 "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else None
             }

@@ -5,6 +5,7 @@ LangGraph를 사용하여 워크플로우를 관리합니다.
 """
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any, List, TypedDict
 from pydantic import BaseModel, Field, model_validator
@@ -21,6 +22,65 @@ ALLOWED_PHASE_A_TO_E_LLM_MODELS = {"gemini-3-flash-preview", "gemini-3-pro-previ
 DEFAULT_NEWS_SUMMARY_MODEL = "gemini-3-pro-preview"
 DEFAULT_MARKET_BRIEFING_MODEL = "gemini-3-flash-preview"
 DEFAULT_STRATEGY_MODEL = "gemini-3-pro-preview"
+DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP = 0.6
+SUB_ALLOCATOR_ASSET_SPECS = (
+    {
+        "asset_label": "Stocks",
+        "allocation_key": "Stocks",
+        "candidate_group": "stocks",
+        "normalized_field": "stocks_sub_mp",
+        "legacy_field": "stocks",
+    },
+    {
+        "asset_label": "Bonds",
+        "allocation_key": "Bonds",
+        "candidate_group": "bonds",
+        "normalized_field": "bonds_sub_mp",
+        "legacy_field": "bonds",
+    },
+    {
+        "asset_label": "Alternatives",
+        "allocation_key": "Alternatives",
+        "candidate_group": "alternatives",
+        "normalized_field": "alternatives_sub_mp",
+        "legacy_field": "alternatives",
+    },
+)
+SUB_MP_REASONING_KEY_ALIASES = {
+    "stocks": "stocks",
+    "stock": "stocks",
+    "equity": "stocks",
+    "eq": "stocks",
+    "stocks_sub_mp": "stocks",
+    "stocks_reasoning": "stocks",
+    "stocks_reason": "stocks",
+    "stocks_sub_mp_reasoning": "stocks",
+    "bonds": "bonds",
+    "bond": "bonds",
+    "fixed_income": "bonds",
+    "bonds_sub_mp": "bonds",
+    "bonds_reasoning": "bonds",
+    "bonds_reason": "bonds",
+    "bonds_sub_mp_reasoning": "bonds",
+    "alternatives": "alternatives",
+    "alternative": "alternatives",
+    "alts": "alternatives",
+    "alternatives_sub_mp": "alternatives",
+    "alternatives_reasoning": "alternatives",
+    "alternatives_reason": "alternatives",
+    "alternatives_sub_mp_reasoning": "alternatives",
+    "cash": "cash",
+    "cash_sub_mp": "cash",
+    "cash_reasoning": "cash",
+    "cash_reason": "cash",
+    "cash_sub_mp_reasoning": "cash",
+}
+SUB_MP_REASONING_LABELS = {
+    "stocks": "Stocks",
+    "bonds": "Bonds",
+    "alternatives": "Alternatives",
+    "cash": "Cash",
+}
 
 
 def _resolve_phase_llm_model(requested_model: Optional[str], default_model: str) -> str:
@@ -277,18 +337,31 @@ def get_sub_mp_etf_details(sub_mp_id: str) -> Optional[List[Dict]]:
     return None
 
 
-def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[str, Dict]]:
-    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성 (cash 포함, 미지정 시 cash 기본값 사용)"""
-    if not sub_mp_data:
+def get_sub_mp_details(sub_mp_data: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """자산군별 Sub-MP ID 목록에서 세부 종목 정보를 구성 (reasoning 메타데이터 포함)"""
+    if not isinstance(sub_mp_data, dict):
         return None
 
+    normalized_sub_mp = _normalize_sub_mp_payload(sub_mp_data)
     sub_portfolios = get_sub_model_portfolios()
-    sub_mp_details: Dict[str, Dict] = {}
+    sub_mp_details: Dict[str, Any] = {}
+    field_alias = {
+        "stocks": "stocks_sub_mp",
+        "bonds": "bonds_sub_mp",
+        "alternatives": "alternatives_sub_mp",
+        "cash": "cash_sub_mp",
+    }
 
-    # stocks, bonds, alternatives, cash 모두 처리
-    for asset_key in ("stocks", "bonds", "alternatives", "cash"):
-        sub_mp_id = sub_mp_data.get(asset_key)
+    reasoning_by_asset_raw = normalized_sub_mp.get("reasoning_by_asset")
+    reasoning_by_asset: Dict[str, str] = {}
+    if isinstance(reasoning_by_asset_raw, dict):
+        for asset_key, reason in reasoning_by_asset_raw.items():
+            cleaned_reason = str(reason or "").strip()
+            if asset_key in field_alias and cleaned_reason:
+                reasoning_by_asset[asset_key] = cleaned_reason
 
+    for asset_key, normalized_field in field_alias.items():
+        sub_mp_id = normalized_sub_mp.get(normalized_field)
         if not sub_mp_id:
             continue
 
@@ -297,13 +370,23 @@ def get_sub_mp_details(sub_mp_data: Optional[Dict[str, str]]) -> Optional[Dict[s
             continue
 
         sub_mp_info = sub_portfolios.get(sub_mp_id, {})
-        sub_mp_details[asset_key] = {
+        asset_payload = {
             "sub_mp_id": sub_mp_id,
             "sub_mp_name": sub_mp_info.get("name", ""),
             "sub_mp_description": sub_mp_info.get("description", ""),
             "updated_at": sub_mp_info.get("updated_at"),
             "etf_details": etf_details,
         }
+        asset_reasoning = reasoning_by_asset.get(asset_key)
+        if asset_reasoning:
+            asset_payload["reasoning"] = asset_reasoning
+        sub_mp_details[asset_key] = asset_payload
+
+    overall_reasoning = str(normalized_sub_mp.get("reasoning") or "").strip()
+    if overall_reasoning:
+        sub_mp_details["reasoning"] = overall_reasoning
+    if reasoning_by_asset:
+        sub_mp_details["reasoning_by_asset"] = reasoning_by_asset
 
     return sub_mp_details or None
 
@@ -345,6 +428,7 @@ class SubMPDecision(BaseModel):
     alternatives_sub_mp: Optional[str] = Field(default=None, description="대체자산 Sub-MP ID (Alt-I, Alt-C)")
     cash_sub_mp: Optional[str] = Field(default=None, description="현금 Sub-MP ID (Cash 계열)")
     reasoning: str = Field(..., description="Sub-MP 선택 근거")
+    reasoning_by_asset: Dict[str, str] = Field(default_factory=dict, description="자산군별 Sub-MP 선택 근거")
 
 
 class AIStrategyDecision(BaseModel):
@@ -1260,7 +1344,13 @@ def create_sub_mp_analysis_prompt(
     "bonds_sub_mp": "Bnd-L" 또는 "Bnd-N" 또는 "Bnd-S" 또는 null,
     "alternatives_sub_mp": "Alt-I" 또는 "Alt-C" 또는 null,
     "cash_sub_mp": "Cash-N" 또는 null,
-    "reasoning": "Sub-MP 선택 근거 (한국어, 300-500자) - 1) [변화 감지] 이전 MP/Sub-MP 대비 경제 지표의 유의미한 변화가 있었는지 평가 (예: 실업률 추세 전환 등). 2) [데이터 상충 해결] 뉴스(실업률 하락)와 데이터(3개월 추세 상승) 간 괴리 발생 시 데이터 우선 판단 근거 서술. 3) [최종 선택] Sub-MP 선택한 논리적 근거 서술."
+    "reasoning": "Sub-MP 선택 근거 (한국어, 300-500자) - 1) [변화 감지] 이전 MP/Sub-MP 대비 경제 지표의 유의미한 변화가 있었는지 평가 (예: 실업률 추세 전환 등). 2) [데이터 상충 해결] 뉴스(실업률 하락)와 데이터(3개월 추세 상승) 간 괴리 발생 시 데이터 우선 판단 근거 서술. 3) [최종 선택] Sub-MP 선택한 논리적 근거 서술.",
+    "reasoning_by_asset": {{
+      "stocks": "string",
+      "bonds": "string",
+      "alternatives": "string",
+      "cash": "string"
+    }}
 }}
 
 **중요:**
@@ -1272,6 +1362,1109 @@ JSON 형식으로만 응답하세요. 다른 설명은 포함하지 마세요.
 """
     
     return prompt
+
+
+def _create_strategy_llm(model_name: str):
+    """전략 분석용 LLM 인스턴스 생성"""
+    return (
+        llm_gemini_flash(model=model_name)
+        if "flash" in model_name
+        else llm_gemini_pro(model=model_name)
+    )
+
+
+def _invoke_llm_json(
+    prompt: str,
+    model_name: str,
+    service_name: str,
+    max_retries: int = 1,
+) -> Dict[str, Any]:
+    """LLM 호출 후 JSON 응답 파싱 (형식 오류 시 1회 재시도)"""
+    current_prompt = prompt
+    last_error: Optional[Exception] = None
+
+    for attempt in range(max_retries + 1):
+        llm = _create_strategy_llm(model_name)
+        with track_llm_call(
+            model_name=model_name,
+            provider="Google",
+            service_name=service_name,
+            request_prompt=current_prompt,
+        ) as tracker:
+            response = llm.invoke(current_prompt)
+            tracker.set_response(response)
+
+        response_text = _parse_llm_response(response)
+        try:
+            return _parse_json_response(response_text)
+        except Exception as parse_error:
+            last_error = parse_error
+            logger.warning(
+                "JSON 파싱 실패 (service=%s, attempt=%s/%s): %s",
+                service_name,
+                attempt + 1,
+                max_retries + 1,
+                parse_error,
+            )
+            if attempt >= max_retries:
+                break
+
+            current_prompt = (
+                f"{prompt}\n\n"
+                "### 재시도 규칙\n"
+                "- 직전 응답은 JSON 파싱에 실패했습니다.\n"
+                "- 유효한 JSON 객체 1개만 출력하세요.\n"
+                "- 추가 설명, 코드블록, 마크다운 없이 JSON만 반환하세요.\n"
+            )
+
+    raise ValueError(f"LLM JSON 파싱 최종 실패: {service_name}: {last_error}")
+
+
+def _format_previous_decision_context(previous_decision: Optional[Dict[str, Any]]) -> str:
+    """이전 결정 요약 텍스트"""
+    if not previous_decision:
+        return "이전 결정 없음"
+
+    previous_mp_id = previous_decision.get("mp_id") or "N/A"
+    previous_sub_mp = previous_decision.get("sub_mp") or {}
+    previous_summary = previous_decision.get("analysis_summary") or "N/A"
+    decision_date = previous_decision.get("decision_date")
+
+    return (
+        f"- decision_date: {decision_date}\n"
+        f"- previous_mp_id: {previous_mp_id}\n"
+        f"- previous_sub_mp: {json.dumps(previous_sub_mp, ensure_ascii=False, default=str)}\n"
+        f"- previous_summary: {previous_summary}"
+    )
+
+
+def _format_model_portfolio_candidates_for_prompt() -> str:
+    """MP 후보 요약"""
+    lines: List[str] = []
+    portfolios = get_model_portfolios()
+    for mp_id, mp_data in portfolios.items():
+        allocation = mp_data.get("allocation", {})
+        lines.append(
+            f"- {mp_id}: {mp_data.get('name', 'N/A')} | "
+            f"Stocks {allocation.get('Stocks', 0)} / Bonds {allocation.get('Bonds', 0)} / "
+            f"Alternatives {allocation.get('Alternatives', 0)} / Cash {allocation.get('Cash', 0)} | "
+            f"{mp_data.get('strategy', '')}"
+        )
+    return "\n".join(lines)
+
+
+def _get_sub_model_candidates_by_group() -> Dict[str, List[str]]:
+    """Sub-MP 후보 ID를 자산군별로 분류"""
+    grouped_ids = {
+        "stocks": [],
+        "bonds": [],
+        "alternatives": [],
+        "cash": [],
+    }
+
+    for sub_model_id, sub_model_data in get_sub_model_portfolios().items():
+        if not sub_model_id:
+            continue
+
+        normalized_asset_class = str(sub_model_data.get("asset_class") or "").strip().lower()
+        if sub_model_id.startswith("Eq-") or normalized_asset_class in {"stocks", "equity", "stock"}:
+            grouped_ids["stocks"].append(sub_model_id)
+        elif sub_model_id.startswith("Bnd-") or normalized_asset_class in {"bonds", "bond", "fixed_income"}:
+            grouped_ids["bonds"].append(sub_model_id)
+        elif sub_model_id.startswith("Alt-") or normalized_asset_class in {"alternatives", "alternative", "alts"}:
+            grouped_ids["alternatives"].append(sub_model_id)
+        elif sub_model_id.startswith("Cash-") or normalized_asset_class == "cash":
+            grouped_ids["cash"].append(sub_model_id)
+
+    for key, values in grouped_ids.items():
+        grouped_ids[key] = sorted(set(values))
+
+    return grouped_ids
+
+
+def _format_sub_model_candidates_for_prompt() -> str:
+    """Sub-MP 후보 요약"""
+    grouped_ids = _get_sub_model_candidates_by_group()
+    return (
+        f"- Stocks: {grouped_ids['stocks']}\n"
+        f"- Bonds: {grouped_ids['bonds']}\n"
+        f"- Alternatives: {grouped_ids['alternatives']}\n"
+        f"- Cash: {grouped_ids['cash']}"
+    )
+
+
+def _format_sub_model_candidates_for_asset_prompt(candidate_ids: List[str]) -> str:
+    """자산군별 Sub-MP 후보 상세 요약"""
+    if not candidate_ids:
+        return "- 후보 없음"
+
+    sub_portfolios = get_sub_model_portfolios()
+    lines: List[str] = []
+    for candidate_id in candidate_ids:
+        candidate = sub_portfolios.get(candidate_id, {})
+        name = candidate.get("name", "N/A")
+        description = candidate.get("description", "")
+        basket_parts: List[str] = []
+        for etf in (candidate.get("etf_details") or [])[:4]:
+            ticker = etf.get("ticker", "N/A")
+            weight_value = etf.get("weight")
+            try:
+                weight_pct = f"{float(weight_value) * 100:.0f}%"
+            except (TypeError, ValueError):
+                weight_pct = "N/A"
+            basket_parts.append(f"{ticker} {weight_pct}")
+        basket_text = ", ".join(basket_parts) if basket_parts else "N/A"
+        lines.append(f"- {candidate_id}: {name} | {description} | basket={basket_text}")
+
+    return "\n".join(lines)
+
+
+def _format_objective_constraints_for_prompt(
+    objective: Optional[Dict[str, Any]],
+    constraints: Optional[Dict[str, Any]],
+) -> str:
+    """Objective/Constraints 블록 포맷"""
+    objective_payload = objective or {}
+    constraints_payload = constraints or {}
+    return (
+        "## Objective\n"
+        f"{json.dumps(objective_payload, ensure_ascii=False, default=str, indent=2)}\n\n"
+        "## Constraints\n"
+        f"{json.dumps(constraints_payload, ensure_ascii=False, default=str, indent=2)}"
+    )
+
+
+def _build_objective_constraints_from_config(
+    config: Any,
+    previous_decision: Optional[Dict[str, Any]] = None,
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    """설정 기반 objective/constraints 구성"""
+    objective = {
+        "primary": "maximize_risk_adjusted_return",
+        "secondary": ["capital_preservation", "reduce_whipsaw"],
+        "rebalance_threshold_percent": float(config.rebalancing.threshold),
+        "cash_reserve_ratio": float(config.rebalancing.cash_reserve_ratio),
+        "min_trade_amount": int(config.rebalancing.min_trade_amount),
+        "max_daily_loss_percent": float(config.safety.max_daily_loss_percent),
+        "max_monthly_loss_percent": float(config.safety.max_monthly_loss_percent),
+    }
+
+    constraints = {
+        "allowed_mp_ids": sorted(get_model_portfolios().keys()),
+        "allowed_sub_mp_ids": _get_sub_model_candidates_by_group(),
+        "manual_approval_required": bool(config.safety.manual_approval_required),
+        "dry_run_mode": bool(config.safety.dry_run_mode),
+        "keep_previous_if_uncertain": True,
+        "max_turnover_trigger_percent": float(config.rebalancing.threshold),
+        "min_confidence_to_switch_mp": DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP,
+        "llm_model": config.llm.model,
+        "llm_temperature": float(config.llm.temperature),
+    }
+
+    if previous_decision and previous_decision.get("decision_date"):
+        constraints["previous_decision_date"] = str(previous_decision.get("decision_date"))
+
+    return objective, constraints
+
+
+def _apply_mp_quality_gate(
+    mp_decision_data: Dict[str, Any],
+    previous_mp_id: Optional[str],
+    risk_report: Optional[Dict[str, Any]],
+    constraints: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """confidence/risk 기반 MP 품질 게이트"""
+    if not isinstance(mp_decision_data, dict):
+        return {}
+
+    gated_decision = dict(mp_decision_data)
+    min_confidence = float((constraints or {}).get("min_confidence_to_switch_mp", DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP))
+
+    current_mp_id = gated_decision.get("mp_id")
+    confidence = gated_decision.get("confidence")
+    try:
+        confidence_value = float(confidence)
+    except (TypeError, ValueError):
+        confidence_value = None
+
+    risk_action = ""
+    if isinstance(risk_report, dict):
+        risk_action = str(risk_report.get("recommended_action") or "").strip().upper()
+
+    should_hold_previous = risk_action == "HOLD_PREVIOUS"
+    should_hold_previous = should_hold_previous or (
+        confidence_value is not None
+        and previous_mp_id
+        and previous_mp_id != current_mp_id
+        and confidence_value < min_confidence
+    )
+
+    if should_hold_previous and previous_mp_id and previous_mp_id in get_model_portfolios():
+        original_mp_id = gated_decision.get("mp_id")
+        gated_decision["mp_id"] = previous_mp_id
+        existing_reasoning = str(gated_decision.get("reasoning") or "")
+        gate_reason = (
+            f"Quality Gate 적용: previous_mp 유지({previous_mp_id}). "
+            f"원래 제안 MP={original_mp_id}, confidence={confidence_value}, risk_action={risk_action or 'N/A'}"
+        )
+        gated_decision["reasoning"] = (existing_reasoning + "\n" + gate_reason).strip()
+
+    return gated_decision
+
+
+def create_quant_agent_prompt(
+    fred_signals: Dict[str, Any],
+    previous_decision: Optional[Dict[str, Any]],
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Agent A (Quant) 프롬프트"""
+    fred_summary = _format_fred_dashboard_data(fred_signals)
+    previous_context = _format_previous_decision_context(previous_decision)
+    mp_candidates = _format_model_portfolio_candidates_for_prompt()
+    objective_constraints = _format_objective_constraints_for_prompt(objective, constraints)
+
+    return f"""# Role
+당신은 Quantitative Macro Analyst입니다.
+
+# Reasoning Protocol (Hidden)
+- 입력 점검 → 성장/물가/유동성 판단 → mp_fit 산출 → JSON 검증 순서로 내부 추론하세요.
+- 중간 추론은 출력하지 말고, JSON 1개만 반환하세요.
+
+# Input
+## Previous Context
+{previous_context}
+
+## MP Candidates
+{mp_candidates}
+
+{objective_constraints}
+
+## Macro Indicators
+{fred_summary}
+
+# Output JSON Schema
+{{
+  "scores": {{"growth": 0, "inflation": 0, "liquidity": 0}},
+  "growth_status": "Slowing/Expanding/Recovering",
+  "inflation_status": "Sticky/Cooling/Accelerating",
+  "liquidity_status": "Tight/Loose/Neutral",
+  "regime_definition": "string",
+  "mp_fit": {{"MP-1": 0.0}},
+  "key_indicators_used": ["string"],
+  "confidence_score": 0.0
+}}
+"""
+
+
+def create_narrative_agent_prompt(
+    economic_news: Optional[Dict[str, Any]],
+    graph_context: str,
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Agent B (Narrative) 프롬프트"""
+    news_summary = _format_economic_news_data(economic_news or {})
+    graph_context_block = graph_context or "Graph context unavailable"
+    objective_constraints = _format_objective_constraints_for_prompt(objective, constraints)
+
+    return f"""# Role
+당신은 Market Narrative Expert입니다.
+
+# Reasoning Protocol (Hidden)
+- 뉴스/그래프 근거를 분리하고, 근거가 있는 주장만 남기세요.
+- 중간 추론은 출력하지 말고, JSON 1개만 반환하세요.
+
+# Input
+## News Summary
+{news_summary}
+
+## Graph Evidence
+{graph_context_block}
+
+{objective_constraints}
+
+# Output JSON Schema
+{{
+  "dominant_themes": ["string"],
+  "narrative_sentiment": "Fear/Greed/Neutral",
+  "causal_risks": ["string"],
+  "weak_signals": ["string"],
+  "graph_evidence_summary": "string",
+  "evidence_ids": ["evidence:123"]
+}}
+"""
+
+
+def create_risk_agent_prompt(
+    quant_report: Dict[str, Any],
+    narrative_report: Dict[str, Any],
+    previous_decision: Optional[Dict[str, Any]],
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Agent C (Risk) 프롬프트"""
+    previous_context = _format_previous_decision_context(previous_decision)
+    objective_constraints = _format_objective_constraints_for_prompt(objective, constraints)
+
+    return f"""# Role
+당신은 Risk Manager입니다.
+
+# Reasoning Protocol (Hidden)
+- Quant/Narrative 상충 여부, 제약 위반 가능성, whipsaw 위험을 순서대로 점검하세요.
+- 중간 추론은 출력하지 말고, JSON 1개만 반환하세요.
+
+# Input
+## Quant Report
+{json.dumps(quant_report, ensure_ascii=False, default=str)}
+
+## Narrative Report
+{json.dumps(narrative_report, ensure_ascii=False, default=str)}
+
+## Previous Context
+{previous_context}
+
+{objective_constraints}
+
+# Output JSON Schema
+{{
+  "divergence_detected": true,
+  "risk_level": "High/Medium/Low",
+  "constraint_violations": ["string"],
+  "adjustment_advice": "string",
+  "whipsaw_warning": false,
+  "recommended_action": "HOLD_PREVIOUS/SHIFT_NEUTRAL/SHIFT_DEFENSIVE"
+}}
+"""
+
+
+def create_supervisor_agent_prompt(
+    quant_report: Dict[str, Any],
+    narrative_report: Dict[str, Any],
+    risk_report: Dict[str, Any],
+    previous_decision: Optional[Dict[str, Any]],
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Supervisor 프롬프트"""
+    previous_context = _format_previous_decision_context(previous_decision)
+    mp_candidates = _format_model_portfolio_candidates_for_prompt()
+    sub_candidates = _format_sub_model_candidates_for_prompt()
+    objective_constraints = _format_objective_constraints_for_prompt(objective, constraints)
+
+    return f"""# Role
+당신은 CIO입니다. Agent A/B/C 결과를 종합해 최종 MP와 Sub-MP를 결정하세요.
+
+# Reasoning Protocol (Hidden)
+- 후보군 비교 → 리스크 반영 → MP/Sub-MP 선택 → 스키마 검증 순서로 내부 추론하세요.
+- 중간 추론은 출력하지 말고, JSON 1개만 반환하세요.
+
+# Constraints
+- mp_id는 MP 후보 목록 안에서만 선택
+- sub_mp는 Sub-MP 후보 목록 안에서만 선택
+- 근거 없는 수치/ID 생성 금지
+
+# Input
+## Previous Context
+{previous_context}
+
+## MP Candidates
+{mp_candidates}
+
+## Sub-MP Candidates
+{sub_candidates}
+
+{objective_constraints}
+
+## Quant Report
+{json.dumps(quant_report, ensure_ascii=False, default=str)}
+
+## Narrative Report
+{json.dumps(narrative_report, ensure_ascii=False, default=str)}
+
+## Risk Report
+{json.dumps(risk_report, ensure_ascii=False, default=str)}
+
+# Output JSON Schema
+{{
+  "analysis_summary": "string",
+  "mp_id": "MP-X",
+  "reasoning": "string",
+  "sub_mp": {{
+    "stocks_sub_mp": "Eq-X | null",
+    "bonds_sub_mp": "Bnd-X | null",
+    "alternatives_sub_mp": "Alt-X | null",
+    "cash_sub_mp": "Cash-N | null",
+    "reasoning": "string",
+    "reasoning_by_asset": {{
+      "stocks": "string",
+      "bonds": "string",
+      "alternatives": "string",
+      "cash": "string"
+    }}
+  }},
+  "confidence": 0.0,
+  "used_evidence_ids": ["evidence:123"]
+}}
+"""
+
+
+def create_sub_allocator_agent_prompt(
+    mp_id: str,
+    quant_report: Optional[Dict[str, Any]],
+    narrative_report: Optional[Dict[str, Any]],
+    risk_report: Optional[Dict[str, Any]],
+    previous_sub_mp: Optional[Dict[str, Any]],
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Agent D (Sub-Allocator) 프롬프트"""
+    sub_candidates = _format_sub_model_candidates_for_prompt()
+    objective_constraints = _format_objective_constraints_for_prompt(objective, constraints)
+
+    return f"""# Role
+당신은 Portfolio Manager(Sub-Allocator)입니다.
+선택된 MP에 맞는 Sub-MP를 자산군별로 선택하세요.
+
+# Reasoning Protocol (Hidden)
+- MP 제약 확인 → 자산군별 신호 분리 → 후보군 내 선택 → JSON 검증 순서로 내부 추론하세요.
+- 중간 추론은 출력하지 말고 JSON 1개만 반환하세요.
+
+# Constraints
+- 제공된 후보 ID 내에서만 선택
+- 선택된 MP의 자산군 비중이 0%면 해당 Sub-MP는 null
+
+# Input
+## Selected MP
+{mp_id}
+
+## Previous Sub-MP
+{json.dumps(previous_sub_mp or {}, ensure_ascii=False, default=str)}
+
+## Sub-MP Candidates
+{sub_candidates}
+
+{objective_constraints}
+
+## Quant Report
+{json.dumps(quant_report or {}, ensure_ascii=False, default=str)}
+
+## Narrative Report
+{json.dumps(narrative_report or {}, ensure_ascii=False, default=str)}
+
+## Risk Report
+{json.dumps(risk_report or {}, ensure_ascii=False, default=str)}
+
+# Output JSON Schema
+{{
+  "sub_allocations": {{
+    "Stocks": {{"id": "Eq-X | null", "reason": "string"}},
+    "Bonds": {{"id": "Bnd-X | null", "reason": "string"}},
+    "Alternatives": {{"id": "Alt-X | null", "reason": "string"}},
+    "Cash": {{"id": "Cash-N | null", "reason": "string"}}
+  }},
+  "final_construction_summary": "string"
+}}
+"""
+
+
+def _normalize_sub_model_id(raw_value: Any) -> Optional[str]:
+    """Sub-MP ID 정규화"""
+    if raw_value is None:
+        return None
+    normalized_value = str(raw_value).strip()
+    if not normalized_value or normalized_value.lower() in {"null", "none", "n/a"}:
+        return None
+    return normalized_value
+
+
+def _extract_previous_sub_mp_choice(
+    previous_sub_mp: Optional[Dict[str, Any]],
+    normalized_field: str,
+    legacy_field: str,
+) -> Optional[str]:
+    """이전 Sub-MP에서 자산군별 선택값 추출"""
+    if not isinstance(previous_sub_mp, dict):
+        return None
+
+    normalized_payload = _normalize_sub_mp_payload(previous_sub_mp)
+    normalized_choice = _normalize_sub_model_id(normalized_payload.get(normalized_field))
+    if normalized_choice:
+        return normalized_choice
+
+    return _normalize_sub_model_id(previous_sub_mp.get(legacy_field))
+
+
+def create_asset_sub_allocator_agent_prompt(
+    *,
+    asset_label: str,
+    mp_id: str,
+    target_weight: float,
+    candidate_ids: List[str],
+    previous_choice: Optional[str],
+    quant_report: Optional[Dict[str, Any]],
+    narrative_report: Optional[Dict[str, Any]],
+    risk_report: Optional[Dict[str, Any]],
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> str:
+    """자산군별 Sub-Agent 프롬프트"""
+    objective_constraints = _format_objective_constraints_for_prompt(objective, constraints)
+    candidate_details = _format_sub_model_candidates_for_asset_prompt(candidate_ids)
+
+    return f"""# Role
+당신은 {asset_label} 자산군 전담 Sub-Allocator입니다.
+선택된 MP 제약 안에서 {asset_label} Sub-MP 1개를 선택하세요.
+
+# Reasoning Protocol (Hidden)
+- 후보군 검토 → 리스크 반영 → 이전 선택 대비 변경 필요성 점검 → JSON 검증 순서로 내부 추론하세요.
+- 중간 추론은 출력하지 말고 JSON 1개만 반환하세요.
+
+# Constraints
+- selected_sub_mp는 반드시 후보 목록 내 ID 또는 null만 허용
+- target_weight가 0이면 selected_sub_mp는 null
+- 근거 없는 ID/숫자 생성 금지
+
+# Input
+## Selected MP
+{mp_id}
+
+## Asset Bucket
+- asset_group: {asset_label}
+- target_weight_percent: {target_weight}
+- previous_choice: {previous_choice or "None"}
+
+## Candidate Sub-MP
+{candidate_details}
+
+{objective_constraints}
+
+## Quant Report
+{json.dumps(quant_report or {}, ensure_ascii=False, default=str)}
+
+## Narrative Report
+{json.dumps(narrative_report or {}, ensure_ascii=False, default=str)}
+
+## Risk Report
+{json.dumps(risk_report or {}, ensure_ascii=False, default=str)}
+
+# Output JSON Schema
+{{
+  "asset_group": "{asset_label}",
+  "selected_sub_mp": "candidate_id | null",
+  "reason": "string",
+  "confidence": 0.0
+}}
+"""
+
+
+def _invoke_parallel_sub_allocator_agents(
+    *,
+    mp_id: str,
+    quant_report: Optional[Dict[str, Any]],
+    narrative_report: Optional[Dict[str, Any]],
+    risk_report: Optional[Dict[str, Any]],
+    previous_sub_mp: Optional[Dict[str, Any]],
+    model_name: str,
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Equity/Bond/Alt 전담 Sub-Agent 병렬 실행 후 결과 통합"""
+    target_allocation = get_model_portfolio_allocation(mp_id) or {}
+    grouped_ids = _get_sub_model_candidates_by_group()
+
+    safe_quant_report = quant_report if isinstance(quant_report, dict) else {}
+    safe_narrative_report = narrative_report if isinstance(narrative_report, dict) else {}
+    safe_risk_report = risk_report if isinstance(risk_report, dict) else {}
+
+    def _run_single_asset_agent(spec: Dict[str, str]) -> tuple[str, Dict[str, Any]]:
+        asset_label = spec["asset_label"]
+        allocation_key = spec["allocation_key"]
+        candidate_group = spec["candidate_group"]
+        normalized_field = spec["normalized_field"]
+        legacy_field = spec["legacy_field"]
+
+        target_weight = float(target_allocation.get(allocation_key, 0) or 0)
+        candidate_ids = list(grouped_ids.get(candidate_group, []))
+        previous_choice = _extract_previous_sub_mp_choice(
+            previous_sub_mp,
+            normalized_field=normalized_field,
+            legacy_field=legacy_field,
+        )
+
+        if target_weight <= 0:
+            return asset_label, {"id": None, "reason": f"{asset_label} 비중 0%로 선택 생략"}
+
+        if not candidate_ids:
+            return asset_label, {"id": None, "reason": f"{asset_label} 후보군 없음"}
+
+        try:
+            asset_prompt = create_asset_sub_allocator_agent_prompt(
+                asset_label=asset_label,
+                mp_id=mp_id,
+                target_weight=target_weight,
+                candidate_ids=candidate_ids,
+                previous_choice=previous_choice,
+                quant_report=safe_quant_report,
+                narrative_report=safe_narrative_report,
+                risk_report=safe_risk_report,
+                objective=objective,
+                constraints=constraints,
+            )
+            raw_asset_payload = _invoke_llm_json(
+                asset_prompt,
+                model_name,
+                f"ai_strategist_agent_sub_allocator_{candidate_group}",
+                1,
+            )
+        except Exception as asset_error:
+            logger.warning("%s Sub-Agent 호출 실패: %s", asset_label, asset_error)
+            fallback_id = previous_choice if previous_choice in candidate_ids else candidate_ids[0]
+            return asset_label, {"id": fallback_id, "reason": f"{asset_label} Sub-Agent 실패로 폴백 선택"}
+
+        selected_id = _normalize_sub_model_id((raw_asset_payload or {}).get("selected_sub_mp"))
+        reason = str((raw_asset_payload or {}).get("reason") or "").strip()
+
+        if selected_id not in candidate_ids:
+            fallback_id = previous_choice if previous_choice in candidate_ids else candidate_ids[0]
+            logger.warning(
+                "%s Sub-Agent가 후보 외 ID를 반환함: %s (fallback=%s)",
+                asset_label,
+                selected_id,
+                fallback_id,
+            )
+            selected_id = fallback_id
+            if reason:
+                reason = f"{reason} (후보 제약 적용)"
+
+        if not reason:
+            reason = f"{asset_label} 후보군 내 상대 적합도 기반 선택"
+
+        return asset_label, {"id": selected_id, "reason": reason}
+
+    sub_allocations: Dict[str, Dict[str, Any]] = {}
+    with ThreadPoolExecutor(max_workers=len(SUB_ALLOCATOR_ASSET_SPECS)) as executor:
+        futures = [executor.submit(_run_single_asset_agent, spec) for spec in SUB_ALLOCATOR_ASSET_SPECS]
+        for future in futures:
+            asset_label, allocation_payload = future.result()
+            sub_allocations[asset_label] = allocation_payload
+
+    cash_weight = float(target_allocation.get("Cash", 0) or 0)
+    cash_candidates = grouped_ids.get("cash", [])
+    previous_cash_choice = _extract_previous_sub_mp_choice(
+        previous_sub_mp,
+        normalized_field="cash_sub_mp",
+        legacy_field="cash",
+    )
+    if cash_weight <= 0:
+        sub_allocations["Cash"] = {"id": None, "reason": "Cash 비중 0%로 선택 생략"}
+    elif cash_candidates:
+        if previous_cash_choice in cash_candidates:
+            selected_cash_id = previous_cash_choice
+            cash_reason = "turnover 최소화를 위해 이전 Cash Sub-MP 유지"
+        else:
+            selected_cash_id = "Cash-N" if "Cash-N" in cash_candidates else cash_candidates[0]
+            cash_reason = "Cash 자산군 운영 규칙에 따라 현금성 모델 선택"
+        sub_allocations["Cash"] = {"id": selected_cash_id, "reason": cash_reason}
+    else:
+        sub_allocations["Cash"] = {"id": None, "reason": "Cash 후보군 없음"}
+
+    summary_parts: List[str] = []
+    reason_parts: List[str] = []
+    reasoning_by_asset: Dict[str, str] = {}
+    for asset_label in ("Stocks", "Bonds", "Alternatives", "Cash"):
+        selected_id = _normalize_sub_model_id((sub_allocations.get(asset_label) or {}).get("id"))
+        reason = str((sub_allocations.get(asset_label) or {}).get("reason") or "").strip()
+        normalized_reason_key = _normalize_sub_mp_reasoning_key(asset_label)
+        summary_parts.append(f"{asset_label}={selected_id or 'null'}")
+        if reason:
+            reason_parts.append(f"{asset_label}: {reason}")
+            if normalized_reason_key:
+                reasoning_by_asset[normalized_reason_key] = reason
+
+    return {
+        "sub_allocations": sub_allocations,
+        "final_construction_summary": (
+            "병렬 Sub-Agent 결과: "
+            + ", ".join(summary_parts)
+            + (" | " + " / ".join(reason_parts) if reason_parts else "")
+        ),
+        "reasoning_by_asset": reasoning_by_asset,
+        "selection_mode": "parallel_asset_agents_v2",
+    }
+
+
+def _normalize_sub_mp_reasoning_key(raw_key: Any) -> Optional[str]:
+    """Sub-MP 자산군 reasoning 키 정규화"""
+    if raw_key is None:
+        return None
+    normalized_key = str(raw_key).strip().lower()
+    if not normalized_key:
+        return None
+    return SUB_MP_REASONING_KEY_ALIASES.get(normalized_key)
+
+
+def _compose_sub_mp_reasoning_summary(reasoning_by_asset: Optional[Dict[str, Any]]) -> str:
+    """자산군별 reasoning을 단일 요약 문자열로 합성"""
+    if not isinstance(reasoning_by_asset, dict):
+        return ""
+
+    summary_parts: List[str] = []
+    for asset_key in ("stocks", "bonds", "alternatives", "cash"):
+        reason = str(reasoning_by_asset.get(asset_key) or "").strip()
+        if not reason:
+            continue
+        summary_parts.append(f"{SUB_MP_REASONING_LABELS.get(asset_key, asset_key)}: {reason}")
+    return " / ".join(summary_parts)
+
+
+def _extract_reasoning_by_asset(
+    raw_payload: Dict[str, Any],
+    source_payload: Dict[str, Any],
+) -> Dict[str, str]:
+    """다양한 입력 형태에서 자산군별 reasoning 추출"""
+    extracted: Dict[str, str] = {}
+
+    def _upsert_reason(raw_key: Any, raw_value: Any) -> None:
+        normalized_key = _normalize_sub_mp_reasoning_key(raw_key)
+        reason = str(raw_value or "").strip()
+        if normalized_key and reason:
+            extracted[normalized_key] = reason
+
+    for candidate in (source_payload, raw_payload):
+        reasoning_map = candidate.get("reasoning_by_asset")
+        if isinstance(reasoning_map, dict):
+            for raw_key, raw_value in reasoning_map.items():
+                _upsert_reason(raw_key, raw_value)
+
+    for candidate in (source_payload, raw_payload):
+        for raw_key, raw_value in candidate.items():
+            if not isinstance(raw_key, str):
+                continue
+            normalized_key = _normalize_sub_mp_reasoning_key(raw_key)
+            if not normalized_key:
+                continue
+            if raw_key.endswith("_reasoning") or raw_key.endswith("_reason"):
+                _upsert_reason(raw_key, raw_value)
+
+    allocations_payload = raw_payload.get("sub_allocations")
+    if isinstance(allocations_payload, dict):
+        for asset_label, allocation_payload in allocations_payload.items():
+            if not isinstance(allocation_payload, dict):
+                continue
+            _upsert_reason(
+                asset_label,
+                allocation_payload.get("reason") or allocation_payload.get("reasoning"),
+            )
+
+    for nested_payload in (raw_payload.get("sub_mp"), source_payload):
+        if not isinstance(nested_payload, dict):
+            continue
+        for asset_key in ("stocks", "bonds", "alternatives", "cash"):
+            nested_asset_payload = nested_payload.get(asset_key)
+            if isinstance(nested_asset_payload, dict):
+                _upsert_reason(
+                    asset_key,
+                    nested_asset_payload.get("reason") or nested_asset_payload.get("reasoning"),
+                )
+
+    return extracted
+
+
+def _merge_sub_mp_payloads(
+    supervisor_sub_mp: Optional[Dict[str, Any]],
+    sub_allocator_payload: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Supervisor와 Sub-Allocator 결과를 병합 (Supervisor 우선, 빈 값은 Sub-Allocator로 보완)"""
+    supervisor_normalized = _normalize_sub_mp_payload(supervisor_sub_mp)
+    allocator_normalized = _normalize_sub_mp_payload(sub_allocator_payload)
+
+    merged_payload = {
+        "stocks_sub_mp": supervisor_normalized.get("stocks_sub_mp") or allocator_normalized.get("stocks_sub_mp"),
+        "bonds_sub_mp": supervisor_normalized.get("bonds_sub_mp") or allocator_normalized.get("bonds_sub_mp"),
+        "alternatives_sub_mp": supervisor_normalized.get("alternatives_sub_mp")
+        or allocator_normalized.get("alternatives_sub_mp"),
+        "cash_sub_mp": supervisor_normalized.get("cash_sub_mp") or allocator_normalized.get("cash_sub_mp"),
+        "reasoning": "",
+        "reasoning_by_asset": {},
+    }
+
+    supervisor_reason = (supervisor_normalized.get("reasoning") or "").strip()
+    allocator_reason = (allocator_normalized.get("reasoning") or "").strip()
+    if supervisor_reason and allocator_reason and supervisor_reason != allocator_reason:
+        merged_payload["reasoning"] = f"Supervisor: {supervisor_reason}\nSub-Allocator: {allocator_reason}"
+    else:
+        merged_payload["reasoning"] = supervisor_reason or allocator_reason
+
+    supervisor_reasoning_map = supervisor_normalized.get("reasoning_by_asset")
+    allocator_reasoning_map = allocator_normalized.get("reasoning_by_asset")
+    normalized_supervisor_reasoning = supervisor_reasoning_map if isinstance(supervisor_reasoning_map, dict) else {}
+    normalized_allocator_reasoning = allocator_reasoning_map if isinstance(allocator_reasoning_map, dict) else {}
+
+    merged_reasoning_by_asset: Dict[str, str] = {}
+    for asset_key in ("stocks", "bonds", "alternatives", "cash"):
+        merged_reason = str(
+            normalized_supervisor_reasoning.get(asset_key)
+            or normalized_allocator_reasoning.get(asset_key)
+            or ""
+        ).strip()
+        if merged_reason:
+            merged_reasoning_by_asset[asset_key] = merged_reason
+    merged_payload["reasoning_by_asset"] = merged_reasoning_by_asset
+
+    if not merged_payload["reasoning"]:
+        merged_payload["reasoning"] = _compose_sub_mp_reasoning_summary(merged_reasoning_by_asset)
+
+    return merged_payload
+
+
+def _normalize_sub_mp_payload(raw_payload: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """다양한 응답 구조를 통일된 Sub-MP 키 구조로 정규화"""
+    if not isinstance(raw_payload, dict):
+        return {}
+
+    sub_mp_payload = raw_payload.get("sub_mp")
+    source_payload: Dict[str, Any]
+    if isinstance(sub_mp_payload, dict):
+        source_payload = sub_mp_payload
+    elif isinstance(raw_payload.get("sub_allocations"), dict):
+        allocations_payload = raw_payload.get("sub_allocations", {})
+        source_payload = {
+            "stocks_sub_mp": (allocations_payload.get("Stocks") or {}).get("id"),
+            "bonds_sub_mp": (allocations_payload.get("Bonds") or {}).get("id"),
+            "alternatives_sub_mp": (allocations_payload.get("Alternatives") or {}).get("id"),
+            "cash_sub_mp": (allocations_payload.get("Cash") or {}).get("id"),
+            "reasoning": raw_payload.get("final_construction_summary"),
+        }
+    else:
+        source_payload = raw_payload
+
+    reasoning_by_asset = _extract_reasoning_by_asset(raw_payload, source_payload)
+    overall_reasoning = str(source_payload.get("reasoning") or raw_payload.get("reasoning", "")).strip()
+    if not overall_reasoning:
+        overall_reasoning = _compose_sub_mp_reasoning_summary(reasoning_by_asset)
+
+    return {
+        "stocks_sub_mp": source_payload.get("stocks_sub_mp") or source_payload.get("stocks"),
+        "bonds_sub_mp": source_payload.get("bonds_sub_mp") or source_payload.get("bonds"),
+        "alternatives_sub_mp": source_payload.get("alternatives_sub_mp") or source_payload.get("alternatives"),
+        "cash_sub_mp": source_payload.get("cash_sub_mp") or source_payload.get("cash"),
+        "reasoning": overall_reasoning,
+        "reasoning_by_asset": reasoning_by_asset,
+    }
+
+
+def _validate_sub_mp_selection(mp_id: str, sub_mp_payload: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Sub-MP 선택값 유효성 검증 및 정리"""
+    normalized_payload = _normalize_sub_mp_payload(sub_mp_payload)
+    target_allocation = get_model_portfolio_allocation(mp_id) or {}
+    grouped_ids = _get_sub_model_candidates_by_group()
+
+    field_map = {
+        "stocks_sub_mp": ("stocks", "Stocks", "stocks"),
+        "bonds_sub_mp": ("bonds", "Bonds", "bonds"),
+        "alternatives_sub_mp": ("alternatives", "Alternatives", "alternatives"),
+        "cash_sub_mp": ("cash", "Cash", "cash"),
+    }
+
+    validated_payload: Dict[str, Any] = {"reasoning": normalized_payload.get("reasoning", "")}
+    raw_reasoning_by_asset = normalized_payload.get("reasoning_by_asset")
+    validated_reasoning_by_asset: Dict[str, str] = {}
+    if isinstance(raw_reasoning_by_asset, dict):
+        for asset_key, reason in raw_reasoning_by_asset.items():
+            cleaned_reason = str(reason or "").strip()
+            if asset_key in {"stocks", "bonds", "alternatives", "cash"} and cleaned_reason:
+                validated_reasoning_by_asset[asset_key] = cleaned_reason
+
+    for field_name, (asset_group, allocation_key, reasoning_key) in field_map.items():
+        allowed_ids = grouped_ids.get(asset_group, [])
+        selected_id = normalized_payload.get(field_name)
+        allocation_value = float(target_allocation.get(allocation_key, 0) or 0)
+
+        if allocation_value <= 0:
+            validated_payload[field_name] = None
+            if not validated_reasoning_by_asset.get(reasoning_key):
+                validated_reasoning_by_asset[reasoning_key] = f"{allocation_key} 비중 0%로 선택 없음"
+            continue
+
+        if selected_id in allowed_ids:
+            validated_payload[field_name] = selected_id
+            continue
+
+        if asset_group == "cash" and allowed_ids:
+            fallback_cash_id = "Cash-N" if "Cash-N" in allowed_ids else allowed_ids[0]
+            validated_payload[field_name] = fallback_cash_id
+            if selected_id and not validated_reasoning_by_asset.get(reasoning_key):
+                validated_reasoning_by_asset[reasoning_key] = "유효하지 않은 Cash 후보 반환으로 기본값 적용"
+            continue
+
+        if selected_id:
+            logger.warning("유효하지 않은 Sub-MP 선택값(%s): %s", field_name, selected_id)
+            if not validated_reasoning_by_asset.get(reasoning_key):
+                validated_reasoning_by_asset[reasoning_key] = "유효하지 않은 후보 반환으로 선택 제외"
+        validated_payload[field_name] = None
+
+    validated_payload["reasoning_by_asset"] = validated_reasoning_by_asset
+    if not validated_payload.get("reasoning"):
+        validated_payload["reasoning"] = _compose_sub_mp_reasoning_summary(validated_reasoning_by_asset)
+
+    return validated_payload
+
+
+def _has_sub_mp_decision(sub_mp_payload: Optional[Dict[str, Any]]) -> bool:
+    """Sub-MP 결정값이 하나 이상 있는지 확인"""
+    normalized_payload = _normalize_sub_mp_payload(sub_mp_payload)
+    return any(
+        normalized_payload.get(key)
+        for key in ("stocks_sub_mp", "bonds_sub_mp", "alternatives_sub_mp", "cash_sub_mp")
+    )
+
+
+def _build_strategy_decision_with_fallback(
+    *,
+    fred_signals: Optional[Dict[str, Any]],
+    economic_news: Optional[Dict[str, Any]],
+    previous_mp_id: Optional[str],
+    previous_sub_mp: Optional[Dict[str, Any]],
+    model_name: str,
+    graph_context: str,
+    mp_decision_data: Optional[Dict[str, Any]],
+    supervisor_sub_mp_data: Optional[Dict[str, Any]],
+    quant_report: Optional[Dict[str, Any]] = None,
+    narrative_report: Optional[Dict[str, Any]] = None,
+    risk_report: Optional[Dict[str, Any]] = None,
+    sub_allocator_data: Optional[Dict[str, Any]] = None,
+    objective: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> AIStrategyDecision:
+    """MP/Sub-MP 최종 결정 생성 (멀티에이전트 우선, 레거시 폴백)"""
+    safe_fred_signals = fred_signals or {}
+    safe_economic_news = economic_news or {}
+    normalized_mp_decision_data = mp_decision_data if isinstance(mp_decision_data, dict) else {}
+    normalized_supervisor_sub_mp_data = (
+        supervisor_sub_mp_data if isinstance(supervisor_sub_mp_data, dict) else {}
+    )
+    normalized_quant_report = quant_report if isinstance(quant_report, dict) else {}
+    normalized_narrative_report = narrative_report if isinstance(narrative_report, dict) else {}
+    normalized_risk_report = risk_report if isinstance(risk_report, dict) else {}
+    normalized_objective = objective if isinstance(objective, dict) else {}
+    normalized_constraints = constraints if isinstance(constraints, dict) else {}
+    normalized_mp_decision_data = _apply_mp_quality_gate(
+        normalized_mp_decision_data,
+        previous_mp_id=previous_mp_id,
+        risk_report=normalized_risk_report,
+        constraints=normalized_constraints,
+    )
+
+    portfolios = get_model_portfolios()
+    mp_id = normalized_mp_decision_data.get("mp_id")
+    if not mp_id or mp_id not in portfolios:
+        logger.info("레거시 MP 분석 프롬프트 실행 중...")
+        mp_prompt = create_mp_analysis_prompt(
+            safe_fred_signals,
+            safe_economic_news,
+            previous_mp_id,
+            graph_context=graph_context,
+        )
+        normalized_mp_decision_data = _invoke_llm_json(
+            mp_prompt,
+            model_name,
+            "ai_strategist_mp",
+            1,
+        )
+        normalized_mp_decision_data = _apply_mp_quality_gate(
+            normalized_mp_decision_data,
+            previous_mp_id=previous_mp_id,
+            risk_report=normalized_risk_report,
+            constraints=normalized_constraints,
+        )
+        mp_id = normalized_mp_decision_data.get("mp_id")
+
+    if not mp_id or mp_id not in portfolios:
+        valid_mp_ids = ", ".join(str(key) for key in portfolios.keys())
+        logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
+        raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
+
+    resolved_sub_allocator_data = sub_allocator_data if isinstance(sub_allocator_data, dict) else {}
+    if not resolved_sub_allocator_data:
+        try:
+            resolved_sub_allocator_data = _invoke_parallel_sub_allocator_agents(
+                mp_id=mp_id,
+                quant_report=normalized_quant_report,
+                narrative_report=normalized_narrative_report,
+                risk_report=normalized_risk_report,
+                previous_sub_mp=previous_sub_mp,
+                model_name=model_name,
+                objective=normalized_objective,
+                constraints=normalized_constraints,
+            )
+        except Exception as parallel_sub_allocator_error:
+            logger.warning("병렬 Sub-Allocator 호출 실패, 단일 프롬프트로 폴백: %s", parallel_sub_allocator_error)
+            resolved_sub_allocator_data = {}
+
+    if not _has_sub_mp_decision(resolved_sub_allocator_data):
+        try:
+            sub_allocator_prompt = create_sub_allocator_agent_prompt(
+                mp_id=mp_id,
+                quant_report=normalized_quant_report,
+                narrative_report=normalized_narrative_report,
+                risk_report=normalized_risk_report,
+                previous_sub_mp=previous_sub_mp,
+                objective=normalized_objective,
+                constraints=normalized_constraints,
+            )
+            resolved_sub_allocator_data = _invoke_llm_json(
+                sub_allocator_prompt,
+                model_name,
+                "ai_strategist_agent_sub_allocator",
+                1,
+            )
+        except Exception as sub_allocator_error:
+            logger.warning("Sub-Allocator 호출 실패, 폴백 경로 사용: %s", sub_allocator_error)
+            resolved_sub_allocator_data = {}
+
+    merged_sub_mp_data = _merge_sub_mp_payloads(
+        supervisor_sub_mp=normalized_supervisor_sub_mp_data,
+        sub_allocator_payload=resolved_sub_allocator_data,
+    )
+
+    if _has_sub_mp_decision(merged_sub_mp_data):
+        sub_mp_decision_data = merged_sub_mp_data
+        if not sub_mp_decision_data.get("reasoning"):
+            sub_mp_decision_data["reasoning"] = normalized_mp_decision_data.get("reasoning", "")
+    else:
+        logger.info("레거시 Sub-MP 분석 프롬프트 실행 중...")
+        sub_mp_prompt = create_sub_mp_analysis_prompt(
+            safe_fred_signals,
+            safe_economic_news,
+            mp_id,
+            previous_sub_mp,
+            graph_context=graph_context,
+        )
+        sub_mp_decision_data = _invoke_llm_json(
+            sub_mp_prompt,
+            model_name,
+            "ai_strategist_sub_mp",
+            1,
+        )
+
+    validated_sub_mp = _validate_sub_mp_selection(mp_id, sub_mp_decision_data)
+    sub_mp_decision = SubMPDecision(
+        stocks_sub_mp=validated_sub_mp.get("stocks_sub_mp"),
+        bonds_sub_mp=validated_sub_mp.get("bonds_sub_mp"),
+        alternatives_sub_mp=validated_sub_mp.get("alternatives_sub_mp"),
+        cash_sub_mp=validated_sub_mp.get("cash_sub_mp"),
+        reasoning=validated_sub_mp.get("reasoning", ""),
+        reasoning_by_asset=validated_sub_mp.get("reasoning_by_asset") or {},
+    )
+
+    return AIStrategyDecision(
+        analysis_summary=normalized_mp_decision_data.get("analysis_summary", ""),
+        mp_id=mp_id,
+        reasoning=normalized_mp_decision_data.get("reasoning", ""),
+        sub_mp=sub_mp_decision,
+        recommended_stocks=None,
+    )
 
 
 def _parse_llm_response(response) -> str:
@@ -1404,12 +2597,11 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
             config.llm.model,
             default_model=DEFAULT_STRATEGY_MODEL,
         )
-        llm = (
-            llm_gemini_flash(model=model_name)
-            if "flash" in model_name
-            else llm_gemini_pro(model=model_name)
+        objective, constraints = _build_objective_constraints_from_config(
+            config,
+            previous_decision,
         )
-        
+
         # ===== Macro Graph 근거 컨텍스트 생성 (E-3) =====
         graph_context = ""
         try:
@@ -1427,124 +2619,94 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         except Exception as e:
             logger.warning(f"[Phase E] Macro Graph 컨텍스트 생성 실패 (폴백: 빈 컨텍스트): {e}")
             graph_context = ""
-        
-        # ===== 1단계: MP 분석 =====
-        logger.info("1단계: MP 분석 중...")
-        mp_prompt = create_mp_analysis_prompt(
-            fred_signals, economic_news, previous_mp_id, graph_context=graph_context
-        )
-        
-        with track_llm_call(
-            model_name=model_name,
-            provider="Google",
-            service_name="ai_strategist_mp",
-            request_prompt=mp_prompt
-        ) as tracker:
-            mp_response = llm.invoke(mp_prompt)
-            tracker.set_response(mp_response)
-        
-        mp_response_text = _parse_llm_response(mp_response)
-        mp_decision_data = _parse_json_response(mp_response_text)
-        
-        # MP ID 검증
-        mp_id = mp_decision_data.get('mp_id')
-        portfolios = get_model_portfolios()
-        if not mp_id or mp_id not in portfolios:
-            # portfolios.keys()가 정수일 수 있으므로 문자열로 변환
-            valid_mp_ids = ', '.join(str(k) for k in portfolios.keys())
-            logger.error(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID: {valid_mp_ids}")
-            raise ValueError(f"유효하지 않은 MP ID: {mp_id}. 유효한 MP ID는 {valid_mp_ids} 중 하나여야 합니다.")
-        
-        logger.info(f"MP 분석 완료: {mp_id}")
-        
-        # ===== 2단계: Sub-MP 분석 =====
-        logger.info("2단계: Sub-MP 분석 중...")
+
+        # ===== 1단계: Multi-Agent MP 분석 =====
+        mp_decision_data: Dict[str, Any] = {}
+        supervisor_sub_mp_data: Dict[str, Any] = {}
+        quant_report: Dict[str, Any] = {}
+        narrative_report: Dict[str, Any] = {}
+        risk_report: Dict[str, Any] = {}
         try:
-            sub_mp_prompt = create_sub_mp_analysis_prompt(
-                fred_signals, economic_news, mp_id, previous_sub_mp, graph_context=graph_context
+            logger.info("1단계: Multi-Agent MP 분석 시작 (Quant + Narrative 병렬)")
+            quant_prompt = create_quant_agent_prompt(
+                fred_signals=fred_signals or {},
+                previous_decision=previous_decision,
+                objective=objective,
+                constraints=constraints,
             )
-            logger.info(f"Sub-MP 프롬프트 생성 완료 (길이: {len(sub_mp_prompt)}자)")
-            
-            with track_llm_call(
-                model_name=model_name,
-                provider="Google",
-                service_name="ai_strategist_sub_mp",
-                request_prompt=sub_mp_prompt
-            ) as tracker:
-                logger.info("Sub-MP LLM 호출 시작...")
-                sub_mp_response = llm.invoke(sub_mp_prompt)
-                tracker.set_response(sub_mp_response)
-                logger.info("Sub-MP LLM 응답 수신 완료")
-            
-            # with 블록이 끝나면 __exit__가 호출되어 로그가 저장되어야 함
-            logger.info("Sub-MP LLM 호출 컨텍스트 종료 (로그 저장 예상)")
-            logger.info("Sub-MP 응답 파싱 시작...")
-            sub_mp_response_text = _parse_llm_response(sub_mp_response)
-            logger.info(f"Sub-MP 응답 텍스트 추출 완료 (길이: {len(sub_mp_response_text)}자)")
-            
-            sub_mp_decision_data = _parse_json_response(sub_mp_response_text)
-            logger.info(f"Sub-MP JSON 파싱 완료: {sub_mp_decision_data}")
-        except Exception as e:
-            logger.error(f"Sub-MP 분석 중 오류 발생: {e}", exc_info=True)
-            logger.error(f"Sub-MP 분석 오류 타입: {type(e).__name__}")
-            import traceback
-            logger.error(f"Sub-MP 분석 전체 traceback:\n{traceback.format_exc()}")
-            raise
-        
-        # Sub-MP 검증
-        stocks_sub_mp = sub_mp_decision_data.get('stocks_sub_mp')
-        bonds_sub_mp = sub_mp_decision_data.get('bonds_sub_mp')
-        alternatives_sub_mp = sub_mp_decision_data.get('alternatives_sub_mp')
-        cash_sub_mp = sub_mp_decision_data.get('cash_sub_mp')
-        
-        # 자산군 비중 확인
-        target_allocation = get_model_portfolio_allocation(mp_id)
-        if target_allocation:
-            if target_allocation.get('Stocks', 0) == 0:
-                stocks_sub_mp = None
-            if target_allocation.get('Bonds', 0) == 0:
-                bonds_sub_mp = None
-            if target_allocation.get('Alternatives', 0) == 0:
-                alternatives_sub_mp = None
-            if target_allocation.get('Cash', 0) == 0:
-                cash_sub_mp = None
-        
-        # Sub-MP 유효성 검증
-        valid_stocks_sub_mp = ["Eq-A", "Eq-N", "Eq-D"]
-        valid_bonds_sub_mp = ["Bnd-L", "Bnd-N", "Bnd-S"]
-        valid_alternatives_sub_mp = ["Alt-I", "Alt-C"]
-        valid_cash_sub_mp = ["Cash-N"]
-        
-        if stocks_sub_mp and stocks_sub_mp not in valid_stocks_sub_mp:
-            logger.warning(f"유효하지 않은 주식 Sub-MP: {stocks_sub_mp}, None으로 설정")
-            stocks_sub_mp = None
-        if bonds_sub_mp and bonds_sub_mp not in valid_bonds_sub_mp:
-            logger.warning(f"유효하지 않은 채권 Sub-MP: {bonds_sub_mp}, None으로 설정")
-            bonds_sub_mp = None
-        if alternatives_sub_mp and alternatives_sub_mp not in valid_alternatives_sub_mp:
-            logger.warning(f"유효하지 않은 대체자산 Sub-MP: {alternatives_sub_mp}, None으로 설정")
-            alternatives_sub_mp = None
-        if cash_sub_mp and valid_cash_sub_mp and cash_sub_mp not in valid_cash_sub_mp:
-            logger.warning(f"유효하지 않은 현금 Sub-MP: {cash_sub_mp}, None으로 설정")
-            cash_sub_mp = None
-        
-        logger.info(f"Sub-MP 분석 완료: Stocks={stocks_sub_mp}, Bonds={bonds_sub_mp}, Alternatives={alternatives_sub_mp}, Cash={cash_sub_mp}")
-        
-        # ===== 최종 결정 생성 =====
-        sub_mp_decision = SubMPDecision(
-            stocks_sub_mp=stocks_sub_mp,
-            bonds_sub_mp=bonds_sub_mp,
-            alternatives_sub_mp=alternatives_sub_mp,
-            cash_sub_mp=cash_sub_mp,
-            reasoning=sub_mp_decision_data.get('reasoning', '')
-        )
-        
-        decision = AIStrategyDecision(
-            analysis_summary=mp_decision_data.get('analysis_summary', ''),
-            mp_id=mp_id,
-            reasoning=mp_decision_data.get('reasoning', ''),
-            sub_mp=sub_mp_decision,
-            recommended_stocks=None  # 추천 종목은 Sub-MP 기반으로 나중에 생성 가능
+            narrative_prompt = create_narrative_agent_prompt(
+                economic_news=economic_news,
+                graph_context=graph_context,
+                objective=objective,
+                constraints=constraints,
+            )
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                quant_future = executor.submit(
+                    _invoke_llm_json,
+                    quant_prompt,
+                    model_name,
+                    "ai_strategist_agent_quant",
+                    1,
+                )
+                narrative_future = executor.submit(
+                    _invoke_llm_json,
+                    narrative_prompt,
+                    model_name,
+                    "ai_strategist_agent_narrative",
+                    1,
+                )
+                quant_report = quant_future.result()
+                narrative_report = narrative_future.result()
+
+            risk_prompt = create_risk_agent_prompt(
+                quant_report=quant_report,
+                narrative_report=narrative_report,
+                previous_decision=previous_decision,
+                objective=objective,
+                constraints=constraints,
+            )
+            risk_report = _invoke_llm_json(
+                risk_prompt,
+                model_name,
+                "ai_strategist_agent_risk",
+                1,
+            )
+
+            supervisor_prompt = create_supervisor_agent_prompt(
+                quant_report=quant_report,
+                narrative_report=narrative_report,
+                risk_report=risk_report,
+                previous_decision=previous_decision,
+                objective=objective,
+                constraints=constraints,
+            )
+            mp_decision_data = _invoke_llm_json(
+                supervisor_prompt,
+                model_name,
+                "ai_strategist_agent_supervisor",
+                1,
+            )
+            supervisor_sub_mp_data = mp_decision_data.get("sub_mp", {}) if isinstance(mp_decision_data, dict) else {}
+        except Exception as multi_agent_error:
+            logger.warning("Multi-Agent MP 분석 실패, 레거시 MP 분석으로 폴백: %s", multi_agent_error)
+            mp_decision_data = {}
+            supervisor_sub_mp_data = {}
+
+        decision = _build_strategy_decision_with_fallback(
+            fred_signals=fred_signals,
+            economic_news=economic_news,
+            previous_mp_id=previous_mp_id,
+            previous_sub_mp=previous_sub_mp,
+            model_name=model_name,
+            graph_context=graph_context,
+            mp_decision_data=mp_decision_data,
+            supervisor_sub_mp_data=supervisor_sub_mp_data,
+            quant_report=quant_report,
+            narrative_report=narrative_report,
+            risk_report=risk_report,
+            objective=objective,
+            constraints=constraints,
         )
         
         target_allocation = decision.get_target_allocation()
@@ -1578,6 +2740,19 @@ class AIAnalysisState(TypedDict):
     fred_signals: Optional[Dict[str, Any]]
     economic_news: Optional[Dict[str, Any]]
     news_summary: Optional[str]
+    previous_decision: Optional[Dict[str, Any]]
+    previous_mp_id: Optional[str]
+    previous_sub_mp: Optional[Dict[str, Any]]
+    objective: Optional[Dict[str, Any]]
+    constraints: Optional[Dict[str, Any]]
+    model_name: Optional[str]
+    graph_context: Optional[str]
+    quant_report: Optional[Dict[str, Any]]
+    narrative_report: Optional[Dict[str, Any]]
+    risk_report: Optional[Dict[str, Any]]
+    mp_decision_data: Optional[Dict[str, Any]]
+    supervisor_sub_mp_data: Optional[Dict[str, Any]]
+    sub_allocator_data: Optional[Dict[str, Any]]
     decision: Optional[AIStrategyDecision]
     error: Optional[str]
     success: bool
@@ -1665,6 +2840,272 @@ def summarize_news_node(state: AIAnalysisState) -> AIAnalysisState:
             **state,
             "news_summary": None,
             "error": f"뉴스 요약 실패: {str(e)}"
+        }
+
+
+def prepare_context_node(state: AIAnalysisState) -> AIAnalysisState:
+    """분석 컨텍스트 준비 노드"""
+    try:
+        previous_decision = get_previous_decision_with_sub_mp()
+        previous_mp_id = previous_decision.get("mp_id") if previous_decision else None
+        previous_sub_mp = previous_decision.get("sub_mp") if previous_decision else None
+
+        from service.macro_trading.config.config_loader import get_config
+
+        config = get_config()
+        model_name = _resolve_phase_llm_model(
+            config.llm.model,
+            default_model=DEFAULT_STRATEGY_MODEL,
+        )
+        objective, constraints = _build_objective_constraints_from_config(
+            config,
+            previous_decision,
+        )
+
+        graph_context = ""
+        try:
+            from service.graph.strategy import build_strategy_graph_context
+
+            graph_context = build_strategy_graph_context(
+                time_range_days=7,
+                max_events=5,
+                max_stories=3,
+                max_evidences=5,
+            )
+        except Exception as graph_error:
+            logger.warning("Graph 컨텍스트 생성 실패, 빈 값 사용: %s", graph_error)
+            graph_context = ""
+
+        return {
+            **state,
+            "previous_decision": previous_decision,
+            "previous_mp_id": previous_mp_id,
+            "previous_sub_mp": previous_sub_mp,
+            "objective": objective,
+            "constraints": constraints,
+            "model_name": model_name,
+            "graph_context": graph_context,
+        }
+    except Exception as e:
+        logger.error("컨텍스트 준비 실패: %s", e, exc_info=True)
+        return {
+            **state,
+            "error": f"컨텍스트 준비 실패: {str(e)}",
+        }
+
+
+def quant_agent_node(state: AIAnalysisState) -> AIAnalysisState:
+    """Agent A (Quant) 노드"""
+    try:
+        model_name = state.get("model_name")
+        if not model_name:
+            return {**state, "quant_report": {}, "error": "model_name이 없습니다."}
+
+        quant_prompt = create_quant_agent_prompt(
+            fred_signals=state.get("fred_signals") or {},
+            previous_decision=state.get("previous_decision"),
+            objective=state.get("objective"),
+            constraints=state.get("constraints"),
+        )
+        quant_report = _invoke_llm_json(
+            quant_prompt,
+            model_name,
+            "ai_strategist_agent_quant",
+            1,
+        )
+        return {**state, "quant_report": quant_report}
+    except Exception as e:
+        logger.warning("Quant Agent 실패: %s", e)
+        return {**state, "quant_report": {}, "error": state.get("error")}
+
+
+def narrative_agent_node(state: AIAnalysisState) -> AIAnalysisState:
+    """Agent B (Narrative) 노드"""
+    try:
+        model_name = state.get("model_name")
+        if not model_name:
+            return {**state, "narrative_report": {}, "error": "model_name이 없습니다."}
+
+        narrative_prompt = create_narrative_agent_prompt(
+            economic_news=state.get("economic_news"),
+            graph_context=state.get("graph_context") or "",
+            objective=state.get("objective"),
+            constraints=state.get("constraints"),
+        )
+        narrative_report = _invoke_llm_json(
+            narrative_prompt,
+            model_name,
+            "ai_strategist_agent_narrative",
+            1,
+        )
+        return {**state, "narrative_report": narrative_report}
+    except Exception as e:
+        logger.warning("Narrative Agent 실패: %s", e)
+        return {**state, "narrative_report": {}, "error": state.get("error")}
+
+
+def risk_agent_node(state: AIAnalysisState) -> AIAnalysisState:
+    """Agent C (Risk) 노드"""
+    try:
+        model_name = state.get("model_name")
+        if not model_name:
+            return {**state, "risk_report": {}, "error": "model_name이 없습니다."}
+
+        risk_prompt = create_risk_agent_prompt(
+            quant_report=state.get("quant_report") or {},
+            narrative_report=state.get("narrative_report") or {},
+            previous_decision=state.get("previous_decision"),
+            objective=state.get("objective"),
+            constraints=state.get("constraints"),
+        )
+        risk_report = _invoke_llm_json(
+            risk_prompt,
+            model_name,
+            "ai_strategist_agent_risk",
+            1,
+        )
+        return {**state, "risk_report": risk_report}
+    except Exception as e:
+        logger.warning("Risk Agent 실패: %s", e)
+        return {**state, "risk_report": {}, "error": state.get("error")}
+
+
+def supervisor_agent_node(state: AIAnalysisState) -> AIAnalysisState:
+    """Supervisor 노드 (MP + 기본 Sub-MP 제안)"""
+    try:
+        model_name = state.get("model_name")
+        if not model_name:
+            return {
+                **state,
+                "mp_decision_data": {},
+                "supervisor_sub_mp_data": {},
+                "error": "model_name이 없습니다.",
+            }
+
+        supervisor_prompt = create_supervisor_agent_prompt(
+            quant_report=state.get("quant_report") or {},
+            narrative_report=state.get("narrative_report") or {},
+            risk_report=state.get("risk_report") or {},
+            previous_decision=state.get("previous_decision"),
+            objective=state.get("objective"),
+            constraints=state.get("constraints"),
+        )
+        raw_mp_decision_data = _invoke_llm_json(
+            supervisor_prompt,
+            model_name,
+            "ai_strategist_agent_supervisor",
+            1,
+        )
+        mp_decision_data = _apply_mp_quality_gate(
+            raw_mp_decision_data if isinstance(raw_mp_decision_data, dict) else {},
+            previous_mp_id=state.get("previous_mp_id"),
+            risk_report=state.get("risk_report"),
+            constraints=state.get("constraints"),
+        )
+        supervisor_sub_mp_data = (
+            mp_decision_data.get("sub_mp", {}) if isinstance(mp_decision_data, dict) else {}
+        )
+        return {
+            **state,
+            "mp_decision_data": mp_decision_data,
+            "supervisor_sub_mp_data": supervisor_sub_mp_data,
+        }
+    except Exception as e:
+        logger.warning("Supervisor Agent 실패: %s", e)
+        return {
+            **state,
+            "mp_decision_data": {},
+            "supervisor_sub_mp_data": {},
+            "error": state.get("error"),
+        }
+
+
+def sub_allocator_agent_node(state: AIAnalysisState) -> AIAnalysisState:
+    """Agent D (Sub-Allocator) 노드"""
+    try:
+        model_name = state.get("model_name")
+        if not model_name:
+            return {**state, "sub_allocator_data": {}, "error": "model_name이 없습니다."}
+
+        mp_decision_data = _apply_mp_quality_gate(
+            state.get("mp_decision_data") or {},
+            previous_mp_id=state.get("previous_mp_id"),
+            risk_report=state.get("risk_report"),
+            constraints=state.get("constraints"),
+        )
+        mp_id = mp_decision_data.get("mp_id")
+        if not mp_id:
+            return {**state, "mp_decision_data": mp_decision_data, "sub_allocator_data": {}}
+
+        sub_allocator_data = _invoke_parallel_sub_allocator_agents(
+            mp_id=mp_id,
+            quant_report=state.get("quant_report") or {},
+            narrative_report=state.get("narrative_report") or {},
+            risk_report=state.get("risk_report") or {},
+            previous_sub_mp=state.get("previous_sub_mp"),
+            model_name=model_name,
+            objective=state.get("objective"),
+            constraints=state.get("constraints"),
+        )
+        if not _has_sub_mp_decision(sub_allocator_data):
+            sub_allocator_prompt = create_sub_allocator_agent_prompt(
+                mp_id=mp_id,
+                quant_report=state.get("quant_report") or {},
+                narrative_report=state.get("narrative_report") or {},
+                risk_report=state.get("risk_report") or {},
+                previous_sub_mp=state.get("previous_sub_mp"),
+                objective=state.get("objective"),
+                constraints=state.get("constraints"),
+            )
+            sub_allocator_data = _invoke_llm_json(
+                sub_allocator_prompt,
+                model_name,
+                "ai_strategist_agent_sub_allocator",
+                1,
+            )
+        return {
+            **state,
+            "mp_decision_data": mp_decision_data,
+            "sub_allocator_data": sub_allocator_data,
+        }
+    except Exception as e:
+        logger.warning("Sub-Allocator Agent 실패: %s", e)
+        return {**state, "sub_allocator_data": {}, "error": state.get("error")}
+
+
+def finalize_decision_node(state: AIAnalysisState) -> AIAnalysisState:
+    """멀티 에이전트 결과를 기반으로 최종 전략 결정 생성"""
+    try:
+        logger.info("3단계: 멀티 에이전트 결과 기반 최종 의사결정 생성 중...")
+
+        decision = _build_strategy_decision_with_fallback(
+            fred_signals=state.get("fred_signals"),
+            economic_news=state.get("economic_news"),
+            previous_mp_id=state.get("previous_mp_id"),
+            previous_sub_mp=state.get("previous_sub_mp"),
+            model_name=state.get("model_name") or DEFAULT_STRATEGY_MODEL,
+            graph_context=state.get("graph_context") or "",
+            mp_decision_data=state.get("mp_decision_data"),
+            supervisor_sub_mp_data=state.get("supervisor_sub_mp_data"),
+            quant_report=state.get("quant_report"),
+            narrative_report=state.get("narrative_report"),
+            risk_report=state.get("risk_report"),
+            sub_allocator_data=state.get("sub_allocator_data"),
+            objective=state.get("objective"),
+            constraints=state.get("constraints"),
+        )
+
+        logger.info("최종 의사결정 생성 완료: MP=%s", decision.mp_id)
+        return {
+            **state,
+            "decision": decision,
+        }
+    except Exception as e:
+        logger.error("최종 의사결정 생성 실패: %s", e, exc_info=True)
+        return {
+            **state,
+            "decision": None,
+            "error": f"AI 분석 실패: {str(e)}",
         }
 
 
@@ -1784,15 +3225,27 @@ def create_ai_analysis_graph():
     graph.add_node("collect_fred", collect_fred_node)
     graph.add_node("collect_news", collect_news_node)
     graph.add_node("summarize_news", summarize_news_node)
-    graph.add_node("analyze", analyze_node)
+    graph.add_node("prepare_context", prepare_context_node)
+    graph.add_node("quant_agent", quant_agent_node)
+    graph.add_node("narrative_agent", narrative_agent_node)
+    graph.add_node("risk_agent", risk_agent_node)
+    graph.add_node("supervisor_agent", supervisor_agent_node)
+    graph.add_node("sub_allocator_agent", sub_allocator_agent_node)
+    graph.add_node("finalize_decision", finalize_decision_node)
     graph.add_node("save_decision", save_decision_node)
     
     # 엣지 연결: 순차 실행
     graph.add_edge(START, "collect_fred")
     graph.add_edge("collect_fred", "collect_news")
     graph.add_edge("collect_news", "summarize_news")
-    graph.add_edge("summarize_news", "analyze")
-    graph.add_edge("analyze", "save_decision")
+    graph.add_edge("summarize_news", "prepare_context")
+    graph.add_edge("prepare_context", "quant_agent")
+    graph.add_edge("quant_agent", "narrative_agent")
+    graph.add_edge("narrative_agent", "risk_agent")
+    graph.add_edge("risk_agent", "supervisor_agent")
+    graph.add_edge("supervisor_agent", "sub_allocator_agent")
+    graph.add_edge("sub_allocator_agent", "finalize_decision")
+    graph.add_edge("finalize_decision", "save_decision")
     graph.add_edge("save_decision", END)
     
     return graph.compile()
@@ -1841,7 +3294,8 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                     "bonds": decision.sub_mp.bonds_sub_mp,
                     "alternatives": decision.sub_mp.alternatives_sub_mp,
                     "cash": decision.sub_mp.cash_sub_mp,
-                    "reasoning": decision.sub_mp.reasoning
+                    "reasoning": decision.sub_mp.reasoning,
+                    "reasoning_by_asset": decision.sub_mp.reasoning_by_asset or {},
                 }
             
             cursor.execute("""
@@ -1884,6 +3338,19 @@ def run_ai_analysis():
             "fred_signals": None,
             "economic_news": None,
             "news_summary": None,
+            "previous_decision": None,
+            "previous_mp_id": None,
+            "previous_sub_mp": None,
+            "objective": None,
+            "constraints": None,
+            "model_name": None,
+            "graph_context": None,
+            "quant_report": None,
+            "narrative_report": None,
+            "risk_report": None,
+            "mp_decision_data": None,
+            "supervisor_sub_mp_data": None,
+            "sub_allocator_data": None,
             "decision": None,
             "error": None,
             "success": False

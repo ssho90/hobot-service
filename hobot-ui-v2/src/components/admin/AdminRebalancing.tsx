@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Settings, PieChart, Layers, Bitcoin, Save, X, Plus, Trash2, Edit2, AlertCircle, Check } from 'lucide-react';
+import { Settings, PieChart, Layers, Bitcoin, Save, X, Plus, Trash2, Edit2, AlertCircle, Check, Lightbulb } from 'lucide-react';
 
 interface RebalancingConfig {
     mp_threshold_percent: number;
@@ -48,7 +48,7 @@ interface CryptoConfig {
 }
 
 export const AdminRebalancing: React.FC = () => {
-    const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'mp' | 'sub-mp' | 'crypto'
+    const [activeTab, setActiveTab] = useState('advice'); // 'advice' | 'settings' | 'mp' | 'sub-mp' | 'crypto'
 
     // Data States
     const [rebalancingConfig, setRebalancingConfig] = useState<RebalancingConfig | null>(null);
@@ -132,6 +132,10 @@ export const AdminRebalancing: React.FC = () => {
 
     // --- Effects ---
     useEffect(() => {
+        if (activeTab === 'advice') {
+            fetchRebalancingConfig();
+            fetchCryptoConfig();
+        }
         if (activeTab === 'settings') fetchRebalancingConfig();
         if (activeTab === 'mp') fetchModelPortfolios();
         if (activeTab === 'sub-mp') fetchSubModelPortfolios();
@@ -247,6 +251,33 @@ export const AdminRebalancing: React.FC = () => {
         setTimeout(() => setSuccessMessage(''), 3000);
     };
 
+    const mpThreshold = rebalancingConfig?.mp_threshold_percent;
+    const subMpThreshold = rebalancingConfig?.sub_mp_threshold_percent;
+
+    const mpAdvice = typeof mpThreshold !== 'number'
+        ? 'MP 임계값을 불러오지 못했습니다. 설정 탭에서 값을 확인하세요.'
+        : mpThreshold < 2.5
+            ? 'MP 임계값이 낮아 작은 노이즈에도 MP가 자주 바뀔 수 있습니다. Whipsaw 위험을 주의하세요.'
+            : mpThreshold <= 5.0
+                ? 'MP 임계값이 안정성과 민감도 사이의 균형 구간입니다. 현재 설정을 기준선으로 운영하기 좋습니다.'
+                : 'MP 임계값이 높아 불필요한 변경은 줄지만, 국면 전환 반응이 늦어질 수 있습니다.';
+
+    const subMpAdvice = typeof subMpThreshold !== 'number'
+        ? 'Sub-MP 임계값을 불러오지 못했습니다. 설정 탭에서 값을 확인하세요.'
+        : subMpThreshold < 4.0
+            ? 'Sub-MP 임계값이 낮아 자산군 내 교체가 잦아질 수 있습니다. 거래비용 증가를 점검하세요.'
+            : subMpThreshold <= 7.0
+                ? 'Sub-MP 임계값이 무난한 범위입니다. 자산군별 미세 조정과 안정성의 균형이 좋습니다.'
+                : 'Sub-MP 임계값이 높아 교체 빈도는 줄지만, 상대 강도 변화 반영이 느릴 수 있습니다.';
+
+    const marketToneAdvice = cryptoConfig?.market_status === 'BULL'
+        ? 'Crypto 상태가 BULL입니다. 공격적 노출 확대 전, MP/Sub-MP 변경 빈도와 함께 리스크를 병행 점검하세요.'
+        : cryptoConfig?.market_status === 'BEAR'
+            ? 'Crypto 상태가 BEAR입니다. 방어적 유지 편향이 커지므로 과도한 저점 추격 신호를 경계하세요.'
+            : cryptoConfig?.market_status === 'SIDEWAYS'
+                ? 'Crypto 상태가 SIDEWAYS입니다. 추세 신호보다 변동성 관리와 보수적 리밸런싱이 유효합니다.'
+                : 'Crypto 시장 상태 정보를 불러오지 못했습니다.';
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-zinc-900">
             <h1 className="text-3xl font-bold tracking-tight mb-2">리밸런싱 관리</h1>
@@ -260,6 +291,7 @@ export const AdminRebalancing: React.FC = () => {
             {/* Tabs */}
             <div className="flex bg-white p-1 rounded-xl mb-8 w-fit border border-zinc-200 shadow-sm">
                 {[
+                    { id: 'advice', label: '조언', icon: Lightbulb },
                     { id: 'settings', label: '설정', icon: Settings },
                     { id: 'mp', label: '모델 포트폴리오', icon: PieChart },
                     { id: 'sub-mp', label: 'Sub-MP', icon: Layers },
@@ -277,6 +309,57 @@ export const AdminRebalancing: React.FC = () => {
                     </button>
                 ))}
             </div>
+
+            {/* Content: Advice */}
+            {activeTab === 'advice' && (
+                <div className="space-y-6 max-w-4xl">
+                    <div className="bg-white rounded-xl border border-zinc-200 p-8 shadow-sm">
+                        <h2 className="text-xl font-bold mb-2 flex items-center gap-2 text-zinc-900">
+                            <Lightbulb className="w-5 h-5 text-amber-500" /> 리밸런싱 조언
+                        </h2>
+                        <p className="text-sm text-zinc-500">
+                            이 탭은 조언 전용입니다. 실행/저장/주문 동작 없이 현재 설정을 기반으로 점검 포인트만 제공합니다.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+                            <div className="text-xs font-semibold text-zinc-500 mb-1">MP 임계값</div>
+                            <div className="text-2xl font-bold text-zinc-900">
+                                {typeof mpThreshold === 'number' ? `${mpThreshold.toFixed(1)}%` : 'N/A'}
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+                            <div className="text-xs font-semibold text-zinc-500 mb-1">Sub-MP 임계값</div>
+                            <div className="text-2xl font-bold text-zinc-900">
+                                {typeof subMpThreshold === 'number' ? `${subMpThreshold.toFixed(1)}%` : 'N/A'}
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-sm">
+                            <div className="text-xs font-semibold text-zinc-500 mb-1">Crypto 시장 상태</div>
+                            <div className="text-2xl font-bold text-zinc-900">{cryptoConfig?.market_status || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
+                        <h3 className="text-sm font-semibold text-zinc-900 mb-4">현재 설정 기반 조언</h3>
+                        <div className="space-y-3">
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="text-xs font-semibold text-zinc-500 mb-1">MP 변경 안정성</div>
+                                <p className="text-sm text-zinc-700 leading-relaxed">{mpAdvice}</p>
+                            </div>
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="text-xs font-semibold text-zinc-500 mb-1">Sub-MP 변경 빈도</div>
+                                <p className="text-sm text-zinc-700 leading-relaxed">{subMpAdvice}</p>
+                            </div>
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="text-xs font-semibold text-zinc-500 mb-1">시장 상태 해석</div>
+                                <p className="text-sm text-zinc-700 leading-relaxed">{marketToneAdvice}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Content: Settings */}
             {activeTab === 'settings' && (

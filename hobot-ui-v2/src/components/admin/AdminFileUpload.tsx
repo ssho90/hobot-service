@@ -49,6 +49,25 @@ export const AdminFileUpload: React.FC = () => {
         }
     }, [getAuthHeaders]);
 
+    const fetchSharedView = useCallback(async () => {
+        try {
+            const response = await fetch('/api/admin/shared-view', { headers: getAuthHeaders() });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.type && data.content) {
+                    setDisplayedContent({ type: data.type, content: data.content });
+                }
+            }
+        } catch (err) {
+            console.error('Failed to fetch shared view:', err);
+        }
+    }, [getAuthHeaders]);
+
+    useEffect(() => {
+        const interval = setInterval(fetchSharedView, 2000);
+        return () => clearInterval(interval);
+    }, [fetchSharedView]);
+
     useEffect(() => {
         fetchFiles();
         return () => {
@@ -78,14 +97,35 @@ export const AdminFileUpload: React.FC = () => {
                 setUploadMessage(`'${file.name}' 업로드가 완료되었습니다.`);
                 fetchFiles();
                 setTimeout(() => setUploadMessage(''), 3000);
+                const data = await response.json();
+                return data;
             } else {
                 const data = await response.json();
                 setUploadMessage(`업로드 실패: ${data.detail || '알 수 없는 오류'}`);
+                return null;
             }
         } catch {
             setUploadMessage('업로드 중 오류가 발생했습니다.');
+            return null;
         }
     }, [getAuthHeaders, fetchFiles]);
+
+    const updateSharedView = async (type: 'text' | 'image', content: string) => {
+        try {
+            await fetch('/api/admin/shared-view', {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ type, content })
+            });
+            fetchSharedView(); // 즉시 업데이트
+        } catch (err) {
+            console.error('Failed to update shared view:', err);
+            alert('공유 화면 업데이트 실패');
+        }
+    };
 
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
@@ -137,14 +177,19 @@ export const AdminFileUpload: React.FC = () => {
         };
     }, [displayedContent]);
 
-    const handleDisplayContent = () => {
+    const handleDisplayContent = async () => {
         if (pastedFile) {
-            const newUrl = URL.createObjectURL(pastedFile);
-            setDisplayedContent({ type: 'image', content: newUrl });
-            setPastedFile(null);
-            setPreviewUrl(null);
+            // 이미지 업로드 후 공유
+            const uploadedData = await handleUpload(pastedFile);
+            if (uploadedData && uploadedData.id) {
+                const imageUrl = `/api/admin/files/${uploadedData.id}`;
+                await updateSharedView('image', imageUrl);
+                setPastedFile(null);
+                setPreviewUrl(null);
+            }
         } else if (contentInput.trim()) {
-            setDisplayedContent({ type: 'text', content: contentInput });
+            // 텍스트 공유
+            await updateSharedView('text', contentInput);
             setContentInput('');
         } else {
             alert('표시할 텍스트나 이미지가 없습니다.');

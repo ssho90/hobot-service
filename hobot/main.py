@@ -3558,6 +3558,43 @@ async def download_file(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+# ============================================
+# Shared View API (File Upload Sync)
+# ============================================
+
+class SharedViewRequest(BaseModel):
+    type: str  # 'text' or 'image'
+    content: str # text content or image URL
+
+# Simple in-memory storage
+shared_view_state = {
+    "type": None,
+    "content": None,
+    "updated_at": None
+}
+
+@api_router.get("/admin/shared-view")
+async def get_shared_view(current_user: dict = Depends(require_admin)):
+    """공유된 화면 상태 조회"""
+    return shared_view_state
+
+@api_router.post("/admin/shared-view")
+async def update_shared_view(
+    req: SharedViewRequest,
+    current_user: dict = Depends(require_admin)
+):
+    """공유된 화면 상태 업데이트"""
+    global shared_view_state
+    from datetime import datetime
+    shared_view_state = {
+        "type": req.type,
+        "content": req.content,
+        "updated_at": datetime.now().isoformat()
+    }
+    return {"status": "success", "data": shared_view_state}
+
+
 # --- Test Environment API (Phase 1) ---
 
 class TimeTravelRequest(BaseModel):

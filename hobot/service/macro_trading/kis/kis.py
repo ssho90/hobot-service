@@ -123,9 +123,11 @@ def get_active_etf_mapping_from_db() -> Dict[str, str]:
                 return {}
             
             # 2. 각 자산군별 Sub-MP ID에 대해 티커 목록 조회
-            # asset_class: stocks, bonds, alternatives, cash
-            for asset_class, sub_mp_id in sub_mp_map.items():
-                if asset_class == 'reasoning': continue  # reasoning 필드 제외
+            # 메타데이터(reasoning, reasoning_by_asset 등)는 제외
+            for asset_class in ("stocks", "bonds", "alternatives", "cash"):
+                sub_mp_id = sub_mp_map.get(asset_class)
+                if not isinstance(sub_mp_id, str) or not sub_mp_id:
+                    continue
 
                 # Sub-MP ID로 sub_portfolio_models의 ID 조회
                 cursor.execute("SELECT id FROM sub_portfolio_models WHERE sub_model_id = %s", (sub_mp_id,))
@@ -456,4 +458,3 @@ def get_current_price_api(user_id: str, ticker: str) -> Optional[int]:
     except Exception as e:
         logging.error(f"Error fetching current price for {ticker}: {e}")
         return None
-
