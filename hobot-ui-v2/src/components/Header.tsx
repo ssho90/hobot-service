@@ -8,6 +8,7 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false); // Mobile toggle
+  const [isOntologyOpen, setIsOntologyOpen] = useState(false); // Mobile toggle
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -179,6 +180,38 @@ export const Header: React.FC = () => {
                   {item.label}
                 </Link>
               ))}
+
+
+              {/* Mobile Ontology Menu */}
+              <div className="border-t border-zinc-800 pt-2 mt-2">
+                <button
+                  onClick={() => setIsOntologyOpen(!isOntologyOpen)}
+                  className="w-full text-left px-3 py-2 text-zinc-400 hover:text-white flex items-center justify-between"
+                >
+                  <span className="font-bold text-zinc-300">Ontology</span>
+                  <ChevronDown className={`h-4 w-4 transform transition-transform ${isOntologyOpen ? 'rotate-180' : ''} `} />
+                </button>
+
+                {isOntologyOpen && (
+                  <div className="pl-4 space-y-1">
+                    {ontologyItems
+                      .filter(item => !item.requiredRole || (item.requiredRole === 'architect' && isArchitect))
+                      .map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setIsMenuOpen(false)}
+                          className={`block px-3 py-2 rounded-md text-sm font-medium ${isActive(item.path)
+                            ? 'text-white bg-zinc-800'
+                            : 'text-zinc-500 hover:text-white'
+                            } `}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                  </div>
+                )}
+              </div>
 
               {/* Mobile Admin Menu */}
               {isAdmin && (

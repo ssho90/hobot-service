@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Network, Search, RefreshCw, Clock, ExternalLink, Newspaper } from 'lucide-react';
+import { ArrowRight, Network, Search, RefreshCw, Clock, ExternalLink, Newspaper, Sparkles } from 'lucide-react';
 import { TickerTape } from './TickerTape';
 import { AIMacroReport } from './AIMacroReport';
 import { MacroIndicators } from './MacroIndicators';
@@ -10,6 +10,70 @@ import { AnalysisHistoryModal } from './AnalysisHistoryModal';
 import { BriefingSummaryModal } from './BriefingSummaryModal';
 import { EconomicNewsModal } from './EconomicNewsModal';
 import { getTimeAgo } from '../utils/formatters';
+
+const extractTextFromStructuredContent = (value: unknown): string => {
+  if (value == null) return '';
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      const extracted = extractTextFromStructuredContent(parsed);
+      if (extracted) return extracted;
+    } catch {
+      // no-op
+    }
+
+    // Python dict/list repr 형태 대응: [{'type': 'text', 'text': '...'}]
+    const textWithExtras = trimmed.match(/['"]text['"]\s*:\s*'([\s\S]*?)'\s*,\s*['"]extras['"]/);
+    if (textWithExtras?.[1]) {
+      return textWithExtras[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"')
+        .trim();
+    }
+
+    return trimmed;
+  }
+
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((item) => extractTextFromStructuredContent(item).trim())
+      .filter((item) => item.length > 0);
+    return parts.join('\n');
+  }
+
+  if (typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.text === 'string') return obj.text.trim();
+    if (obj.content !== undefined) return extractTextFromStructuredContent(obj.content);
+    if (obj.parts !== undefined) return extractTextFromStructuredContent(obj.parts);
+    if (obj.message !== undefined) return extractTextFromStructuredContent(obj.message);
+  }
+
+  return String(value).trim();
+};
+
+const sanitizeBriefingText = (text: string): string => {
+  if (!text) return '';
+  let cleaned = text.trim();
+
+  const prefixPatterns = [
+    /^\s*\[\s*market\s*briefing\s*\]\s*/i,
+    /^\s*market\s*briefing\s*[:\-]\s*/i,
+    /^\s*#{1,6}\s*market\s*briefing\s*/i,
+    /^\s*\[\s*마켓\s*브리핑\s*\]\s*/i,
+    /^\s*마켓\s*브리핑\s*[:\-]\s*/i
+  ];
+
+  prefixPatterns.forEach((pattern) => {
+    cleaned = cleaned.replace(pattern, '');
+  });
+
+  return cleaned.replace(/\n{3,}/g, '\n\n').trim();
+};
 
 const Dashboard: React.FC = () => {
   const activeTab = 'macro' as const;
@@ -24,6 +88,9 @@ const Dashboard: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isBriefingModalOpen, setIsBriefingModalOpen] = useState(false);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
+  const cleanedBriefing = sanitizeBriefingText(
+    extractTextFromStructuredContent(marketBriefing?.briefing ?? '')
+  );
 
   const handleManualUpdate = async () => {
     if (isUpdating) return;
@@ -199,8 +266,19 @@ const Dashboard: React.FC = () => {
                         </button>
                       )}
                     </div>
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 rounded border border-stone-300 bg-stone-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-700">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        AI Editorial Brief
+                      </span>
+                      {marketBriefing?.created_at && (
+                        <span className="text-[10px] text-stone-500 italic">
+                          AI 작성 · {getTimeAgo(marketBriefing.created_at)}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-stone-800 leading-relaxed text-xs text-justify font-serif whitespace-pre-line">
-                      {marketBriefing ? marketBriefing.briefing : "최신 시장 브리핑을 불러오고 있습니다. 잠시만 기다려주세요..."}
+                      {marketBriefing ? cleanedBriefing : "최신 시장 브리핑을 불러오고 있습니다. 잠시만 기다려주세요..."}
                     </p>
                   </div>
 

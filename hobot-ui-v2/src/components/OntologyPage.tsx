@@ -63,6 +63,7 @@ interface MacroPresetQuery {
 
 type MacroAnswerModel = 'gemini-3-flash-preview' | 'gemini-3-pro-preview';
 const MACRO_ANSWER_MODEL_STORAGE_KEY = 'ontology.macro.answerModel';
+const MOBILE_LAYOUT_BREAKPOINT = 1024;
 
 const macroPresetQueries: MacroPresetQuery[] = [
     {
@@ -214,6 +215,11 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
     // Sidebar state
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [activePreset, setActivePreset] = useState<string | null>(null);
+    const [isMobileLayout, setIsMobileLayout] = useState<boolean>(() => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth < MOBILE_LAYOUT_BREAKPOINT;
+    });
+    const [mobileActivePanel, setMobileActivePanel] = useState<'graph' | 'chat'>('graph');
 
     // Cypher Query Input state
     const [cypherQueryOpen, setCypherQueryOpen] = useState(false);
@@ -282,6 +288,22 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
         window.localStorage.setItem(MACRO_ANSWER_MODEL_STORAGE_KEY, macroAnswerModel);
     }, [macroAnswerModel]);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleResize = () => {
+            const nextIsMobile = window.innerWidth < MOBILE_LAYOUT_BREAKPOINT;
+            setIsMobileLayout(nextIsMobile);
+            if (!nextIsMobile) {
+                setMobileActivePanel('graph');
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // Resize observer for graph
     useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
@@ -298,7 +320,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
         }
 
         return () => resizeObserver.disconnect();
-    }, [sidebarOpen, selectedNode]);
+    }, [sidebarOpen, selectedNode, isMobileLayout, mobileActivePanel]);
 
     // Auto-scroll chat to bottom
     useEffect(() => {
@@ -822,10 +844,42 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
     const suggestedQueries = (macroAnswer?.suggested_queries && macroAnswer.suggested_queries.length > 0)
         ? macroAnswer.suggested_queries
         : macroSuggestedQueries;
+    const showGraphPanel = !isMobileLayout || mobileActivePanel === 'graph';
+    const showChatPanel = isMobileLayout ? mobileActivePanel === 'chat' : sidebarOpen;
 
     return (
-        <div className="flex h-[calc(100vh-64px)] bg-gray-50 text-gray-900 font-sans overflow-hidden">
-            <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div className="flex h-[calc(100vh-64px)] flex-col lg:flex-row bg-gray-50 text-gray-900 font-sans overflow-hidden">
+            {isMobileLayout && (
+                <div className="px-3 py-2 border-b border-gray-200 bg-white">
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setMobileActivePanel('graph')}
+                            className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                                mobileActivePanel === 'graph'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            그래프 보기
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMobileActivePanel('chat')}
+                            className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                                mobileActivePanel === 'chat'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            채팅 보기
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {showGraphPanel && (
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white shadow-sm z-10">
                     <div className="flex items-center gap-2">
                         <Database className="w-5 h-5 text-indigo-600" />
@@ -833,22 +887,24 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                             {mode === 'architecture' ? 'Architecture Graph' : 'Macro Graph'}
                         </h1>
                     </div>
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-colors"
-                    >
-                        {sidebarOpen ? (
-                            <>
-                                <PanelRightClose className="w-4 h-4" />
-                                질문창 닫기
-                            </>
-                        ) : (
-                            <>
-                                <PanelRightOpen className="w-4 h-4" />
-                                질문창 열기
-                            </>
-                        )}
-                    </button>
+                    {!isMobileLayout && (
+                        <button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-colors"
+                        >
+                            {sidebarOpen ? (
+                                <>
+                                    <PanelRightClose className="w-4 h-4" />
+                                    질문창 닫기
+                                </>
+                            ) : (
+                                <>
+                                    <PanelRightOpen className="w-4 h-4" />
+                                    질문창 열기
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
 
                 {mode === 'macro' && (
@@ -1367,12 +1423,17 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                     )}
                 </div>
             </div>
+            )}
 
+            {showChatPanel && (
             <div
-                className={`bg-white border-l border-gray-200 flex flex-col transition-all duration-300 overflow-hidden ${sidebarOpen ? 'w-[420px]' : 'w-0'
-                    }`}
+                className={`bg-white flex flex-col overflow-hidden min-h-0 ${
+                    isMobileLayout
+                        ? 'w-full border-t border-gray-200'
+                        : 'border-l border-gray-200 transition-all duration-300 w-[420px]'
+                }`}
             >
-                {sidebarOpen && (
+                {(!isMobileLayout && sidebarOpen) || isMobileLayout ? (
                     <>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-white">
                             <div className="flex items-center gap-2">
@@ -1644,8 +1705,9 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                             )}
                         </div>
                     </>
-                )}
+                ) : null}
             </div>
+            )}
         </div>
     );
 };

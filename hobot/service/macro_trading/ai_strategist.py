@@ -3,8 +3,10 @@ AI 전략가 모듈
 Gemini 3 Pro Preview를 사용하여 거시경제 데이터를 분석하고 자산 배분 전략을 결정합니다.
 LangGraph를 사용하여 워크플로우를 관리합니다.
 """
+import ast
 import json
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any, List, TypedDict
@@ -93,6 +95,99 @@ def _resolve_phase_llm_model(requested_model: Optional[str], default_model: str)
         default_model,
     )
     return default_model
+
+
+def _try_parse_serialized_content(value: str) -> Optional[Any]:
+    """문자열로 직렬화된 list/dict를 파싱 시도."""
+    raw = value.strip()
+    if not raw:
+        return None
+
+    if not ((raw.startswith("[") and raw.endswith("]")) or (raw.startswith("{") and raw.endswith("}"))):
+        return None
+
+    for parser in (json.loads, ast.literal_eval):
+        try:
+            parsed = parser(raw)
+            if isinstance(parsed, (list, dict)):
+                return parsed
+        except Exception:
+            continue
+    return None
+
+
+def _extract_text_from_payload(payload: Any) -> str:
+    """LLM 응답 payload에서 사람이 읽을 텍스트를 추출."""
+    if payload is None:
+        return ""
+
+    if isinstance(payload, str):
+        parsed = _try_parse_serialized_content(payload)
+        if parsed is not None:
+            parsed_text = _extract_text_from_payload(parsed).strip()
+            if parsed_text:
+                return parsed_text
+        return payload
+
+    if isinstance(payload, list):
+        parts: List[str] = []
+        for item in payload:
+            text = _extract_text_from_payload(item).strip()
+            if text:
+                parts.append(text)
+        return "\n".join(parts)
+
+    if isinstance(payload, dict):
+        text_value = payload.get("text")
+        if isinstance(text_value, str):
+            return text_value
+        for key in ("content", "parts", "message"):
+            if key in payload:
+                nested = _extract_text_from_payload(payload.get(key)).strip()
+                if nested:
+                    return nested
+        return ""
+
+    if hasattr(payload, "content"):
+        return _extract_text_from_payload(getattr(payload, "content"))
+    if hasattr(payload, "text"):
+        return _extract_text_from_payload(getattr(payload, "text"))
+
+    return ""
+
+
+def _extract_llm_text(response: Any) -> str:
+    text = _extract_text_from_payload(response).strip()
+    if text:
+        return text
+    if response is None:
+        return ""
+    return str(response).strip()
+
+
+def _sanitize_market_briefing_text(text: str) -> str:
+    """Market Briefing 표기용 불필요 프리픽스 제거."""
+    if not text:
+        return ""
+
+    cleaned = text.strip()
+    prefix_patterns = (
+        r"^\s*\[\s*market\s*briefing\s*\]\s*",
+        r"^\s*market\s*briefing\s*[:\-]\s*",
+        r"^\s*#{1,6}\s*market\s*briefing\s*",
+        r"^\s*\[\s*마켓\s*브리핑\s*\]\s*",
+        r"^\s*마켓\s*브리핑\s*[:\-]\s*",
+    )
+    for pattern in prefix_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+    return cleaned
+
+
+def normalize_market_briefing_text(raw: Any) -> str:
+    """Market Briefing 표시용 텍스트 정규화."""
+    return _sanitize_market_briefing_text(_extract_llm_text(raw))
 
 
 # ============================================================================
@@ -611,38 +706,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
             response = llm.invoke(prompt)
             tracker.set_response(response)
         
-        # 응답 텍스트 추출
-        response_text = None
-        if hasattr(response, 'content'):
-            if isinstance(response.content, list) and len(response.content) > 0:
-                first_item = response.content[0]
-                if isinstance(first_item, dict) and 'text' in first_item:
-                    response_text = first_item['text']
-                else:
-                    response_text = str(first_item)
-            elif isinstance(response.content, str):
-                response_text = response.content
-            else:
-                response_text = str(response.content)
-        elif hasattr(response, 'text'):
-            response_text = response.text
-        elif isinstance(response, str):
-            response_text = response
-        else:
-            response_text = str(response)
-        
-        if isinstance(response_text, list):
-            if len(response_text) > 0:
-                first_item = response_text[0]
-                if isinstance(first_item, dict) and 'text' in first_item:
-                    response_text = first_item['text']
-                else:
-                    response_text = str(first_item)
-            else:
-                response_text = ""
-        
-        if not isinstance(response_text, str):
-            response_text = str(response_text)
+        response_text = _extract_llm_text(response)
         
         logger.info(f"뉴스 요약 완료: {len(response_text)}자")
         return response_text.strip()
@@ -676,6 +740,7 @@ def generate_market_briefing(summary_text: str) -> str:
 2. 톤앤매너: 전문적이지만 이해하기 쉽게, 객관적인 어조 유지 (존댓말).
 3. 분량: 한국어 200~300자 내외.
 4. 첫 문장은 전체 시장 분위기를 한마디로 요약하는 것이 좋습니다.
+5. 출력에는 제목/헤더(예: [Market Briefing], Market Briefing:)를 포함하지 말고 본문만 작성하세요.
 
 [분석 리포트]
 {summary_text}
@@ -692,11 +757,7 @@ def generate_market_briefing(summary_text: str) -> str:
             response = llm.invoke(prompt)
             tracker.set_response(response)
             
-        if hasattr(response, 'content'):
-            return str(response.content)
-        elif hasattr(response, 'text'):
-            return response.text
-        return str(response)
+        return normalize_market_briefing_text(response)
         
     except Exception as e:
         logger.error(f"Market Briefing 생성 실패: {e}", exc_info=True)

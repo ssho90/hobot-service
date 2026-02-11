@@ -132,7 +132,7 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
       <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
       <div className={`px-4 py-3 border-b border-zinc-200 flex items-center gap-2 ${colorClass}`}>
         {icon}
-        <span className="font-semibold text-sm flex-1">
+        <span className="font-semibold text-sm flex-1 min-w-0 break-words">
           {title} Sub-MP: {category.sub_mp_id} - {category.sub_mp_name}
         </span>
         {durationText && (
@@ -195,8 +195,8 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
       {/* ========== 상단: MP 비율 + Sub-MP 세부종목 ========== */}
       <div className="bg-white rounded-2xl border border-zinc-200 shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-zinc-200 bg-gradient-to-r from-slate-50 to-white flex justify-between items-center">
-          <div className="flex items-center gap-3">
+        <div className="p-5 border-b border-zinc-200 bg-gradient-to-r from-slate-50 to-white flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-full items-center gap-3 sm:w-auto">
             <div className="bg-blue-100 p-2 rounded-xl border border-blue-200">
               <Brain className="h-6 w-6 text-blue-600" />
             </div>
@@ -207,7 +207,7 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
             <button
               onClick={handleRefresh}
               disabled={refreshing}
@@ -216,15 +216,15 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
-            <div className="px-3 py-1 bg-emerald-100 border border-emerald-200 rounded-full">
-              <span className="text-xs font-semibold text-emerald-600">Regime: {regime}</span>
+            <div className="max-w-full px-3 py-1 bg-emerald-100 border border-emerald-200 rounded-full">
+              <span className="text-xs font-semibold text-emerald-600 whitespace-nowrap">Regime: {regime}</span>
             </div>
           </div>
         </div>
 
         {/* MP Target Allocation */}
         <div className="p-6">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <PieChart className="h-5 w-5 text-zinc-500" />
             <h3 className="text-sm uppercase tracking-wider text-zinc-500 font-semibold">
               MP Target Allocation
@@ -246,7 +246,7 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
             {data.mp_info && (
               <button
                 onClick={() => setShowMpDetails(!showMpDetails)}
-                className="ml-auto p-1.5 text-zinc-400 hover:text-zinc-700 bg-slate-100 hover:bg-slate-200 rounded transition-colors"
+                className="sm:ml-auto p-1.5 text-zinc-400 hover:text-zinc-700 bg-slate-100 hover:bg-slate-200 rounded transition-colors"
                 title="MP 설명 보기"
               >
                 <Info className="w-4 h-4" />
@@ -272,22 +272,22 @@ export const AIMacroReport: React.FC<{ children?: React.ReactNode }> = ({ childr
               )}
             </div>
           )}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-zinc-200 text-center">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+            <div className="bg-slate-50 p-3 sm:p-4 rounded-xl border border-zinc-200 text-center min-w-0">
               <span className="block text-2xl font-bold text-blue-600">{data.target_allocation.Stocks}%</span>
-              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">STOCKS</span>
+              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tight leading-tight break-words">STOCKS</span>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-zinc-200 text-center">
+            <div className="bg-slate-50 p-3 sm:p-4 rounded-xl border border-zinc-200 text-center min-w-0">
               <span className="block text-2xl font-bold text-indigo-600">{data.target_allocation.Bonds}%</span>
-              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">BONDS</span>
+              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tight leading-tight break-words">BONDS</span>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-zinc-200 text-center">
+            <div className="bg-slate-50 p-3 sm:p-4 rounded-xl border border-zinc-200 text-center min-w-0">
               <span className="block text-2xl font-bold text-amber-600">{data.target_allocation.Alternatives}%</span>
-              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">ALTERNATIVES</span>
+              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tight leading-tight break-words">ALTERNATIVES</span>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-zinc-200 text-center">
+            <div className="bg-slate-50 p-3 sm:p-4 rounded-xl border border-zinc-200 text-center min-w-0">
               <span className="block text-2xl font-bold text-emerald-600">{data.target_allocation.Cash}%</span>
-              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">CASH</span>
+              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tight leading-tight break-words">CASH</span>
             </div>
           </div>
         </div>

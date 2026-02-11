@@ -1589,11 +1589,12 @@ async def get_market_briefing():
     """최신 Market Briefing 조회 (Headlines 포함)"""
     try:
         from service.database.db import get_db_connection
+        from service.macro_trading.ai_strategist import normalize_market_briefing_text
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT briefing_text, summary_text, created_at 
+                SELECT id, briefing_text, summary_text, created_at 
                 FROM market_news_summaries 
                 ORDER BY created_at DESC 
                 LIMIT 1
@@ -1617,10 +1618,25 @@ async def get_market_briefing():
                  })
             
             if row and row.get('briefing_text'):
+                raw_briefing = row.get('briefing_text') or ""
+                normalized_briefing = normalize_market_briefing_text(raw_briefing)
+                normalized_summary = normalize_market_briefing_text(row.get('summary_text') or "")
+
+                # 기존에 저장된 직렬화 문자열이 있으면 조회 시점에 정리 저장
+                if normalized_briefing and normalized_briefing != raw_briefing and row.get('id'):
+                    try:
+                        cursor.execute("""
+                            UPDATE market_news_summaries
+                            SET briefing_text = %s
+                            WHERE id = %s
+                        """, (normalized_briefing, row['id']))
+                    except Exception as update_err:
+                        logging.warning(f"Market Briefing 정규화 저장 실패(id={row.get('id')}): {update_err}")
+
                 return {
                     "status": "success",
-                    "briefing": row['briefing_text'],
-                    "summary_text": row.get('summary_text'),
+                    "briefing": normalized_briefing,
+                    "summary_text": normalized_summary,
                     "created_at": row['created_at'].strftime("%Y-%m-%d %H:%M:%S"),
                     "headlines": headlines
                 }
