@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Database, Cpu, Shield, ChartLine, Lock, ShieldCheck, Key, Mail, ArrowRight } from 'lucide-react';
+import { Globe, Database, Cpu, Shield, ChartLine, Lock, ShieldCheck, Key, Mail, ArrowRight, Network, ScanSearch, GitBranch, Sparkles, Waypoints } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
     const [currentLang, setCurrentLang] = useState<'KR' | 'EN'>('KR');
@@ -19,6 +19,65 @@ export const AboutPage: React.FC = () => {
         { icon: Lock, title: currentLang === 'KR' ? '데이터 암호화' : 'Data Encryption', desc: currentLang === 'KR' ? 'AES-256 알고리즘으로 암호화' : 'AES-256 encryption' },
         { icon: ShieldCheck, title: currentLang === 'KR' ? 'SSL 보안 통신' : 'SSL Secure Channel', desc: currentLang === 'KR' ? 'HTTPS(SSL/TLS) 보호' : 'HTTPS (SSL/TLS) protection' },
         { icon: Key, title: currentLang === 'KR' ? '접근 제어 (MFA)' : 'Access Control (MFA)', desc: currentLang === 'KR' ? '다단계 인증 및 IP 제어' : 'Multi-Factor Authentication' },
+    ];
+
+    const ontologyPipeline = [
+        {
+            step: '01',
+            icon: Network,
+            title: currentLang === 'KR' ? '온톨로지 그래프 구성' : 'Ontology Graph Construction',
+            desc: currentLang === 'KR'
+                ? '뉴스, 거시지표, 자산 데이터를 엔티티-관계 그래프로 정규화합니다.'
+                : 'Normalizes news, macro indicators, and assets into a unified entity-relation graph.',
+        },
+        {
+            step: '02',
+            icon: ScanSearch,
+            title: currentLang === 'KR' ? '시그널 패턴 탐색' : 'Signal Pattern Discovery',
+            desc: currentLang === 'KR'
+                ? '상승/하락/변동성 신호를 연결 구조에서 탐색해 핵심 원인을 추출합니다.'
+                : 'Discovers up/down/volatility patterns from graph connectivity and extracts key drivers.',
+        },
+        {
+            step: '03',
+            icon: GitBranch,
+            title: currentLang === 'KR' ? '인과 경로 추론' : 'Causal Path Reasoning',
+            desc: currentLang === 'KR'
+                ? '금리, 고용, 물가, 유동성이 포트폴리오에 미치는 파급 경로를 추론합니다.'
+                : 'Infers how rates, labor, inflation, and liquidity propagate into portfolio decisions.',
+        },
+        {
+            step: '04',
+            icon: Waypoints,
+            title: currentLang === 'KR' ? '전략 액션 연결' : 'Strategy Action Mapping',
+            desc: currentLang === 'KR'
+                ? '추론 결과를 MP/Sub-MP 판단 근거와 리밸런싱 액션으로 연결합니다.'
+                : 'Maps reasoning outputs to MP/Sub-MP rationale and actionable rebalancing signals.',
+        },
+    ];
+
+    const ontologyOutputs = [
+        {
+            tag: currentLang === 'KR' ? '핵심 연결' : 'Core Link',
+            title: currentLang === 'KR' ? '리스크 전이 경로' : 'Risk Transmission Path',
+            desc: currentLang === 'KR'
+                ? '어떤 거시 이벤트가 어떤 자산군을 통해 포트폴리오에 영향을 주는지 시각화'
+                : 'Visual path from macro events to portfolio impact through each asset class',
+        },
+        {
+            tag: currentLang === 'KR' ? '설명 가능성' : 'Explainability',
+            title: currentLang === 'KR' ? '근거 기반 요약' : 'Evidence-Based Summary',
+            desc: currentLang === 'KR'
+                ? '분석 결과를 일반 투자자도 이해 가능한 문장으로 구조화'
+                : 'Transforms model outputs into investor-friendly natural language explanations',
+        },
+        {
+            tag: currentLang === 'KR' ? '실행 연결' : 'Execution',
+            title: currentLang === 'KR' ? '전략 반영 우선순위' : 'Strategy Priority Queue',
+            desc: currentLang === 'KR'
+                ? '즉시 반영, 관찰 유지, 리스크 헤지 등 액션 우선순위를 제공'
+                : 'Provides priority actions such as immediate rebalance, monitor, and hedge',
+        },
     ];
 
     return (
@@ -95,6 +154,84 @@ export const AboutPage: React.FC = () => {
                                 )}
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Ontology Intelligence */}
+            <section className="relative py-20 px-6 overflow-hidden bg-slate-950">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.22),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.2),transparent_45%)]" />
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <div className="text-center mb-12">
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-300/20 text-cyan-200 text-sm font-semibold">
+                            <Sparkles className="h-4 w-4" />
+                            {currentLang === 'KR' ? 'Ontology Intelligence Layer' : 'Ontology Intelligence Layer'}
+                        </span>
+                        <h2 className="mt-5 text-2xl md:text-3xl font-bold text-white">
+                            {currentLang === 'KR' ? '온톨로지 분석 엔진' : 'Ontology Analysis Engine'}
+                        </h2>
+                        <p className="mt-4 text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                            {currentLang === 'KR'
+                                ? 'Stockoverflow는 단순 지표 해석을 넘어, 이벤트-지표-자산 간 연결 관계를 온톨로지 그래프로 분석해 왜 이런 전략이 나왔는지까지 설명합니다.'
+                                : 'Stockoverflow goes beyond indicator interpretation by modeling event-indicator-asset relationships as an ontology graph and explaining why each strategy is selected.'}
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        <div className="lg:col-span-3 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-6">
+                            <h3 className="text-lg font-semibold text-white mb-5">
+                                {currentLang === 'KR' ? '분석 파이프라인' : 'Analysis Pipeline'}
+                            </h3>
+                            <div className="space-y-4">
+                                {ontologyPipeline.map((item) => (
+                                    <div
+                                        key={item.step}
+                                        className="rounded-xl border border-white/10 bg-slate-900/70 px-4 py-4 flex items-start gap-4"
+                                    >
+                                        <div className="w-9 h-9 rounded-lg bg-cyan-400/15 border border-cyan-300/30 flex items-center justify-center flex-shrink-0">
+                                            <item.icon className="h-4 w-4 text-cyan-200" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-xs font-bold text-cyan-200/90 tracking-wide">{item.step}</span>
+                                                <h4 className="text-sm md:text-base font-semibold text-white">{item.title}</h4>
+                                            </div>
+                                            <p className="text-sm text-slate-300 leading-relaxed">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-6">
+                                <h3 className="text-lg font-semibold text-white mb-4">
+                                    {currentLang === 'KR' ? '사용자에게 제공되는 분석 결과' : 'What Users Receive'}
+                                </h3>
+                                <div className="space-y-3">
+                                    {ontologyOutputs.map((item) => (
+                                        <div key={item.title} className="rounded-lg border border-white/10 bg-slate-900/60 p-3">
+                                            <span className="inline-block text-[11px] px-2 py-1 rounded-md bg-blue-500/20 text-blue-100 border border-blue-300/20 mb-2">
+                                                {item.tag}
+                                            </span>
+                                            <h4 className="text-sm font-semibold text-white mb-1">{item.title}</h4>
+                                            <p className="text-xs text-slate-300 leading-relaxed">{item.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-slate-900 p-5">
+                                <p className="text-[11px] tracking-[0.2em] text-cyan-200 uppercase font-bold mb-2">
+                                    {currentLang === 'KR' ? 'AI Narrative' : 'AI Narrative'}
+                                </p>
+                                <p className="text-sm text-slate-100 leading-relaxed">
+                                    {currentLang === 'KR'
+                                        ? '“지표가 어떻게 연결되어 현재 전략으로 이어졌는지”를 한 눈에 이해할 수 있도록, 복잡한 그래프 추론 결과를 자연어 설명과 실행 우선순위로 변환합니다.'
+                                        : '"How indicators connect to today’s strategy" is translated into natural language explanations and prioritized actions from complex graph reasoning.'}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
