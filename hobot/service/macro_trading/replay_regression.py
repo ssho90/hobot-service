@@ -10,6 +10,12 @@ from typing import Any, Dict, Iterable, List, Optional
 logger = logging.getLogger(__name__)
 
 ASSET_KEYS = ("stocks", "bonds", "alternatives", "cash")
+DEFAULT_REPLAY_BASELINES: Dict[str, Any] = {
+    "min_decision_count": 3,
+    "mp_change_rate": {"stable_max": 0.35, "caution_max": 0.55},
+    "overall_sub_mp_change_rate": {"stable_max": 0.45, "caution_max": 0.65},
+    "whipsaw_rate": {"stable_max": 0.15, "caution_max": 0.30},
+}
 
 
 def _safe_json_loads(value: Any) -> Dict[str, Any]:
@@ -173,6 +179,71 @@ def calculate_replay_regression_metrics(
     }
 
 
+def _classify_metric(
+    value: float,
+    stable_max: float,
+    caution_max: float,
+) -> str:
+    if value <= stable_max:
+        return "stable"
+    if value <= caution_max:
+        return "caution"
+    return "warning"
+
+
+def evaluate_replay_regression_metrics(
+    metrics: Dict[str, Any],
+    baselines: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Evaluate replay metrics against baseline thresholds."""
+    applied = baselines or DEFAULT_REPLAY_BASELINES
+
+    decision_count = int(metrics.get("decision_count", 0) or 0)
+    min_decision_count = int(applied.get("min_decision_count", 3) or 3)
+
+    if decision_count < min_decision_count:
+        return {
+            "overall_status": "insufficient",
+            "status": {
+                "mp_change_rate": "insufficient",
+                "overall_sub_mp_change_rate": "insufficient",
+                "whipsaw_rate": "insufficient",
+            },
+            "notes": [
+                f"의사결정 표본({decision_count})이 최소 기준({min_decision_count})보다 적어 해석 신뢰도가 낮습니다."
+            ],
+        }
+
+    status: Dict[str, str] = {}
+    notes: List[str] = []
+    for metric_key in ("mp_change_rate", "overall_sub_mp_change_rate", "whipsaw_rate"):
+        value = float(metrics.get(metric_key, 0.0) or 0.0)
+        threshold = applied.get(metric_key, {})
+        stable_max = float(threshold.get("stable_max", 0.0))
+        caution_max = float(threshold.get("caution_max", 0.0))
+        metric_status = _classify_metric(value, stable_max, caution_max)
+        status[metric_key] = metric_status
+
+        if metric_status == "warning":
+            notes.append(f"{metric_key}가 경고 구간입니다 ({value:.2%}).")
+        elif metric_status == "caution":
+            notes.append(f"{metric_key}가 주의 구간입니다 ({value:.2%}).")
+
+    if any(item == "warning" for item in status.values()):
+        overall_status = "warning"
+    elif any(item == "caution" for item in status.values()):
+        overall_status = "caution"
+    else:
+        overall_status = "stable"
+        notes.append("핵심 리플레이 지표가 모두 안정 구간입니다.")
+
+    return {
+        "overall_status": overall_status,
+        "status": status,
+        "notes": notes,
+    }
+
+
 def fetch_strategy_history_rows(
     days: int = 90,
     now: Optional[datetime] = None,
@@ -207,6 +278,7 @@ def generate_historical_replay_report(
     days: int = 90,
     history_rows: Optional[Iterable[Dict[str, Any]]] = None,
     now: Optional[datetime] = None,
+    baselines: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Build a replay report for MP/Sub-MP volatility and whipsaw diagnostics."""
     reference_now = now or datetime.now()
@@ -217,6 +289,8 @@ def generate_historical_replay_report(
     scoped_rows = [row for row in normalized_rows if row["decision_date"] >= cutoff]
 
     metrics = calculate_replay_regression_metrics(scoped_rows)
+    applied_baselines = baselines or DEFAULT_REPLAY_BASELINES
+    evaluation = evaluate_replay_regression_metrics(metrics, baselines=applied_baselines)
     first_decision = scoped_rows[0]["decision_date"].strftime("%Y-%m-%d %H:%M:%S") if scoped_rows else None
     last_decision = scoped_rows[-1]["decision_date"].strftime("%Y-%m-%d %H:%M:%S") if scoped_rows else None
 
@@ -226,13 +300,17 @@ def generate_historical_replay_report(
         "period_start": cutoff.strftime("%Y-%m-%d %H:%M:%S"),
         "first_decision_date": first_decision,
         "last_decision_date": last_decision,
+        "baselines": applied_baselines,
         "metrics": metrics,
+        "evaluation": evaluation,
     }
 
 
 __all__ = [
     "ASSET_KEYS",
+    "DEFAULT_REPLAY_BASELINES",
     "calculate_replay_regression_metrics",
+    "evaluate_replay_regression_metrics",
     "fetch_strategy_history_rows",
     "generate_historical_replay_report",
     "normalize_strategy_history_rows",

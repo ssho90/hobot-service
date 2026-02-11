@@ -446,6 +446,42 @@ def setup_account_snapshot_scheduler():
         raise
 
 
+@retry_on_failure(max_retries=2, delay=120)
+def run_extraction_cache_cleanup():
+    """
+    뉴스 추출 캐시(extraction_cache)에서 90일을 초과한 데이터를 정리합니다.
+    """
+    from service.database.db import cleanup_old_extraction_cache
+
+    deleted_rows = cleanup_old_extraction_cache(days=90)
+    logger.info(
+        "뉴스 추출 캐시 정리 완료: 보존기간=90일, 삭제=%s건",
+        deleted_rows,
+    )
+    return deleted_rows
+
+
+def setup_extraction_cache_cleanup_scheduler():
+    """
+    뉴스 추출 캐시 정리 스케줄을 설정합니다.
+    매일 04:20(KST)에 실행되도록 등록합니다.
+    """
+    try:
+        existing_jobs = schedule.get_jobs()
+        for job in existing_jobs:
+            if "extraction_cache_cleanup" in job.tags:
+                schedule.cancel_job(job)
+                logger.debug(f"기존 추출 캐시 정리 스케줄 제거: {job}")
+
+        schedule.every().day.at("04:20").do(
+            run_threaded, run_extraction_cache_cleanup
+        ).tag("extraction_cache_cleanup")
+        logger.info("뉴스 추출 캐시 정리 스케줄 등록: 매일 04:20 KST (90일 보존)")
+    except Exception as e:
+        logger.error(f"뉴스 추출 캐시 정리 스케줄 설정 실패: {e}", exc_info=True)
+        raise
+
+
 def start_fred_scheduler_thread():
     """
     FRED 데이터 수집 스케줄러를 별도 스레드에서 시작합니다.
@@ -547,6 +583,12 @@ def start_all_schedulers():
         logger.info("계좌 스냅샷 스케줄 설정 완료")
     except Exception as e:
         logger.error(f"계좌 스냅샷 스케줄 설정 실패: {e}")
+
+    try:
+        setup_extraction_cache_cleanup_scheduler()
+        logger.info("뉴스 추출 캐시 정리 스케줄 설정 완료")
+    except Exception as e:
+        logger.error(f"뉴스 추출 캐시 정리 스케줄 설정 실패: {e}")
 
     try:
         setup_phase_c_weekly_scheduler()

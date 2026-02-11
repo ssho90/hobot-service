@@ -80,6 +80,11 @@ class TestReplayRegression(unittest.TestCase):
         self.assertAlmostEqual(metrics["sub_mp_change_rate"]["alternatives"], 0.5)
         self.assertAlmostEqual(metrics["sub_mp_change_rate"]["cash"], 0.0)
         self.assertAlmostEqual(metrics["overall_sub_mp_change_rate"], 0.5)
+        self.assertEqual(report["baselines"]["mp_change_rate"]["stable_max"], 0.35)
+        self.assertEqual(report["evaluation"]["status"]["mp_change_rate"], "warning")
+        self.assertEqual(report["evaluation"]["status"]["overall_sub_mp_change_rate"], "caution")
+        self.assertEqual(report["evaluation"]["status"]["whipsaw_rate"], "warning")
+        self.assertEqual(report["evaluation"]["overall_status"], "warning")
 
     def test_generate_report_handles_single_decision(self):
         history_rows = [
@@ -103,6 +108,7 @@ class TestReplayRegression(unittest.TestCase):
         self.assertEqual(metrics["whipsaw_count"], 0)
         self.assertEqual(metrics["whipsaw_triplet_count"], 0)
         self.assertEqual(metrics["whipsaw_rate"], 0.0)
+        self.assertEqual(report["evaluation"]["overall_status"], "insufficient")
 
     def test_generate_report_filters_out_of_lookback_window(self):
         history_rows = [
@@ -126,6 +132,7 @@ class TestReplayRegression(unittest.TestCase):
         self.assertEqual(metrics["decision_count"], 1)
         self.assertEqual(report["first_decision_date"], "2026-02-01 09:00:00")
         self.assertEqual(report["last_decision_date"], "2026-02-01 09:00:00")
+        self.assertEqual(report["evaluation"]["overall_status"], "insufficient")
 
 
 if __name__ == "__main__":

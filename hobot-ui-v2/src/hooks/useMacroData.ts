@@ -43,6 +43,7 @@ export interface MPData {
   description?: string;
   updated_at?: string;
   started_at?: string;
+  duration_days?: number;
   decision_date?: string;
   target_allocation: Record<string, number>;
   actual_allocation: Record<string, number>;
@@ -71,6 +72,7 @@ export interface SubMPCategory {
   sub_mp_description?: string;
   updated_at?: string;
   started_at?: string;
+  duration_days?: number;
   etf_details: ETFDetail[];
 }
 
@@ -81,6 +83,24 @@ export interface SubMP {
   cash?: SubMPCategory;
 }
 
+export interface RiskSummary {
+  divergence_detected?: boolean;
+  risk_level?: string;
+  whipsaw_warning?: boolean;
+  recommended_action?: string;
+  constraint_violations?: string[];
+  adjustment_advice?: string;
+}
+
+export interface DecisionMeta {
+  confidence?: number;
+  min_confidence_to_switch_mp?: number;
+  quality_gate_applied?: boolean;
+  quality_gate_reason?: string;
+  quality_gate_risk_action?: string;
+  risk_summary?: RiskSummary;
+}
+
 export interface OverviewData {
   mp_id: string;
   mp_info?: {
@@ -88,6 +108,7 @@ export interface OverviewData {
     description: string;
     updated_at: string;
     started_at?: string;
+    duration_days?: number;
   };
   analysis_summary: string;
   reasoning: string;
@@ -99,6 +120,13 @@ export interface OverviewData {
     Cash: number;
   };
   sub_mp: SubMP;
+  sub_mp_reasoning_by_asset?: {
+    stocks?: string;
+    bonds?: string;
+    alternatives?: string;
+    cash?: string;
+  };
+  decision_meta?: DecisionMeta;
   decision_date: string;
 }
 

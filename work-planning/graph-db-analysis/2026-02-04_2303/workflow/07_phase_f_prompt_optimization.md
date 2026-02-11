@@ -351,7 +351,7 @@ Supervisor가 선택한 `mp_id` 전략 내에서 구체적인 자산군별 상�
 ## 5. WBS (Work Breakdown Structure) & Progress
 
 기준일: **2026-02-10**  
-전체 진행률(가중치 기준): **92%**
+전체 진행률(가중치 기준): **95%**
 
 ### 5.1 진행률 산정 기준
 - 산식: `진행률 = (완료 산출물 / 계획 산출물) * 100`
@@ -367,7 +367,7 @@ Supervisor가 선택한 `mp_id` 전략 내에서 구체적인 자산군별 상�
 | F-3 | Stage 2 Sub-MP 의사결정 구축 | 완료 | 100% | Supervisor + Sub-Allocator 병합/검증 + 자산군별 Sub-Agent 병렬화(v2) + 자산군별 reasoning 분해 |
 | F-4 | 스키마 검증/폴백 안전장치 | 진행중 | 86% | JSON 재시도, ID 검증, 0% 비중 null 처리 |
 | F-5 | 관측/운영 로깅 | 진행중 | 68% | 에이전트별 LLM 로그 분리 저장 |
-| F-6 | 테스트/릴리즈 준비 | 진행중 | 68% | 컴파일 + 멀티에이전트 헬퍼 단위테스트 확장(9케이스) + 90일 리플레이 회귀 지표 계산기/단위테스트 추가. 실데이터 리플레이/섀도우 런 미실시 |
+| F-6 | 테스트/릴리즈 준비 | 진행중 | 80% | 컴파일 + 멀티에이전트 헬퍼 단위테스트 확장(9케이스) + 90일 리플레이 회귀 API/어드민 조언 탭 연동 + 임의 기준선(안정/주의/경고) 적용 완료. 운영 데이터 미세조정/섀도우 런 미실시 |
 
 ### 5.3 멀티 에이전트 구축 WBS (상세)
 
@@ -412,11 +412,11 @@ Supervisor가 선택한 `mp_id` 전략 내에서 구체적인 자산군별 상�
 | F-5.3 | 운영 지표 대시보드(에이전트 단위 실패율) | 대기 | 0% | 메트릭 집계 쿼리/시각화 미구현 |
 | F-6.1 | 정적 검증(문법/컴파일) | 완료 | 100% | `py_compile` 성공 |
 | F-6.2 | 단위 테스트(프롬프트/검증 함수) | 진행중 | 90% | `test_ai_strategist_multi_agent_helpers.py` 확장 (정규화/병합/검증 + 품질게이트/계약생성 + 병렬 Sub-Agent/Reasoning 메타데이터 총 9케이스) |
-| F-6.3 | 히스토리컬 리플레이 회귀 테스트 | 진행중 | 40% | `replay_regression.py` 지표 계산기 + `test_replay_regression.py` 추가 (MP/Sub-MP 변경률·whipsaw). 실데이터 90일 실행/기준선 비교는 미실시 |
+| F-6.3 | 히스토리컬 리플레이 회귀 테스트 | 진행중 | 85% | `replay_regression.py` + `test_replay_regression.py` + admin API(`/api/macro-trading/rebalancing/replay-report`) + Admin Rebalancing 조언 탭 지표 연동 + 임의 기준선(예: MP 35/55, Sub-MP 45/65, Whipsaw 15/30) + `evaluation(overall/status/notes)` 응답/배지 연동 완료. 운영 기준선 미세조정만 남음 |
 | F-6.4 | 섀도우 런(운영 병행) | 대기 | 0% | 기존 전략과 동시 실행 비교 미실시 |
 
 ### 5.6 이번 주 실행 우선순위 (실행 가능한 작업)
-1. **F-6.3 진행:** 리플레이 지표 계산기/단위테스트를 기준으로 최근 90일 실데이터 실행 + 기준선 비교 리포트 확정
+1. **F-6.3 마무리:** 임의 기준선 운영 관찰(1~2주) 후 수치 미세조정 + 주간 리포트 포맷 고정
 2. **F-5.2 착수:** Quant/Narrative/Risk/Sub-Agent 중간 산출물 Graph 저장
 3. **F-6.2 마무리:** 호환 경로(overview/kis) 중심 단위테스트 보강
 4. **F-6.4 착수:** 섀도우 런(운영 병행)으로 MP/Sub-MP 안정성 검증
@@ -457,5 +457,24 @@ Supervisor가 선택한 `mp_id` 전략 내에서 구체적인 자산군별 상�
 - [ ] F-5.3 운영 지표 대시보드(에이전트 단위 실패율)
 - [x] F-6.1 정적 검증(문법/컴파일)
 - [ ] F-6.2 단위 테스트(프롬프트/검증 함수) (부분 완료: helper 9 케이스 추가)
-- [ ] F-6.3 히스토리컬 리플레이 회귀 테스트 (부분 완료: `replay_regression.py` + `test_replay_regression.py`)
+- [ ] F-6.3 히스토리컬 리플레이 회귀 테스트 (부분 완료: `replay_regression.py` + `test_replay_regression.py` + replay-report API + Admin 조언 탭 연동 + 임의 기준선 적용)
 - [ ] F-6.4 섀도우 런(운영 병행)
+
+### 5.8 최신 반영 내역 (2026-02-10)
+
+#### F-6.3 기준선/평가 로직 반영
+- 백엔드 리플레이 리포트에 `baselines`와 `evaluation` 필드 추가
+  - `baselines`: 임의 기준선(안정/주의/경고 컷)
+  - `evaluation`: `overall_status`, `status(metric별)`, `notes`
+- 적용 기준선(임의)
+  - `mp_change_rate`: 안정 `<=0.35`, 주의 `<=0.55`, 경고 `>0.55`
+  - `overall_sub_mp_change_rate`: 안정 `<=0.45`, 주의 `<=0.65`, 경고 `>0.65`
+  - `whipsaw_rate`: 안정 `<=0.15`, 주의 `<=0.30`, 경고 `>0.30`
+  - 최소 표본: `decision_count >= 3` 미만 시 `insufficient`
+- Admin Rebalancing 조언 탭이 백엔드 평가값(`evaluation.status`)을 직접 사용해 배지(안정/주의/경고/N/A) 렌더링
+- 조언 탭에 기준선 숫자(`baselines`)와 진단 노트(`evaluation.notes`) 표시
+
+#### 검증 로그(로컬)
+- `python3 hobot/service/macro_trading/tests/test_replay_regression.py` 통과
+- `python3 -m py_compile hobot/service/macro_trading/replay_regression.py hobot/main.py` 통과
+- `npm --prefix hobot-ui-v2 run build` 통과

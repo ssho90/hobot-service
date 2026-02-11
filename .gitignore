@@ -147,3 +147,5 @@ hobot/service/database/*.db-wal
 **/service/database/*.db
 **/service/database/*.db-shm
 **/service/database/*.db-wal
+# Extraction Cache
+hobot/service/cache/extractions/

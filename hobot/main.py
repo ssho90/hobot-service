@@ -2742,6 +2742,22 @@ async def get_rebalancing_config(admin_user: dict = Depends(require_admin)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/macro-trading/rebalancing/replay-report")
+async def get_rebalancing_replay_report(
+    days: int = Query(90, ge=30, le=365, description="리플레이 조회 기간(일)"),
+    admin_user: dict = Depends(require_admin),
+):
+    """리밸런싱 회귀 리포트 조회 (admin 전용)"""
+    try:
+        from service.macro_trading.replay_regression import generate_historical_replay_report
+
+        report = generate_historical_replay_report(days=days)
+        return {"status": "success", "data": report}
+    except Exception as e:
+        logging.error(f"Error getting rebalancing replay report: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/macro-trading/rebalancing/config")
 async def upsert_rebalancing_config(
     request: RebalancingConfigRequest,

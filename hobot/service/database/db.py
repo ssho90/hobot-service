@@ -349,6 +349,19 @@ def init_database():
                 INDEX idx_created_at (created_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='시장 뉴스 요약 및 브리핑'
         """)
+        
+        # 추출 결과 캐시 테이블 (LLM 비용 절감용)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS extraction_cache (
+                cache_key VARCHAR(64) PRIMARY KEY COMMENT '해시 키 (doc_id + version + model)',
+                doc_id VARCHAR(255) NOT NULL COMMENT '문서 ID',
+                data JSON NOT NULL COMMENT '추출 결과 데이터',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                INDEX idx_doc_id (doc_id),
+                INDEX idx_updated_at (updated_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='뉴스 추출 결과 캐시'
+        """)
 
         # AI 전략 결정 이력 테이블
         cursor.execute("""
@@ -701,6 +714,32 @@ def cleanup_old_backups(days=30):
                     print(f"⚠️  백업 파일 삭제 실패 ({filename}): {e}")
     except Exception as e:
         print(f"⚠️  백업 정리 실패: {e}")
+
+
+def cleanup_old_extraction_cache(days: int = 90) -> int:
+    """오래된 뉴스 추출 캐시(extraction_cache) 정리.
+
+    Args:
+        days: 보존 일수 (기본 90일)
+
+    Returns:
+        int: 삭제된 레코드 수
+    """
+    if days <= 0:
+        raise ValueError("days must be a positive integer")
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            DELETE FROM extraction_cache
+            WHERE updated_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL %s DAY)
+            """,
+            (days,),
+        )
+        deleted_rows = cursor.rowcount or 0
+        conn.commit()
+        return deleted_rows
 
 
 def restore_database(backup_path: str):

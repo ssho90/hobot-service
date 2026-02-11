@@ -211,8 +211,12 @@ class NewsExtractor:
             self.client = None
             logger.warning("No Gemini API key found. Extraction will fail.")
         
-        # 캐시 디렉토리 생성
-        os.makedirs(self.cache_dir, exist_ok=True)
+        
+        # 캐시 디렉토리 생성 (DB 사용하더라도 Fallback용)
+        try:
+            os.makedirs(self.cache_dir, exist_ok=True)
+        except Exception:
+            pass
 
     def _resolve_model_name(self, requested_model: Optional[str]) -> str:
         model_name = (requested_model or "").strip()
@@ -231,36 +235,92 @@ class NewsExtractor:
         return hashlib.sha256(content.encode()).hexdigest()[:32]
     
     def _get_cached(self, doc_id: str) -> Optional[ExtractionResult]:
-        """캐시에서 결과 조회"""
+        """캐시에서 결과 조회 (DB 및 파일 지원)"""
         if not self.cache_enabled:
             return None
         
         cache_key = self._get_cache_key(doc_id)
-        cache_path = os.path.join(self.cache_dir, f"{cache_key}.json")
         
+        # 1. DB에서 먼저 확인
+        try:
+            from service.database.db import get_db_connection
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT data FROM extraction_cache WHERE cache_key = %s",
+                    (cache_key,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    try:
+                        # row['data'] is expected to be a dict if pymysql handles JSON
+                        # but often it is a string when using dict cursor
+                        raw_data = row['data']
+                        if isinstance(raw_data, str):
+                            data = json.loads(raw_data)
+                        else:
+                            data = raw_data
+                        
+                        logger.debug(f"DB Cache hit for {doc_id}")
+                        return ExtractionResult.model_validate(data)
+                    except Exception as e:
+                        logger.warning(f"DB Cache parse error for {doc_id}: {e}")
+        except Exception as e:
+            logger.warning(f"DB Cache read error for {doc_id}: {e}")
+
+        # 2. 파일 시스템 확인 (레거시 지원 및 마이그레이션 전)
+        cache_path = os.path.join(self.cache_dir, f"{cache_key}.json")
         if os.path.exists(cache_path):
             try:
                 with open(cache_path, 'r') as f:
                     data = json.load(f)
+                    
+                    # 파일에 있으면 DB로 마이그레이션 시도 (선택적)
+                    try:
+                        self._save_to_db(cache_key, doc_id, data)
+                        # os.remove(cache_path) # 안전하게 삭제하지 않음 (사용자 확인 필요)
+                    except Exception as db_err:
+                        logger.warning(f"Failed to migrate file cache to DB: {db_err}")
+
                     return ExtractionResult.model_validate(data)
             except Exception as e:
-                logger.warning(f"Cache read error for {doc_id}: {e}")
+                logger.warning(f"File Cache read error for {doc_id}: {e}")
         
         return None
     
+    def _save_to_db(self, cache_key: str, doc_id: str, data: dict):
+        """DB에 캐시 저장"""
+        from service.database.db import get_db_connection
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO extraction_cache (cache_key, doc_id, data)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE data = %s
+            """, (cache_key, doc_id, json.dumps(data), json.dumps(data)))
+            conn.commit()
+
     def _save_cache(self, doc_id: str, result: ExtractionResult):
-        """결과를 캐시에 저장"""
+        """결과를 캐시에 저장 (DB 우선)"""
         if not self.cache_enabled:
             return
         
         cache_key = self._get_cache_key(doc_id)
-        cache_path = os.path.join(self.cache_dir, f"{cache_key}.json")
+        data = result.model_dump(mode='json')
         
+        # 1. DB 저장
         try:
-            with open(cache_path, 'w') as f:
-                json.dump(result.model_dump(mode='json'), f, indent=2, default=str)
+            self._save_to_db(cache_key, doc_id, data)
         except Exception as e:
-            logger.warning(f"Cache write error for {doc_id}: {e}")
+            logger.warning(f"DB Cache write error for {doc_id}: {e}")
+            
+            # 2. DB 저장 실패 시 파일에 백업 저장 (Fallback)
+            cache_path = os.path.join(self.cache_dir, f"{cache_key}.json")
+            try:
+                with open(cache_path, 'w') as f:
+                    json.dump(data, f, indent=2, default=str)
+            except Exception as file_e:
+                 logger.warning(f"File Cache write error for {doc_id}: {file_e}")
 
     def _normalize_choice(
         self,

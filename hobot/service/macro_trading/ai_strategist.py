@@ -1579,17 +1579,22 @@ def _apply_mp_quality_gate(
 
     gated_decision = dict(mp_decision_data)
     min_confidence = float((constraints or {}).get("min_confidence_to_switch_mp", DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP))
+    gated_decision["quality_gate_applied"] = False
+    gated_decision["quality_gate_reason"] = ""
+    gated_decision["quality_gate_min_confidence"] = min_confidence
 
     current_mp_id = gated_decision.get("mp_id")
     confidence = gated_decision.get("confidence")
     try:
         confidence_value = float(confidence)
+        gated_decision["confidence"] = confidence_value
     except (TypeError, ValueError):
         confidence_value = None
 
     risk_action = ""
     if isinstance(risk_report, dict):
         risk_action = str(risk_report.get("recommended_action") or "").strip().upper()
+    gated_decision["quality_gate_risk_action"] = risk_action or None
 
     should_hold_previous = risk_action == "HOLD_PREVIOUS"
     should_hold_previous = should_hold_previous or (
@@ -1602,12 +1607,13 @@ def _apply_mp_quality_gate(
     if should_hold_previous and previous_mp_id and previous_mp_id in get_model_portfolios():
         original_mp_id = gated_decision.get("mp_id")
         gated_decision["mp_id"] = previous_mp_id
-        existing_reasoning = str(gated_decision.get("reasoning") or "")
+        risk_action_label = "기존 전략 유지" if risk_action == "HOLD_PREVIOUS" else (risk_action or "N/A")
         gate_reason = (
-            f"Quality Gate 적용: previous_mp 유지({previous_mp_id}). "
-            f"원래 제안 MP={original_mp_id}, confidence={confidence_value}, risk_action={risk_action or 'N/A'}"
+            f"품질 게이트로 기존 MP({previous_mp_id})를 유지했습니다. "
+            f"원래 제안={original_mp_id}, 신뢰도={confidence_value}, 리스크 판단={risk_action_label}"
         )
-        gated_decision["reasoning"] = (existing_reasoning + "\n" + gate_reason).strip()
+        gated_decision["quality_gate_applied"] = True
+        gated_decision["quality_gate_reason"] = gate_reason
 
     return gated_decision
 
@@ -3182,7 +3188,14 @@ def save_decision_node(state: AIAnalysisState) -> AIAnalysisState:
                 "error": error or "저장할 결정이 없습니다."
             }
         
-        success = save_strategy_decision(decision, fred_signals, economic_news)
+        success = save_strategy_decision(
+            decision,
+            fred_signals,
+            economic_news,
+            mp_decision_data=state.get("mp_decision_data"),
+            risk_report=state.get("risk_report"),
+            constraints=state.get("constraints"),
+        )
         
         if success:
             target_allocation = decision.get_target_allocation()
@@ -3267,7 +3280,14 @@ def get_ai_analysis_graph():
 # 기존 함수들 (하위 호환성 유지)
 # ============================================================================
 
-def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, economic_news: Dict) -> bool:
+def save_strategy_decision(
+    decision: AIStrategyDecision,
+    fred_signals: Dict,
+    economic_news: Dict,
+    mp_decision_data: Optional[Dict[str, Any]] = None,
+    risk_report: Optional[Dict[str, Any]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+) -> bool:
     """전략 결정 결과를 DB에 저장"""
     try:
         with get_db_connection() as conn:
@@ -3286,6 +3306,56 @@ def save_strategy_decision(decision: AIStrategyDecision, fred_signals: Dict, eco
                 "mp_id": decision.mp_id,
                 "target_allocation": target_allocation.model_dump()
             }
+
+            normalized_mp_decision = mp_decision_data if isinstance(mp_decision_data, dict) else {}
+            normalized_risk_report = risk_report if isinstance(risk_report, dict) else {}
+            normalized_constraints = constraints if isinstance(constraints, dict) else {}
+
+            decision_meta: Dict[str, Any] = {}
+            confidence = normalized_mp_decision.get("confidence")
+            try:
+                decision_meta["confidence"] = float(confidence)
+            except (TypeError, ValueError):
+                pass
+
+            decision_meta["min_confidence_to_switch_mp"] = float(
+                normalized_constraints.get("min_confidence_to_switch_mp", DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP)
+            )
+            decision_meta["quality_gate_applied"] = bool(normalized_mp_decision.get("quality_gate_applied", False))
+
+            quality_gate_reason = str(normalized_mp_decision.get("quality_gate_reason") or "").strip()
+            if quality_gate_reason:
+                decision_meta["quality_gate_reason"] = quality_gate_reason
+
+            quality_gate_risk_action = str(normalized_mp_decision.get("quality_gate_risk_action") or "").strip()
+            if quality_gate_risk_action:
+                decision_meta["quality_gate_risk_action"] = quality_gate_risk_action
+
+            risk_summary: Dict[str, Any] = {}
+            if "divergence_detected" in normalized_risk_report:
+                risk_summary["divergence_detected"] = bool(normalized_risk_report.get("divergence_detected"))
+            if normalized_risk_report.get("risk_level") is not None:
+                risk_summary["risk_level"] = str(normalized_risk_report.get("risk_level"))
+            if "whipsaw_warning" in normalized_risk_report:
+                risk_summary["whipsaw_warning"] = bool(normalized_risk_report.get("whipsaw_warning"))
+            if normalized_risk_report.get("recommended_action") is not None:
+                risk_summary["recommended_action"] = str(normalized_risk_report.get("recommended_action"))
+
+            raw_constraint_violations = normalized_risk_report.get("constraint_violations")
+            if isinstance(raw_constraint_violations, list):
+                risk_summary["constraint_violations"] = [
+                    str(item) for item in raw_constraint_violations if str(item).strip()
+                ]
+
+            adjustment_advice = str(normalized_risk_report.get("adjustment_advice") or "").strip()
+            if adjustment_advice:
+                risk_summary["adjustment_advice"] = adjustment_advice
+
+            if risk_summary:
+                decision_meta["risk_summary"] = risk_summary
+
+            if decision_meta:
+                save_data["decision_meta"] = decision_meta
             
             # Sub-MP 정보 추가
             if decision.sub_mp:

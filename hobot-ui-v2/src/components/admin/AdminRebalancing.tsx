@@ -47,6 +47,44 @@ interface CryptoConfig {
     market_status: string;
 }
 
+interface ReplayMetrics {
+    decision_count: number;
+    mp_change_count: number;
+    mp_transition_count: number;
+    mp_change_rate: number;
+    sub_mp_change_count: Record<string, number>;
+    sub_mp_transition_count: Record<string, number>;
+    sub_mp_change_rate: Record<string, number>;
+    overall_sub_mp_change_rate: number;
+    whipsaw_count: number;
+    whipsaw_triplet_count: number;
+    whipsaw_rate: number;
+    whipsaw_events: Array<{
+        decision_date: string;
+        pattern: string[];
+    }>;
+}
+
+interface ReplayReport {
+    lookback_days: number;
+    reference_now: string;
+    period_start: string;
+    first_decision_date: string | null;
+    last_decision_date: string | null;
+    baselines: {
+        min_decision_count: number;
+        mp_change_rate: { stable_max: number; caution_max: number };
+        overall_sub_mp_change_rate: { stable_max: number; caution_max: number };
+        whipsaw_rate: { stable_max: number; caution_max: number };
+    };
+    metrics: ReplayMetrics;
+    evaluation: {
+        overall_status: 'stable' | 'caution' | 'warning' | 'insufficient';
+        status: Record<string, 'stable' | 'caution' | 'warning' | 'insufficient'>;
+        notes: string[];
+    };
+}
+
 export const AdminRebalancing: React.FC = () => {
     const [activeTab, setActiveTab] = useState('advice'); // 'advice' | 'settings' | 'mp' | 'sub-mp' | 'crypto'
 
@@ -55,9 +93,11 @@ export const AdminRebalancing: React.FC = () => {
     const [modelPortfolios, setModelPortfolios] = useState<ModelPortfolio[]>([]);
     const [subModelPortfolios, setSubModelPortfolios] = useState<SubModelPortfolio[]>([]);
     const [cryptoConfig, setCryptoConfig] = useState<CryptoConfig | null>(null);
+    const [replayReport, setReplayReport] = useState<ReplayReport | null>(null);
 
     // Loading/Error States
     const [loading, setLoading] = useState(false);
+    const [replayLoading, setReplayLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -130,17 +170,38 @@ export const AdminRebalancing: React.FC = () => {
         } catch (err) { console.error(err); }
     }, [getAuthHeaders]);
 
+    const fetchReplayReport = useCallback(async () => {
+        try {
+            setReplayLoading(true);
+            const response = await fetch('/api/macro-trading/rebalancing/replay-report?days=90', { headers: getAuthHeaders() });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'success') {
+                    setReplayReport(data.data || null);
+                    return;
+                }
+            }
+            setError('리플레이 회귀 지표를 불러오지 못했습니다.');
+        } catch (err) {
+            console.error(err);
+            setError('리플레이 회귀 지표 조회 중 오류가 발생했습니다.');
+        } finally {
+            setReplayLoading(false);
+        }
+    }, [getAuthHeaders]);
+
     // --- Effects ---
     useEffect(() => {
         if (activeTab === 'advice') {
             fetchRebalancingConfig();
             fetchCryptoConfig();
+            fetchReplayReport();
         }
         if (activeTab === 'settings') fetchRebalancingConfig();
         if (activeTab === 'mp') fetchModelPortfolios();
         if (activeTab === 'sub-mp') fetchSubModelPortfolios();
         if (activeTab === 'crypto') fetchCryptoConfig();
-    }, [activeTab, fetchRebalancingConfig, fetchModelPortfolios, fetchSubModelPortfolios, fetchCryptoConfig]);
+    }, [activeTab, fetchRebalancingConfig, fetchModelPortfolios, fetchSubModelPortfolios, fetchCryptoConfig, fetchReplayReport]);
 
     // --- Handlers: Rebalancing Config ---
     const handleSaveConfig = async () => {
@@ -278,6 +339,41 @@ export const AdminRebalancing: React.FC = () => {
                 ? 'Crypto 상태가 SIDEWAYS입니다. 추세 신호보다 변동성 관리와 보수적 리밸런싱이 유효합니다.'
                 : 'Crypto 시장 상태 정보를 불러오지 못했습니다.';
 
+    const replayMetrics = replayReport?.metrics;
+    const replayEvaluation = replayReport?.evaluation;
+    const replayBaselines = replayReport?.baselines;
+
+    const formatRatePercent = (value?: number) => (
+        typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : 'N/A'
+    );
+
+    const getRiskBadgeByStatus = (status?: string) => {
+        if (!status || status === 'insufficient') {
+            return { label: 'N/A', className: 'bg-slate-100 text-zinc-500 border-zinc-200' };
+        }
+        if (status === 'stable') {
+            return { label: '안정', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+        }
+        if (status === 'caution') {
+            return { label: '주의', className: 'bg-amber-100 text-amber-700 border-amber-200' };
+        }
+        return { label: '경고', className: 'bg-rose-100 text-rose-700 border-rose-200' };
+    };
+
+    const mpChangeBadge = getRiskBadgeByStatus(replayEvaluation?.status?.mp_change_rate);
+    const subChangeBadge = getRiskBadgeByStatus(replayEvaluation?.status?.overall_sub_mp_change_rate);
+    const whipsawBadge = getRiskBadgeByStatus(replayEvaluation?.status?.whipsaw_rate);
+
+    const replayAdvice = !replayMetrics
+        ? '최근 90일 리플레이 지표를 아직 불러오지 못했습니다.'
+        : replayEvaluation?.overall_status === 'insufficient'
+            ? '리플레이 표본 수가 작아 추세 해석의 신뢰도가 낮습니다. 기간을 확장해 추가 확인이 필요합니다.'
+            : replayEvaluation?.overall_status === 'warning'
+                ? 'Whipsaw 비율이 높습니다. MP 전환 조건을 보수적으로 조정하거나 HOLD 정책 강화를 고려하세요.'
+                : replayEvaluation?.overall_status === 'caution'
+                    ? '일부 지표가 주의 구간입니다. 전환 임계값 및 quality gate를 점진 조정해 안정성을 점검하세요.'
+                    : '리플레이 기준 전략 전환 안정성은 현재 허용 범위 내입니다.';
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-zinc-900">
             <h1 className="text-3xl font-bold tracking-tight mb-2">리밸런싱 관리</h1>
@@ -342,6 +438,101 @@ export const AdminRebalancing: React.FC = () => {
                     </div>
 
                     <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                            <h3 className="text-sm font-semibold text-zinc-900">최근 90일 리플레이 지표</h3>
+                            {replayLoading && <span className="text-xs text-zinc-500">지표 로딩 중...</span>}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-semibold text-zinc-500">MP 변경률</span>
+                                    <span className={`text-[11px] px-2 py-0.5 rounded-full border ${mpChangeBadge.className}`}>{mpChangeBadge.label}</span>
+                                </div>
+                                <div className="text-xl font-bold text-zinc-900">{formatRatePercent(replayMetrics?.mp_change_rate)}</div>
+                                <div className="text-[11px] text-zinc-500 mt-1">
+                                    {replayMetrics ? `${replayMetrics.mp_change_count}/${replayMetrics.mp_transition_count} 전환` : 'N/A'}
+                                </div>
+                            </div>
+
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-semibold text-zinc-500">Sub-MP 변경률</span>
+                                    <span className={`text-[11px] px-2 py-0.5 rounded-full border ${subChangeBadge.className}`}>{subChangeBadge.label}</span>
+                                </div>
+                                <div className="text-xl font-bold text-zinc-900">{formatRatePercent(replayMetrics?.overall_sub_mp_change_rate)}</div>
+                                <div className="text-[11px] text-zinc-500 mt-1">
+                                    전체 자산군 전환 기준
+                                </div>
+                            </div>
+
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-semibold text-zinc-500">Whipsaw 비율</span>
+                                    <span className={`text-[11px] px-2 py-0.5 rounded-full border ${whipsawBadge.className}`}>{whipsawBadge.label}</span>
+                                </div>
+                                <div className="text-xl font-bold text-zinc-900">{formatRatePercent(replayMetrics?.whipsaw_rate)}</div>
+                                <div className="text-[11px] text-zinc-500 mt-1">
+                                    {replayMetrics ? `${replayMetrics.whipsaw_count}/${replayMetrics.whipsaw_triplet_count} 패턴` : 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-xs text-zinc-500">
+                            기준 기간:
+                            {' '}
+                            {replayReport?.period_start || 'N/A'}
+                            {' '}
+                            ~
+                            {' '}
+                            {replayReport?.reference_now || 'N/A'}
+                            {' '}
+                            / 의사결정 수:
+                            {' '}
+                            {replayMetrics?.decision_count ?? 0}
+                        </div>
+                        <div className="text-xs text-zinc-500 mt-2">
+                            임의 기준선:
+                            {' '}
+                            MP
+                            {' '}
+                            ≤
+                            {formatRatePercent(replayBaselines?.mp_change_rate?.stable_max)}
+                            {' '}
+                            안정 /
+                            {' '}
+                            ≤
+                            {formatRatePercent(replayBaselines?.mp_change_rate?.caution_max)}
+                            {' '}
+                            주의,
+                            {' '}
+                            Sub-MP
+                            {' '}
+                            ≤
+                            {formatRatePercent(replayBaselines?.overall_sub_mp_change_rate?.stable_max)}
+                            {' '}
+                            안정 /
+                            {' '}
+                            ≤
+                            {formatRatePercent(replayBaselines?.overall_sub_mp_change_rate?.caution_max)}
+                            {' '}
+                            주의,
+                            {' '}
+                            Whipsaw
+                            {' '}
+                            ≤
+                            {formatRatePercent(replayBaselines?.whipsaw_rate?.stable_max)}
+                            {' '}
+                            안정 /
+                            {' '}
+                            ≤
+                            {formatRatePercent(replayBaselines?.whipsaw_rate?.caution_max)}
+                            {' '}
+                            주의
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
                         <h3 className="text-sm font-semibold text-zinc-900 mb-4">현재 설정 기반 조언</h3>
                         <div className="space-y-3">
                             <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
@@ -355,6 +546,17 @@ export const AdminRebalancing: React.FC = () => {
                             <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
                                 <div className="text-xs font-semibold text-zinc-500 mb-1">시장 상태 해석</div>
                                 <p className="text-sm text-zinc-700 leading-relaxed">{marketToneAdvice}</p>
+                            </div>
+                            <div className="rounded-lg border border-zinc-200 bg-slate-50 p-4">
+                                <div className="text-xs font-semibold text-zinc-500 mb-1">리플레이 진단</div>
+                                <p className="text-sm text-zinc-700 leading-relaxed">{replayAdvice}</p>
+                                {Array.isArray(replayEvaluation?.notes) && replayEvaluation.notes.length > 0 && (
+                                    <ul className="mt-2 text-xs text-zinc-500 list-disc pl-5 space-y-1">
+                                        {replayEvaluation.notes.map((note, idx) => (
+                                            <li key={`replay-note-${idx}`}>{note}</li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
                         </div>
                     </div>
