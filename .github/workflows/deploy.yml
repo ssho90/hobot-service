@@ -13,6 +13,37 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'ap-northeast-2' }}
+
+      - name: Whitelist Runner IP
+        id: whitelist
+        env:
+          AWS_SG_ID: ${{ secrets.AWS_SG_ID }}
+        run: |
+          if [ -z "$AWS_SG_ID" ]; then
+            echo "⚠️ AWS_SG_ID secret is not set. Skipping security group update."
+            echo "skip_whitelist=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          IP=$(curl -s https://checkip.amazonaws.com)
+          echo "Runner IP: $IP"
+          echo "runner_ip=$IP" >> $GITHUB_OUTPUT
+          
+          echo "Adds inbound rule to security group..."
+          aws ec2 authorize-security-group-ingress \
+            --group-id $AWS_SG_ID \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${IP}/32
+          
+          echo "skip_whitelist=false" >> $GITHUB_OUTPUT
       
       - name: Setup SSH
         env:
@@ -166,3 +197,18 @@ jobs:
               echo "❌ Backend API (via nginx): HTTP $API_RESPONSE"
             fi
           ENDSSH
+          
+      - name: Revoke Runner IP
+        if: always() && steps.whitelist.outputs.skip_whitelist == 'false'
+        env:
+          AWS_SG_ID: ${{ secrets.AWS_SG_ID }}
+          RUNNER_IP: ${{ steps.whitelist.outputs.runner_ip }}
+        run: |
+          echo "Revokes inbound rule from security group..."
+          if [ -n "$RUNNER_IP" ] && [ -n "$AWS_SG_ID" ]; then
+            aws ec2 revoke-security-group-ingress \
+              --group-id $AWS_SG_ID \
+              --protocol tcp \
+              --port 22 \
+              --cidr ${RUNNER_IP}/32
+          fi
