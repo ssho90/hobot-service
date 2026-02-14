@@ -95,7 +95,7 @@ FRED_INDICATORS = {
         "code": "WTREGEN",
         "name": "U.S. Treasury General Account (TGA)",
         "unit": "Millions of Dollars",
-        "frequency": "daily"
+        "frequency": "weekly"
     },
     "RRPONTSYD": {
         "code": "RRPONTSYD",

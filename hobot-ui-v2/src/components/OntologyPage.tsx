@@ -220,6 +220,10 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
         return window.innerWidth < MOBILE_LAYOUT_BREAKPOINT;
     });
     const [mobileActivePanel, setMobileActivePanel] = useState<'graph' | 'chat'>('graph');
+    const [macroControlsOpen, setMacroControlsOpen] = useState<boolean>(() => {
+        if (typeof window === 'undefined') return true;
+        return window.innerWidth >= MOBILE_LAYOUT_BREAKPOINT;
+    });
 
     // Cypher Query Input state
     const [cypherQueryOpen, setCypherQueryOpen] = useState(false);
@@ -846,6 +850,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
         : macroSuggestedQueries;
     const showGraphPanel = !isMobileLayout || mobileActivePanel === 'graph';
     const showChatPanel = isMobileLayout ? mobileActivePanel === 'chat' : sidebarOpen;
+    const showMacroControls = macroControlsOpen;
 
     return (
         <div className="flex h-[calc(100vh-64px)] flex-col lg:flex-row bg-gray-50 text-gray-900 font-sans overflow-hidden">
@@ -908,6 +913,24 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                 </div>
 
                 {mode === 'macro' && (
+                    <div className="px-4 py-2 border-b border-gray-200 bg-white">
+                        <button
+                            type="button"
+                            onClick={() => setMacroControlsOpen((prev) => !prev)}
+                            className="w-full inline-flex items-center justify-between px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold"
+                        >
+                            <span>{macroControlsOpen ? '그래프 옵션 숨기기' : '그래프 옵션 보기'}</span>
+                            {macroControlsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                        {!macroControlsOpen && (
+                            <p className="mt-1 text-[11px] text-gray-500">
+                                그래프를 크게 보려면 현재 상태를 유지하고, 필터 변경이 필요할 때만 옵션을 여세요.
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {mode === 'macro' && showMacroControls && (
                     <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -932,7 +955,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                     </div>
                 )}
 
-                {mode === 'macro' && (
+                {mode === 'macro' && showMacroControls && (
                     <div className="px-4 py-3 border-b border-gray-200 bg-white">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs font-semibold text-gray-700">📊 그래프 탐색</span>
@@ -958,7 +981,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                     </div>
                 )}
 
-                {mode === 'macro' && (
+                {mode === 'macro' && showMacroControls && (
                     <div className="px-4 py-3 border-b border-gray-200 bg-white">
                         <div className="flex items-center gap-2 mb-2">
                             <Filter className="w-4 h-4 text-indigo-600" />
@@ -1077,7 +1100,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                     </div>
                 )}
 
-                {mode === 'macro' && macroAnswer && (
+                {mode === 'macro' && macroAnswer && showMacroControls && (
                     <div className="px-4 py-3 border-b border-gray-200 bg-indigo-50/40">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -1285,7 +1308,13 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                     </div>
 
                     {selectedNode && (
-                        <div className="absolute top-0 right-0 w-96 h-full bg-white border-l border-gray-200 overflow-y-auto shadow-xl flex flex-col z-20">
+                        <div
+                            className={`absolute bg-white overflow-y-auto shadow-xl flex flex-col z-20 ${
+                                isMobileLayout
+                                    ? 'left-0 bottom-0 w-full h-[48%] border-t border-gray-200 rounded-t-xl'
+                                    : 'top-0 right-0 w-96 h-full border-l border-gray-200'
+                            }`}
+                        >
                             <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                 <h2 className="font-bold text-sm text-gray-800">Node Detail</h2>
                                 <button
