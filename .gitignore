@@ -149,3 +149,6 @@ hobot/service/database/*.db-wal
 **/service/database/*.db-wal
 # Extraction Cache
 hobot/service/cache/extractions/
+
+# Ignored Skills
+antigravity-awesome-skills/
