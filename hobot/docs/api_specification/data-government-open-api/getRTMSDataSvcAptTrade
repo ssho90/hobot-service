@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  title: Apartment Real Transaction Price API
+  description: 국토교통부 아파트 매매 실거래 상세 자료 조회 서비스
+  version: 1.0.0
+servers:
+  - url: http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc
+    description: Public Data Portal Default Endpoint
+paths:
+  /getRTMSDataSvcAptTrade:
+    get:
+      summary: 아파트 매매 실거래 자료 조회
+      parameters:
+        - name: serviceKey
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 공공데이터포털 인증키 (Decoding된 키 권장)
+        - name: LAWD_CD
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{5}$'
+          description: 지역코드 5자리 (예: 11110)
+        - name: DEAL_YMD
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{6}$'
+          description: 계약년월 6자리 (YYYYMM)
+        - name: pageNo
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: numOfRows
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      header:
+                        type: object
+                        properties:
+                          resultCode:
+                            type: string
+                            description: 결과 코드 (00: 정상)
+                          resultMsg:
+                            type: string
+                            description: 결과 메시지
+                      body:
+                        type: object
+                        properties:
+                          totalCount:
+                            type: integer
+                          numOfRows:
+                            type: integer
+                          pageNo:
+                            type: integer
+                          items:
+                            type: object
+                            properties:
+                              item:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    dealAmount:
+                                      type: string
+                                      description: 거래금액(만원), 콤마 포함 가능
+                                    buildYear:
+                                      type: string
+                                      description: 건축년도
+                                    dealYear:
+                                      type: string
+                                      description: 계약년도
+                                    dealMonth:
+                                      type: string
+                                      description: 계약월
+                                    dealDay:
+                                      type: string
+                                      description: 계약일
+                                    aptNm:
+                                      type: string
+                                      description: 단지명
+                                    sggCd:
+                                      type: string
+                                      description: 지역코드
+                                    umdNm:
+                                      type: string
+                                      description: 법정동
+                                    jibun:
+                                      type: string
+                                      description: 지번
+                                    excluUseAr:
+                                      type: string
+                                      description: 전용면적(m2)
+                                    floor:
+                                      type: string
+                                      description: 층
+                                    aptDong:
+                                      type: string
+                                      description: 동 이름
+                                    cdealType:
+                                      type: string
+                                      description: 해제여부
+                                    cdealDay:
+                                      type: string
+                                      description: 해제사유발생일
+                                    dealingGbn:
+                                      type: string
+                                      description: 거래유형
+                                    estateAgentSggNm:
+                                      type: string
+                                      description: 중개사소재지
+                                    rgstDate:
+                                      type: string
+                                      description: 등기일자
+                                    slerGbn:
+                                      type: string
+                                      description: 매도자 구분
+                                    buyerGbn:
+                                      type: string
+                                      description: 매수자 구분
+                                    landLeaseholdGbn:
+                                      type: string
+                                      description: 토지임대부 여부

@@ -3,10 +3,11 @@ Phase D-5: GraphRAG monitoring metrics.
 """
 
 import hashlib
+import json
 import logging
 import uuid
 from datetime import UTC, date, datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -54,6 +55,7 @@ class GraphRagApiCallLogger:
         question: str,
         time_range: str,
         country: Optional[str],
+        country_code: Optional[str] = None,
         as_of_date: date,
         model: str,
         status: str,
@@ -79,6 +81,7 @@ class GraphRagApiCallLogger:
               response_hash: $response_hash,
               time_range: $time_range,
               country: $country,
+              country_code: $country_code,
               as_of_date: date($as_of_date),
               model: $model,
               status: $status,
@@ -98,6 +101,7 @@ class GraphRagApiCallLogger:
                 "response_hash": response_hash,
                 "time_range": time_range,
                 "country": country,
+                "country_code": country_code,
                 "as_of_date": as_of_date.isoformat(),
                 "model": model,
                 "status": status,
@@ -260,11 +264,101 @@ class GraphRagMonitoringMetrics:
             "p95_link_count": _safe_float(base.get("p95_link_count")),
         }
 
-    def collect_summary(self, days: int = 7) -> Dict[str, Any]:
+    def scope_violation_metrics(
+        self,
+        days: int = 7,
+        allowed_country_codes: Sequence[str] = ("US", "KR"),
+    ) -> Dict[str, Any]:
+        allowed_codes = sorted(
+            {str(code or "").strip().upper() for code in allowed_country_codes if str(code or "").strip()}
+        )
+        row = self.neo4j_client.run_read(
+            """
+            // phase_d5_scope_violation_metrics
+            MATCH (c:GraphRagApiCall)
+            WHERE c.created_at >= datetime($since_iso)
+            WITH c,
+                 trim(toUpper(coalesce(toString(c.country_code), ""))) AS code
+            WITH count(c) AS total_calls,
+                 count(CASE WHEN code = "" THEN 1 END) AS missing_country_code_calls,
+                 count(CASE WHEN code <> "" AND NOT code IN $allowed_country_codes THEN 1 END) AS out_of_scope_calls
+            RETURN total_calls,
+                   missing_country_code_calls,
+                   out_of_scope_calls,
+                   CASE WHEN total_calls = 0 THEN 0.0 ELSE toFloat(out_of_scope_calls) / total_calls * 100 END AS out_of_scope_rate_pct
+            """,
+            {
+                "since_iso": self._since_iso(days),
+                "allowed_country_codes": allowed_codes,
+            },
+        )
+        base = row[0] if row else {}
+        return {
+            "allowed_country_codes": allowed_codes,
+            "total_calls": _safe_int(base.get("total_calls")),
+            "missing_country_code_calls": _safe_int(base.get("missing_country_code_calls")),
+            "out_of_scope_calls": _safe_int(base.get("out_of_scope_calls")),
+            "out_of_scope_rate_pct": _safe_float(base.get("out_of_scope_rate_pct")),
+        }
+
+    def persist_weekly_quality_snapshot(
+        self,
+        days: int = 7,
+        snapshot_date: Optional[date] = None,
+        allowed_country_codes: Sequence[str] = ("US", "KR"),
+    ) -> Dict[str, Any]:
+        summary = self.collect_summary(days=days, allowed_country_codes=allowed_country_codes)
+        target_date = snapshot_date or date.today()
+        scope_codes = summary.get("scope", {}).get("allowed_country_codes", [])
+
+        write_result = self.neo4j_client.run_write(
+            """
+            // phase_d5_quality_snapshot
+            MERGE (s:GraphRagQualitySnapshot {snapshot_date: date($snapshot_date), window_days: $window_days})
+            SET s.scope_key = $scope_key,
+                s.allowed_country_codes = $allowed_country_codes,
+                s.total_calls = $total_calls,
+                s.success_calls = $success_calls,
+                s.error_calls = $error_calls,
+                s.evidence_link_rate_pct = $evidence_link_rate_pct,
+                s.api_error_rate_pct = $api_error_rate_pct,
+                s.out_of_scope_calls = $out_of_scope_calls,
+                s.out_of_scope_rate_pct = $out_of_scope_rate_pct,
+                s.summary_json = $summary_json,
+                s.updated_at = datetime()
+            """,
+            {
+                "snapshot_date": target_date.isoformat(),
+                "window_days": int(summary.get("window_days", days)),
+                "scope_key": "|".join(scope_codes),
+                "allowed_country_codes": scope_codes,
+                "total_calls": int(summary.get("quality", {}).get("total_calls", 0)),
+                "success_calls": int(summary.get("quality", {}).get("success_calls", 0)),
+                "error_calls": int(summary.get("quality", {}).get("error_calls", 0)),
+                "evidence_link_rate_pct": float(summary.get("quality", {}).get("evidence_link_rate_pct", 0.0)),
+                "api_error_rate_pct": float(summary.get("quality", {}).get("api_error_rate_pct", 0.0)),
+                "out_of_scope_calls": int(summary.get("scope", {}).get("out_of_scope_calls", 0)),
+                "out_of_scope_rate_pct": float(summary.get("scope", {}).get("out_of_scope_rate_pct", 0.0)),
+                "summary_json": json.dumps(summary, ensure_ascii=False),
+            },
+        )
+        return {
+            "snapshot_date": target_date.isoformat(),
+            "window_days": int(summary.get("window_days", days)),
+            "summary": summary,
+            "write_result": write_result,
+        }
+
+    def collect_summary(
+        self,
+        days: int = 7,
+        allowed_country_codes: Sequence[str] = ("US", "KR"),
+    ) -> Dict[str, Any]:
         quality = self.quality_metrics(days=days)
         reproducibility = self.reproducibility_metrics(days=days)
         consistency = self.consistency_metrics(days=days)
         performance = self.performance_metrics(days=days)
+        scope = self.scope_violation_metrics(days=days, allowed_country_codes=allowed_country_codes)
 
         return {
             "window_days": days,
@@ -288,6 +382,7 @@ class GraphRagMonitoringMetrics:
                 "consistency_pct": _safe_float(consistency.get("consistency_pct")),
             },
             "performance": performance,
+            "scope": scope,
         }
 
 

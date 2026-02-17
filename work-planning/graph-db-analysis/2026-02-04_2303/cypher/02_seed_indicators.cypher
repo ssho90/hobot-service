@@ -25,11 +25,21 @@ UNWIND [
   {code: 'NETLIQ', name: 'Net Liquidity (WALCL - TGA - RRP)', unit: 'Millions USD', freq: 'daily', theme: 'liquidity'},
   {code: 'BAMLH0A0HYM2', name: 'High Yield Spread', unit: '%', freq: 'daily', theme: 'risk'},
   {code: 'VIXCLS', name: 'VIX', unit: 'Index', freq: 'daily', theme: 'risk'},
-  {code: 'STLFSI4', name: 'Financial Stress Index', unit: 'Index', freq: 'weekly', theme: 'risk'}
+  {code: 'STLFSI4', name: 'Financial Stress Index', unit: 'Index', freq: 'weekly', theme: 'risk'},
+  {code: 'KR_BASE_RATE', name: 'Korea Base Rate', unit: '%', freq: 'monthly', theme: 'rates'},
+  {code: 'KR_CPI', name: 'Korea CPI', unit: 'Index', freq: 'monthly', theme: 'inflation'},
+  {code: 'KR_UNEMPLOYMENT', name: 'Korea Unemployment Rate', unit: '%', freq: 'monthly', theme: 'labor'},
+  {code: 'KR_USDKRW', name: 'USD/KRW Exchange Rate', unit: 'KRW', freq: 'daily', theme: 'rates'},
+  {code: 'KR_HOUSE_PRICE_INDEX', name: 'Korea Housing Sale Price Index', unit: 'Index', freq: 'monthly', theme: 'inflation'},
+  {code: 'KR_JEONSE_PRICE_RATIO', name: 'Korea Jeonse-to-Sale Price Ratio', unit: '%', freq: 'monthly', theme: 'inflation'},
+  {code: 'KR_UNSOLD_HOUSING', name: 'Korea Unsold Housing Inventory', unit: 'count', freq: 'monthly', theme: 'growth'},
+  {code: 'KR_HOUSING_SUPPLY_APPROVAL', name: 'Korea Housing Supply (Permits/Approvals)', unit: 'count', freq: 'monthly', theme: 'growth'}
 ] AS row
 MERGE (i:EconomicIndicator {indicator_code: row.code})
 SET i.name = row.name, i.unit = row.unit, i.frequency = row.freq, 
-    i.source = 'FRED', i.country = 'US', i.created_at = datetime()
+    i.source = CASE WHEN row.code STARTS WITH 'KR_' THEN 'KR-MACRO' ELSE 'FRED' END,
+    i.country = CASE WHEN row.code STARTS WITH 'KR_' THEN 'KR' ELSE 'US' END,
+    i.created_at = datetime()
 WITH i, row
 MATCH (t:MacroTheme {theme_id: row.theme})
 MERGE (i)-[:BELONGS_TO]->(t);

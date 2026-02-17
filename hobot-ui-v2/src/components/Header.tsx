@@ -18,6 +18,7 @@ export const Header: React.FC = () => {
     { path: '/about', label: 'About' },
     { path: '/', label: 'Dashboard' },
     { path: '/trading', label: 'Trading' },
+    { path: '/real-estate', label: 'Real Estate' },
     // { path: '/ontology', label: 'Ontology' }, // Moved to dropdown
   ];
 
@@ -27,6 +28,8 @@ export const Header: React.FC = () => {
   ];
 
   const adminItems = [
+    { path: '/admin/indicators', label: '경제지표 관리' },
+    { path: '/admin/neo4j', label: 'Neo4j 모니터링' },
     { path: '/admin/users', label: '사용자 관리' },
     { path: '/admin/logs', label: '로그 관리' },
     { path: '/admin/llm', label: 'LLM 모니터링' },

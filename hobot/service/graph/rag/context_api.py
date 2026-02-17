@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from ..neo4j_client import get_neo4j_client
+from ..normalization.country_mapping import get_country_name, normalize_country
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +58,14 @@ QUESTION_TERM_STOPWORDS: Set[str] = {
     "this",
 }
 
+SUPPORTED_QA_COUNTRY_CODES: Set[str] = {"US", "KR"}
+
 
 class GraphRagContextRequest(BaseModel):
     question: str = Field(..., min_length=3)
     time_range: str = Field(default="30d")
     country: Optional[str] = None
+    country_code: Optional[str] = None
     as_of_date: Optional[date] = None
     top_k_events: int = Field(default=25, ge=5, le=100)
     top_k_documents: int = Field(default=40, ge=5, le=200)
@@ -141,12 +145,126 @@ class GraphRagContextBuilder:
     def __init__(self, neo4j_client=None):
         self.neo4j_client = neo4j_client or get_neo4j_client()
 
+    @staticmethod
+    def _resolve_country_filter(
+        country: Optional[str],
+        country_code: Optional[str],
+    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        """
+        country 입력을 (raw_country, normalized_country_name, normalized_country_code)로 정규화
+
+        - raw_country: 요청 원문(legacy country 필드 호환)
+        - normalized_country_name: ISO 코드 기반 표준 국가명
+        - normalized_country_code: ISO 3166-1 alpha-2
+        """
+        raw_country = _normalize_text(country) or None
+        raw_country_code = _normalize_text(country_code).upper() if country_code else None
+
+        normalized_code = raw_country_code or normalize_country(raw_country or "")
+        normalized_name = get_country_name(normalized_code) if normalized_code else None
+        if normalized_name and normalized_name == normalized_code:
+            normalized_name = None
+
+        return raw_country, normalized_name, normalized_code
+
+    @staticmethod
+    def _validate_scope_country(
+        request_country: Optional[str],
+        request_country_code: Optional[str],
+        normalized_country_code: Optional[str],
+    ) -> None:
+        has_scope_input = bool(_normalize_text(request_country) or _normalize_text(request_country_code))
+        if not has_scope_input:
+            return
+
+        if not normalized_country_code:
+            allowed = ", ".join(sorted(SUPPORTED_QA_COUNTRY_CODES))
+            raise ValueError(f"country scope must resolve to one of: {allowed}")
+
+        if normalized_country_code not in SUPPORTED_QA_COUNTRY_CODES:
+            allowed = ", ".join(sorted(SUPPORTED_QA_COUNTRY_CODES))
+            raise ValueError(f"country_code '{normalized_country_code}' is not supported in Phase 1 scope ({allowed})")
+
+    @staticmethod
+    def _resolve_row_country_code(row: Dict[str, Any]) -> Optional[str]:
+        country_code = _normalize_text(str(row.get("country_code") or "")).upper()
+        if country_code:
+            return country_code
+
+        raw_country = _normalize_text(str(row.get("country") or ""))
+        if not raw_country:
+            return None
+        normalized = normalize_country(raw_country)
+        return normalized.upper() if normalized else None
+
+    def _build_scope_warning_summary(
+        self,
+        *,
+        events: List[Dict[str, Any]],
+        documents: List[Dict[str, Any]],
+        requested_country_code: Optional[str],
+    ) -> Dict[str, Any]:
+        counts = {
+            "missing_country_code": 0,
+            "out_of_scope_country_code": 0,
+            "requested_country_mismatch": 0,
+        }
+        samples: List[Dict[str, Any]] = []
+
+        def add_sample(kind: str, node_type: str, row: Dict[str, Any], resolved_code: Optional[str]) -> None:
+            if len(samples) >= 10:
+                return
+            samples.append(
+                {
+                    "warning_type": kind,
+                    "node_type": node_type,
+                    "id": row.get("event_id") or row.get("doc_id"),
+                    "country": row.get("country"),
+                    "country_code": row.get("country_code"),
+                    "resolved_country_code": resolved_code,
+                }
+            )
+
+        for node_type, rows in (("Event", events), ("Document", documents)):
+            for row in rows:
+                resolved_code = self._resolve_row_country_code(row)
+                if not resolved_code:
+                    counts["missing_country_code"] += 1
+                    add_sample("missing_country_code", node_type, row, resolved_code)
+                    continue
+                if resolved_code not in SUPPORTED_QA_COUNTRY_CODES:
+                    counts["out_of_scope_country_code"] += 1
+                    add_sample("out_of_scope_country_code", node_type, row, resolved_code)
+                if requested_country_code and resolved_code != requested_country_code:
+                    counts["requested_country_mismatch"] += 1
+                    add_sample("requested_country_mismatch", node_type, row, resolved_code)
+
+        messages: List[str] = []
+        if counts["missing_country_code"] > 0:
+            messages.append(f"country_code 누락 데이터 {counts['missing_country_code']}건")
+        if counts["out_of_scope_country_code"] > 0:
+            messages.append(f"US/KR 범위 외 데이터 {counts['out_of_scope_country_code']}건")
+        if requested_country_code and counts["requested_country_mismatch"] > 0:
+            messages.append(
+                f"요청 국가({requested_country_code})와 불일치한 데이터 {counts['requested_country_mismatch']}건"
+            )
+
+        has_violation = any(value > 0 for value in counts.values())
+        return {
+            "has_violation": has_violation,
+            "counts": counts,
+            "messages": messages,
+            "samples": samples,
+        }
+
     def _resolve_theme_candidates(
         self,
         question: str,
         start_iso: str,
         end_iso: str,
         country: Optional[str],
+        country_name: Optional[str],
+        country_code: Optional[str],
     ) -> List[str]:
         normalized_question = question.lower()
         matched: Set[str] = set()
@@ -165,7 +283,12 @@ class GraphRagContextBuilder:
             WHERE d.published_at IS NOT NULL
               AND d.published_at >= datetime($start_iso)
               AND d.published_at <= datetime($end_iso)
-              AND ($country IS NULL OR d.country = $country)
+              AND (
+                ($country IS NULL AND $country_name IS NULL AND $country_code IS NULL)
+                OR ($country IS NOT NULL AND d.country = $country)
+                OR ($country_name IS NOT NULL AND d.country = $country_name)
+                OR ($country_code IS NOT NULL AND (d.country_code = $country_code OR d.country = $country_code))
+              )
             RETURN t.theme_id AS theme_id, count(*) AS doc_count
             ORDER BY doc_count DESC
             LIMIT 3
@@ -174,6 +297,8 @@ class GraphRagContextBuilder:
                 "start_iso": start_iso,
                 "end_iso": end_iso,
                 "country": country,
+                "country_name": country_name,
+                "country_code": country_code,
             },
         )
         return [row["theme_id"] for row in rows if row.get("theme_id")]
@@ -226,6 +351,8 @@ class GraphRagContextBuilder:
         start_iso: str,
         end_iso: str,
         country: Optional[str],
+        country_name: Optional[str],
+        country_code: Optional[str],
         theme_filter: List[str],
         indicator_filter: List[str],
         limit: int,
@@ -237,7 +364,12 @@ class GraphRagContextBuilder:
             WHERE e.event_time IS NOT NULL
               AND e.event_time >= datetime($start_iso)
               AND e.event_time <= datetime($end_iso)
-              AND ($country IS NULL OR e.country = $country)
+              AND (
+                ($country IS NULL AND $country_name IS NULL AND $country_code IS NULL)
+                OR ($country IS NOT NULL AND e.country = $country)
+                OR ($country_name IS NOT NULL AND e.country = $country_name)
+                OR ($country_code IS NOT NULL AND (e.country_code = $country_code OR e.country = $country_code))
+              )
             OPTIONAL MATCH (e)-[:ABOUT_THEME]->(t:MacroTheme)
             OPTIONAL MATCH (e)-[:AFFECTS]->(i:EconomicIndicator)
             WITH e,
@@ -253,6 +385,7 @@ class GraphRagContextBuilder:
                    e.summary AS summary,
                    e.event_time AS event_time,
                    e.country AS country,
+                   e.country_code AS country_code,
                    theme_ids,
                    indicator_codes
             ORDER BY e.event_time DESC
@@ -262,6 +395,8 @@ class GraphRagContextBuilder:
                 "start_iso": start_iso,
                 "end_iso": end_iso,
                 "country": country,
+                "country_name": country_name,
+                "country_code": country_code,
                 "theme_filter": theme_filter,
                 "indicator_filter": indicator_filter,
                 "limit": limit,
@@ -284,6 +419,8 @@ class GraphRagContextBuilder:
         start_iso: str,
         end_iso: str,
         country: Optional[str],
+        country_name: Optional[str],
+        country_code: Optional[str],
         theme_filter: List[str],
         event_filter: List[str],
         limit: int,
@@ -295,7 +432,12 @@ class GraphRagContextBuilder:
             WHERE d.published_at IS NOT NULL
               AND d.published_at >= datetime($start_iso)
               AND d.published_at <= datetime($end_iso)
-              AND ($country IS NULL OR d.country = $country)
+              AND (
+                ($country IS NULL AND $country_name IS NULL AND $country_code IS NULL)
+                OR ($country IS NOT NULL AND d.country = $country)
+                OR ($country_name IS NOT NULL AND d.country = $country_name)
+                OR ($country_code IS NOT NULL AND (d.country_code = $country_code OR d.country = $country_code))
+              )
             OPTIONAL MATCH (d)-[:MENTIONS]->(e:Event)
             OPTIONAL MATCH (d)-[:ABOUT_THEME]->(t:MacroTheme)
             WITH d,
@@ -311,6 +453,7 @@ class GraphRagContextBuilder:
                    coalesce(d.url, d.link) AS url,
                    d.source AS source,
                    d.country AS country,
+                   d.country_code AS country_code,
                    d.category AS category,
                    d.published_at AS published_at,
                    event_ids,
@@ -322,6 +465,8 @@ class GraphRagContextBuilder:
                 "start_iso": start_iso,
                 "end_iso": end_iso,
                 "country": country,
+                "country_name": country_name,
+                "country_code": country_code,
                 "theme_filter": theme_filter,
                 "event_filter": event_filter,
                 "limit": limit,
@@ -344,6 +489,8 @@ class GraphRagContextBuilder:
         start_iso: str,
         end_iso: str,
         country: Optional[str],
+        country_name: Optional[str],
+        country_code: Optional[str],
         question: str,
         limit: int,
     ) -> List[Dict[str, Any]]:
@@ -369,7 +516,12 @@ class GraphRagContextBuilder:
                 WHERE d.published_at IS NOT NULL
                   AND d.published_at >= datetime($start_iso)
                   AND d.published_at <= datetime($end_iso)
-                  AND ($country IS NULL OR d.country = $country)
+                  AND (
+                    ($country IS NULL AND $country_name IS NULL AND $country_code IS NULL)
+                    OR ($country IS NOT NULL AND d.country = $country)
+                    OR ($country_name IS NOT NULL AND d.country = $country_name)
+                    OR ($country_code IS NOT NULL AND (d.country_code = $country_code OR d.country = $country_code))
+                  )
                 WITH d, score
                 ORDER BY score DESC, d.published_at DESC
                 LIMIT $limit
@@ -380,6 +532,7 @@ class GraphRagContextBuilder:
                        coalesce(d.url, d.link) AS url,
                        d.source AS source,
                        d.country AS country,
+                       d.country_code AS country_code,
                        d.category AS category,
                        d.published_at AS published_at,
                        collect(DISTINCT e.event_id) AS event_ids,
@@ -391,6 +544,8 @@ class GraphRagContextBuilder:
                     "start_iso": start_iso,
                     "end_iso": end_iso,
                     "country": country,
+                    "country_name": country_name,
+                    "country_code": country_code,
                     "limit": limit * 2,  # 그래프 필터링 후 상위 N개 선택을 위해 여유분 확보
                 },
             )
@@ -398,7 +553,13 @@ class GraphRagContextBuilder:
             # Full-text index가 없거나 쿼리 실패 시 fallback
             logger.warning(f"Full-text search failed, falling back to CONTAINS: {e}")
             return self._fetch_documents_by_question_terms_fallback(
-                start_iso, end_iso, country, question, limit
+                start_iso,
+                end_iso,
+                country,
+                country_name,
+                country_code,
+                question,
+                limit,
             )
 
         normalized_rows: List[Dict[str, Any]] = []
@@ -417,6 +578,8 @@ class GraphRagContextBuilder:
         start_iso: str,
         end_iso: str,
         country: Optional[str],
+        country_name: Optional[str],
+        country_code: Optional[str],
         question: str,
         limit: int,
     ) -> List[Dict[str, Any]]:
@@ -432,7 +595,12 @@ class GraphRagContextBuilder:
             WHERE d.published_at IS NOT NULL
               AND d.published_at >= datetime($start_iso)
               AND d.published_at <= datetime($end_iso)
-              AND ($country IS NULL OR d.country = $country)
+              AND (
+                ($country IS NULL AND $country_name IS NULL AND $country_code IS NULL)
+                OR ($country IS NOT NULL AND d.country = $country)
+                OR ($country_name IS NOT NULL AND d.country = $country_name)
+                OR ($country_code IS NOT NULL AND (d.country_code = $country_code OR d.country = $country_code))
+              )
             WITH d,
                  [term IN $question_terms WHERE
                     toLower(coalesce(d.title, '')) CONTAINS term
@@ -448,6 +616,7 @@ class GraphRagContextBuilder:
                    coalesce(d.url, d.link) AS url,
                    d.source AS source,
                    d.country AS country,
+                   d.country_code AS country_code,
                    d.category AS category,
                    d.published_at AS published_at,
                    collect(DISTINCT e.event_id) AS event_ids,
@@ -460,6 +629,8 @@ class GraphRagContextBuilder:
                 "start_iso": start_iso,
                 "end_iso": end_iso,
                 "country": country,
+                "country_name": country_name,
+                "country_code": country_code,
                 "question_terms": question_terms,
                 "limit": limit,
             },
@@ -667,12 +838,23 @@ class GraphRagContextBuilder:
         start_date = end_date - timedelta(days=window_days)
         start_iso = f"{start_date.isoformat()}T00:00:00"
         end_iso = f"{end_date.isoformat()}T23:59:59"
+        country_input, country_name, country_code = self._resolve_country_filter(
+            request.country,
+            request.country_code,
+        )
+        self._validate_scope_country(
+            request_country=request.country,
+            request_country_code=request.country_code,
+            normalized_country_code=country_code,
+        )
 
         matched_theme_ids = self._resolve_theme_candidates(
             question=request.question,
             start_iso=start_iso,
             end_iso=end_iso,
-            country=request.country,
+            country=country_input,
+            country_name=country_name,
+            country_code=country_code,
         )
         matched_indicator_codes = self._resolve_indicator_candidates(request.question)
         question_terms = self._extract_question_search_terms(request.question)
@@ -680,7 +862,9 @@ class GraphRagContextBuilder:
         events = self._fetch_events(
             start_iso=start_iso,
             end_iso=end_iso,
-            country=request.country,
+            country=country_input,
+            country_name=country_name,
+            country_code=country_code,
             theme_filter=matched_theme_ids,
             indicator_filter=matched_indicator_codes,
             limit=request.top_k_events,
@@ -690,7 +874,9 @@ class GraphRagContextBuilder:
         documents = self._fetch_documents(
             start_iso=start_iso,
             end_iso=end_iso,
-            country=request.country,
+            country=country_input,
+            country_name=country_name,
+            country_code=country_code,
             theme_filter=matched_theme_ids,
             event_filter=event_ids,
             limit=request.top_k_documents,
@@ -700,12 +886,31 @@ class GraphRagContextBuilder:
         keyword_documents = self._fetch_documents_by_fulltext(
             start_iso=start_iso,
             end_iso=end_iso,
-            country=request.country,
+            country=country_input,
+            country_name=country_name,
+            country_code=country_code,
             question=request.question,
             limit=request.top_k_documents,
         )
-        if keyword_documents:
+        fallback_documents: List[Dict[str, Any]] = []
+        if question_terms and len(keyword_documents) < request.top_k_documents:
+            # Full-text만으로 놓칠 수 있는 인물명/복합 키워드 문서를 보강한다.
+            fallback_documents = self._fetch_documents_by_question_terms_fallback(
+                start_iso=start_iso,
+                end_iso=end_iso,
+                country=country_input,
+                country_name=country_name,
+                country_code=country_code,
+                question=request.question,
+                limit=request.top_k_documents,
+            )
+
+        if keyword_documents or fallback_documents:
             merged_docs: Dict[str, Dict[str, Any]] = {}
+            for row in fallback_documents:
+                doc_id = row.get("doc_id")
+                if doc_id:
+                    merged_docs[doc_id] = row
             for row in keyword_documents:
                 doc_id = row.get("doc_id")
                 if doc_id:
@@ -717,6 +922,17 @@ class GraphRagContextBuilder:
             documents = list(merged_docs.values())[: request.top_k_documents]
 
         doc_ids = [row["doc_id"] for row in documents if row.get("doc_id")]
+        scope_warnings = self._build_scope_warning_summary(
+            events=events,
+            documents=documents,
+            requested_country_code=country_code,
+        )
+        if scope_warnings.get("has_violation"):
+            logger.warning(
+                "[GraphRAGContext] scope warning counts=%s requested_country_code=%s",
+                scope_warnings.get("counts"),
+                country_code,
+            )
 
         discovered_theme_ids: Set[str] = set(matched_theme_ids)
         discovered_indicator_codes: Set[str] = set(matched_indicator_codes)
@@ -780,6 +996,7 @@ class GraphRagContextBuilder:
                     "event_type": row.get("event_type"),
                     "event_time": row.get("event_time"),
                     "country": row.get("country"),
+                    "country_code": row.get("country_code"),
                 },
             )
             for theme_id in row.get("theme_ids") or []:
@@ -815,6 +1032,7 @@ class GraphRagContextBuilder:
                     "url": row.get("url"),
                     "source": row.get("source"),
                     "country": row.get("country"),
+                    "country_code": row.get("country_code"),
                     "category": row.get("category"),
                     "published_at": row.get("published_at"),
                 },
@@ -901,6 +1119,13 @@ class GraphRagContextBuilder:
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
             "country": request.country,
+            "country_code": request.country_code,
+            "resolved_country": country_input or country_name,
+            "resolved_country_code": country_code,
+            "scope_allowed_country_codes": sorted(SUPPORTED_QA_COUNTRY_CODES),
+            "scope_warnings": scope_warnings.get("messages", []),
+            "scope_violation_counts": scope_warnings.get("counts", {}),
+            "scope_violation_samples": scope_warnings.get("samples", []),
             "matched_theme_ids": matched_theme_ids,
             "matched_indicator_codes": matched_indicator_codes,
             "question_terms": question_terms[:10],

@@ -283,16 +283,16 @@ class StrategyDecisionMirror:
             query = """
             // phase_e_link_decision_to_macro_state
             MATCH (sd:StrategyDecision {decision_id: $decision_id})
-            MATCH (ms:MacroState)
-            WHERE date(ms.as_of_date) = date($decision_date)
-            MERGE (sd)-[:BASED_ON]->(ms)
-            RETURN count(*) AS linked_count
+            MATCH (ms:MacroState {date: date($decision_date)})
+            MERGE (sd)-[r:BASED_ON]->(ms)
+            ON CREATE SET r.created_at = datetime()
+            SET r.updated_at = datetime()
             """
             result = client.run_write(query, {
                 "decision_id": decision_id,
                 "decision_date": decision_date.isoformat(),
             })
-            if result and result[0].get("linked_count", 0) > 0:
+            if result.get("relationships_created", 0) > 0:
                 logger.info(f"[DecisionMirror] MacroState 연결 완료: {decision_id}")
         except Exception as e:
             logger.warning(f"[DecisionMirror] MacroState 연결 실패 (무시): {e}")

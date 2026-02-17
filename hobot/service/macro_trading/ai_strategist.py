@@ -25,6 +25,29 @@ DEFAULT_NEWS_SUMMARY_MODEL = "gemini-3-pro-preview"
 DEFAULT_MARKET_BRIEFING_MODEL = "gemini-3-flash-preview"
 DEFAULT_STRATEGY_MODEL = "gemini-3-pro-preview"
 DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP = 0.6
+US_ANALYSIS_COUNTRY_CODE = "US"
+US_ANALYSIS_COUNTRY_NAME = "United States"
+US_NEWS_SUMMARY_SCOPE_TAG = "[SCOPE:US]"
+TRADING_ANALYSIS_ROUTE = "trading_engine"
+TRADING_SCOPE_VERSION = "US_EQ_TRADING_V1"
+BLOCK_CHATBOT_AUTO_INGESTION = True
+BLOCKED_UPSTREAM_ANALYSIS_ROUTES = {
+    "qa_chatbot",
+    "qa_engine",
+    "ontology_chatbot",
+    "graph_rag",
+    "graph_rag_answer",
+}
+US_COUNTRY_LABELS = {
+    "united states",
+    "united states of america",
+    "us",
+    "usa",
+    "u.s.",
+    "u.s",
+    "america",
+    "미국",
+}
 SUB_ALLOCATOR_ASSET_SPECS = (
     {
         "asset_label": "Stocks",
@@ -715,6 +738,112 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
         logger.error(f"LLM 뉴스 요약 실패: {e}", exc_info=True)
         return None
 
+def _is_us_country_label(country_value: Any) -> bool:
+    """국가 문자열이 미국 범주인지 판별"""
+    if country_value is None:
+        return False
+    normalized = str(country_value).strip().lower()
+    if not normalized:
+        return False
+    return normalized in US_COUNTRY_LABELS
+
+
+def _enforce_trading_news_scope(economic_news: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """
+    트레이딩 입력 payload를 US scope로 강제
+
+    - target_countries를 US로 정규화
+    - 비-US/국가 불명 뉴스 항목 제거
+    - 스코프 메타를 저장/추적할 수 있도록 payload에 기록
+    """
+    if economic_news is None or not isinstance(economic_news, dict):
+        return economic_news
+
+    scoped_news = dict(economic_news)
+
+    requested_countries_raw = scoped_news.get("target_countries")
+    requested_countries = requested_countries_raw if isinstance(requested_countries_raw, list) else []
+    normalized_targets = [
+        str(country).strip()
+        for country in requested_countries
+        if _is_us_country_label(country)
+    ]
+    if not normalized_targets:
+        normalized_targets = [US_ANALYSIS_COUNTRY_NAME]
+    scoped_news["target_countries"] = normalized_targets
+
+    news_items = scoped_news.get("news")
+    dropped_non_us = 0
+    dropped_unknown = 0
+    original_count = 0
+    if isinstance(news_items, list):
+        original_count = len(news_items)
+        filtered_news: List[Dict[str, Any]] = []
+        for item in news_items:
+            if not isinstance(item, dict):
+                dropped_unknown += 1
+                continue
+
+            country_label = item.get("country_ko") or item.get("country") or item.get("country_code")
+            if not country_label:
+                dropped_unknown += 1
+                continue
+            if not _is_us_country_label(country_label):
+                dropped_non_us += 1
+                continue
+
+            filtered_news.append(item)
+
+        scoped_news["news"] = filtered_news
+        scoped_news["raw_total_count"] = original_count
+        scoped_news["total_count"] = len(filtered_news)
+
+    scope_enforcement = {
+        "route": TRADING_ANALYSIS_ROUTE,
+        "scope_version": TRADING_SCOPE_VERSION,
+        "analysis_country_code": US_ANALYSIS_COUNTRY_CODE,
+        "requested_target_countries": requested_countries,
+        "effective_target_countries": normalized_targets,
+        "dropped_non_us_count": dropped_non_us,
+        "dropped_unknown_country_count": dropped_unknown,
+    }
+    scoped_news["analysis_route"] = TRADING_ANALYSIS_ROUTE
+    scoped_news["scope_version"] = TRADING_SCOPE_VERSION
+    scoped_news["analysis_country_code"] = US_ANALYSIS_COUNTRY_CODE
+    scoped_news["scope_enforcement"] = scope_enforcement
+
+    logger.info(
+        "[Phase0][TradingScope] route=%s scope_version=%s country_code=%s requested=%s effective=%s dropped_non_us=%s dropped_unknown=%s",
+        TRADING_ANALYSIS_ROUTE,
+        TRADING_SCOPE_VERSION,
+        US_ANALYSIS_COUNTRY_CODE,
+        requested_countries,
+        normalized_targets,
+        dropped_non_us,
+        dropped_unknown,
+    )
+    return scoped_news
+
+
+def _is_chatbot_analysis_payload(economic_news: Optional[Dict[str, Any]]) -> bool:
+    """
+    QA/챗봇 응답 payload가 트레이딩 경로로 유입되는지 판별
+
+    자동 유입 차단 플래그가 켜진 경우, 아래 시그널이 있으면 차단 대상:
+    - analysis_route가 챗봇/GraphRAG 계열
+    - QA 응답 구조 키(question/answer/citations/context_meta 등) 포함
+    """
+    if not isinstance(economic_news, dict):
+        return False
+
+    analysis_route = str(economic_news.get("analysis_route") or "").strip().lower()
+    if analysis_route in BLOCKED_UPSTREAM_ANALYSIS_ROUTES:
+        return True
+    if analysis_route and analysis_route.startswith(("qa", "graph_rag")):
+        return True
+
+    qa_like_keys = {"question", "answer", "citations", "context_meta", "analysis_run_id", "suggested_queries"}
+    return any(key in economic_news for key in qa_like_keys)
 
 
 def generate_market_briefing(summary_text: str) -> str:
@@ -776,8 +905,8 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
         include_summary: LLM 요약 포함 여부 (기본값: True)
     """
     try:
-        # AI 분석에 사용할 국가 목록
-        target_countries = ['Crypto', 'Commodity', 'Euro Area', 'China', 'United States']
+        # AI 분석은 미국 주식(US Equities)에 집중하도록 미국 뉴스만 사용
+        target_countries = [US_ANALYSIS_COUNTRY_NAME]
         
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -789,20 +918,23 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
                         SELECT summary_text, briefing_text, created_at 
                         FROM market_news_summaries 
                         WHERE created_at >= NOW() - INTERVAL 12 HOUR
+                          AND summary_text LIKE %s
                         ORDER BY created_at DESC 
                         LIMIT 1
-                    """)
+                    """, (f"{US_NEWS_SUMMARY_SCOPE_TAG}%",))
                     cached_row = cursor.fetchone()
                     
                     if cached_row:
-                        summary_text = cached_row['summary_text']
+                        summary_text = cached_row['summary_text'] or ""
+                        if summary_text.startswith(US_NEWS_SUMMARY_SCOPE_TAG):
+                            summary_text = summary_text[len(US_NEWS_SUMMARY_SCOPE_TAG):].lstrip()
                         briefing_text = cached_row['briefing_text']
                         created_at = cached_row['created_at']
                         
                         logger.info(f"✅ 캐시된 뉴스 요약 사용 (생성일: {created_at})")
                         
                         # 뉴스 목록은 캐시 사용 시 빈 리스트로 반환 (성능 최적화)
-                        return {
+                        return _enforce_trading_news_scope({
                             "total_count": 0,
                             "days": days,
                             "target_countries": target_countries,
@@ -810,7 +942,7 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
                             "news_summary": summary_text,
                             "briefing_text": briefing_text or "",  # Briefing text 추가 반환
                             "cached": True
-                        }
+                        })
                 except Exception as e:
                     logger.warning(f"뉴스 요약 캐시 확인 중 오류 (무시하고 진행): {e}")
 
@@ -820,14 +952,15 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
             # 지난 N일 기준으로 cutoff_time 설정
             cutoff_time = datetime.now() - timedelta(days=days)
             
-            cursor.execute("""
+            placeholders = ", ".join(["%s"] * len(target_countries))
+            cursor.execute(f"""
                 SELECT 
                     id, title, title_ko, link, country, country_ko, 
                     category, category_ko, description, description_ko, 
                     published_at, collected_at, source
                 FROM economic_news
                 WHERE published_at >= %s
-                  AND country IN (%s, %s, %s, %s, %s)
+                  AND country IN ({placeholders})
                 ORDER BY published_at DESC
             """, (cutoff_time, *target_countries))
             
@@ -854,16 +987,17 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
                     
                     # DB 저장
                     try:
+                        summary_text_for_store = f"{US_NEWS_SUMMARY_SCOPE_TAG} {news_summary}"
                         cursor.execute("""
                             INSERT INTO market_news_summaries (summary_text, briefing_text, created_at)
                             VALUES (%s, %s, %s)
-                        """, (news_summary, briefing_text, datetime.now()))
+                        """, (summary_text_for_store, briefing_text, datetime.now()))
                         conn.commit()
                         logger.info("✅ 뉴스 요약 및 Briefing DB 저장 완료")
                     except Exception as e:
                         logger.error(f"뉴스 요약 DB 저장 실패: {e}")
             
-            return {
+            return _enforce_trading_news_scope({
                 "total_count": len(news),
                 "days": days,
                 "target_countries": target_countries,
@@ -871,7 +1005,7 @@ def collect_economic_news(days: int = 20, include_summary: bool = True) -> Optio
                 "news_summary": news_summary,
                 "briefing_text": briefing_text,
                 "cached": False
-            }
+            })
             
     except Exception as e:
         logger.error(f"경제 뉴스 수집 및 분석 실패: {e}", exc_info=True)
@@ -1216,6 +1350,7 @@ def create_mp_analysis_prompt(
 {graph_context_block}
 
 ## 분석 지침:
+0. **투자 목적 고정:** 본 분석의 1차 목적은 **미국 주식(US Equities)** 자산 배분 최적화입니다. 해외 이벤트는 미국 주식(특히 지수/섹터 밸류에이션, 유동성, 금리 경로)에 미치는 파급효과가 명확할 때만 반영하세요.
 1. **정량 데이터(FRED) 절대 우선:** 뉴스 텍스트(심리)와 FRED 데이터(수치)가 상충할 경우(예: 뉴스에서는 실업률 하락을 강조하나, 데이터 추세는 상승인 경우), 반드시 **FRED 데이터의 수치와 추세**를 기준으로 판단하세요.
 2. **금리 커브(Yield Curve) 심층 해석:**
    - **Bear Steepening (장기 금리 상승 주도)** 현상이 관측될 경우, 이를 단순한 경기 회복 신호로 해석하지 말고 **'재정 건전성 우려' 또는 '인플레이션 고착화' 리스크**로 해석하여 보수적인 MP(MP-4 등) 선택의 근거로 삼으세요.
@@ -1603,6 +1738,8 @@ def _build_objective_constraints_from_config(
     objective = {
         "primary": "maximize_risk_adjusted_return",
         "secondary": ["capital_preservation", "reduce_whipsaw"],
+        "investment_focus": "US_equities",
+        "analysis_country_code": US_ANALYSIS_COUNTRY_CODE,
         "rebalance_threshold_percent": float(config.rebalancing.threshold),
         "cash_reserve_ratio": float(config.rebalancing.cash_reserve_ratio),
         "min_trade_amount": int(config.rebalancing.min_trade_amount),
@@ -1620,6 +1757,10 @@ def _build_objective_constraints_from_config(
         "min_confidence_to_switch_mp": DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP,
         "llm_model": config.llm.model,
         "llm_temperature": float(config.llm.temperature),
+        "enforce_us_equity_focus": True,
+        "block_chatbot_auto_ingestion": BLOCK_CHATBOT_AUTO_INGESTION,
+        "analysis_country_code": US_ANALYSIS_COUNTRY_CODE,
+        "analysis_country_name": US_ANALYSIS_COUNTRY_NAME,
     }
 
     if previous_decision and previous_decision.get("decision_date"):
@@ -1675,6 +1816,13 @@ def _apply_mp_quality_gate(
         )
         gated_decision["quality_gate_applied"] = True
         gated_decision["quality_gate_reason"] = gate_reason
+        existing_reasoning = str(gated_decision.get("reasoning") or "").strip()
+        gate_reasoning = f"Quality Gate 적용: {gate_reason}"
+        gated_decision["reasoning"] = (
+            f"{existing_reasoning}\n\n{gate_reasoning}"
+            if existing_reasoning
+            else gate_reasoning
+        )
 
     return gated_decision
 
@@ -1740,6 +1888,7 @@ def create_narrative_agent_prompt(
 
 # Reasoning Protocol (Hidden)
 - 뉴스/그래프 근거를 분리하고, 근거가 있는 주장만 남기세요.
+- 미국 주식시장(US equities)에 직접 영향을 주는 해석만 남기고, 타국 이슈는 미국 자산 전이 경로가 있을 때만 반영하세요.
 - 중간 추론은 출력하지 말고, JSON 1개만 반환하세요.
 
 # Input
@@ -2647,10 +2796,23 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         if fred_signals is None:
             logger.info("FRED 시그널 수집 중...")
             fred_signals = collect_fred_signals()
-        
+
+        if BLOCK_CHATBOT_AUTO_INGESTION and _is_chatbot_analysis_payload(economic_news):
+            logger.warning(
+                "[Phase0][BoundaryGuard] chatbot/qa payload detected. Ignore external economic_news and recollect for trading route."
+            )
+            economic_news = None
+
         if economic_news is None:
             logger.info("경제 뉴스 수집 중... (지난 20일, 특정 국가 필터)")
             economic_news = collect_economic_news(days=20)
+        economic_news = _enforce_trading_news_scope(economic_news)
+        logger.info(
+            "[Phase0][TradingScope] analyze_and_decide route=%s scope_version=%s analysis_country_code=%s",
+            TRADING_ANALYSIS_ROUTE,
+            TRADING_SCOPE_VERSION,
+            US_ANALYSIS_COUNTRY_CODE,
+        )
         
         # 이전 결정 조회
         previous_decision = get_previous_decision_with_sub_mp()
@@ -2675,6 +2837,7 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
             from service.graph.strategy import build_strategy_graph_context
             graph_context = build_strategy_graph_context(
                 time_range_days=7,
+                country=US_ANALYSIS_COUNTRY_CODE,
                 max_events=5,
                 max_stories=3,
                 max_evidences=5,
@@ -2851,6 +3014,7 @@ def collect_news_node(state: AIAnalysisState) -> AIAnalysisState:
         logger.info("2단계: 경제 뉴스 수집 중...")
         # include_summary=True로 변경하여 collect_economic_news 내부의 캐싱/요약 로직 사용
         economic_news = collect_economic_news(days=20, include_summary=True)
+        economic_news = _enforce_trading_news_scope(economic_news)
         if not economic_news:
             logger.warning("경제 뉴스 수집 실패 (None 반환)")
         return {
@@ -2935,6 +3099,7 @@ def prepare_context_node(state: AIAnalysisState) -> AIAnalysisState:
 
             graph_context = build_strategy_graph_context(
                 time_range_days=7,
+                country=US_ANALYSIS_COUNTRY_CODE,
                 max_events=5,
                 max_stories=3,
                 max_evidences=5,
@@ -3383,6 +3548,11 @@ def save_strategy_decision(
                 normalized_constraints.get("min_confidence_to_switch_mp", DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP)
             )
             decision_meta["quality_gate_applied"] = bool(normalized_mp_decision.get("quality_gate_applied", False))
+            decision_meta["analysis_route"] = TRADING_ANALYSIS_ROUTE
+            decision_meta["scope_version"] = TRADING_SCOPE_VERSION
+            decision_meta["analysis_country_code"] = US_ANALYSIS_COUNTRY_CODE
+            decision_meta["analysis_country_name"] = US_ANALYSIS_COUNTRY_NAME
+            decision_meta["block_chatbot_auto_ingestion"] = BLOCK_CHATBOT_AUTO_INGESTION
 
             quality_gate_reason = str(normalized_mp_decision.get("quality_gate_reason") or "").strip()
             if quality_gate_reason:
@@ -3414,6 +3584,11 @@ def save_strategy_decision(
 
             if risk_summary:
                 decision_meta["risk_summary"] = risk_summary
+
+            if isinstance(economic_news, dict):
+                scope_enforcement = economic_news.get("scope_enforcement")
+                if isinstance(scope_enforcement, dict):
+                    decision_meta["scope_enforcement"] = scope_enforcement
 
             if decision_meta:
                 save_data["decision_meta"] = decision_meta
@@ -3461,6 +3636,12 @@ def run_ai_analysis():
     try:
         logger.info("=" * 60)
         logger.info("AI 전략 분석 시작")
+        logger.info(
+            "[Phase0][TradingScope] run_ai_analysis route=%s scope_version=%s analysis_country_code=%s",
+            TRADING_ANALYSIS_ROUTE,
+            TRADING_SCOPE_VERSION,
+            US_ANALYSIS_COUNTRY_CODE,
+        )
         logger.info("=" * 60)
         
         # LangGraph 워크플로우 실행

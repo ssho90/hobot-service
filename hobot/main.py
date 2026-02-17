@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 import os
 import json
-from datetime import datetime
+import time
+import schedule
+from datetime import date, datetime
 
 load_dotenv(override=True)
 
@@ -24,9 +26,10 @@ from service.graph.rag.context_api import router as graph_rag_router
 from service.graph.rag.response_generator import router as graph_rag_answer_router
 from service.graph.monitoring.graphrag_metrics import router as graph_rag_metrics_router
 from service.graph.strategy.strategy_api import router as strategy_api_router
+from service.macro_trading.real_estate_api import router as real_estate_api_router
 # 서비스 시작 시 데이터베이스 초기화 (지연 초기화)
 # 실제 사용 시점에 자동으로 초기화됨
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 app = FastAPI(title="Hobot API", version="1.0.0")
 
@@ -36,6 +39,7 @@ api_router.include_router(graph_rag_router)
 api_router.include_router(graph_rag_answer_router)
 api_router.include_router(graph_rag_metrics_router)
 api_router.include_router(strategy_api_router)
+api_router.include_router(real_estate_api_router)
 
 # CORS 설정
 app.add_middleware(
@@ -2465,6 +2469,553 @@ async def delete_user(user_id: str, admin_user: dict = Depends(require_admin)):
     except Exception as e:
         logging.error(f"Error deleting user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/macro-indicators/status")
+async def get_macro_indicator_status(admin_user: dict = Depends(require_admin)):
+    """미국/한국 경제지표 수집 상태 조회 (admin 전용)"""
+    try:
+        from service.macro_trading.indicator_health import get_macro_indicator_health_snapshot
+
+        snapshot = get_macro_indicator_health_snapshot()
+        return {"status": "success", **snapshot}
+    except Exception as e:
+        logging.error(f"Error getting macro indicator status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        if value is None:
+            return default
+        return int(value)
+    except Exception:
+        return default
+
+
+def _to_iso_or_none(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    if hasattr(value, "isoformat"):
+        try:
+            return value.isoformat()
+        except Exception:
+            pass
+    return str(value)
+
+
+def _record_to_dict(record: Any) -> Dict[str, Any]:
+    if record is None:
+        return {}
+    if hasattr(record, "data"):
+        return record.data()
+    try:
+        return dict(record)
+    except Exception:
+        return {}
+
+
+def _build_neo4j_db_summary(database: str) -> Dict[str, Any]:
+    started_at = time.perf_counter()
+    try:
+        driver = get_neo4j_driver(database)
+        with driver.session() as session:
+            session.run("RETURN 1 AS ok").single()
+            node_row = _record_to_dict(session.run("MATCH (n) RETURN count(n) AS count").single())
+            rel_row = _record_to_dict(session.run("MATCH ()-[r]->() RETURN count(r) AS count").single())
+
+            label_rows = session.run(
+                """
+                UNWIND ['Document', 'Event', 'Fact', 'Claim', 'Evidence', 'Entity', 'EconomicIndicator', 'MacroTheme'] AS label
+                CALL {
+                  WITH label
+                  MATCH (n)
+                  WHERE label IN labels(n)
+                  RETURN count(n) AS cnt
+                }
+                RETURN label, cnt
+                """
+            )
+            relationship_rows = session.run(
+                """
+                UNWIND ['MENTIONS', 'ABOUT_THEME', 'AFFECTS', 'HAS_EVIDENCE', 'SUPPORTS', 'CAUSES', 'ABOUT', 'BELONGS_TO'] AS rel_type
+                CALL {
+                  WITH rel_type
+                  MATCH ()-[r]->()
+                  WHERE type(r) = rel_type
+                  RETURN count(r) AS cnt
+                }
+                RETURN rel_type, cnt
+                """
+            )
+
+            label_counts: Dict[str, int] = {}
+            for row in label_rows:
+                label_name = row.get("label")
+                label_counts[label_name] = _safe_int(row.get("cnt"))
+
+            relationship_counts: Dict[str, int] = {}
+            for row in relationship_rows:
+                rel_type = row.get("rel_type")
+                relationship_counts[rel_type] = _safe_int(row.get("cnt"))
+
+        return {
+            "database": database,
+            "status": "success",
+            "message": "connected",
+            "response_ms": round((time.perf_counter() - started_at) * 1000, 1),
+            "node_count": _safe_int(node_row.get("count")),
+            "relationship_count": _safe_int(rel_row.get("count")),
+            "label_counts": label_counts,
+            "relationship_type_counts": relationship_counts,
+        }
+    except Exception as exc:
+        logging.error("Neo4j summary failed (%s): %s", database, exc, exc_info=True)
+        return {
+            "database": database,
+            "status": "error",
+            "message": str(exc),
+            "response_ms": round((time.perf_counter() - started_at) * 1000, 1),
+            "node_count": 0,
+            "relationship_count": 0,
+            "label_counts": {},
+            "relationship_type_counts": {},
+        }
+
+
+def _collect_macro_graph_extraction_summary() -> Dict[str, Any]:
+    try:
+        driver = get_neo4j_driver("macro")
+        with driver.session() as session:
+            summary_row = _record_to_dict(
+                session.run(
+                    """
+                    MATCH (d:Document)
+                    RETURN count(d) AS total_documents,
+                           count(CASE WHEN d.extraction_status = 'success' THEN 1 END) AS success_documents,
+                           count(CASE WHEN d.extraction_status = 'failed' THEN 1 END) AS failed_documents,
+                           count(CASE WHEN d.extraction_status = 'pending' THEN 1 END) AS pending_status_documents,
+                           count(CASE WHEN d.extraction_status IS NULL THEN 1 END) AS null_status_documents,
+                           count(CASE
+                                  WHEN d.extraction_status = 'failed'
+                                       AND (
+                                         d.extraction_updated_at IS NULL
+                                         OR d.extraction_updated_at <= datetime() - duration({minutes: 180})
+                                       )
+                                  THEN 1 END
+                           ) AS retryable_failed_documents,
+                           count(CASE
+                                  WHEN d.extraction_status IS NULL OR d.extraction_status = 'pending'
+                                  THEN 1 END
+                           ) AS pending_candidates,
+                           count(CASE
+                                  WHEN d.extraction_updated_at >= datetime() - duration({hours: 24})
+                                  THEN 1 END
+                           ) AS extracted_last_24h,
+                           max(d.published_at) AS latest_published_at,
+                           max(d.extraction_updated_at) AS latest_extraction_updated_at
+                    """
+                ).single()
+            )
+
+            recent_rows = []
+            for row in session.run(
+                """
+                MATCH (d:Document)
+                RETURN d.doc_id AS doc_id,
+                       d.title AS title,
+                       d.country_code AS country_code,
+                       d.category AS category,
+                       d.extraction_status AS extraction_status,
+                       d.extraction_last_error AS extraction_last_error,
+                       d.published_at AS published_at,
+                       d.extraction_updated_at AS extraction_updated_at
+                ORDER BY coalesce(d.extraction_updated_at, d.published_at) DESC
+                LIMIT 20
+                """
+            ):
+                recent_rows.append(
+                    {
+                        "doc_id": row.get("doc_id"),
+                        "title": row.get("title"),
+                        "country_code": row.get("country_code"),
+                        "category": row.get("category"),
+                        "extraction_status": row.get("extraction_status") or "unknown",
+                        "extraction_last_error": row.get("extraction_last_error"),
+                        "published_at": _to_iso_or_none(row.get("published_at")),
+                        "extraction_updated_at": _to_iso_or_none(row.get("extraction_updated_at")),
+                    }
+                )
+
+            failed_rows = []
+            for row in session.run(
+                """
+                MATCH (d:Document)
+                WHERE d.extraction_status = 'failed'
+                RETURN d.doc_id AS doc_id,
+                       d.title AS title,
+                       d.extraction_last_error AS extraction_last_error,
+                       d.extraction_updated_at AS extraction_updated_at
+                ORDER BY d.extraction_updated_at DESC
+                LIMIT 10
+                """
+            ):
+                failed_rows.append(
+                    {
+                        "doc_id": row.get("doc_id"),
+                        "title": row.get("title"),
+                        "extraction_last_error": row.get("extraction_last_error"),
+                        "extraction_updated_at": _to_iso_or_none(row.get("extraction_updated_at")),
+                    }
+                )
+
+        return {
+            "status": "success",
+            "total_documents": _safe_int(summary_row.get("total_documents")),
+            "success_documents": _safe_int(summary_row.get("success_documents")),
+            "failed_documents": _safe_int(summary_row.get("failed_documents")),
+            "pending_status_documents": _safe_int(summary_row.get("pending_status_documents")),
+            "null_status_documents": _safe_int(summary_row.get("null_status_documents")),
+            "pending_candidates": _safe_int(summary_row.get("pending_candidates")),
+            "retryable_failed_documents": _safe_int(summary_row.get("retryable_failed_documents")),
+            "extracted_last_24h": _safe_int(summary_row.get("extracted_last_24h")),
+            "latest_published_at": _to_iso_or_none(summary_row.get("latest_published_at")),
+            "latest_extraction_updated_at": _to_iso_or_none(summary_row.get("latest_extraction_updated_at")),
+            "recent_documents": recent_rows,
+            "recent_failed_documents": failed_rows,
+        }
+    except Exception as exc:
+        logging.error("Macro graph extraction summary failed: %s", exc, exc_info=True)
+        return {
+            "status": "error",
+            "message": str(exc),
+            "total_documents": 0,
+            "success_documents": 0,
+            "failed_documents": 0,
+            "pending_status_documents": 0,
+            "null_status_documents": 0,
+            "pending_candidates": 0,
+            "retryable_failed_documents": 0,
+            "extracted_last_24h": 0,
+            "latest_published_at": None,
+            "latest_extraction_updated_at": None,
+            "recent_documents": [],
+            "recent_failed_documents": [],
+        }
+
+
+@api_router.get("/admin/neo4j-monitoring")
+async def get_admin_neo4j_monitoring(admin_user: dict = Depends(require_admin)):
+    """
+    Admin Neo4j/수집 파이프라인 모니터링 스냅샷.
+    """
+    try:
+        from service.database.db import get_db_connection
+        from service.macro_trading.indicator_health import get_macro_indicator_health_snapshot
+
+        news_summary: Dict[str, Any] = {
+            "total_news": 0,
+            "news_last_24h": 0,
+            "news_last_7d": 0,
+            "collected_last_24h": 0,
+            "last_published_at": None,
+            "last_collected_at": None,
+            "by_country_last_7d": [],
+        }
+        fred_summary: Dict[str, Any] = {
+            "total_rows": 0,
+            "indicator_count": 0,
+            "rows_last_24h": 0,
+            "rows_last_7d": 0,
+            "last_observation_date": None,
+            "last_collected_at": None,
+            "daily_rows_last_7d": [],
+        }
+
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    """
+                    SELECT count(*) AS total_news,
+                           sum(CASE WHEN published_at >= NOW() - INTERVAL 1 DAY THEN 1 ELSE 0 END) AS news_last_24h,
+                           sum(CASE WHEN published_at >= NOW() - INTERVAL 7 DAY THEN 1 ELSE 0 END) AS news_last_7d,
+                           sum(CASE WHEN collected_at >= NOW() - INTERVAL 1 DAY THEN 1 ELSE 0 END) AS collected_last_24h,
+                           max(published_at) AS last_published_at,
+                           max(collected_at) AS last_collected_at
+                    FROM economic_news
+                    """
+                )
+                row = cursor.fetchone() or {}
+                news_summary.update(
+                    {
+                        "total_news": _safe_int(row.get("total_news")),
+                        "news_last_24h": _safe_int(row.get("news_last_24h")),
+                        "news_last_7d": _safe_int(row.get("news_last_7d")),
+                        "collected_last_24h": _safe_int(row.get("collected_last_24h")),
+                        "last_published_at": _to_iso_or_none(row.get("last_published_at")),
+                        "last_collected_at": _to_iso_or_none(row.get("last_collected_at")),
+                    }
+                )
+
+                cursor.execute(
+                    """
+                    SELECT COALESCE(country, 'Unknown') AS country,
+                           count(*) AS count
+                    FROM economic_news
+                    WHERE published_at >= NOW() - INTERVAL 7 DAY
+                    GROUP BY COALESCE(country, 'Unknown')
+                    ORDER BY count DESC
+                    LIMIT 12
+                    """
+                )
+                news_summary["by_country_last_7d"] = [
+                    {"country": row.get("country"), "count": _safe_int(row.get("count"))}
+                    for row in cursor.fetchall()
+                ]
+
+                cursor.execute(
+                    """
+                    SELECT count(*) AS total_rows,
+                           count(DISTINCT indicator_code) AS indicator_count,
+                           sum(CASE WHEN created_at >= NOW() - INTERVAL 1 DAY THEN 1 ELSE 0 END) AS rows_last_24h,
+                           sum(CASE WHEN created_at >= NOW() - INTERVAL 7 DAY THEN 1 ELSE 0 END) AS rows_last_7d,
+                           max(date) AS last_observation_date,
+                           max(created_at) AS last_collected_at
+                    FROM fred_data
+                    """
+                )
+                row = cursor.fetchone() or {}
+                fred_summary.update(
+                    {
+                        "total_rows": _safe_int(row.get("total_rows")),
+                        "indicator_count": _safe_int(row.get("indicator_count")),
+                        "rows_last_24h": _safe_int(row.get("rows_last_24h")),
+                        "rows_last_7d": _safe_int(row.get("rows_last_7d")),
+                        "last_observation_date": _to_iso_or_none(row.get("last_observation_date")),
+                        "last_collected_at": _to_iso_or_none(row.get("last_collected_at")),
+                    }
+                )
+
+                cursor.execute(
+                    """
+                    SELECT DATE(created_at) AS day, count(*) AS rows
+                    FROM fred_data
+                    WHERE created_at >= NOW() - INTERVAL 7 DAY
+                    GROUP BY DATE(created_at)
+                    ORDER BY day DESC
+                    """
+                )
+                fred_summary["daily_rows_last_7d"] = [
+                    {"day": _to_iso_or_none(row.get("day")), "rows": _safe_int(row.get("rows"))}
+                    for row in cursor.fetchall()
+                ]
+        except Exception as db_exc:
+            logging.error("Admin monitoring DB summary failed: %s", db_exc, exc_info=True)
+            news_summary["status"] = "error"
+            news_summary["message"] = str(db_exc)
+            fred_summary["status"] = "error"
+            fred_summary["message"] = str(db_exc)
+
+        indicator_snapshot = get_macro_indicator_health_snapshot()
+        stale_or_missing_indicators = [
+            {
+                "code": item.get("code"),
+                "name": item.get("name"),
+                "country": item.get("country"),
+                "health": item.get("health"),
+                "lag_hours": item.get("lag_hours"),
+                "expected_interval_hours": item.get("expected_interval_hours"),
+                "last_collected_at": item.get("last_collected_at"),
+                "note": item.get("note"),
+            }
+            for item in indicator_snapshot.get("indicators", [])
+            if item.get("health") in {"stale", "missing"}
+        ]
+        stale_or_missing_indicators.sort(
+            key=lambda item: (
+                0 if item.get("health") == "stale" else 1,
+                -(item.get("lag_hours") or 0),
+                item.get("code") or "",
+            )
+        )
+
+        neo4j_architecture = _build_neo4j_db_summary("architecture")
+        neo4j_macro = _build_neo4j_db_summary("macro")
+        macro_extraction = _collect_macro_graph_extraction_summary()
+
+        scheduler_jobs: List[Dict[str, Any]] = []
+        try:
+            for job in schedule.get_jobs():
+                scheduler_jobs.append(
+                    {
+                        "tags": sorted(list(job.tags)) if job.tags else [],
+                        "interval": _safe_int(getattr(job, "interval", 0)),
+                        "unit": str(getattr(job, "unit", "")),
+                        "next_run": _to_iso_or_none(getattr(job, "next_run", None)),
+                        "last_run": _to_iso_or_none(getattr(job, "last_run", None)),
+                        "at_time": str(getattr(job, "at_time", "")) if getattr(job, "at_time", None) else None,
+                    }
+                )
+        except Exception as schedule_exc:
+            logging.warning("Scheduler job snapshot failed: %s", schedule_exc)
+
+        flow_status_news = "healthy" if news_summary.get("news_last_24h", 0) > 0 else "warning"
+        flow_status_graph = (
+            "error"
+            if macro_extraction.get("status") == "error"
+            else ("warning" if macro_extraction.get("pending_candidates", 0) > 0 else "healthy")
+        )
+        flow_status_fred = "healthy" if fred_summary.get("rows_last_24h", 0) > 0 else "warning"
+        stale_count = len([x for x in stale_or_missing_indicators if x.get("health") == "stale"])
+        missing_count = len([x for x in stale_or_missing_indicators if x.get("health") == "missing"])
+        flow_status_indicator = "warning" if (stale_count + missing_count) > 0 else "healthy"
+        flow_status_neo4j = (
+            "healthy"
+            if neo4j_architecture.get("status") == "success" and neo4j_macro.get("status") == "success"
+            else "error"
+        )
+
+        news_reason = None
+        if flow_status_news != "healthy":
+            news_reason = (
+                "최근 24시간 기준 발행 뉴스 수가 0건입니다. "
+                f"(24h={news_summary.get('news_last_24h', 0)}, 7d={news_summary.get('news_last_7d', 0)})"
+            )
+
+        graph_sync_reason = None
+        if flow_status_graph == "error":
+            graph_sync_reason = (
+                f"Macro Graph 추출 상태 오류: {macro_extraction.get('message') or 'unknown error'}"
+            )
+        elif flow_status_graph == "warning":
+            graph_sync_reason = (
+                "미처리/재시도 대상 문서가 남아 있습니다. "
+                f"(pending={macro_extraction.get('pending_candidates', 0)}, "
+                f"retryable_failed={macro_extraction.get('retryable_failed_documents', 0)})"
+            )
+
+        llm_extraction_reason = None
+        if flow_status_graph == "error":
+            llm_extraction_reason = (
+                f"LLM 추출 파이프라인 오류: {macro_extraction.get('message') or 'unknown error'}"
+            )
+        elif flow_status_graph == "warning":
+            llm_extraction_reason = (
+                "백로그 추출이 아직 완료되지 않았습니다. "
+                f"(success={macro_extraction.get('success_documents', 0)}, "
+                f"failed={macro_extraction.get('failed_documents', 0)}, "
+                f"pending={macro_extraction.get('pending_candidates', 0)})"
+            )
+
+        fred_reason = None
+        if flow_status_fred != "healthy":
+            fred_reason = (
+                "최근 24시간 fred_data 적재 행이 0건입니다. "
+                f"(24h={fred_summary.get('rows_last_24h', 0)}, 7d={fred_summary.get('rows_last_7d', 0)})"
+            )
+
+        indicator_reason = None
+        if flow_status_indicator != "healthy":
+            indicator_reason = (
+                "수집 주기 대비 지연/미수집 지표가 존재합니다. "
+                f"(stale={stale_count}, missing={missing_count})"
+            )
+
+        neo4j_reason = None
+        if flow_status_neo4j != "healthy":
+            neo4j_reason = (
+                "Neo4j 연결/쿼리 점검 필요. "
+                f"(macro={neo4j_macro.get('status')}:{neo4j_macro.get('message')}, "
+                f"architecture={neo4j_architecture.get('status')}:{neo4j_architecture.get('message')})"
+            )
+
+        pipeline_flow = [
+            {
+                "id": "news_collection",
+                "title": "뉴스 수집",
+                "description": "TradingEconomics Stream -> MySQL economic_news",
+                "schedule": "매 1시간",
+                "status": flow_status_news,
+                "metric": f"24h {news_summary.get('news_last_24h', 0)}건 / 7d {news_summary.get('news_last_7d', 0)}건",
+                "reason": news_reason,
+            },
+            {
+                "id": "graph_sync",
+                "title": "문서 그래프 동기화",
+                "description": "MySQL news -> Neo4j Document + ABOUT_THEME + MENTIONS",
+                "schedule": "매 2시간",
+                "status": flow_status_graph,
+                "metric": f"Document {macro_extraction.get('total_documents', 0)}개",
+                "reason": graph_sync_reason,
+            },
+            {
+                "id": "llm_extraction",
+                "title": "LLM 추출 적재",
+                "description": "Document -> Event/Fact/Claim/Evidence/AFFECTS",
+                "schedule": "백로그 배치",
+                "status": flow_status_graph,
+                "metric": f"pending {macro_extraction.get('pending_candidates', 0)} / retryable_failed {macro_extraction.get('retryable_failed_documents', 0)}",
+                "reason": llm_extraction_reason,
+            },
+            {
+                "id": "fred_ingestion",
+                "title": "FRED 정량 수집",
+                "description": "FRED API -> MySQL fred_data",
+                "schedule": "일별 스케줄",
+                "status": flow_status_fred,
+                "metric": f"24h {fred_summary.get('rows_last_24h', 0)}행 / indicator {fred_summary.get('indicator_count', 0)}개",
+                "reason": fred_reason,
+            },
+            {
+                "id": "indicator_health",
+                "title": "지표 상태 평가",
+                "description": "수집 주기 대비 지연/미수집 감시",
+                "schedule": "조회 시 실시간",
+                "status": flow_status_indicator,
+                "metric": f"stale {stale_count} / missing {missing_count}",
+                "reason": indicator_reason,
+            },
+            {
+                "id": "graph_serving",
+                "title": "Graph 질의 제공",
+                "description": "Ontology/Macro Graph 질의 처리",
+                "schedule": "API 요청 시",
+                "status": flow_status_neo4j,
+                "metric": f"macro {neo4j_macro.get('status')} / architecture {neo4j_architecture.get('status')}",
+                "reason": neo4j_reason,
+            },
+        ]
+
+        return {
+            "status": "success",
+            "generated_at": datetime.now().isoformat(),
+            "neo4j": {
+                "architecture": neo4j_architecture,
+                "macro": neo4j_macro,
+            },
+            "macro_graph": {
+                "extraction": macro_extraction,
+            },
+            "ingestion": {
+                "news": news_summary,
+                "fred": fred_summary,
+                "indicators": {
+                    "summary": indicator_snapshot.get("summary", {}),
+                    "stale_or_missing_count": len(stale_or_missing_indicators),
+                    "stale_or_missing_indicators": stale_or_missing_indicators[:20],
+                },
+            },
+            "scheduler": {
+                "jobs": scheduler_jobs,
+                "pipeline_flow": pipeline_flow,
+            },
+        }
+    except Exception as exc:
+        logging.error("Error getting admin neo4j monitoring snapshot: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 # 포트폴리오 관리 API (admin 전용)
 @api_router.get("/admin/portfolios/model-portfolios")

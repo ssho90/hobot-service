@@ -68,6 +68,13 @@ class TestPhaseDStatePersistence(unittest.TestCase):
         self.assertIn("DOMINANT_THEME", joined_queries)
         self.assertIn("HAS_SIGNAL", joined_queries)
 
+        signal_read_query = next(
+            query for query, _params in client.read_calls if "MATCH (i:EconomicIndicator)" in query and "CALL {" in query
+        )
+        self.assertIn("coalesce(f.effective_date, f.obs_date)", signal_read_query)
+        self.assertIn("coalesce(f.published_at", signal_read_query)
+        self.assertIn("coalesce(f.as_of_date, f.obs_date)", signal_read_query)
+
     def test_analysis_run_writer_persists_run_and_links(self):
         client = StubNeo4jClient()
         writer = AnalysisRunWriter(neo4j_client=client)
@@ -100,4 +107,3 @@ class TestPhaseDStatePersistence(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

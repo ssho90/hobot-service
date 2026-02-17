@@ -39,6 +39,7 @@ class PhaseCWeeklyBatchRunner:
         weight_windows: Iterable[int] = (90, 180),
         correlation_window_days: int = 180,
         story_window_days: int = 14,
+        run_country_backfill: bool = True,
     ) -> Dict[str, Any]:
         as_of_value = as_of_date or date.today()
         logger.info("[PhaseCWeeklyBatch] start as_of=%s", as_of_value.isoformat())
@@ -61,7 +62,13 @@ class PhaseCWeeklyBatchRunner:
             min_story_count=10,
             as_of_date=as_of_value,
         )
-        metrics_result = self.metrics_collector.collect_summary()
+        country_backfill_result: Dict[str, Any] = {"skipped": True}
+        if run_country_backfill:
+            country_backfill_result = self.metrics_collector.backfill_country_codes()
+        metrics_result = self.metrics_collector.collect_summary(as_of_date=as_of_value)
+        country_quality_snapshot = self.metrics_collector.persist_weekly_country_quality_snapshot(
+            snapshot_date=as_of_value,
+        )
 
         final_result = {
             "as_of": as_of_value.isoformat(),
@@ -69,7 +76,9 @@ class PhaseCWeeklyBatchRunner:
             "affects_recalc": affects_result,
             "correlation": correlation_result,
             "story_cluster": story_result,
+            "country_backfill": country_backfill_result,
             "metrics": metrics_result,
+            "country_quality_snapshot": country_quality_snapshot,
         }
         logger.info("[PhaseCWeeklyBatch] complete")
         return final_result

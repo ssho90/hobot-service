@@ -8,8 +8,12 @@ from datetime import date, timedelta
 from typing import Optional, Dict, Any, List
 
 from service.graph.neo4j_client import get_neo4j_client
+from service.graph.normalization.country_mapping import normalize_country
 
 logger = logging.getLogger(__name__)
+TRADING_SCOPE_COUNTRY_CODE = "US"
+TRADING_SCOPE_COUNTRY_NAME = "United States"
+TRADING_SCOPE_VERSION = "US_EQ_TRADING_V1"
 
 
 class StrategyGraphContextProvider:
@@ -32,6 +36,38 @@ class StrategyGraphContextProvider:
                 logger.warning(f"[StrategyGraphContext] Neo4j 클라이언트 초기화 실패: {e}")
                 self.neo4j_client = None
         return self.neo4j_client
+
+    @staticmethod
+    def _resolve_country_filter(country: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+        """국가명/코드 입력을 country + country_code 필터로 정규화"""
+        if not country:
+            return None, None
+        country_value = country.strip()
+        if not country_value:
+            return None, None
+        country_code = normalize_country(country_value)
+        return country_value, country_code
+
+    @staticmethod
+    def _enforce_trading_scope_country(country: Optional[str]) -> tuple[str, str]:
+        """
+        전략(트레이딩) 컨텍스트는 US scope로 강제
+
+        - 입력이 KR/기타 국가거나 비어 있어도 US로 고정
+        - country 필드는 legacy 호환을 위해 국가명으로 사용
+        """
+        country_value, country_code = StrategyGraphContextProvider._resolve_country_filter(country)
+
+        if country_code == TRADING_SCOPE_COUNTRY_CODE:
+            return TRADING_SCOPE_COUNTRY_NAME, TRADING_SCOPE_COUNTRY_CODE
+
+        if country:
+            logger.warning(
+                "[StrategyGraphContext] Non-US country '%s' requested for trading context; force to US scope.",
+                country,
+            )
+
+        return TRADING_SCOPE_COUNTRY_NAME, TRADING_SCOPE_COUNTRY_CODE
 
     def build_strategy_context(
         self,
@@ -66,20 +102,28 @@ class StrategyGraphContextProvider:
 
             as_of_date = as_of_date or date.today()
             start_date = as_of_date - timedelta(days=time_range_days)
+            country_value, country_code = self._enforce_trading_scope_country(country)
+            logger.info(
+                "[StrategyGraphContext] scope_version=%s country_code=%s country_name=%s requested_country=%s",
+                TRADING_SCOPE_VERSION,
+                country_code,
+                country_value,
+                country,
+            )
 
             # 1. 최근 주요 이벤트 조회
             events = self._fetch_recent_events(
-                client, start_date, as_of_date, country, max_events
+                client, start_date, as_of_date, country_value, country_code, max_events
             )
 
             # 2. 최근 스토리 조회
             stories = self._fetch_recent_stories(
-                client, start_date, as_of_date, max_stories
+                client, start_date, as_of_date, country_value, country_code, max_stories
             )
 
             # 3. 핵심 Evidence 조회 (테마 관련)
             evidences = self._fetch_relevant_evidences(
-                client, start_date, as_of_date, theme_ids, max_evidences
+                client, start_date, as_of_date, country_value, country_code, theme_ids, max_evidences
             )
 
             # 4. 컨텍스트 블록 조립
@@ -107,6 +151,7 @@ class StrategyGraphContextProvider:
         start_date: date,
         end_date: date,
         country: Optional[str],
+        country_code: Optional[str],
         limit: int,
     ) -> List[Dict[str, Any]]:
         """최근 주요 이벤트 조회"""
@@ -117,15 +162,19 @@ class StrategyGraphContextProvider:
             WHERE e.event_time IS NOT NULL
               AND date(e.event_time) >= date($start_date)
               AND date(e.event_time) <= date($end_date)
-              AND ($country IS NULL OR e.country = $country)
+              AND (
+                $country IS NULL
+                OR e.country = $country
+                OR ($country_code IS NOT NULL AND e.country_code = $country_code)
+              )
             OPTIONAL MATCH (e)<-[:MENTIONS]-(d:Document)
             WITH e, count(DISTINCT d) AS doc_count
             ORDER BY doc_count DESC, e.event_time DESC
             LIMIT $limit
             RETURN e.event_id AS event_id,
                    e.summary AS summary,
-                   e.event_type AS event_type,
-                   e.country AS country,
+                   coalesce(e.event_type, e.type, "other") AS event_type,
+                   coalesce(e.country_code, e.country) AS country,
                    e.event_time AS event_time,
                    doc_count
             """
@@ -133,6 +182,7 @@ class StrategyGraphContextProvider:
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
                 "country": country,
+                "country_code": country_code,
                 "limit": limit,
             })
             return [dict(row) for row in rows]
@@ -145,6 +195,8 @@ class StrategyGraphContextProvider:
         client,
         start_date: date,
         end_date: date,
+        country: Optional[str],
+        country_code: Optional[str],
         limit: int,
     ) -> List[Dict[str, Any]]:
         """최근 스토리 조회"""
@@ -155,8 +207,14 @@ class StrategyGraphContextProvider:
             WHERE s.story_date IS NOT NULL
               AND date(s.story_date) >= date($start_date)
               AND date(s.story_date) <= date($end_date)
-            OPTIONAL MATCH (s)-[:AGGREGATES]->(d:Document)
+            OPTIONAL MATCH (s)-[:CONTAINS|AGGREGATES]->(d:Document)
+            WHERE (
+                $country IS NULL
+                OR d.country = $country
+                OR ($country_code IS NOT NULL AND d.country_code = $country_code)
+            )
             WITH s, count(DISTINCT d) AS doc_count
+            WHERE $country IS NULL OR doc_count > 0
             ORDER BY doc_count DESC, s.story_date DESC
             LIMIT $limit
             RETURN s.story_id AS story_id,
@@ -168,6 +226,8 @@ class StrategyGraphContextProvider:
             rows = client.run_read(query, {
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
+                "country": country,
+                "country_code": country_code,
                 "limit": limit,
             })
             return [dict(row) for row in rows]
@@ -180,6 +240,8 @@ class StrategyGraphContextProvider:
         client,
         start_date: date,
         end_date: date,
+        country: Optional[str],
+        country_code: Optional[str],
         theme_ids: Optional[List[str]],
         limit: int,
     ) -> List[Dict[str, Any]]:
@@ -189,14 +251,22 @@ class StrategyGraphContextProvider:
             if theme_ids:
                 query = """
                 // phase_e_strategy_themed_evidences
-                MATCH (ev:Evidence)-[:SUPPORTS]->(target)
-                WHERE (target:MacroTheme AND target.theme_id IN $theme_ids)
-                   OR (target:Event)-[:ABOUT_THEME]->(:MacroTheme {theme_id: $theme_ids[0]})
-                MATCH (ev)<-[:HAS_EVIDENCE]-(d:Document)
+                MATCH (ev:Evidence)<-[:HAS_EVIDENCE]-(d:Document)
                 WHERE d.published_at IS NOT NULL
                   AND date(d.published_at) >= date($start_date)
                   AND date(d.published_at) <= date($end_date)
-                RETURN ev.evidence_id AS evidence_id,
+                  AND (
+                    $country IS NULL
+                    OR d.country = $country
+                    OR ($country_code IS NOT NULL AND d.country_code = $country_code)
+                  )
+                OPTIONAL MATCH (d)-[:ABOUT_THEME]->(doc_theme:MacroTheme)
+                OPTIONAL MATCH (ev)-[:SUPPORTS]->(:Claim)-[:ABOUT]->(:Event)-[:ABOUT_THEME]->(event_theme:MacroTheme)
+                WITH ev, d,
+                     [theme_id IN (collect(DISTINCT doc_theme.theme_id) + collect(DISTINCT event_theme.theme_id))
+                      WHERE theme_id IS NOT NULL] AS matched_theme_ids
+                WHERE any(theme_id IN matched_theme_ids WHERE theme_id IN $theme_ids)
+                RETURN DISTINCT ev.evidence_id AS evidence_id,
                        ev.text AS text,
                        d.doc_id AS doc_id,
                        d.title AS doc_title,
@@ -208,6 +278,8 @@ class StrategyGraphContextProvider:
                 rows = client.run_read(query, {
                     "start_date": start_date.isoformat(),
                     "end_date": end_date.isoformat(),
+                    "country": country,
+                    "country_code": country_code,
                     "theme_ids": theme_ids,
                     "limit": limit,
                 })
@@ -219,6 +291,11 @@ class StrategyGraphContextProvider:
                 WHERE d.published_at IS NOT NULL
                   AND date(d.published_at) >= date($start_date)
                   AND date(d.published_at) <= date($end_date)
+                  AND (
+                    $country IS NULL
+                    OR d.country = $country
+                    OR ($country_code IS NOT NULL AND d.country_code = $country_code)
+                  )
                 RETURN ev.evidence_id AS evidence_id,
                        ev.text AS text,
                        d.doc_id AS doc_id,
@@ -231,6 +308,8 @@ class StrategyGraphContextProvider:
                 rows = client.run_read(query, {
                     "start_date": start_date.isoformat(),
                     "end_date": end_date.isoformat(),
+                    "country": country,
+                    "country_code": country_code,
                     "limit": limit,
                 })
 

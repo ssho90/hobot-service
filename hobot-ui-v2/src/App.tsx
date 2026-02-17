@@ -7,9 +7,12 @@ const RegisterPage = lazy(() => import('./components/RegisterPage'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const AboutPage = lazy(() => import('./components/AboutPage').then((module) => ({ default: module.AboutPage })));
 const TradingDashboard = lazy(() => import('./components/TradingDashboard'));
+const RealEstatePage = lazy(() => import('./components/RealEstatePage'));
 const AdminUserManagement = lazy(() => import('./components/admin/AdminUserManagement').then((module) => ({ default: module.AdminUserManagement })));
 const AdminLogManagement = lazy(() => import('./components/admin/AdminLogManagement').then((module) => ({ default: module.AdminLogManagement })));
 const AdminLLMMonitoring = lazy(() => import('./components/admin/AdminLLMMonitoring').then((module) => ({ default: module.AdminLLMMonitoring })));
+const AdminIndicatorManagement = lazy(() => import('./components/admin/AdminIndicatorManagement').then((module) => ({ default: module.AdminIndicatorManagement })));
+const AdminNeo4jMonitoring = lazy(() => import('./components/admin/AdminNeo4jMonitoring').then((module) => ({ default: module.AdminNeo4jMonitoring })));
 const AdminRebalancing = lazy(() => import('./components/admin/AdminRebalancing').then((module) => ({ default: module.AdminRebalancing })));
 const AdminFileUpload = lazy(() => import('./components/admin/AdminFileUpload').then((module) => ({ default: module.AdminFileUpload })));
 const OntologyPage = lazy(() => import('./components/OntologyPage'));
@@ -35,10 +38,13 @@ const AppLayout: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/trading" element={<TradingDashboard />} />
+          <Route path="/real-estate" element={<RealEstatePage />} />
           <Route path="/admin" element={<Navigate to="/admin/users" replace />} />
           <Route path="/admin/users" element={<AdminUserManagement />} />
           <Route path="/admin/logs" element={<AdminLogManagement />} />
           <Route path="/admin/llm" element={<AdminLLMMonitoring />} />
+          <Route path="/admin/indicators" element={<AdminIndicatorManagement />} />
+          <Route path="/admin/neo4j" element={<AdminNeo4jMonitoring />} />
           <Route path="/admin/rebalancing" element={<AdminRebalancing />} />
           <Route path="/admin/files" element={<AdminFileUpload />} />
           <Route path="/ontology/architecture" element={<OntologyPage mode="architecture" />} />

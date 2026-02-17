@@ -5,11 +5,13 @@ Phase A: 그래프 데이터 관리
 from .neo4j_client import Neo4jClient, get_neo4j_client
 from .seed_data import run_all_seeds, seed_constraints, seed_themes, seed_indicators, seed_entities, verify_seed
 from .indicator_loader import IndicatorLoader, sync_all_indicators
+from .real_estate_loader import RealEstateSummaryLoader, sync_kr_real_estate_monthly_summary
 from .derived_feature_calc import DerivedFeatureCalculator, calculate_all_derived_features
 from .news_loader import (
     NewsLoader,
     sync_news,
     sync_news_with_extraction,
+    sync_news_with_extraction_backlog,
     backfill_news_extractions,
     backfill_events_and_affects,
 )
@@ -43,6 +45,8 @@ __all__ = [
     # Indicator Loader (A-5)
     "IndicatorLoader",
     "sync_all_indicators",
+    "RealEstateSummaryLoader",
+    "sync_kr_real_estate_monthly_summary",
     # Derived Features (A-6)
     "DerivedFeatureCalculator",
     "calculate_all_derived_features",
@@ -50,6 +54,7 @@ __all__ = [
     "NewsLoader",
     "sync_news",
     "sync_news_with_extraction",
+    "sync_news_with_extraction_backlog",
     "backfill_news_extractions",
     "backfill_events_and_affects",
     # Phase C

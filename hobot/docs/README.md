@@ -14,6 +14,7 @@
 거시경제 기반 자동매매 Agent 관련 문서
 - `workflow_review.md` - Workflow 검토 및 의사결정 사항
 - `implementation_plan.md` - 구현 계획서 및 작업 추적
+- `global_ontology_macro_graph_master_plan.md` - 미국·한국(US/KR) 경제·부동산 Ontology/Macro Graph 구축 마스터 플랜
 
 ### 🗄️ database/
 데이터베이스 설정 및 마이그레이션 가이드
@@ -32,4 +33,3 @@
 ---
 
 **마지막 업데이트**: 2024-12-19
-

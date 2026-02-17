@@ -556,18 +556,19 @@ class NewsCollector:
                 logger.info(f"{hours}시간 이내의 뉴스가 없습니다")
                 return 0, 0
             
-            # 4. 번역 (순차 처리)
-            logger.info("뉴스 번역 시작 (순차 처리)...")
-            for i, item in enumerate(recent_news):
-                try:
-                    logger.info(f"[{i+1}/{len(recent_news)}] 번역 중: {item.get('title')[:30]}...")
-                    translated = self._translate_item(item)
-                    item.update(translated)
-                    # API 속도 제한 고려하여 약간의 지연 (필요시)
-                    time.sleep(1) 
-                except Exception as e:
-                    logger.error(f"번역 실패 (건너뜀): {e}")
-                    # 번역 실패해도 원본 저장을 위해 계속 진행
+            # 4. 번역 (순차 처리) - 비활성화됨
+            # logger.info("뉴스 번역 시작 (순차 처리)...")
+            # for i, item in enumerate(recent_news):
+            #     try:
+            #         logger.info(f"[{i+1}/{len(recent_news)}] 번역 중: {item.get('title')[:30]}...")
+            #         translated = self._translate_item(item)
+            #         item.update(translated)
+            #         # API 속도 제한 고려하여 약간의 지연 (필요시)
+            #         time.sleep(1) 
+            #     except Exception as e:
+            #         logger.error(f"번역 실패 (건너뜀): {e}")
+            #         # 번역 실패해도 원본 저장을 위해 계속 진행
+            logger.info("번역 기능이 비활성화되었습니다. 원본 뉴스만 저장됩니다.")
             
             # 5. DB에 저장
             saved, skipped = self.save_to_db(recent_news)

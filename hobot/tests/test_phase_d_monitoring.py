@@ -68,6 +68,13 @@ class StubNeo4jClient:
                 "avg_link_count": 152.3,
                 "p95_link_count": 320.0,
             }]
+        if "phase_d5_scope_violation_metrics" in query:
+            return [{
+                "total_calls": 100,
+                "missing_country_code_calls": 2,
+                "out_of_scope_calls": 3,
+                "out_of_scope_rate_pct": 3.0,
+            }]
         return []
 
 
@@ -106,9 +113,19 @@ class TestPhaseDMonitoring(unittest.TestCase):
         self.assertGreater(summary["reproducibility"]["reproducibility_pct"], 80.0)
         self.assertGreater(summary["consistency"]["consistency_pct"], 70.0)
         self.assertGreater(summary["performance"]["p95_duration_ms"], 2000.0)
-        self.assertEqual(len(client.read_calls), 4)
+        self.assertEqual(summary["scope"]["out_of_scope_calls"], 3)
+        self.assertEqual(len(client.read_calls), 5)
+
+    def test_persist_weekly_quality_snapshot_writes_node(self):
+        client = StubNeo4jClient()
+        metrics = GraphRagMonitoringMetrics(neo4j_client=client)
+        result = metrics.persist_weekly_quality_snapshot(days=7, snapshot_date=date(2026, 2, 15))
+
+        self.assertEqual(result["snapshot_date"], "2026-02-15")
+        self.assertEqual(len(client.write_calls), 1)
+        query = client.write_calls[0][0]
+        self.assertIn("phase_d5_quality_snapshot", query)
 
 
 if __name__ == "__main__":
     unittest.main()
-

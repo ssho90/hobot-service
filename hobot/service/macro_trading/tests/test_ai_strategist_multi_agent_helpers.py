@@ -207,9 +207,59 @@ class TestAIStrategistMultiAgentHelpers(unittest.TestCase):
 
         self.assertEqual(objective["rebalance_threshold_percent"], 5.0)
         self.assertEqual(objective["cash_reserve_ratio"], 0.12)
+        self.assertEqual(objective["investment_focus"], "US_equities")
+        self.assertEqual(objective["analysis_country_code"], "US")
         self.assertEqual(constraints["allowed_mp_ids"], ["MP-1", "MP-2"])
         self.assertEqual(constraints["allowed_sub_mp_ids"]["stocks"], ["Eq-A"])
+        self.assertTrue(constraints["enforce_us_equity_focus"])
+        self.assertTrue(constraints["block_chatbot_auto_ingestion"])
+        self.assertEqual(constraints["analysis_country_code"], "US")
+        self.assertEqual(constraints["analysis_country_name"], "United States")
         self.assertEqual(constraints["previous_decision_date"], "2026-02-08")
+
+    def test_enforce_trading_news_scope_filters_non_us_news(self):
+        payload = {
+            "target_countries": ["United States", "South Korea"],
+            "news": [
+                {"title": "US job data", "country": "United States"},
+                {"title": "KR CPI", "country": "South Korea"},
+                {"title": "unknown country"},
+            ],
+            "total_count": 3,
+        }
+
+        scoped = ai_strategist._enforce_trading_news_scope(payload)
+        self.assertEqual(scoped["target_countries"], ["United States"])
+        self.assertEqual(scoped["total_count"], 1)
+        self.assertEqual(scoped["raw_total_count"], 3)
+        self.assertEqual(scoped["scope_enforcement"]["dropped_non_us_count"], 1)
+        self.assertEqual(scoped["scope_enforcement"]["dropped_unknown_country_count"], 1)
+        self.assertEqual(scoped["analysis_country_code"], "US")
+        self.assertEqual(scoped["scope_version"], "US_EQ_TRADING_V1")
+
+    def test_enforce_trading_news_scope_sets_default_target_country(self):
+        payload = {
+            "target_countries": ["KR"],
+            "news": [],
+        }
+
+        scoped = ai_strategist._enforce_trading_news_scope(payload)
+        self.assertEqual(scoped["target_countries"], ["United States"])
+
+    def test_is_chatbot_analysis_payload_detects_route(self):
+        payload = {
+            "analysis_route": "qa_chatbot",
+            "summary": "qa output",
+        }
+        self.assertTrue(ai_strategist._is_chatbot_analysis_payload(payload))
+
+    def test_is_chatbot_analysis_payload_detects_qa_shape(self):
+        payload = {
+            "question": "최근 한국 부동산 시장은?",
+            "answer": {"conclusion": "완만한 회복"},
+            "citations": [],
+        }
+        self.assertTrue(ai_strategist._is_chatbot_analysis_payload(payload))
 
     @patch.object(ai_strategist, "create_asset_sub_allocator_agent_prompt")
     @patch.object(ai_strategist, "_invoke_llm_json")

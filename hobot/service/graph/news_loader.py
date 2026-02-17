@@ -397,6 +397,190 @@ class NewsLoader:
             },
         )
 
+    def fetch_extraction_candidates(
+        self,
+        limit: int = 200,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        retry_failed_after_minutes: int = 180,
+    ) -> List[Dict[str, Any]]:
+        """
+        Neo4j Document 중 추출 대상(미처리 + 실패 재시도 가능) 후보를 조회한다.
+        """
+        params = {
+            "limit": limit,
+            "start_date": start_date.isoformat() if start_date else None,
+            "end_date": end_date.isoformat() if end_date else None,
+            "retry_failed_after_minutes": max(0, int(retry_failed_after_minutes)),
+        }
+        query = """
+        MATCH (d:Document)
+        WHERE trim(coalesce(d.text, d.description, d.title, "")) <> ""
+          AND (
+            d.extraction_status IS NULL
+            OR d.extraction_status = "pending"
+            OR (
+              d.extraction_status = "failed"
+              AND (
+                d.extraction_updated_at IS NULL
+                OR d.extraction_updated_at <= datetime() - duration({minutes: $retry_failed_after_minutes})
+              )
+            )
+          )
+          AND (
+            $start_date IS NULL
+            OR (
+              d.published_at IS NOT NULL
+              AND date(d.published_at) >= date($start_date)
+            )
+          )
+          AND (
+            $end_date IS NULL
+            OR (
+              d.published_at IS NOT NULL
+              AND date(d.published_at) <= date($end_date)
+            )
+          )
+        RETURN d.doc_id AS doc_id,
+               d.source AS source,
+               d.country AS country,
+               d.country_code AS country_code,
+               d.category AS category,
+               d.title AS title,
+               d.description AS description,
+               d.text AS text,
+               toString(d.published_at) AS published_at
+        ORDER BY coalesce(d.published_at, d.updated_at) DESC
+        LIMIT $limit
+        """
+        rows = self.neo4j_client.run_read(query, params)
+        return [dict(row) for row in rows]
+
+    def sync_news_with_extraction_backlog(
+        self,
+        sync_limit: int = 2000,
+        sync_days: int = 30,
+        extraction_batch_size: int = 200,
+        max_extraction_batches: int = 10,
+        retry_failed_after_minutes: int = 180,
+        extraction_progress_log_interval: int = 25,
+    ) -> Dict[str, Any]:
+        """
+        1) MySQL -> Neo4j Document/기본 링크 동기화
+        2) Neo4j의 미추출/재시도 대상 문서를 배치로 추출 적재
+        """
+        end_date = date.today()
+        start_date = end_date - timedelta(days=sync_days)
+        logger.info(
+            "[NewsLoader][Backlog] start sync_days=%s sync_limit=%s extraction_batch_size=%s max_batches=%s retry_failed_after_minutes=%s",
+            sync_days,
+            sync_limit,
+            extraction_batch_size,
+            max_extraction_batches,
+            retry_failed_after_minutes,
+        )
+
+        sync_result = self.sync_news(
+            limit=sync_limit,
+            start_date=start_date,
+            end_date=end_date,
+            run_extraction=False,
+        )
+
+        extraction_summary: Dict[str, Any] = {
+            "status": "success",
+            "batches": 0,
+            "processed_docs": 0,
+            "success_docs": 0,
+            "failed_docs": 0,
+            "skipped_docs": 0,
+            "failed_doc_ids": [],
+            "write_result": {
+                "nodes_created": 0,
+                "nodes_deleted": 0,
+                "relationships_created": 0,
+                "relationships_deleted": 0,
+                "properties_set": 0,
+                "constraints_added": 0,
+                "indexes_added": 0,
+            },
+            "stop_reason": "no_candidates",
+        }
+
+        batch_summaries: List[Dict[str, Any]] = []
+        seen_failed_doc_ids = set()
+
+        for batch_idx in range(max(1, max_extraction_batches)):
+            candidates = self.fetch_extraction_candidates(
+                limit=max(1, extraction_batch_size),
+                start_date=start_date,
+                end_date=end_date,
+                retry_failed_after_minutes=retry_failed_after_minutes,
+            )
+            if not candidates:
+                extraction_summary["stop_reason"] = "no_candidates"
+                break
+
+            extract_result = self.extract_and_persist(
+                candidates,
+                progress_log_interval=extraction_progress_log_interval,
+            )
+
+            extraction_summary["batches"] += 1
+            extraction_summary["processed_docs"] += int(extract_result.get("processed_docs", 0) or 0)
+            extraction_summary["success_docs"] += int(extract_result.get("success_docs", 0) or 0)
+            extraction_summary["failed_docs"] += int(extract_result.get("failed_docs", 0) or 0)
+            extraction_summary["skipped_docs"] += int(extract_result.get("skipped_docs", 0) or 0)
+
+            batch_failed_doc_ids = extract_result.get("failed_doc_ids", []) or []
+            for doc_id in batch_failed_doc_ids:
+                if doc_id in seen_failed_doc_ids:
+                    continue
+                seen_failed_doc_ids.add(doc_id)
+                extraction_summary["failed_doc_ids"].append(doc_id)
+
+            write_result = extract_result.get("write_result") or {}
+            for key in extraction_summary["write_result"].keys():
+                extraction_summary["write_result"][key] += int(write_result.get(key, 0) or 0)
+
+            batch_summaries.append(
+                {
+                    "batch_index": batch_idx + 1,
+                    "requested_docs": len(candidates),
+                    "status": extract_result.get("status"),
+                    "processed_docs": int(extract_result.get("processed_docs", 0) or 0),
+                    "success_docs": int(extract_result.get("success_docs", 0) or 0),
+                    "failed_docs": int(extract_result.get("failed_docs", 0) or 0),
+                }
+            )
+
+            status = extract_result.get("status")
+            if status == "skipped":
+                extraction_summary["status"] = "skipped"
+                extraction_summary["stop_reason"] = str(extract_result.get("reason") or "skipped")
+                break
+            if status == "no_data":
+                extraction_summary["stop_reason"] = "no_data"
+                break
+
+        extraction_summary["batch_summaries"] = batch_summaries
+
+        logger.info(
+            "[NewsLoader][Backlog] done synced_docs=%s batches=%s processed=%s success=%s failed=%s skipped=%s stop_reason=%s",
+            sync_result.get("documents"),
+            extraction_summary["batches"],
+            extraction_summary["processed_docs"],
+            extraction_summary["success_docs"],
+            extraction_summary["failed_docs"],
+            extraction_summary["skipped_docs"],
+            extraction_summary["stop_reason"],
+        )
+        return {
+            "status": "success",
+            "sync_result": sync_result,
+            "extraction": extraction_summary,
+        }
+
     def extract_and_persist(
         self,
         news_list: List[Dict[str, Any]],
@@ -519,6 +703,11 @@ class NewsLoader:
 
             event_name_to_id: Dict[str, str] = {}
             default_event_time = self._to_iso_datetime(news.get("published_at")) or self._to_iso_datetime(datetime.utcnow())
+            document_country = (str(news.get("country") or "").strip() or None)
+            document_country_code = (
+                str(news.get("country_code") or "").strip().upper()
+                or normalize_country(document_country or "")
+            )
 
             def ensure_event(
                 event_name: str,
@@ -526,11 +715,19 @@ class NewsLoader:
                 summary: Optional[str] = None,
                 event_time: Optional[str] = None,
                 impact_level: str = "medium",
+                event_country: Optional[str] = None,
+                event_country_code: Optional[str] = None,
             ) -> str:
                 normalized_name = event_name.strip()
                 cache_key = normalized_name.lower()
                 if cache_key in event_name_to_id:
                     return event_name_to_id[cache_key]
+                resolved_country = (event_country or document_country or "").strip() or None
+                resolved_country_code = (
+                    (event_country_code or "").strip().upper()
+                    or normalize_country(resolved_country or "")
+                    or document_country_code
+                )
                 event_id = self._build_deterministic_id(
                     "EVT", f"{doc_id}:{normalized_name}"
                 )
@@ -542,7 +739,8 @@ class NewsLoader:
                         "event_type": event_type or "other",
                         "summary": (summary or normalized_name)[:300],
                         "event_time": event_time or default_event_time,
-                        "country_code": news.get("country_code"),
+                        "country": resolved_country,
+                        "country_code": resolved_country_code,
                         "impact_level": impact_level or "medium",
                     }
                 )
@@ -777,7 +975,8 @@ class NewsLoader:
                     ev.type = row.event_type,
                     ev.summary = row.summary,
                     ev.event_time = datetime(row.event_time),
-                    ev.country_code = row.country_code,
+                    ev.country = coalesce(row.country, ev.country, d.country),
+                    ev.country_code = coalesce(row.country_code, ev.country_code, d.country_code),
                     ev.impact_level = row.impact_level,
                     ev.source = "llm_extraction",
                     ev.updated_at = datetime()
@@ -1288,6 +1487,28 @@ def sync_news_with_extraction(
         limit=limit,
         days=days,
         run_extraction=True,
+        extraction_progress_log_interval=extraction_progress_log_interval,
+    )
+
+
+def sync_news_with_extraction_backlog(
+    sync_limit: int = 2000,
+    sync_days: int = 30,
+    extraction_batch_size: int = 200,
+    max_extraction_batches: int = 10,
+    retry_failed_after_minutes: int = 180,
+    extraction_progress_log_interval: int = 25,
+) -> Dict[str, Any]:
+    """
+    Document 동기화 후 미처리/실패 문서를 전량 배치로 추출 적재한다.
+    """
+    loader = NewsLoader()
+    return loader.sync_news_with_extraction_backlog(
+        sync_limit=sync_limit,
+        sync_days=sync_days,
+        extraction_batch_size=extraction_batch_size,
+        max_extraction_batches=max_extraction_batches,
+        retry_failed_after_minutes=retry_failed_after_minutes,
         extraction_progress_log_interval=extraction_progress_log_interval,
     )
 

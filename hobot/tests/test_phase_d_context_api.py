@@ -177,6 +177,99 @@ class TestPhaseDContextApi(unittest.TestCase):
         self.assertIn("document:te:5762", node_ids)
         self.assertIn("kevin warsh", result.meta.get("question_terms", []))
 
+    def test_kr_country_filter_propagates_in_qa_context(self):
+        client = StubNeo4jClient()
+        request = GraphRagContextRequest(
+            question="현재 한국 부동산 시장 요약해줘",
+            time_range="30d",
+            country="KR",
+            as_of_date="2026-02-08",
+        )
+
+        result = build_graph_rag_context(request=request, neo4j_client=client)
+        self.assertEqual(result.meta.get("country"), "KR")
+
+        country_params = [params.get("country") for _, params in client.read_calls if isinstance(params, dict)]
+        self.assertIn("KR", country_params)
+
+    def test_country_code_filter_populates_normalized_params(self):
+        client = StubNeo4jClient()
+        request = GraphRagContextRequest(
+            question="미국 금리 경로 요약해줘",
+            time_range="30d",
+            country_code="US",
+            as_of_date="2026-02-08",
+        )
+
+        result = build_graph_rag_context(request=request, neo4j_client=client)
+        self.assertEqual(result.meta.get("country_code"), "US")
+        self.assertEqual(result.meta.get("resolved_country_code"), "US")
+
+        params_list = [params for _, params in client.read_calls if isinstance(params, dict)]
+        self.assertTrue(any(params.get("country_code") == "US" for params in params_list))
+
+    def test_build_graph_context_rejects_out_of_scope_country(self):
+        client = StubNeo4jClient()
+        request = GraphRagContextRequest(
+            question="일본 금리 경로 요약해줘",
+            time_range="30d",
+            country_code="JP",
+            as_of_date="2026-02-08",
+        )
+        with self.assertRaises(ValueError):
+            build_graph_rag_context(request=request, neo4j_client=client)
+
+    def test_scope_violation_warning_added_to_meta(self):
+        client = StubNeo4jClient()
+        original_run_read = client.run_read
+
+        def run_read_with_scope_violation(query, params=None):
+            if "phase_d_events" in query:
+                return [
+                    {
+                        "event_id": "EVT_CN_1",
+                        "event_type": "policy",
+                        "summary": "CN policy event",
+                        "event_time": datetime(2026, 2, 7, 10, 0, 0),
+                        "country": "China",
+                        "country_code": "CN",
+                        "theme_ids": ["growth"],
+                        "indicator_codes": ["DGS10"],
+                    }
+                ]
+            if "phase_d_documents" in query:
+                return [
+                    {
+                        "doc_id": "te:cn-1",
+                        "title": "CN growth update",
+                        "url": "https://example.com/cn",
+                        "source": "TE",
+                        "country": "China",
+                        "country_code": "CN",
+                        "category": "Macro",
+                        "published_at": datetime(2026, 2, 7, 11, 0, 0),
+                        "event_ids": ["EVT_CN_1"],
+                        "theme_ids": ["growth"],
+                    }
+                ]
+            return original_run_read(query, params)
+
+        client.run_read = run_read_with_scope_violation
+
+        request = GraphRagContextRequest(
+            question="미국 성장 리스크 요약",
+            time_range="30d",
+            country_code="US",
+            as_of_date="2026-02-08",
+        )
+        result = build_graph_rag_context(request=request, neo4j_client=client)
+
+        warnings = result.meta.get("scope_warnings", [])
+        violation_counts = result.meta.get("scope_violation_counts", {})
+
+        self.assertTrue(any("범위 외 데이터" in message for message in warnings))
+        self.assertGreaterEqual(violation_counts.get("out_of_scope_country_code", 0), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

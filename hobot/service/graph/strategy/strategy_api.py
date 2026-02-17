@@ -186,7 +186,7 @@ async def get_strategy_decision_detail(decision_id: str):
                sd.sub_mp AS sub_mp,
                sd.analysis_summary AS analysis_summary,
                sd.reasoning AS reasoning,
-               ms.state_id AS macro_state_id,
+               toString(ms.date) AS macro_state_id,
                ms.summary AS macro_state_summary
         """
         

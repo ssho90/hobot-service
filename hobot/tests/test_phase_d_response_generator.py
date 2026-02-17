@@ -26,6 +26,7 @@ from service.graph.rag.response_generator import (
     generate_graph_rag_answer,
     resolve_graph_rag_model,
 )
+import service.graph.rag.response_generator as response_generator_module
 
 
 class _StubLLMResponse:
@@ -40,6 +41,11 @@ class _StubLLM:
     def invoke(self, prompt: str):
         self.last_prompt = prompt
         return _StubLLMResponse(self._content)
+
+
+class _FailingLLM:
+    def invoke(self, prompt: str):
+        raise AssertionError("LLM should not be called when Top50 scope guard is triggered")
 
 
 class _StubMacroStateGenerator:
@@ -69,6 +75,14 @@ class _StubAnalysisRunWriter:
 
 
 class TestPhaseDResponseGenerator(unittest.TestCase):
+    def test_answer_request_to_context_request_includes_country_code(self):
+        request = GraphRagAnswerRequest(
+            question="US macro update",
+            country_code="US",
+        )
+        context_request = request.to_context_request()
+        self.assertEqual(context_request.country_code, "US")
+
     def _sample_context(self) -> GraphRagContextResponse:
         return GraphRagContextResponse(
             nodes=[
@@ -265,6 +279,52 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
         self.assertEqual(response.analysis_run_id, "ar_test_run")
         self.assertIn("macro_state", response.persistence)
         self.assertIn("analysis_run", response.persistence)
+
+    def test_generate_answer_rejects_out_of_scope_country(self):
+        request = GraphRagAnswerRequest(
+            question="일본 금리 경로 요약",
+            country_code="JP",
+            persist_macro_state=False,
+            persist_analysis_run=False,
+        )
+        llm = _StubLLM("{}")
+
+        with self.assertRaises(ValueError):
+            generate_graph_rag_answer(
+                request=request,
+                context_response=self._sample_context(),
+                llm=llm,
+            )
+
+    def test_generate_answer_returns_top50_scope_guard_message(self):
+        request = GraphRagAnswerRequest(
+            question="한화손해보험 실적 알려줘",
+            country_code="KR",
+            persist_macro_state=False,
+            persist_analysis_run=False,
+        )
+
+        original_evaluator = response_generator_module._evaluate_kr_top50_scope
+        response_generator_module._evaluate_kr_top50_scope = lambda question, normalized_country_code: {
+            "enforced": True,
+            "allowed": False,
+            "top50_snapshot_date": "2026-02-16",
+            "out_of_scope_companies": [
+                {"corp_name": "한화손해보험", "stock_code": "000370", "corp_code": "00100000"}
+            ],
+        }
+        try:
+            response = generate_graph_rag_answer(
+                request=request,
+                context_response=self._sample_context(),
+                llm=_FailingLLM(),
+            )
+        finally:
+            response_generator_module._evaluate_kr_top50_scope = original_evaluator
+
+        self.assertIn("Top50", response.answer.conclusion)
+        self.assertIn("데이터", response.answer.key_points[0])
+        self.assertEqual(response.context_meta.get("policy"), "kr_top50_scope_guard")
 
 
 if __name__ == "__main__":

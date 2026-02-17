@@ -14,6 +14,9 @@ CREATE CONSTRAINT IF NOT EXISTS FOR (s:Story) REQUIRE s.story_id IS UNIQUE;
 CREATE CONSTRAINT IF NOT EXISTS FOR (ar:AnalysisRun) REQUIRE ar.run_id IS UNIQUE;
 CREATE CONSTRAINT IF NOT EXISTS FOR (ms:MacroState) REQUIRE ms.date IS UNIQUE;
 CREATE CONSTRAINT IF NOT EXISTS FOR (call:GraphRagApiCall) REQUIRE call.call_id IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS FOR (c:Claim) REQUIRE c.claim_id IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS FOR (fct:Fact) REQUIRE fct.fact_id IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS FOR (evd:Evidence) REQUIRE evd.evidence_id IS UNIQUE;
 
 // Phase A에서는 vintage를 실제로 저장하지 않으므로 (indicator_code, obs_date) 유니크로 운영
 // (Phase C에서 vintage 적재를 시작하면 제약조건을 (indicator_code, obs_date, vintage_date)로 마이그레이션)

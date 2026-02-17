@@ -80,6 +80,34 @@ COUNTRY_MAPPING: Dict[str, str] = {
     
     # Mexico
     "mexico": "MX",
+
+    # Czech Republic
+    "czech republic": "CZ",
+    "czechia": "CZ",
+
+    # Hungary
+    "hungary": "HU",
+
+    # Ireland
+    "ireland": "IE",
+
+    # Poland
+    "poland": "PL",
+
+    # Colombia
+    "colombia": "CO",
+
+    # Bulgaria
+    "bulgaria": "BG",
+
+    # Greece
+    "greece": "GR",
+
+    # Portugal
+    "portugal": "PT",
+
+    # Slovakia
+    "slovakia": "SK",
     
     # Switzerland
     "switzerland": "CH",
@@ -90,10 +118,16 @@ COUNTRY_MAPPING: Dict[str, str] = {
     
     # Sweden
     "sweden": "SE",
-    
+
     # Norway
     "norway": "NO",
-    
+
+    # Denmark
+    "denmark": "DK",
+
+    # Finland
+    "finland": "FI",
+
     # New Zealand
     "new zealand": "NZ",
     
@@ -118,6 +152,64 @@ COUNTRY_MAPPING: Dict[str, str] = {
     
     # Argentina
     "argentina": "AR",
+
+    # Belgium
+    "belgium": "BE",
+
+    # Romania
+    "romania": "RO",
+
+    # Chile
+    "chile": "CL",
+
+    # Lithuania
+    "lithuania": "LT",
+
+    # Latvia
+    "latvia": "LV",
+
+    # Slovenia
+    "slovenia": "SI",
+
+    # North Macedonia
+    "macedonia": "MK",
+    "north macedonia": "MK",
+
+    # Estonia
+    "estonia": "EE",
+
+    # Serbia
+    "serbia": "RS",
+
+    # Iceland
+    "iceland": "IS",
+
+    # Armenia
+    "armenia": "AM",
+
+    # Sri Lanka
+    "sri lanka": "LK",
+
+    # Uruguay
+    "uruguay": "UY",
+
+    # Macau
+    "macau": "MO",
+
+    # Croatia
+    "croatia": "HR",
+
+    # Paraguay
+    "paraguay": "PY",
+
+    # Egypt
+    "egypt": "EG",
+
+    # Pakistan
+    "pakistan": "PK",
+
+    # Kazakhstan
+    "kazakhstan": "KZ",
     
     # Indonesia
     "indonesia": "ID",
@@ -139,6 +231,14 @@ COUNTRY_MAPPING: Dict[str, str] = {
     "world": "GLOBAL",
     "worldwide": "GLOBAL",
     "international": "GLOBAL",
+    "commodity": "GLOBAL",
+    "commodities": "GLOBAL",
+    "currency": "GLOBAL",
+    "currencies": "GLOBAL",
+    "crypto": "GLOBAL",
+    "cryptocurrency": "GLOBAL",
+    "digital asset": "GLOBAL",
+    "other": "GLOBAL",
 }
 
 # ISO 코드 → 국가명 (역매핑)
@@ -159,6 +259,15 @@ ISO_TO_NAME: Dict[str, str] = {
     "BR": "Brazil",
     "RU": "Russia",
     "MX": "Mexico",
+    "CZ": "Czech Republic",
+    "HU": "Hungary",
+    "IE": "Ireland",
+    "PL": "Poland",
+    "CO": "Colombia",
+    "BG": "Bulgaria",
+    "GR": "Greece",
+    "PT": "Portugal",
+    "SK": "Slovakia",
     "CH": "Switzerland",
     "NL": "Netherlands",
     "SE": "Sweden",
@@ -171,6 +280,25 @@ ISO_TO_NAME: Dict[str, str] = {
     "SA": "Saudi Arabia",
     "ZA": "South Africa",
     "AR": "Argentina",
+    "BE": "Belgium",
+    "RO": "Romania",
+    "CL": "Chile",
+    "LT": "Lithuania",
+    "LV": "Latvia",
+    "SI": "Slovenia",
+    "MK": "North Macedonia",
+    "EE": "Estonia",
+    "RS": "Serbia",
+    "IS": "Iceland",
+    "AM": "Armenia",
+    "LK": "Sri Lanka",
+    "UY": "Uruguay",
+    "MO": "Macau",
+    "HR": "Croatia",
+    "PY": "Paraguay",
+    "EG": "Egypt",
+    "PK": "Pakistan",
+    "KZ": "Kazakhstan",
     "ID": "Indonesia",
     "TH": "Thailand",
     "VN": "Vietnam",

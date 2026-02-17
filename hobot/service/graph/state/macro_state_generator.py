@@ -70,6 +70,9 @@ class MacroStateGenerator:
               WITH i
               MATCH (i)-[:HAS_OBSERVATION]->(:IndicatorObservation)-[:HAS_FEATURE]->(f:DerivedFeature)
               WHERE f.obs_date <= date($as_of_date)
+                AND coalesce(f.effective_date, f.obs_date) <= date($as_of_date)
+                AND date(coalesce(f.published_at, datetime(toString(f.obs_date) + "T00:00:00"))) <= date($as_of_date)
+                AND coalesce(f.as_of_date, f.obs_date) <= date($as_of_date)
                 AND f.feature_name IN $feature_names
               RETURN f
               ORDER BY f.obs_date DESC,
@@ -475,4 +478,3 @@ class AnalysisRunWriter:
 def generate_macro_state(as_of_date: Optional[date] = None) -> Dict[str, Any]:
     generator = MacroStateGenerator()
     return generator.generate_macro_state(as_of_date=as_of_date)
-
