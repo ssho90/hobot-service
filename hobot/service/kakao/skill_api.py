@@ -8,7 +8,8 @@ import re
 import uuid
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Header, HTTPException, Request
+import requests
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
 
 from service.graph.rag.response_generator import (
     GraphRagAnswerRequest,
@@ -49,6 +50,13 @@ def _build_kakao_simple_text_response(text: str) -> Dict[str, Any]:
     }
 
 
+def _build_kakao_use_callback_response() -> Dict[str, Any]:
+    return {
+        "version": "2.0",
+        "useCallback": True,
+    }
+
+
 def _extract_utterance(payload: Dict[str, Any]) -> str:
     user_request = payload.get("userRequest") if isinstance(payload.get("userRequest"), dict) else {}
     action = payload.get("action") if isinstance(payload.get("action"), dict) else {}
@@ -69,6 +77,14 @@ def _extract_utterance(payload: Dict[str, Any]) -> str:
     if utterance:
         return utterance
     return param_utterance
+
+
+def _extract_callback_url(payload: Dict[str, Any]) -> Optional[str]:
+    user_request = payload.get("userRequest") if isinstance(payload.get("userRequest"), dict) else {}
+    callback_url = str(user_request.get("callbackUrl") or "").strip()
+    if callback_url.startswith("http://") or callback_url.startswith("https://"):
+        return callback_url
+    return None
 
 
 def _extract_user_id(payload: Dict[str, Any]) -> str:
@@ -171,9 +187,62 @@ def _validate_webhook_secret(
     raise HTTPException(status_code=403, detail="Invalid webhook secret")
 
 
+def _is_callback_required() -> bool:
+    raw_value = str(os.getenv("KAKAO_SKILL_REQUIRE_CALLBACK", "1") or "").strip().lower()
+    return raw_value not in {"0", "false", "no", "off"}
+
+
+def _post_kakao_callback_response(
+    *,
+    callback_url: str,
+    payload: Dict[str, Any],
+) -> None:
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.post(
+        callback_url,
+        headers=headers,
+        json=payload,
+        timeout=10,
+    )
+    response.raise_for_status()
+
+
+def _run_kakao_callback_flow(
+    *,
+    request_payload: Dict[str, Any],
+    request_user_id: str,
+    flow_run_id: str,
+    callback_url: str,
+) -> None:
+    try:
+        answer_request = GraphRagAnswerRequest(**request_payload)
+        answer_response = generate_graph_rag_answer(
+            answer_request,
+            user_id=request_user_id,
+            flow_run_id=flow_run_id,
+        )
+        response_payload = _build_kakao_simple_text_response(_build_kakao_answer_text(answer_response))
+    except Exception as error:
+        logger.error("[KakaoSkill] callback flow failed: %s", error, exc_info=True)
+        response_payload = _build_kakao_simple_text_response(
+            "답변 생성 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요."
+        )
+
+    try:
+        _post_kakao_callback_response(
+            callback_url=callback_url,
+            payload=response_payload,
+        )
+    except Exception as error:
+        logger.error("[KakaoSkill] callback delivery failed: %s", error, exc_info=True)
+
+
 @router.post("/chatbot")
 async def kakao_skill_chatbot(
     http_request: Request,
+    background_tasks: BackgroundTasks,
     x_webhook_secret: Optional[str] = Header(default=None, alias="X-Webhook-Secret"),
 ):
     _validate_webhook_secret(x_webhook_secret=x_webhook_secret)
@@ -212,9 +281,25 @@ async def kakao_skill_chatbot(
     if model_name:
         request_payload["model"] = model_name
 
-    answer_request = GraphRagAnswerRequest(**request_payload)
+    callback_url = _extract_callback_url(payload)
+    if callback_url:
+        logger.info("[KakaoSkill] useCallback enabled: user_id=%s flow_run_id=%s", request_user_id, flow_run_id)
+        background_tasks.add_task(
+            _run_kakao_callback_flow,
+            request_payload=request_payload,
+            request_user_id=request_user_id,
+            flow_run_id=flow_run_id,
+            callback_url=callback_url,
+        )
+        return _build_kakao_use_callback_response()
+    if _is_callback_required():
+        return _build_kakao_simple_text_response(
+            "카카오 스킬 5초 제한으로 즉시 분석 응답이 어렵습니다. "
+            "OpenBuilder에서 Callback 응답을 활성화한 뒤 다시 시도해 주세요."
+        )
 
     try:
+        answer_request = GraphRagAnswerRequest(**request_payload)
         answer_response = generate_graph_rag_answer(
             answer_request,
             user_id=request_user_id,

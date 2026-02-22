@@ -397,7 +397,7 @@ class AnalysisRunWriter:
                 "model": model,
                 "duration_ms": int(duration_ms or 0),
                 "as_of_date": as_of_date.isoformat(),
-                "metadata_json": json.dumps(run_metadata or {}, ensure_ascii=False),
+                "metadata_json": json.dumps(run_metadata or {}, ensure_ascii=False, default=str),
             },
         )
 

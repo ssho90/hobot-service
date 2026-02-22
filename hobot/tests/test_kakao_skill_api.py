@@ -51,7 +51,10 @@ class TestKakaoSkillApi(unittest.TestCase):
     def setUp(self):
         self._env_patcher = patch.dict(
             os.environ,
-            {"KAKAO_SKILL_WEBHOOK_SECRET": ""},
+            {
+                "KAKAO_SKILL_WEBHOOK_SECRET": "",
+                "KAKAO_SKILL_REQUIRE_CALLBACK": "0",
+            },
             clear=False,
         )
         self._env_patcher.start()
@@ -150,6 +153,61 @@ class TestKakaoSkillApi(unittest.TestCase):
         if answer_request is None and mock_generate.call_args.args:
             answer_request = mock_generate.call_args.args[0]
         self.assertEqual(answer_request.question, "팔란티어 주가 어때?")
+
+    def test_kakao_skill_returns_use_callback_when_callback_url_exists(self):
+        payload = {
+            "userRequest": {
+                "utterance": "발화 내용",
+                "callbackUrl": "https://callback.example.com/skill",
+                "user": {"id": "kakao-user-4"},
+            },
+            "action": {
+                "params": {
+                    "question": "팔란티어 주가 어때?",
+                }
+            },
+        }
+
+        with patch(
+            "service.kakao.skill_api._run_kakao_callback_flow",
+            return_value=None,
+        ) as mock_callback_flow:
+            with patch(
+                "service.kakao.skill_api.generate_graph_rag_answer",
+                return_value=_StubGraphAnswerResponse(),
+            ) as mock_generate:
+                response = self.client.post("/api/kakao/skill/chatbot", json=payload)
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body.get("version"), "2.0")
+        self.assertTrue(body.get("useCallback"))
+        self.assertTrue(mock_callback_flow.called)
+        self.assertFalse(mock_generate.called)
+
+    def test_kakao_skill_returns_fast_message_when_callback_required(self):
+        payload = {
+            "userRequest": {
+                "utterance": "팔란티어 주가 어때?",
+                "user": {"id": "kakao-user-5"},
+            },
+            "action": {},
+        }
+
+        with patch.dict(os.environ, {"KAKAO_SKILL_REQUIRE_CALLBACK": "1"}, clear=False):
+            with patch(
+                "service.kakao.skill_api.generate_graph_rag_answer",
+                return_value=_StubGraphAnswerResponse(),
+            ) as mock_generate:
+                response = self.client.post("/api/kakao/skill/chatbot", json=payload)
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        outputs = ((body.get("template") or {}).get("outputs") or [])
+        self.assertTrue(outputs)
+        text = str((((outputs[0] or {}).get("simpleText") or {}).get("text") or ""))
+        self.assertIn("Callback 응답", text)
+        self.assertFalse(mock_generate.called)
 
 
 if __name__ == "__main__":
