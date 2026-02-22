@@ -1,7 +1,8 @@
 # 현재 수집 데이터 리스트 (용도별)
 
-- 기준 시각: 2026-02-20 13:12
-- 총 지표 수: 61
+- 기준 시각: 2026-02-22 11:53
+- 기준 소스: `service.macro_trading.indicator_health` 레지스트리
+- 총 지표 수: 63
 - 분류: 한국 경제 / 한국 주식 / 한국 부동산 / 미국 경제 / 미국 주식 / 공통/글로벌
 
 ## 한국 경제
@@ -96,13 +97,15 @@
 
 ## 공통/글로벌
 
-- 건수: 6
+- 건수: 8
 
 | 국가 | 데이터 코드 | 지표명 | description |
 | --- | --- | --- | --- |
 | GLOBAL | ECONOMIC_NEWS_STREAM | Economic News Stream | economic_news 수집 파이프라인 최신 적재 상태 |
+| GLOBAL | EQUITY_GRAPH_PROJECTION_SYNC | Equity Graph Projection Sync | 주식 Projection(RDB->Neo4j) 동기화 실행 및 지연 상태 |
 | GLOBAL | GRAPH_DOCUMENT_EMBEDDING_COVERAGE | Graph Document Embedding Coverage | Document 노드 임베딩 커버리지(%) |
 | GLOBAL | GRAPH_NEWS_EXTRACTION_SYNC | Graph News Extraction Sync | 뉴스 동기화+추출+임베딩 배치 실행 성공률 |
+| GLOBAL | GRAPH_RAG_PHASE5_WEEKLY_REPORT | Graph RAG Phase5 Weekly Regression | Phase5 회귀 주간 집계 실행 상태 |
 | GLOBAL | GRAPH_RAG_VECTOR_INDEX_READY | Graph RAG Vector Index Readiness | Neo4j vector index(document_text_embedding_idx) 상태 |
 | GLOBAL | TIER1_CORPORATE_EVENT_FEED | Tier-1 Corporate Event Feed | corporate_event_feed 최신 적재 상태 |
 | KR | TIER1_CORPORATE_EVENT_SYNC | Tier-1 Corporate Event Sync Health | KR/US Tier-1 표준 이벤트 동기화 배치 상태 |

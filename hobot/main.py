@@ -27,6 +27,7 @@ from service.graph.rag.response_generator import router as graph_rag_answer_rout
 from service.graph.monitoring.graphrag_metrics import router as graph_rag_metrics_router
 from service.graph.strategy.strategy_api import router as strategy_api_router
 from service.macro_trading.real_estate_api import router as real_estate_api_router
+from service.kakao.skill_api import router as kakao_skill_router
 # 서비스 시작 시 데이터베이스 초기화 (지연 초기화)
 # 실제 사용 시점에 자동으로 초기화됨
 from typing import Any, Dict, List, Optional
@@ -40,6 +41,7 @@ api_router.include_router(graph_rag_answer_router)
 api_router.include_router(graph_rag_metrics_router)
 api_router.include_router(strategy_api_router)
 api_router.include_router(real_estate_api_router)
+api_router.include_router(kakao_skill_router)
 
 # CORS 설정
 app.add_middleware(
