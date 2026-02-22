@@ -49,9 +49,18 @@ class _StubGraphAnswerResponse:
 
 class TestKakaoSkillApi(unittest.TestCase):
     def setUp(self):
+        self._env_patcher = patch.dict(
+            os.environ,
+            {"KAKAO_SKILL_WEBHOOK_SECRET": ""},
+            clear=False,
+        )
+        self._env_patcher.start()
         app = FastAPI()
         app.include_router(kakao_skill_router, prefix="/api")
         self.client = TestClient(app)
+
+    def tearDown(self):
+        self._env_patcher.stop()
 
     def test_kakao_skill_chatbot_returns_kakao_v2_payload(self):
         payload = {
@@ -114,6 +123,33 @@ class TestKakaoSkillApi(unittest.TestCase):
                     headers={"X-Webhook-Secret": "secret-123"},
                 )
             self.assertEqual(allowed.status_code, 200)
+
+    def test_kakao_skill_prefers_action_question_when_utterance_is_placeholder(self):
+        payload = {
+            "userRequest": {
+                "utterance": "발화 내용",
+                "user": {"id": "kakao-user-3"},
+            },
+            "action": {
+                "params": {
+                    "question": "팔란티어 주가 어때?",
+                }
+            },
+        }
+
+        with patch(
+            "service.kakao.skill_api.generate_graph_rag_answer",
+            return_value=_StubGraphAnswerResponse(),
+        ) as mock_generate:
+            response = self.client.post("/api/kakao/skill/chatbot", json=payload)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_generate.called)
+        call_args = mock_generate.call_args.kwargs
+        answer_request = call_args.get("request")
+        if answer_request is None and mock_generate.call_args.args:
+            answer_request = mock_generate.call_args.args[0]
+        self.assertEqual(answer_request.question, "팔란티어 주가 어때?")
 
 
 if __name__ == "__main__":

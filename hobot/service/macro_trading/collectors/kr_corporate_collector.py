@@ -173,6 +173,14 @@ class KRCorporateCollector:
         cursor.execute(f"ALTER TABLE `{table_name}` ADD COLUMN {column_definition}")
 
     @staticmethod
+    def _ensure_index_exists(cursor, table_name: str, index_name: str, index_definition: str):
+        cursor.execute(f"SHOW INDEX FROM `{table_name}` WHERE Key_name = %s", (index_name,))
+        exists = cursor.fetchone()
+        if exists:
+            return
+        cursor.execute(f"ALTER TABLE `{table_name}` ADD INDEX {index_definition}")
+
+    @staticmethod
     def _sanitize_log_params(params: Dict[str, Any]) -> Dict[str, Any]:
         safe = dict(params)
         if "crtfc_key" in safe:
@@ -407,6 +415,16 @@ class KRCorporateCollector:
                     )
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 """
+            )
+            self._ensure_index_exists(
+                cursor,
+                "kr_corporate_earnings_expectations",
+                "idx_expectation_feed_lookup",
+                (
+                    "`idx_expectation_feed_lookup` "
+                    "(`corp_code`, `expected_source`, `period_year`, "
+                    "`fiscal_quarter`, `expected_as_of_date`, `updated_at`)"
+                ),
             )
             cursor.execute(
                 """
@@ -897,6 +915,20 @@ class KRCorporateCollector:
         if not isinstance(expected_as_of_date, date):
             expected_as_of_date = default_as_of_date
 
+        normalized_updated_at: Optional[datetime] = None
+        raw_updated_at = raw.get("updated_at")
+        if isinstance(raw_updated_at, datetime):
+            normalized_updated_at = raw_updated_at
+        elif isinstance(raw_updated_at, date):
+            normalized_updated_at = datetime.combine(raw_updated_at, time.min)
+        elif isinstance(raw_updated_at, str):
+            updated_text = raw_updated_at.strip()
+            if updated_text:
+                try:
+                    normalized_updated_at = datetime.fromisoformat(updated_text.replace("Z", "+00:00"))
+                except ValueError:
+                    normalized_updated_at = None
+
         if not corp_code:
             # Feed may provide stock_code only.
             if stock_code:
@@ -933,6 +965,7 @@ class KRCorporateCollector:
             "expected_value": int(expected_value),
             "expected_source": expected_source,
             "expected_as_of_date": expected_as_of_date,
+            "_updated_at": normalized_updated_at,
             "metadata": raw,
         }
 
@@ -1060,12 +1093,18 @@ class KRCorporateCollector:
         top_corp_codes: List[str] = []
         with self._get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(query, tuple(params))
-            rows = cursor.fetchall()
-            for row in rows:
-                corp_code = _normalize_corp_code(row.get("corp_code"))
-                if corp_code:
-                    top_corp_codes.append(corp_code)
+            try:
+                cursor.execute(query, tuple(params))
+                rows = cursor.fetchall()
+                for row in rows:
+                    corp_code = _normalize_corp_code(row.get("corp_code"))
+                    if corp_code:
+                        top_corp_codes.append(corp_code)
+            except Exception as exc:
+                logger.warning(
+                    "Failed to resolve revenue-ranked corp codes. fallback=stock_code err=%s",
+                    exc,
+                )
 
             # Financial rows can be sparse in 초기 단계, so fallback to listed corp order.
             if len(top_corp_codes) < limit:
@@ -2747,7 +2786,7 @@ class KRCorporateCollector:
                 expected_value,
                 expected_source,
                 expected_as_of_date,
-                metadata_json
+                updated_at
             FROM kr_corporate_earnings_expectations
             WHERE corp_code IN ({corp_placeholders})
               AND expected_source IN ('feed', 'consensus_feed', 'manual')
@@ -2765,7 +2804,6 @@ class KRCorporateCollector:
         if expected_as_of_date:
             query += " AND (expected_as_of_date IS NULL OR expected_as_of_date <= %s)"
             params.append(expected_as_of_date)
-        query += " ORDER BY expected_as_of_date DESC, updated_at DESC"
 
         with self._get_db_connection() as conn:
             cursor = conn.cursor()
@@ -2777,8 +2815,10 @@ class KRCorporateCollector:
             expected_as_of_date=expected_as_of_date,
         )
 
-        normalized_rows: List[Dict[str, Any]] = []
-        dedup_keys = set()
+        normalized_by_key: Dict[tuple, Dict[str, Any]] = {}
+        rank_by_key: Dict[tuple, tuple[date, datetime]] = {}
+        min_date = date(1900, 1, 1)
+        min_datetime = datetime(1900, 1, 1)
         for row in list(naver_feed_rows) + list(rows):
             normalized = self.normalize_expectation_row(
                 row if isinstance(row, dict) else {},
@@ -2799,11 +2839,21 @@ class KRCorporateCollector:
                 normalized["metric_key"],
                 normalized["expected_source"],
             )
-            if dedup_key in dedup_keys:
-                continue
-            dedup_keys.add(dedup_key)
-            normalized_rows.append(normalized)
-        return normalized_rows
+            rank_value = (
+                normalized.get("expected_as_of_date") or min_date,
+                normalized.get("_updated_at") or min_datetime,
+            )
+            previous_rank = rank_by_key.get(dedup_key)
+            if previous_rank is None or rank_value > previous_rank:
+                rank_by_key[dedup_key] = rank_value
+                normalized_by_key[dedup_key] = normalized
+
+        # 안정적인 결과 순서를 유지합니다.
+        ordered_keys = sorted(
+            normalized_by_key.keys(),
+            key=lambda key: (key[0], key[1], int(key[2]), key[3], key[4]),
+        )
+        return [normalized_by_key[key] for key in ordered_keys]
 
     @staticmethod
     def build_expectation_candidate_periods(

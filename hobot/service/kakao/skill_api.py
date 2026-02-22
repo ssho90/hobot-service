@@ -21,6 +21,11 @@ router = APIRouter(prefix="/kakao/skill", tags=["kakao-skill"])
 
 _TIME_RANGE_PATTERN = re.compile(r"^\d+[dmy]$", re.IGNORECASE)
 _INTERNAL_REF_PATTERN = re.compile(r"\b(?:EVT|EV|EVID|CLM)_[A-Za-z0-9]+\b")
+_TEST_UTTERANCE_PLACEHOLDERS = {
+    "발화 내용",
+    "발화내용",
+    "utterance",
+}
 
 
 def _build_kakao_simple_text_response(text: str) -> Dict[str, Any]:
@@ -46,14 +51,24 @@ def _build_kakao_simple_text_response(text: str) -> Dict[str, Any]:
 
 def _extract_utterance(payload: Dict[str, Any]) -> str:
     user_request = payload.get("userRequest") if isinstance(payload.get("userRequest"), dict) else {}
-    utterance = str(user_request.get("utterance") or "").strip()
-    if utterance:
-        return utterance
-
     action = payload.get("action") if isinstance(payload.get("action"), dict) else {}
     params = action.get("params") if isinstance(action.get("params"), dict) else {}
-    fallback = str(params.get("question") or params.get("utterance") or "").strip()
-    return fallback
+    detail_params = action.get("detailParams") if isinstance(action.get("detailParams"), dict) else {}
+
+    utterance = str(user_request.get("utterance") or "").strip()
+    param_utterance = str(params.get("question") or params.get("utterance") or "").strip()
+    if not param_utterance:
+        detail_question = detail_params.get("question") if isinstance(detail_params.get("question"), dict) else {}
+        detail_utterance = detail_params.get("utterance") if isinstance(detail_params.get("utterance"), dict) else {}
+        param_utterance = str(
+            detail_question.get("value") or detail_utterance.get("value") or ""
+        ).strip()
+
+    if param_utterance and (not utterance or utterance.lower() in _TEST_UTTERANCE_PLACEHOLDERS):
+        return param_utterance
+    if utterance:
+        return utterance
+    return param_utterance
 
 
 def _extract_user_id(payload: Dict[str, Any]) -> str:

@@ -769,6 +769,106 @@ class TestKRCorporateCollector(unittest.TestCase):
 
         self.assertEqual(result, ["005930", "000660", "069500"])
 
+    def test_fetch_expectation_rows_from_internal_feed_prefers_latest_row_without_sql_order(self):
+        collector = KRCorporateCollector()
+        collector.resolve_top_corp_codes_for_expectation_feed = (  # type: ignore[method-assign]
+            lambda **_kwargs: ["00126380"]
+        )
+        collector.resolve_stock_codes_from_corp_codes = lambda _codes: []  # type: ignore[method-assign]
+        collector.fetch_expectation_rows_from_naver_stock_codes = lambda **_kwargs: []  # type: ignore[method-assign]
+
+        db_rows = [
+            {
+                "corp_code": "00126380",
+                "stock_code": "005930",
+                "period_year": "2025",
+                "fiscal_quarter": 4,
+                "metric_key": "revenue",
+                "expected_value": 100,
+                "expected_source": "feed",
+                "expected_as_of_date": date(2026, 2, 10),
+                "updated_at": datetime(2026, 2, 10, 9, 0, 0),
+            },
+            {
+                "corp_code": "00126380",
+                "stock_code": "005930",
+                "period_year": "2025",
+                "fiscal_quarter": 4,
+                "metric_key": "revenue",
+                "expected_value": 120,
+                "expected_source": "feed",
+                "expected_as_of_date": date(2026, 2, 12),
+                "updated_at": datetime(2026, 2, 12, 9, 0, 0),
+            },
+        ]
+
+        class _Cursor:
+            def execute(self, _query, _params=None):
+                return None
+
+            def fetchall(self):
+                # DB 정렬 없이 임의 순서로 반환되는 상황을 가정
+                return [db_rows[0], db_rows[1]]
+
+        class _Connection:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def cursor(self):
+                return _Cursor()
+
+        collector._get_db_connection = lambda: _Connection()  # type: ignore[method-assign]
+
+        result = collector.fetch_expectation_rows_from_internal_feed(
+            target_corp_codes=[],
+            candidate_periods=[(2025, 4)],
+            expected_as_of_date=date(2026, 2, 15),
+            top_corp_count=1,
+        )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["expected_value"], 120)
+
+    def test_resolve_top_corp_codes_for_expectation_feed_fallback_on_revenue_sort_error(self):
+        collector = KRCorporateCollector()
+        collector.load_latest_top50_snapshot_rows = lambda **_kwargs: []  # type: ignore[method-assign]
+        collector.capture_top50_snapshot_from_naver = (  # type: ignore[method-assign]
+            lambda **_kwargs: (_ for _ in ()).throw(Exception("naver unavailable"))
+        )
+
+        class _Cursor:
+            def __init__(self):
+                self._last_query = ""
+
+            def execute(self, query, _params=None):
+                self._last_query = str(query)
+                if "MAX(COALESCE(financials.thstrm_add_amount" in self._last_query:
+                    raise Exception("Out of sort memory")
+                return None
+
+            def fetchall(self):
+                if "FROM kr_dart_corp_codes" in self._last_query:
+                    return [{"corp_code": "00126380"}, {"corp_code": "00164779"}]
+                return []
+
+        class _Connection:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def cursor(self):
+                return _Cursor()
+
+        collector._get_db_connection = lambda: _Connection()  # type: ignore[method-assign]
+
+        result = collector.resolve_top_corp_codes_for_expectation_feed(top_corp_count=2)
+        self.assertEqual(result, ["00126380", "00164779"])
+
 
 if __name__ == "__main__":
     unittest.main()
