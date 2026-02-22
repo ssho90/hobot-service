@@ -237,7 +237,7 @@ async def get_strategy_decision_detail(decision_id: str):
             RETURN ev.evidence_id AS evidence_id,
                    ev.text AS text,
                    d.title AS doc_title,
-                   coalesce(d.url, d.link) AS doc_url
+                   coalesce(d['url'], d.link) AS doc_url
             LIMIT 5
             """
             evidence_rows = client.run_read(evidence_query, {"decision_date": decision_date})

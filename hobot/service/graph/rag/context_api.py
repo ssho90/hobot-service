@@ -752,7 +752,7 @@ class GraphRagContextBuilder:
                 OPTIONAL MATCH (d)-[:ABOUT_THEME]->(t:MacroTheme)
                 RETURN d.doc_id AS doc_id,
                        d.title AS title,
-                       coalesce(d.url, d.link) AS url,
+                       coalesce(d['url'], d.link) AS url,
                        d.source AS source,
                        d.country AS country,
                        d.country_code AS country_code,
@@ -1196,7 +1196,7 @@ class GraphRagContextBuilder:
             )
             RETURN d.doc_id AS doc_id,
                    d.title AS title,
-                   coalesce(d.url, d.link) AS url,
+                   coalesce(d['url'], d.link) AS url,
                    d.source AS source,
                    d.country AS country,
                    d.country_code AS country_code,
@@ -1280,7 +1280,7 @@ class GraphRagContextBuilder:
                 OPTIONAL MATCH (d)-[:ABOUT_THEME]->(t:MacroTheme)
                 RETURN d.doc_id AS doc_id,
                        d.title AS title,
-                       coalesce(d.url, d.link) AS url,
+                       coalesce(d['url'], d.link) AS url,
                        d.source AS source,
                        d.country AS country,
                        d.country_code AS country_code,
@@ -1402,7 +1402,7 @@ class GraphRagContextBuilder:
             OPTIONAL MATCH (d)-[:ABOUT_THEME]->(t:MacroTheme)
             RETURN d.doc_id AS doc_id,
                    d.title AS title,
-                   coalesce(d.url, d.link) AS url,
+                   coalesce(d['url'], d.link) AS url,
                    d.source AS source,
                    d.country AS country,
                    d.country_code AS country_code,
@@ -1483,7 +1483,7 @@ class GraphRagContextBuilder:
             OPTIONAL MATCH (d)-[:ABOUT_THEME]->(t:MacroTheme)
             RETURN d.doc_id AS doc_id,
                    d.title AS title,
-                   coalesce(d.url, d.link) AS url,
+                   coalesce(d['url'], d.link) AS url,
                    d.source AS source,
                    d.country AS country,
                    d.country_code AS country_code,
@@ -1562,7 +1562,7 @@ class GraphRagContextBuilder:
             OPTIONAL MATCH (d)-[:ABOUT_THEME]->(t:MacroTheme)
             RETURN d.doc_id AS doc_id,
                    d.title AS title,
-                   coalesce(d.url, d.link) AS url,
+                   coalesce(d['url'], d.link) AS url,
                    d.source AS source,
                    d.country AS country,
                    d.country_code AS country_code,
@@ -1663,7 +1663,7 @@ class GraphRagContextBuilder:
             RETURN ev.evidence_id AS evidence_id,
                    ev.text AS text,
                    d.doc_id AS doc_id,
-                   coalesce(d.url, d.link) AS doc_url,
+                   coalesce(d['url'], d.link) AS doc_url,
                    d.title AS doc_title,
                    d.category AS doc_category,
                    d.published_at AS published_at,

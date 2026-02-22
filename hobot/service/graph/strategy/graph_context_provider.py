@@ -270,7 +270,7 @@ class StrategyGraphContextProvider:
                        ev.text AS text,
                        d.doc_id AS doc_id,
                        d.title AS doc_title,
-                       coalesce(d.url, d.link) AS doc_url,
+                       coalesce(d['url'], d.link) AS doc_url,
                        d.published_at AS published_at
                 ORDER BY d.published_at DESC
                 LIMIT $limit
@@ -300,7 +300,7 @@ class StrategyGraphContextProvider:
                        ev.text AS text,
                        d.doc_id AS doc_id,
                        d.title AS doc_title,
-                       coalesce(d.url, d.link) AS doc_url,
+                       coalesce(d['url'], d.link) AS doc_url,
                        d.published_at AS published_at
                 ORDER BY d.published_at DESC
                 LIMIT $limit

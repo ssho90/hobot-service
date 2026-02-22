@@ -1450,7 +1450,7 @@ def _load_cached_answer(
         RETURN e.evidence_id AS evidence_id,
                e.text AS text,
                d.doc_id AS doc_id,
-               coalesce(d.url, d.link) AS doc_url,
+               coalesce(d['url'], d.link) AS doc_url,
                d.title AS doc_title,
                d.published_at AS published_at,
                collect(DISTINCT labels(target)) AS support_labels_nested
