@@ -105,7 +105,8 @@ class NewsLoader:
             
             query = """
                 SELECT id, title, link, country, category, description,
-                       published_at, source, created_at,
+                       published_at, release_date, effective_date, observed_at,
+                       source, source_type, created_at,
                        title_ko, description_ko, country_ko, category_ko
                 FROM economic_news
                 WHERE DATE(published_at) >= %s AND DATE(published_at) <= %s
@@ -137,6 +138,10 @@ class NewsLoader:
                     'text': text,
                     'link': row.get('link'),
                     'published_at': row['published_at'].isoformat() if row.get('published_at') else None,
+                    'release_date': row['release_date'].isoformat() if row.get('release_date') else None,
+                    'effective_date': row['effective_date'].isoformat() if row.get('effective_date') else None,
+                    'observed_at': row['observed_at'].isoformat() if row.get('observed_at') else None,
+                    'source_type': row.get('source_type'),
                 })
             
             logger.info(f"[NewsLoader] Fetched {len(news_list)} news from MySQL")
@@ -177,6 +182,16 @@ class NewsLoader:
                 d.published_at = CASE WHEN n.published_at IS NOT NULL 
                                       THEN datetime(n.published_at) 
                                       ELSE null END,
+                d.release_date = CASE WHEN n.release_date IS NOT NULL
+                                      THEN datetime(n.release_date)
+                                      ELSE null END,
+                d.effective_date = CASE WHEN n.effective_date IS NOT NULL
+                                        THEN datetime(n.effective_date)
+                                        ELSE null END,
+                d.observed_at = CASE WHEN n.observed_at IS NOT NULL
+                                     THEN datetime(n.observed_at)
+                                     ELSE null END,
+                d.source_type = n.source_type,
                 d.updated_at = datetime()
             """
             

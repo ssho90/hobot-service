@@ -31,6 +31,7 @@ class TestUSTop50EarningsScheduler(unittest.TestCase):
                 include_confirmed=True,
                 lookback_days=5,
                 lookahead_days=30,
+                graph_sync_enabled=False,
             )
 
         self.assertEqual(result["upserted_rows"], 3)
@@ -62,6 +63,7 @@ class TestUSTop50EarningsScheduler(unittest.TestCase):
                 max_symbol_count=1,
                 use_grace_universe=True,
                 grace_max_symbol_count=5,
+                graph_sync_enabled=False,
             )
 
         kwargs = fake_collector.collect_earnings_events.call_args.kwargs
@@ -70,6 +72,38 @@ class TestUSTop50EarningsScheduler(unittest.TestCase):
         self.assertTrue(result["grace_universe_enabled"])
         self.assertEqual(result["grace_symbol_count"], 2)
         self.assertEqual(result["effective_max_symbol_count"], 5)
+
+    def test_run_us_top50_earnings_hotpath_runs_graph_sync_when_enabled(self):
+        fake_collector = Mock()
+        fake_collector.collect_earnings_events.return_value = {
+            "target_symbol_count": 1,
+            "expected_rows": 2,
+            "confirmed_rows": 1,
+            "upserted_rows": 3,
+            "failed_symbols": [],
+        }
+        with patch(
+            "service.macro_trading.scheduler.get_us_corporate_collector",
+            return_value=fake_collector,
+        ), patch(
+            "service.macro_trading.scheduler.sync_equity_projection_to_graph",
+            return_value={"sync_result": {"status": "success"}},
+        ) as graph_sync_mock:
+            result = scheduler.run_us_top50_earnings_hotpath(
+                symbols=["AAPL"],
+                max_symbol_count=5,
+                include_expected=True,
+                include_confirmed=True,
+                lookback_days=5,
+                lookahead_days=30,
+                graph_sync_enabled=True,
+            )
+
+        graph_sync_mock.assert_called_once()
+        kwargs = graph_sync_mock.call_args.kwargs
+        self.assertEqual(kwargs["country_codes"], ("US",))
+        self.assertTrue(result["graph_sync_enabled"])
+        self.assertIsNotNone(result["graph_sync"])
 
     def test_run_us_top50_earnings_hotpath_from_env(self):
         with patch.dict(

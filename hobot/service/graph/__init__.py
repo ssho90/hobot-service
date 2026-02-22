@@ -6,6 +6,7 @@ from .neo4j_client import Neo4jClient, get_neo4j_client
 from .seed_data import run_all_seeds, seed_constraints, seed_themes, seed_indicators, seed_entities, verify_seed
 from .indicator_loader import IndicatorLoader, sync_all_indicators
 from .real_estate_loader import RealEstateSummaryLoader, sync_kr_real_estate_monthly_summary
+from .equity_loader import EquityProjectionLoader, sync_equity_projection
 from .derived_feature_calc import DerivedFeatureCalculator, calculate_all_derived_features
 from .news_loader import (
     NewsLoader,
@@ -15,10 +16,20 @@ from .news_loader import (
     backfill_news_extractions,
     backfill_events_and_affects,
 )
+from .embedding_loader import (
+    DocumentEmbeddingLoader,
+    get_document_embedding_loader,
+    sync_document_embeddings,
+)
 from .impact import EventImpactCalculator, AffectsWeightRecalculator, PhaseCQualityMetrics
 from .stats import CorrelationEdgeGenerator
 from .story import StoryClusterer
-from .scheduler import PhaseCWeeklyBatchRunner, run_phase_c_weekly_jobs
+from .scheduler import (
+    PhaseCWeeklyBatchRunner,
+    Phase5RegressionRequestConfig,
+    run_phase_c_weekly_jobs,
+    run_phase5_golden_regression_jobs,
+)
 from .state import AnalysisRunWriter, MacroStateGenerator, generate_macro_state
 from .monitoring import GraphRagApiCallLogger, GraphRagMonitoringMetrics
 from .rag import (
@@ -47,6 +58,8 @@ __all__ = [
     "sync_all_indicators",
     "RealEstateSummaryLoader",
     "sync_kr_real_estate_monthly_summary",
+    "EquityProjectionLoader",
+    "sync_equity_projection",
     # Derived Features (A-6)
     "DerivedFeatureCalculator",
     "calculate_all_derived_features",
@@ -57,6 +70,9 @@ __all__ = [
     "sync_news_with_extraction_backlog",
     "backfill_news_extractions",
     "backfill_events_and_affects",
+    "DocumentEmbeddingLoader",
+    "get_document_embedding_loader",
+    "sync_document_embeddings",
     # Phase C
     "EventImpactCalculator",
     "AffectsWeightRecalculator",
@@ -65,6 +81,8 @@ __all__ = [
     "StoryClusterer",
     "PhaseCWeeklyBatchRunner",
     "run_phase_c_weekly_jobs",
+    "Phase5RegressionRequestConfig",
+    "run_phase5_golden_regression_jobs",
     # Phase D State
     "MacroStateGenerator",
     "AnalysisRunWriter",

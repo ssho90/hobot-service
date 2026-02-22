@@ -29,19 +29,26 @@ SEC_ARCHIVES_URL_TEMPLATE = "https://www.sec.gov/Archives/edgar/data/{cik_int}/{
 DEFAULT_US_SEC_MAPPING_MAX_AGE_DAYS = 30
 DEFAULT_US_EARNINGS_LOOKBACK_DAYS = 30
 DEFAULT_US_EARNINGS_LOOKAHEAD_DAYS = 120
-DEFAULT_US_EARNINGS_MAX_SYMBOL_COUNT = 50
-DEFAULT_US_FINANCIALS_MAX_SYMBOL_COUNT = 50
+DEFAULT_US_EARNINGS_MAX_SYMBOL_COUNT = 100
+DEFAULT_US_FINANCIALS_MAX_SYMBOL_COUNT = 100
 DEFAULT_US_FINANCIALS_MAX_PERIODS_PER_STATEMENT = 12
+DEFAULT_US_TOP50_DAILY_OHLCV_LOOKBACK_DAYS = 365
+DEFAULT_US_TOP50_OHLCV_CONTINUITY_DAYS = 120
 US_TOP50_DEFAULT_MARKET = "US"
 US_TOP50_DEFAULT_SOURCE_URL = "internal://us-top50-fixed"
 
-# Fixed US Top50-ish large caps for phase 2.5 baseline operation.
+# Fixed US Top100-ish large caps for phase 2.5 baseline operation.
 DEFAULT_US_TOP50_FIXED_SYMBOLS: Sequence[str] = (
     "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "AVGO",
     "JPM", "WMT", "LLY", "V", "XOM", "MA", "COST", "NFLX", "PG", "JNJ",
     "HD", "ABBV", "BAC", "KO", "ORCL", "CRM", "CVX", "AMD", "MRK", "PEP",
     "TMO", "ADBE", "MCD", "CSCO", "WFC", "ACN", "ABT", "IBM", "LIN", "INTU",
     "QCOM", "DHR", "AMAT", "GE", "DIS", "CAT", "TXN", "VZ", "NOW", "PFE",
+    "ISRG", "SPGI", "UNH", "MS", "GS", "BX", "BLK", "UBER", "PLTR", "MU",
+    "PANW", "SYK", "HON", "RTX", "LMT", "NKE", "T", "LOW", "C", "SCHW",
+    "DE", "ADP", "MDT", "GILD", "VRTX", "BKNG", "AMGN", "LRCX", "KLAC", "SNPS",
+    "CDNS", "ANET", "PYPL", "SHOP", "FI", "MMC", "ICE", "CME", "SO", "DUK",
+    "COP", "SLB", "EOG", "MO", "CMCSA", "TMUS", "AEP", "MMM", "F", "GM",
 )
 
 SEC_EARNINGS_FORMS = {"8-K", "10-Q", "10-K"}
@@ -78,6 +85,8 @@ def _safe_int(value: Any) -> Optional[int]:
     if isinstance(value, int):
         return value
     if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
         return int(value)
     text = str(value).strip().replace(",", "")
     if not text or text == "-":
@@ -304,6 +313,31 @@ class USCorporateCollector:
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 """
             )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS us_top50_daily_ohlcv (
+                    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                    market VARCHAR(16) NOT NULL DEFAULT 'US',
+                    symbol VARCHAR(16) NOT NULL,
+                    trade_date DATE NOT NULL,
+                    open_price DOUBLE NULL,
+                    high_price DOUBLE NULL,
+                    low_price DOUBLE NULL,
+                    close_price DOUBLE NULL,
+                    adjusted_close DOUBLE NULL,
+                    volume BIGINT NULL,
+                    source VARCHAR(32) NOT NULL DEFAULT 'yfinance',
+                    source_ref VARCHAR(128) NOT NULL DEFAULT '',
+                    as_of_date DATE NULL,
+                    metadata_json JSON NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_us_top50_daily_ohlcv (market, symbol, trade_date),
+                    INDEX idx_us_top50_daily_ohlcv_date (market, trade_date),
+                    INDEX idx_us_top50_daily_ohlcv_symbol (market, symbol)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                """
+            )
 
     @staticmethod
     def _coerce_snapshot_date(value: Any) -> Optional[date]:
@@ -471,6 +505,42 @@ class USCorporateCollector:
             )
             rows = cursor.fetchall() or []
         return list(rows)
+
+    def load_top50_symbols_in_snapshot_window(
+        self,
+        *,
+        market: str = US_TOP50_DEFAULT_MARKET,
+        start_date: date,
+        end_date: Optional[date] = None,
+        limit: int = DEFAULT_US_EARNINGS_MAX_SYMBOL_COUNT,
+    ) -> List[str]:
+        self.ensure_tables()
+        resolved_market = str(market or US_TOP50_DEFAULT_MARKET).strip().upper() or US_TOP50_DEFAULT_MARKET
+        resolved_start_date = self._coerce_snapshot_date(start_date)
+        resolved_end_date = self._coerce_snapshot_date(end_date or date.today())
+        if not resolved_start_date or not resolved_end_date or resolved_start_date > resolved_end_date:
+            return []
+
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT symbol
+                FROM us_top50_universe_snapshot
+                WHERE market = %s
+                  AND snapshot_date BETWEEN %s AND %s
+                  AND rank_position <= %s
+                ORDER BY snapshot_date DESC, rank_position ASC
+                """,
+                (
+                    resolved_market,
+                    resolved_start_date,
+                    resolved_end_date,
+                    max(int(limit), 1),
+                ),
+            )
+            rows = cursor.fetchall() or []
+        return self._normalize_symbols(row.get("symbol") for row in rows if row.get("symbol"))
 
     def build_top50_snapshot_diff(
         self,
@@ -759,6 +829,356 @@ class USCorporateCollector:
             "saved_rows": int(affected),
             "ranked_by_market_cap": bool(rank_by_market_cap),
         }
+
+    def resolve_top50_symbols_for_ohlcv(
+        self,
+        *,
+        symbols: Optional[Iterable[str]] = None,
+        extra_symbols: Optional[Iterable[str]] = None,
+        max_symbol_count: int = DEFAULT_US_EARNINGS_MAX_SYMBOL_COUNT,
+        market: str = US_TOP50_DEFAULT_MARKET,
+        continuity_days: int = DEFAULT_US_TOP50_OHLCV_CONTINUITY_DAYS,
+        reference_end_date: Optional[date] = None,
+    ) -> List[str]:
+        resolved_limit = max(int(max_symbol_count), 1)
+        normalized_extra_symbols = self._normalize_symbols(extra_symbols)
+
+        def _merge_with_extra(base_symbols: Sequence[str]) -> List[str]:
+            return self._normalize_symbols([*base_symbols, *normalized_extra_symbols])
+
+        explicit_symbols = self._normalize_symbols(symbols)
+        if explicit_symbols:
+            return _merge_with_extra(explicit_symbols[:resolved_limit])
+
+        snapshot_rows = self.load_latest_top50_snapshot_rows(
+            market=market,
+            limit=resolved_limit,
+        )
+        snapshot_symbols = self._normalize_symbols(
+            [row.get("symbol") for row in snapshot_rows if row.get("symbol")]
+        )
+        resolved_continuity_days = max(int(continuity_days), 0)
+        if snapshot_symbols:
+            if resolved_continuity_days <= 0:
+                return _merge_with_extra(snapshot_symbols[:resolved_limit])
+
+            continuity_end_date = self._coerce_snapshot_date(reference_end_date or date.today()) or date.today()
+            continuity_start_date = continuity_end_date - timedelta(days=resolved_continuity_days - 1)
+            continuity_symbols = self.load_top50_symbols_in_snapshot_window(
+                market=market,
+                start_date=continuity_start_date,
+                end_date=continuity_end_date,
+                limit=resolved_limit,
+            )
+            if continuity_symbols:
+                merged_symbols = self._normalize_symbols([*snapshot_symbols, *continuity_symbols])
+                if merged_symbols:
+                    return _merge_with_extra(merged_symbols)
+            return _merge_with_extra(snapshot_symbols[:resolved_limit])
+
+        if resolved_continuity_days > 0:
+            continuity_end_date = self._coerce_snapshot_date(reference_end_date or date.today()) or date.today()
+            continuity_start_date = continuity_end_date - timedelta(days=resolved_continuity_days - 1)
+            continuity_symbols = self.load_top50_symbols_in_snapshot_window(
+                market=market,
+                start_date=continuity_start_date,
+                end_date=continuity_end_date,
+                limit=resolved_limit,
+            )
+            if continuity_symbols:
+                return _merge_with_extra(continuity_symbols)
+
+        fallback_symbols = self.resolve_target_symbols(
+            symbols=None,
+            max_symbol_count=resolved_limit,
+        )
+        return _merge_with_extra(fallback_symbols)
+
+    def fetch_daily_ohlcv_rows_from_yfinance(
+        self,
+        *,
+        symbols: Sequence[str],
+        market: str = US_TOP50_DEFAULT_MARKET,
+        start_date: date,
+        end_date: date,
+        as_of_date: date,
+    ) -> Dict[str, Any]:
+        try:
+            import yfinance as yf
+        except Exception:
+            logger.warning("yfinance is unavailable. US Top50 daily OHLCV collection will be skipped.")
+            return {
+                "rows": [],
+                "rows_by_symbol": {},
+                "failed_symbols": [
+                    {"symbol": "__all__", "reason": "yfinance_unavailable"}
+                ],
+            }
+
+        resolved_market = str(market or US_TOP50_DEFAULT_MARKET).strip().upper() or US_TOP50_DEFAULT_MARKET
+        normalized_symbols = self._normalize_symbols(symbols)
+        if not normalized_symbols:
+            return {"rows": [], "rows_by_symbol": {}, "failed_symbols": []}
+
+        request_end_date = end_date + timedelta(days=1)
+        try:
+            downloaded = yf.download(
+                tickers=list(normalized_symbols),
+                start=start_date.isoformat(),
+                end=request_end_date.isoformat(),
+                interval="1d",
+                auto_adjust=False,
+                progress=False,
+                group_by="ticker",
+                threads=True,
+            )
+        except Exception as exc:
+            logger.warning("yfinance OHLCV download failed(symbol_count=%s): %s", len(normalized_symbols), exc)
+            return {
+                "rows": [],
+                "rows_by_symbol": {},
+                "failed_symbols": [
+                    {"symbol": symbol, "reason": f"download_failed:{exc}"}
+                    for symbol in normalized_symbols
+                ],
+            }
+
+        rows: List[Dict[str, Any]] = []
+        rows_by_symbol: Dict[str, int] = {}
+        failed_symbols: List[Dict[str, str]] = []
+        single_symbol_mode = len(normalized_symbols) == 1
+
+        for symbol in normalized_symbols:
+            symbol_frame = None
+            try:
+                columns = getattr(downloaded, "columns", None)
+                if hasattr(columns, "nlevels") and int(columns.nlevels) > 1:
+                    level0_values = list(columns.get_level_values(0))
+                    if symbol in level0_values:
+                        symbol_frame = downloaded[symbol]
+                    else:
+                        try:
+                            symbol_frame = downloaded.xs(symbol, axis=1, level=-1)
+                        except Exception:
+                            symbol_frame = None
+                elif single_symbol_mode:
+                    symbol_frame = downloaded
+            except Exception:
+                symbol_frame = None
+
+            if symbol_frame is None or getattr(symbol_frame, "empty", True):
+                failed_symbols.append({"symbol": symbol, "reason": "no_ohlcv_rows"})
+                continue
+
+            symbol_row_count = 0
+            try:
+                for index_value, value_row in symbol_frame.iterrows():
+                    trade_date = _extract_date(index_value)
+                    if not trade_date or trade_date < start_date or trade_date > end_date:
+                        continue
+                    open_price = _safe_float(value_row.get("Open"))
+                    high_price = _safe_float(value_row.get("High"))
+                    low_price = _safe_float(value_row.get("Low"))
+                    close_price = _safe_float(value_row.get("Close"))
+                    adjusted_close = _safe_float(value_row.get("Adj Close"))
+                    if adjusted_close is None:
+                        adjusted_close = close_price
+                    volume_raw = _safe_int(value_row.get("Volume"))
+                    volume = volume_raw if volume_raw is not None and volume_raw >= 0 else None
+                    if (
+                        open_price is None
+                        and high_price is None
+                        and low_price is None
+                        and close_price is None
+                        and adjusted_close is None
+                        and volume is None
+                    ):
+                        continue
+
+                    rows.append(
+                        {
+                            "market": resolved_market,
+                            "symbol": symbol,
+                            "trade_date": trade_date,
+                            "open_price": open_price,
+                            "high_price": high_price,
+                            "low_price": low_price,
+                            "close_price": close_price,
+                            "adjusted_close": adjusted_close,
+                            "volume": volume,
+                            "source": "yfinance",
+                            "source_ref": f"{symbol}:{trade_date.isoformat()}",
+                            "as_of_date": as_of_date,
+                            "metadata_json": _to_json(
+                                {
+                                    "yf_symbol": symbol,
+                                    "market": resolved_market,
+                                }
+                            ),
+                        }
+                    )
+                    symbol_row_count += 1
+            except Exception as exc:
+                failed_symbols.append({"symbol": symbol, "reason": f"parse_failed:{exc}"})
+                continue
+
+            if symbol_row_count <= 0:
+                failed_symbols.append({"symbol": symbol, "reason": "no_rows_in_window"})
+                continue
+            rows_by_symbol[symbol] = symbol_row_count
+
+        return {
+            "rows": rows,
+            "rows_by_symbol": rows_by_symbol,
+            "failed_symbols": failed_symbols,
+        }
+
+    def upsert_top50_daily_ohlcv_rows(self, rows: Sequence[Dict[str, Any]]) -> int:
+        if not rows:
+            return 0
+        self.ensure_tables()
+        query = """
+            INSERT INTO us_top50_daily_ohlcv (
+                market,
+                symbol,
+                trade_date,
+                open_price,
+                high_price,
+                low_price,
+                close_price,
+                adjusted_close,
+                volume,
+                source,
+                source_ref,
+                as_of_date,
+                metadata_json
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                open_price = VALUES(open_price),
+                high_price = VALUES(high_price),
+                low_price = VALUES(low_price),
+                close_price = VALUES(close_price),
+                adjusted_close = VALUES(adjusted_close),
+                volume = VALUES(volume),
+                source = VALUES(source),
+                source_ref = VALUES(source_ref),
+                as_of_date = VALUES(as_of_date),
+                metadata_json = VALUES(metadata_json),
+                updated_at = CURRENT_TIMESTAMP
+        """
+        payload = [
+            (
+                row.get("market"),
+                row.get("symbol"),
+                row.get("trade_date"),
+                row.get("open_price"),
+                row.get("high_price"),
+                row.get("low_price"),
+                row.get("close_price"),
+                row.get("adjusted_close"),
+                row.get("volume"),
+                row.get("source") or "yfinance",
+                row.get("source_ref") or "",
+                row.get("as_of_date"),
+                row.get("metadata_json"),
+            )
+            for row in rows
+        ]
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.executemany(query, payload)
+            return int(cursor.rowcount or 0)
+
+    def collect_top50_daily_ohlcv(
+        self,
+        *,
+        symbols: Optional[Iterable[str]] = None,
+        extra_symbols: Optional[Iterable[str]] = None,
+        max_symbol_count: int = DEFAULT_US_EARNINGS_MAX_SYMBOL_COUNT,
+        market: str = US_TOP50_DEFAULT_MARKET,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        lookback_days: int = DEFAULT_US_TOP50_DAILY_OHLCV_LOOKBACK_DAYS,
+        continuity_days: int = DEFAULT_US_TOP50_OHLCV_CONTINUITY_DAYS,
+        as_of_date: Optional[date] = None,
+    ) -> Dict[str, Any]:
+        self.ensure_tables()
+        run_as_of = as_of_date or date.today()
+        resolved_end_date = end_date or run_as_of
+        explicit_symbols = self._normalize_symbols(symbols)
+        normalized_extra_symbols = self._normalize_symbols(extra_symbols)
+        resolved_continuity_days = max(int(continuity_days), 0)
+        if start_date:
+            resolved_start_date = start_date
+        else:
+            resolved_lookback = max(int(lookback_days), 1)
+            resolved_start_date = resolved_end_date - timedelta(days=resolved_lookback - 1)
+        if resolved_start_date > resolved_end_date:
+            raise ValueError("start_date must be <= end_date")
+
+        resolved_symbols = self.resolve_top50_symbols_for_ohlcv(
+            symbols=explicit_symbols or None,
+            extra_symbols=normalized_extra_symbols or None,
+            max_symbol_count=max_symbol_count,
+            market=market,
+            continuity_days=resolved_continuity_days,
+            reference_end_date=resolved_end_date,
+        )
+        if not resolved_symbols:
+            raise ValueError("No target US symbols resolved for daily OHLCV collection.")
+
+        latest_snapshot_symbols: List[str] = []
+        if not explicit_symbols:
+            latest_snapshot_rows = self.load_latest_top50_snapshot_rows(
+                market=market,
+                limit=max(int(max_symbol_count), 1),
+            )
+            latest_snapshot_symbols = self._normalize_symbols(
+                [row.get("symbol") for row in latest_snapshot_rows if row.get("symbol")]
+            )
+        latest_snapshot_set = set(latest_snapshot_symbols)
+        continuity_extra_symbols = [
+            symbol for symbol in resolved_symbols
+            if latest_snapshot_set and symbol not in latest_snapshot_set
+        ]
+
+        summary: Dict[str, Any] = {
+            "market": str(market or US_TOP50_DEFAULT_MARKET).strip().upper() or US_TOP50_DEFAULT_MARKET,
+            "as_of_date": run_as_of.isoformat(),
+            "start_date": resolved_start_date.isoformat(),
+            "end_date": resolved_end_date.isoformat(),
+            "lookback_days": max((resolved_end_date - resolved_start_date).days + 1, 1),
+            "continuity_days": resolved_continuity_days,
+            "continuity_enabled": bool(resolved_continuity_days > 0 and not explicit_symbols),
+            "target_symbol_count": len(resolved_symbols),
+            "target_symbols": resolved_symbols,
+            "extra_symbol_count": len(normalized_extra_symbols),
+            "extra_symbols": normalized_extra_symbols,
+            "latest_snapshot_symbol_count": len(latest_snapshot_symbols),
+            "continuity_extra_symbol_count": len(continuity_extra_symbols),
+            "continuity_extra_symbols": continuity_extra_symbols,
+            "rows_by_symbol": {},
+            "fetched_rows": 0,
+            "upserted_rows": 0,
+            "failed_symbols": [],
+            "started_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+        fetch_result = self.fetch_daily_ohlcv_rows_from_yfinance(
+            symbols=resolved_symbols,
+            market=summary["market"],
+            start_date=resolved_start_date,
+            end_date=resolved_end_date,
+            as_of_date=run_as_of,
+        )
+        rows = list(fetch_result.get("rows") or [])
+        summary["rows_by_symbol"] = dict(fetch_result.get("rows_by_symbol") or {})
+        summary["failed_symbols"] = list(fetch_result.get("failed_symbols") or [])
+        summary["fetched_rows"] = len(rows)
+        summary["upserted_rows"] = self.upsert_top50_daily_ohlcv_rows(rows)
+        summary["finished_at"] = datetime.now(timezone.utc).isoformat()
+        return summary
 
     def fetch_sec_company_tickers(self) -> List[Dict[str, Any]]:
         payload = self._fetch_json(

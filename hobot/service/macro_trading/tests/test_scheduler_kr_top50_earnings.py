@@ -44,6 +44,7 @@ class TestKRTop50EarningsHotpath(unittest.TestCase):
                 max_corp_count=50,
                 per_corp_max_pages=2,
                 immediate_fundamentals=True,
+                graph_sync_enabled=False,
             )
 
         self.assertEqual(disclosure_mock.call_count, 1)
@@ -72,6 +73,7 @@ class TestKRTop50EarningsHotpath(unittest.TestCase):
             result = scheduler.run_kr_top50_earnings_hotpath(
                 lookback_days=1,
                 immediate_fundamentals=True,
+                graph_sync_enabled=False,
             )
 
         self.assertEqual(disclosure_mock.call_count, 1)
@@ -98,6 +100,7 @@ class TestKRTop50EarningsHotpath(unittest.TestCase):
             result = scheduler.run_kr_top50_earnings_hotpath(
                 lookback_days=1,
                 immediate_fundamentals=False,
+                graph_sync_enabled=False,
             )
 
         self.assertEqual(disclosure_mock.call_count, 1)
@@ -119,6 +122,7 @@ class TestKRTop50EarningsHotpath(unittest.TestCase):
                 use_grace_universe=True,
                 grace_lookback_days=365,
                 grace_max_symbol_count=150,
+                graph_sync_enabled=False,
             )
 
         kwargs = disclosure_mock.call_args.kwargs
@@ -127,6 +131,26 @@ class TestKRTop50EarningsHotpath(unittest.TestCase):
         self.assertTrue(result["grace_universe_enabled"])
         self.assertEqual(result["grace_corp_code_count"], 2)
         self.assertEqual(result["grace_lookback_days"], 365)
+
+    def test_hotpath_runs_graph_sync_when_enabled(self):
+        with patch(
+            "service.macro_trading.scheduler.collect_kr_corporate_disclosure_events",
+            return_value={"new_earnings_events": []},
+        ), patch(
+            "service.macro_trading.scheduler.sync_equity_projection_to_graph",
+            return_value={"sync_result": {"status": "success"}},
+        ) as graph_sync_mock:
+            result = scheduler.run_kr_top50_earnings_hotpath(
+                lookback_days=1,
+                immediate_fundamentals=False,
+                graph_sync_enabled=True,
+            )
+
+        graph_sync_mock.assert_called_once()
+        kwargs = graph_sync_mock.call_args.kwargs
+        self.assertEqual(kwargs["country_codes"], ("KR",))
+        self.assertTrue(result["graph_sync_enabled"])
+        self.assertIsNotNone(result["graph_sync"])
 
 
 class TestKRTop50EarningsSchedulerDefaults(unittest.TestCase):

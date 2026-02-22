@@ -1263,7 +1263,8 @@ async def run_ai_analysis_manual(admin_user: dict = Depends(require_admin)):
         
         logging.info(f"수동 AI 분석 실행 요청: {admin_user.get('username')}")
         
-        success = run_ai_analysis()
+        trigger_user_id = admin_user.get("id") or admin_user.get("username")
+        success = run_ai_analysis(triggered_by_user_id=trigger_user_id)
         
         if success:
             return {
@@ -3833,6 +3834,12 @@ async def get_llm_monitoring_logs(
                     model_name,
                     provider,
                     service_name,
+                    user_id,
+                    flow_type,
+                    flow_run_id,
+                    agent_name,
+                    trace_order,
+                    metadata_json,
                     prompt_tokens,
                     completion_tokens,
                     total_tokens,
@@ -4077,6 +4084,255 @@ async def get_llm_users(admin_user: dict = Depends(require_admin)):
             }
     except Exception as e:
         logging.error(f"LLM 사용자 목록 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/multi-agent-monitoring/options")
+async def get_multi_agent_monitoring_options(admin_user: dict = Depends(require_admin)):
+    """멀티에이전트 모니터링 필터 옵션 조회"""
+    try:
+        from service.database.db import get_db_connection
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                """
+                SELECT DISTINCT flow_type
+                FROM llm_usage_logs
+                WHERE flow_type IS NOT NULL AND flow_type != ''
+                ORDER BY flow_type
+                """
+            )
+            flow_types = [row["flow_type"] for row in cursor.fetchall()]
+            if not flow_types:
+                flow_types = ["chatbot", "dashboard_ai_analysis"]
+
+            cursor.execute(
+                """
+                SELECT DISTINCT COALESCE(NULLIF(user_id, ''), 'system') AS user_id
+                FROM llm_usage_logs
+                WHERE flow_type IS NOT NULL AND flow_type != ''
+                ORDER BY user_id
+                """
+            )
+            users = [row["user_id"] for row in cursor.fetchall()]
+
+            return {
+                "status": "success",
+                "flow_types": flow_types,
+                "users": users,
+            }
+    except Exception as e:
+        logging.error(f"멀티에이전트 옵션 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/multi-agent-monitoring/flows")
+async def get_multi_agent_flow_runs(
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    flow_type: Optional[str] = Query(default=None),
+    user_id: Optional[str] = Query(default=None),
+    start_date: Optional[str] = Query(default=None),
+    end_date: Optional[str] = Query(default=None),
+    admin_user: dict = Depends(require_admin),
+):
+    """멀티에이전트 run 목록(요청 단위) 조회"""
+    try:
+        from service.database.db import get_db_connection
+
+        conditions = [
+            "flow_run_id IS NOT NULL",
+            "flow_run_id != ''",
+            "flow_type IS NOT NULL",
+            "flow_type != ''",
+        ]
+        params: List[Any] = []
+
+        if flow_type and flow_type.lower() != "all":
+            conditions.append("flow_type = %s")
+            params.append(flow_type)
+
+        if user_id and user_id.lower() != "all":
+            if user_id == "system":
+                conditions.append("COALESCE(NULLIF(user_id, ''), 'system') = 'system'")
+            else:
+                conditions.append("user_id = %s")
+                params.append(user_id)
+
+        if start_date:
+            if " " in start_date or "T" in start_date:
+                conditions.append("created_at >= %s")
+            else:
+                conditions.append("DATE(created_at) >= %s")
+            params.append(start_date)
+
+        if end_date:
+            if " " in end_date or "T" in end_date:
+                conditions.append("created_at <= %s")
+            else:
+                conditions.append("DATE(created_at) <= %s")
+            params.append(end_date)
+
+        where_clause = "WHERE " + " AND ".join(conditions)
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            count_query = f"""
+                SELECT COUNT(*) AS total
+                FROM (
+                    SELECT flow_run_id
+                    FROM llm_usage_logs
+                    {where_clause}
+                    GROUP BY flow_run_id
+                ) AS run_counts
+            """
+            cursor.execute(count_query, params)
+            total_result = cursor.fetchone() or {}
+            total = int(total_result.get("total") or 0)
+
+            flow_query = f"""
+                SELECT
+                    flow_run_id,
+                    flow_type,
+                    COALESCE(NULLIF(user_id, ''), 'system') AS user_id,
+                    MIN(created_at) AS started_at,
+                    MAX(created_at) AS ended_at,
+                    ROUND(TIMESTAMPDIFF(MICROSECOND, MIN(created_at), MAX(created_at)) / 1000, 0) AS flow_duration_ms,
+                    COUNT(*) AS call_count,
+                    SUM(prompt_tokens) AS total_prompt_tokens,
+                    SUM(completion_tokens) AS total_completion_tokens,
+                    SUM(total_tokens) AS total_tokens,
+                    SUM(COALESCE(duration_ms, 0)) AS llm_duration_ms,
+                    GROUP_CONCAT(DISTINCT service_name ORDER BY service_name SEPARATOR ', ') AS services,
+                    GROUP_CONCAT(DISTINCT model_name ORDER BY model_name SEPARATOR ', ') AS models
+                FROM llm_usage_logs
+                {where_clause}
+                GROUP BY flow_run_id, flow_type, COALESCE(NULLIF(user_id, ''), 'system')
+                ORDER BY started_at DESC
+                LIMIT %s OFFSET %s
+            """
+            flow_params = list(params) + [limit, offset]
+            cursor.execute(flow_query, flow_params)
+            rows = cursor.fetchall()
+
+            flows = []
+            for row in rows:
+                started_at = row.get("started_at")
+                ended_at = row.get("ended_at")
+                flows.append(
+                    {
+                        "flow_run_id": row.get("flow_run_id"),
+                        "flow_type": row.get("flow_type"),
+                        "user_id": row.get("user_id"),
+                        "started_at": started_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(started_at, "strftime") else str(started_at),
+                        "ended_at": ended_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(ended_at, "strftime") else str(ended_at),
+                        "flow_duration_ms": int(row.get("flow_duration_ms") or 0),
+                        "call_count": int(row.get("call_count") or 0),
+                        "total_prompt_tokens": int(row.get("total_prompt_tokens") or 0),
+                        "total_completion_tokens": int(row.get("total_completion_tokens") or 0),
+                        "total_tokens": int(row.get("total_tokens") or 0),
+                        "llm_duration_ms": int(row.get("llm_duration_ms") or 0),
+                        "services": row.get("services") or "",
+                        "models": row.get("models") or "",
+                    }
+                )
+
+            return {
+                "status": "success",
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "flows": flows,
+                "data": flows,
+            }
+    except Exception as e:
+        logging.error(f"멀티에이전트 run 목록 조회 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/multi-agent-monitoring/calls")
+async def get_multi_agent_flow_calls(
+    flow_run_id: str = Query(..., min_length=1),
+    admin_user: dict = Depends(require_admin),
+):
+    """특정 run의 LLM 호출 상세 조회"""
+    try:
+        from service.database.db import get_db_connection
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    flow_run_id,
+                    flow_type,
+                    COALESCE(NULLIF(user_id, ''), 'system') AS user_id,
+                    service_name,
+                    agent_name,
+                    model_name,
+                    provider,
+                    prompt_tokens,
+                    completion_tokens,
+                    total_tokens,
+                    duration_ms,
+                    trace_order,
+                    metadata_json,
+                    request_prompt,
+                    response_prompt,
+                    created_at
+                FROM llm_usage_logs
+                WHERE flow_run_id = %s
+                ORDER BY created_at ASC, id ASC
+                """,
+                (flow_run_id,),
+            )
+            rows = cursor.fetchall()
+
+            calls = []
+            for row in rows:
+                metadata_payload = row.get("metadata_json")
+                if isinstance(metadata_payload, str) and metadata_payload:
+                    try:
+                        metadata_payload = json.loads(metadata_payload)
+                    except Exception:
+                        metadata_payload = {"raw": metadata_payload}
+
+                created_at = row.get("created_at")
+                calls.append(
+                    {
+                        "id": row.get("id"),
+                        "flow_run_id": row.get("flow_run_id"),
+                        "flow_type": row.get("flow_type"),
+                        "user_id": row.get("user_id"),
+                        "service_name": row.get("service_name"),
+                        "agent_name": row.get("agent_name"),
+                        "model_name": row.get("model_name"),
+                        "provider": row.get("provider"),
+                        "prompt_tokens": int(row.get("prompt_tokens") or 0),
+                        "completion_tokens": int(row.get("completion_tokens") or 0),
+                        "total_tokens": int(row.get("total_tokens") or 0),
+                        "duration_ms": int(row.get("duration_ms") or 0),
+                        "trace_order": row.get("trace_order"),
+                        "metadata_json": metadata_payload,
+                        "request_prompt": row.get("request_prompt"),
+                        "response_prompt": row.get("response_prompt"),
+                        "created_at": created_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(created_at, "strftime") else str(created_at),
+                    }
+                )
+
+            return {
+                "status": "success",
+                "flow_run_id": flow_run_id,
+                "call_count": len(calls),
+                "calls": calls,
+                "data": calls,
+            }
+    except Exception as e:
+        logging.error(f"멀티에이전트 호출 상세 조회 실패: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 

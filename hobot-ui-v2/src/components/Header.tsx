@@ -33,6 +33,7 @@ export const Header: React.FC = () => {
     { path: '/admin/users', label: '사용자 관리' },
     { path: '/admin/logs', label: '로그 관리' },
     { path: '/admin/llm', label: 'LLM 모니터링' },
+    { path: '/admin/multi-agent', label: 'Multi-Agent 모니터링' },
     { path: '/admin/rebalancing', label: '리밸런싱 관리' },
     { path: '/admin/files', label: '파일 업로드' },
   ];

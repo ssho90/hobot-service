@@ -308,6 +308,26 @@ def init_database():
             cursor.execute("ALTER TABLE economic_news ADD COLUMN category_ko VARCHAR(100) COMMENT '카테고리 한글 번역'")
         except Exception:
             pass
+
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN release_date DATETIME NULL COMMENT '공식 발표 시각'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN effective_date DATETIME NULL COMMENT '효력 발생 시각'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN observed_at DATETIME NULL COMMENT '수집 관측 시각'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE economic_news ADD COLUMN source_type VARCHAR(64) NULL COMMENT '소스 유형(예: policy_document)'")
+        except Exception:
+            pass
         
         # LLM 사용 로그 테이블
         cursor.execute("""
@@ -323,12 +343,20 @@ def init_database():
                 service_name VARCHAR(100) COMMENT '서비스명 (어떤 기능에서 호출했는지)',
                 duration_ms INT COMMENT '응답 시간 (밀리초)',
                 user_id VARCHAR(100) COMMENT '사용자 ID (인증된 사용자의 경우)',
+                flow_type VARCHAR(64) NULL COMMENT '멀티에이전트 플로우 타입 (예: chatbot, dashboard_ai_analysis)',
+                flow_run_id VARCHAR(80) NULL COMMENT '동일 요청(run) 추적 ID',
+                agent_name VARCHAR(100) NULL COMMENT '호출 주체 에이전트/유틸리티 이름',
+                trace_order INT NULL COMMENT 'run 내 호출 순서',
+                metadata_json JSON NULL COMMENT '추가 메타데이터(JSON)',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
                 INDEX idx_model_name (model_name) COMMENT '모델명 인덱스',
                 INDEX idx_provider (provider) COMMENT '제공자 인덱스',
                 INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스 (일자별 조회용)',
                 INDEX idx_service_name (service_name) COMMENT '서비스명 인덱스',
-                INDEX idx_user_id (user_id) COMMENT '사용자 ID 인덱스'
+                INDEX idx_user_id (user_id) COMMENT '사용자 ID 인덱스',
+                INDEX idx_flow_type (flow_type) COMMENT '플로우 타입 인덱스',
+                INDEX idx_flow_run_id (flow_run_id) COMMENT '플로우 run 인덱스',
+                INDEX idx_agent_name (agent_name) COMMENT '에이전트명 인덱스'
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='LLM 사용 로그'
         """)
         
@@ -338,6 +366,46 @@ def init_database():
             cursor.execute("ALTER TABLE llm_usage_logs ADD INDEX idx_user_id (user_id)")
         except Exception:
             pass  # 이미 존재하는 경우 무시
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD COLUMN flow_type VARCHAR(64) NULL COMMENT '멀티에이전트 플로우 타입 (예: chatbot, dashboard_ai_analysis)'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD COLUMN flow_run_id VARCHAR(80) NULL COMMENT '동일 요청(run) 추적 ID'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD COLUMN agent_name VARCHAR(100) NULL COMMENT '호출 주체 에이전트/유틸리티 이름'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD COLUMN trace_order INT NULL COMMENT 'run 내 호출 순서'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD COLUMN metadata_json JSON NULL COMMENT '추가 메타데이터(JSON)'")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD INDEX idx_flow_type (flow_type)")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD INDEX idx_flow_run_id (flow_run_id)")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE llm_usage_logs ADD INDEX idx_agent_name (agent_name)")
+        except Exception:
+            pass
         
         # 시장 뉴스 요약 테이블 (원본 분석 및 브리핑용 요약)
         cursor.execute("""

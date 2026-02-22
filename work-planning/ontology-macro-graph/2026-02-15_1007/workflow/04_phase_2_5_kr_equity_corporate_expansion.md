@@ -355,7 +355,7 @@
 ### 3.5 테스트/운영 검증
 - [x] P2 일간 수집 성공률 모니터링 지표 추가
 - [x] DART 분기 반영 지연(D+1) 준수 여부 점검 자동화
-- [ ] 종목코드/기업코드 불일치 케이스 회귀 테스트 구축
+- [x] 종목코드/기업코드 불일치 케이스 회귀 테스트 구축
 
 ## 4. 완료 기준 (DoD)
 - KR P2/P3 파이프라인이 일간/분기 운영 주기에서 안정 동작한다.
@@ -422,6 +422,32 @@
   - 테스트 추가:
     - `test_scheduler_kr_dart_dplus1_sla.py`
     - `test_indicator_health.py` (D+1 SLA note 포맷 검증)
+
+진행 현황 업데이트 (2026-02-18, 14차)
+- [x] 종목코드/기업코드 매핑 검증 회귀 테스트 보강 완료
+  - `test_kr_corporate_collector.py`
+    - `validate_top50_corp_code_mapping` 이슈 케이스(누락/불일치/중복) 회귀 검증 추가
+  - `test_scheduler_kr_corp_code_mapping_validation.py`
+    - 스케줄러-수집기 인자 전달/환경변수 파싱 검증 유지 확인
+- [x] D+1 `no_events` 원인 점검 및 커버리지 보강 완료
+  - 원인: Top50 대상 기간에 `is_earnings_event=1` 공시가 없어 `checked_event_count=0` 발생
+  - 보강:
+    - D+1 점검 시 `event_type=periodic_report` 또는 `분기/반기/사업보고서`까지 점검 대상 포함
+    - 공시가 비어있을 때 `only_earnings=False` 하이드레이션 수행 후 재조회
+    - 환경변수 확장:
+      - `KR_DART_DPLUS1_SLA_HYDRATE_IF_EMPTY` (기본 1)
+      - `KR_DART_DPLUS1_SLA_HYDRATE_PAGES` (기본 2)
+      - `KR_DART_DPLUS1_SLA_HYDRATE_PAGE_COUNT` (기본 100)
+  - 테스트:
+    - `test_kr_corporate_collector.py`
+      - 하이드레이션 + 주기보고서 포함 시나리오 추가
+    - `test_scheduler_kr_dart_dplus1_sla.py`
+      - 신규 하이드레이션 환경변수 전달 검증 추가
+  - 검증 실행:
+    - 단위 테스트 30건 통과 (`unittest`)
+    - 실DB 스모크(2026-02-18):
+      - 기본 lookback(30일): `status=no_events`, `hydrate_attempted=true` 확인
+      - 확장 lookback(120일): `checked_event_count=49`로 점검 경로 동작 확인
 
 ## 8. 운영 범위 정책 (2026-02-16)
 - KR 기업 질의 데이터 범위는 Top50 고정 스냅샷으로 제한한다.

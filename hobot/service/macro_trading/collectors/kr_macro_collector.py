@@ -47,12 +47,21 @@ KR_MACRO_INDICATORS: Dict[str, Dict[str, Any]] = {
         "frequency": "monthly",
         "unit": "Index",
         "kosis": {
-            # API parameter defaults are intentionally conservative and override-able.
+            # KOSIS metadata (DT_1J22003): itmId='T'(CPI), objL1='T10'(전국)
+            # https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1J22003&conn_path=I3
             "orgId": "101",
             "tblId": "DT_1J22003",
-            "itmId": "T01",
+            "itmId": "T",
+            "objL1": "T10",
             "prdSe": "M",
         },
+        "kosis_env": {
+            "orgId": "KOSIS_KR_CPI_ORG_ID",
+            "tblId": "KOSIS_KR_CPI_TBL_ID",
+            "itmId": "KOSIS_KR_CPI_ITM_ID",
+            "objL1": "KOSIS_KR_CPI_OBJL1",
+        },
+        "kosis_required_params": ("orgId", "tblId", "itmId", "objL1", "prdSe"),
     },
     "KR_UNEMPLOYMENT": {
         "name": "Korea Unemployment Rate",
@@ -61,11 +70,21 @@ KR_MACRO_INDICATORS: Dict[str, Dict[str, Any]] = {
         "frequency": "monthly",
         "unit": "%",
         "kosis": {
+            # KOSIS metadata (DT_1DA7004S): itmId='T80'(실업률), objL1='00'(전국)
+            # https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1DA7004S&conn_path=I3
             "orgId": "101",
             "tblId": "DT_1DA7004S",
-            "itmId": "T10",
+            "itmId": "T80",
+            "objL1": "00",
             "prdSe": "M",
         },
+        "kosis_env": {
+            "orgId": "KOSIS_KR_UNEMPLOYMENT_ORG_ID",
+            "tblId": "KOSIS_KR_UNEMPLOYMENT_TBL_ID",
+            "itmId": "KOSIS_KR_UNEMPLOYMENT_ITM_ID",
+            "objL1": "KOSIS_KR_UNEMPLOYMENT_OBJL1",
+        },
+        "kosis_required_params": ("orgId", "tblId", "itmId", "objL1", "prdSe"),
     },
     "KR_USDKRW": {
         "name": "USD/KRW Exchange Rate",
@@ -420,7 +439,19 @@ class KRMacroCollector:
             **params,
         }
         payload = self._fetch_json(base, query)
-        rows: List[Dict[str, Any]] = payload if isinstance(payload, list) else []
+        rows: List[Dict[str, Any]] = []
+        if isinstance(payload, dict):
+            err_code = str(payload.get("err") or payload.get("ERR_CD") or "").strip()
+            if err_code:
+                err_msg = str(payload.get("errMsg") or payload.get("ERR_MSG") or "").strip()
+                raise ValueError(f"KOSIS API 오류(err={err_code}): {err_msg or 'unknown error'}")
+        elif isinstance(payload, list):
+            rows = payload
+            if rows and isinstance(rows[0], dict):
+                err_code = str(rows[0].get("err") or rows[0].get("ERR_CD") or "").strip()
+                if err_code:
+                    err_msg = str(rows[0].get("errMsg") or rows[0].get("ERR_MSG") or "").strip()
+                    raise ValueError(f"KOSIS API 오류(err={err_code}): {err_msg or 'unknown error'}")
 
         # Some KOSIS monthly tables return empty when endPrdDe points to unpublished/latest unsupported month.
         # Retry by stepping endPrdDe backward up to 24 months.

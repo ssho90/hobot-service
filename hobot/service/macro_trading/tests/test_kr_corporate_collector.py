@@ -1,7 +1,8 @@
 import io
 import unittest
 import zipfile
-from datetime import date
+from datetime import date, datetime
+from unittest.mock import patch
 
 from service.macro_trading.collectors.kr_corporate_collector import (
     DEFAULT_EXPECTATION_FEED_URL,
@@ -287,6 +288,61 @@ class TestKRCorporateCollector(unittest.TestCase):
         self.assertEqual(rows[0]["stock_code"], "005930")
         self.assertEqual(rows[0]["stock_name"], "삼성전자")
 
+    def test_build_naver_page_url_updates_page_query(self):
+        page_url = KRCorporateCollector._build_naver_page_url(
+            "https://finance.naver.com/sise/sise_market_sum.naver?sosok=0&page=1",
+            2,
+        )
+        self.assertIn("sosok=0", page_url)
+        self.assertIn("page=2", page_url)
+
+    def test_fetch_top_stock_rows_from_naver_paginates_until_limit(self):
+        collector = KRCorporateCollector()
+
+        def _make_html(start: int, end: int) -> str:
+            links = "".join(
+                f'<tr><td><a href="/item/main.naver?code={idx:06d}" class="tltle">종목{idx:06d}</a></td></tr>'
+                for idx in range(start, end + 1)
+            )
+            return f'<table class="type_2"><tbody>{links}</tbody></table>'
+
+        html_page_1 = _make_html(1, 50).encode("utf-8")
+        html_page_2 = _make_html(51, 100).encode("utf-8")
+
+        class _FakeResponse:
+            def __init__(self, payload: bytes):
+                self._payload = payload
+
+            def read(self):
+                return self._payload
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        def _fake_urlopen(request, timeout=25):  # noqa: ARG001
+            request_url = getattr(request, "full_url", str(request))
+            if "page=2" in request_url:
+                return _FakeResponse(html_page_2)
+            return _FakeResponse(html_page_1)
+
+        with patch(
+            "service.macro_trading.collectors.kr_corporate_collector.urlopen",
+            side_effect=_fake_urlopen,
+        ):
+            rows = collector.fetch_top_stock_rows_from_naver(
+                limit=100,
+                url="https://finance.naver.com/sise/sise_market_sum.naver?sosok=0&page=1",
+            )
+
+        self.assertEqual(len(rows), 100)
+        self.assertEqual(rows[0]["rank_position"], 1)
+        self.assertEqual(rows[0]["stock_code"], "000001")
+        self.assertEqual(rows[-1]["rank_position"], 100)
+        self.assertEqual(rows[-1]["stock_code"], "000100")
+
     def test_parse_naver_quarterly_consensus_rows(self):
         html = """
         <table class="tb_type1 tb_num tb_type1_ifrs">
@@ -466,6 +522,252 @@ class TestKRCorporateCollector(unittest.TestCase):
         self.assertFalse(diff["has_previous_snapshot"])
         self.assertEqual(diff["added_count"], 1)
         self.assertEqual(diff["removed_count"], 0)
+
+    def test_validate_top50_corp_code_mapping_detects_mapping_issues(self):
+        collector = KRCorporateCollector()
+        collector.ensure_tables = lambda: None  # type: ignore[method-assign]
+        collector.load_latest_top50_snapshot_rows = lambda **_kwargs: [  # type: ignore[method-assign]
+            {"snapshot_date": date(2026, 2, 17), "stock_code": "005930", "corp_code": "00126380"},
+            {"snapshot_date": date(2026, 2, 17), "stock_code": "000660", "corp_code": None},
+            {"snapshot_date": date(2026, 2, 17), "stock_code": "035420", "corp_code": "00987654"},
+        ]
+
+        fetch_batches = [
+            [
+                {"stock_code": "005930", "corp_code": "00126380"},
+                {"stock_code": "035420", "corp_code": "00111111"},
+                {"stock_code": "035420", "corp_code": "00222222"},
+            ],
+            [
+                {"stock_code": "035420", "corp_count": 2},
+            ],
+        ]
+
+        class _Cursor:
+            def __init__(self, batches):
+                self._batches = list(batches)
+
+            def execute(self, _query, _params=None):
+                return None
+
+            def fetchall(self):
+                if self._batches:
+                    return self._batches.pop(0)
+                return []
+
+        class _Connection:
+            def __init__(self, cursor):
+                self._cursor = cursor
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def cursor(self):
+                return self._cursor
+
+        cursor = _Cursor(fetch_batches)
+        collector._get_db_connection = lambda: _Connection(cursor)  # type: ignore[method-assign]
+
+        result = collector.validate_top50_corp_code_mapping(
+            report_date=date(2026, 2, 17),
+            market="KOSPI",
+            top_limit=50,
+            persist=False,
+        )
+
+        self.assertEqual(result["status"], "warning")
+        self.assertEqual(result["snapshot_row_count"], 3)
+        self.assertEqual(result["snapshot_missing_corp_count"], 1)
+        self.assertEqual(result["snapshot_missing_in_dart_count"], 1)
+        self.assertEqual(result["snapshot_corp_code_mismatch_count"], 1)
+        self.assertEqual(result["dart_duplicate_stock_count"], 1)
+        details = result["details"]
+        self.assertIn("000660", details["snapshot_missing_corp_stocks"])
+        self.assertIn("000660", details["snapshot_missing_in_dart_stocks"])
+        self.assertEqual(details["snapshot_corp_code_mismatches"][0]["stock_code"], "035420")
+        self.assertIn("035420", details["dart_duplicate_stock_codes"])
+
+    def test_validate_dart_disclosure_dplus1_sla_hydrates_and_includes_periodic_report(self):
+        collector = KRCorporateCollector()
+        collector.ensure_tables = lambda: None  # type: ignore[method-assign]
+        collector.load_latest_top50_snapshot_rows = lambda **_kwargs: [  # type: ignore[method-assign]
+            {"snapshot_date": date(2026, 2, 17), "stock_code": "005930", "corp_code": "00126380"},
+        ]
+        hydrate_calls = {}
+
+        def _fake_collect_disclosure_events(**kwargs):
+            hydrate_calls.update(kwargs)
+            return {"status": "ok", "normalized_rows": 1, "db_affected": 1}
+
+        collector.collect_disclosure_events = _fake_collect_disclosure_events  # type: ignore[method-assign]
+
+        fetch_batches = [
+            [],
+            [
+                {
+                    "corp_code": "00126380",
+                    "rcept_no": "20260216000123",
+                    "rcept_dt": date(2026, 2, 16),
+                    "period_year": "2025",
+                    "fiscal_quarter": 4,
+                    "report_nm": "분기보고서 (2025.09)",
+                    "event_type": "",
+                    "is_earnings_event": 0,
+                }
+            ],
+            [
+                {
+                    "corp_code": "00126380",
+                    "bsns_year": "2025",
+                    "reprt_code": "11011",
+                    "first_financial_at": datetime(2026, 2, 17, 10, 0, 0),
+                }
+            ],
+        ]
+
+        class _Cursor:
+            def __init__(self, batches):
+                self._batches = list(batches)
+
+            def execute(self, _query, _params=None):
+                return None
+
+            def fetchall(self):
+                if self._batches:
+                    return self._batches.pop(0)
+                return []
+
+        class _Connection:
+            def __init__(self, cursor):
+                self._cursor = cursor
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def cursor(self):
+                return self._cursor
+
+        cursor = _Cursor(fetch_batches)
+        collector._get_db_connection = lambda: _Connection(cursor)  # type: ignore[method-assign]
+
+        result = collector.validate_dart_disclosure_dplus1_sla(
+            report_date=date(2026, 2, 17),
+            market="KOSPI",
+            top_limit=50,
+            lookback_days=30,
+            hydrate_disclosures_if_empty=True,
+            hydrate_per_corp_max_pages=2,
+            hydrate_page_count=10,
+            persist=False,
+        )
+
+        self.assertEqual(result["status"], "healthy")
+        self.assertEqual(result["checked_event_count"], 1)
+        self.assertEqual(result["met_sla_count"], 1)
+        self.assertEqual(result["violated_sla_count"], 0)
+        self.assertTrue(result["details"]["hydrate_attempted"])
+        self.assertEqual(result["details"]["hydrate_summary"]["status"], "ok")
+        self.assertEqual(hydrate_calls["only_earnings"], False)
+        self.assertEqual(hydrate_calls["per_corp_max_pages"], 2)
+        self.assertEqual(hydrate_calls["page_count"], 10)
+
+    def test_collect_top50_daily_ohlcv_aggregates_summary(self):
+        collector = KRCorporateCollector()
+        collector.ensure_tables = lambda: None  # type: ignore[method-assign]
+        collector.resolve_top50_stock_codes_for_ohlcv = (  # type: ignore[method-assign]
+            lambda **_kwargs: ["005930"]
+        )
+        collector.fetch_daily_ohlcv_rows_from_yfinance = (  # type: ignore[method-assign]
+            lambda **_kwargs: {
+                "rows": [
+                    {
+                        "market": "KOSPI",
+                        "stock_code": "005930",
+                        "trade_date": date(2026, 2, 18),
+                        "open_price": 70000.0,
+                        "high_price": 71000.0,
+                        "low_price": 69500.0,
+                        "close_price": 70500.0,
+                        "adjusted_close": 70500.0,
+                        "volume": 1000,
+                        "source": "yfinance",
+                        "source_ref": "005930:2026-02-18",
+                        "as_of_date": date(2026, 2, 19),
+                        "metadata_json": "{}",
+                    }
+                ],
+                "rows_by_stock_code": {"005930": 1},
+                "failed_stock_codes": [],
+            }
+        )
+        collector.upsert_top50_daily_ohlcv_rows = lambda rows: len(list(rows))  # type: ignore[method-assign]
+
+        result = collector.collect_top50_daily_ohlcv(
+            stock_codes=["005930"],
+            max_stock_count=1,
+            lookback_days=10,
+            as_of_date=date(2026, 2, 19),
+        )
+
+        self.assertEqual(result["target_stock_count"], 1)
+        self.assertEqual(result["fetched_rows"], 1)
+        self.assertEqual(result["upserted_rows"], 1)
+        self.assertEqual(result["continuity_days"], 120)
+        self.assertFalse(result["continuity_enabled"])
+        self.assertEqual(result["continuity_extra_stock_count"], 0)
+        self.assertEqual(result["rows_by_stock_code"]["005930"], 1)
+
+    def test_resolve_top50_stock_codes_for_ohlcv_merges_recent_snapshot_universe(self):
+        collector = KRCorporateCollector()
+        with patch.object(
+            collector,
+            "load_latest_top50_snapshot_rows",
+            return_value=[
+                {"stock_code": "005930"},
+                {"stock_code": "000660"},
+            ],
+        ), patch.object(
+            collector,
+            "load_top50_stock_codes_in_snapshot_window",
+            return_value=["000660", "035420"],
+        ), patch.object(
+            collector,
+            "fetch_top_stock_codes_from_naver",
+            return_value=["005930", "000660"],
+        ):
+            result = collector.resolve_top50_stock_codes_for_ohlcv(
+                max_stock_count=2,
+                market="KOSPI",
+                continuity_days=120,
+                reference_end_date=date(2026, 2, 19),
+            )
+
+        self.assertEqual(result, ["005930", "000660", "035420"])
+
+    def test_resolve_top50_stock_codes_for_ohlcv_appends_extra_stock_codes(self):
+        collector = KRCorporateCollector()
+        with patch.object(
+            collector,
+            "load_latest_top50_snapshot_rows",
+            return_value=[
+                {"stock_code": "005930"},
+                {"stock_code": "000660"},
+            ],
+        ):
+            result = collector.resolve_top50_stock_codes_for_ohlcv(
+                max_stock_count=2,
+                market="KOSPI",
+                continuity_days=0,
+                extra_stock_codes=["069500", "005930"],
+            )
+
+        self.assertEqual(result, ["005930", "000660", "069500"])
 
 
 if __name__ == "__main__":

@@ -3,7 +3,14 @@ import { useAuth } from '../../context/AuthContext';
 import { AlertCircle, Database, Loader2, RefreshCw, Shield } from 'lucide-react';
 
 type IndicatorHealth = 'healthy' | 'stale' | 'missing' | 'disabled';
-type SourceGroupFilter = 'ALL' | 'US_MACRO' | 'KR_MACRO' | 'KR_CORPORATE' | 'OTHER';
+type SourceGroupFilter =
+  | 'ALL'
+  | 'US_MACRO'
+  | 'US_CORPORATE'
+  | 'KR_MACRO'
+  | 'KR_CORPORATE'
+  | 'GRAPH'
+  | 'OTHER';
 
 interface IndicatorStatusRow {
   code: string;
@@ -24,6 +31,8 @@ interface IndicatorStatusRow {
   is_stale: boolean;
   note: string;
   latest_source?: string | null;
+  run_health_status?: 'healthy' | 'warning' | 'failed' | null;
+  run_health_reason?: string | null;
 }
 
 interface SummaryCounter {
@@ -60,16 +69,36 @@ const HEALTH_STYLES: Record<IndicatorHealth, string> = {
 const SOURCE_GROUP_LABELS: Record<SourceGroupFilter, string> = {
   ALL: '소스 그룹 전체',
   US_MACRO: '미국 거시 (FRED)',
+  US_CORPORATE: '미국 기업 (SEC/YFINANCE/INTERNAL)',
   KR_MACRO: '한국 거시 (ECOS/KOSIS/FRED)',
   KR_CORPORATE: '한국 기업 (DART/INTERNAL)',
+  GRAPH: '그래프 (Neo4j)',
   OTHER: '기타',
 };
 
 const SOURCE_GROUP_SORT_ORDER: Record<Exclude<SourceGroupFilter, 'ALL'>, number> = {
   KR_CORPORATE: 0,
-  KR_MACRO: 1,
-  US_MACRO: 2,
-  OTHER: 3,
+  US_CORPORATE: 1,
+  KR_MACRO: 2,
+  US_MACRO: 3,
+  GRAPH: 4,
+  OTHER: 5,
+};
+
+const GRAPH_EMBEDDING_COVERAGE_CODE = 'GRAPH_DOCUMENT_EMBEDDING_COVERAGE';
+const GRAPH_VECTOR_INDEX_READY_CODE = 'GRAPH_RAG_VECTOR_INDEX_READY';
+const GRAPH_NEWS_SYNC_CODE = 'GRAPH_NEWS_EXTRACTION_SYNC';
+
+const RUN_HEALTH_STATUS_LABELS: Record<'healthy' | 'warning' | 'failed', string> = {
+  healthy: '정상',
+  warning: '경고',
+  failed: '실패',
+};
+
+const RUN_HEALTH_STATUS_STYLES: Record<'healthy' | 'warning' | 'failed', string> = {
+  healthy: 'bg-emerald-100 text-emerald-700',
+  warning: 'bg-amber-100 text-amber-700',
+  failed: 'bg-red-100 text-red-700',
 };
 
 const resolveSourceGroup = (indicator: IndicatorStatusRow): Exclude<SourceGroupFilter, 'ALL'> => {
@@ -77,8 +106,14 @@ const resolveSourceGroup = (indicator: IndicatorStatusRow): Exclude<SourceGroupF
   const country = (indicator.country || '').toUpperCase();
   const code = (indicator.code || '').toUpperCase();
 
+  if (code.startsWith('GRAPH_') || source === 'NEO4J') {
+    return 'GRAPH';
+  }
   if (country === 'KR' && (source === 'DART' || source === 'INTERNAL' || code.startsWith('KR_DART_'))) {
     return 'KR_CORPORATE';
+  }
+  if (country === 'US' && (source === 'SEC' || source === 'YFINANCE' || source === 'INTERNAL' || code.startsWith('US_'))) {
+    return 'US_CORPORATE';
   }
   if (country === 'KR' && (source === 'ECOS' || source === 'KOSIS' || source === 'FRED')) {
     return 'KR_MACRO';
@@ -109,6 +144,11 @@ const formatInterval = (hours: number): string => {
   if (hours % (24 * 7) === 0) return `${hours / (24 * 7)}주`;
   if (hours % 24 === 0) return `${hours / 24}일`;
   return `${hours}시간`;
+};
+
+const formatPercent = (value: number | null, digits = 1): string => {
+  if (value === null || Number.isNaN(value)) return '-';
+  return `${value.toFixed(digits)}%`;
 };
 
 export const AdminIndicatorManagement: React.FC = () => {
@@ -215,6 +255,123 @@ export const AdminIndicatorManagement: React.FC = () => {
       });
   }, [countryFilter, healthFilter, indicators, searchText, sourceGroupFilter]);
 
+  const graphEmbeddingIndicator = useMemo(
+    () => indicators.find((item) => item.code === GRAPH_EMBEDDING_COVERAGE_CODE) || null,
+    [indicators]
+  );
+  const graphVectorIndicator = useMemo(
+    () => indicators.find((item) => item.code === GRAPH_VECTOR_INDEX_READY_CODE) || null,
+    [indicators]
+  );
+  const graphNewsSyncIndicator = useMemo(
+    () => indicators.find((item) => item.code === GRAPH_NEWS_SYNC_CODE) || null,
+    [indicators]
+  );
+  const graphIndicators = useMemo(
+    () => filteredIndicators.filter((item) => resolveSourceGroup(item) === 'GRAPH'),
+    [filteredIndicators]
+  );
+  const nonGraphIndicators = useMemo(
+    () => filteredIndicators.filter((item) => resolveSourceGroup(item) !== 'GRAPH'),
+    [filteredIndicators]
+  );
+
+  const renderIndicatorTable = (
+    rows: IndicatorStatusRow[],
+    title: string,
+    emptyMessage: string
+  ) => (
+    <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
+        <h3 className="text-base font-semibold">{title}</h3>
+        <p className="text-sm text-zinc-500">{rows.length}개 표시 중</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[1320px]">
+          <thead className="bg-slate-50">
+            <tr className="text-left text-xs uppercase tracking-wider text-zinc-500">
+              <th className="px-4 py-3">상태</th>
+              <th className="px-4 py-3">국가</th>
+              <th className="px-4 py-3">코드</th>
+              <th className="px-4 py-3">지표명</th>
+              <th className="px-4 py-3">소스</th>
+              <th className="px-4 py-3">최근 소스</th>
+              <th className="px-4 py-3">수집 간격</th>
+              <th className="px-4 py-3">최근 데이터 날짜</th>
+              <th className="px-4 py-3">최근 수집 시각</th>
+              <th className="px-4 py-3">현재 지연</th>
+              <th className="px-4 py-3">비교 결과</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-200">
+            {rows.map((indicator) => {
+              const comparisonBaseHours =
+                indicator.stale_threshold_hours ?? indicator.expected_interval_hours;
+              const overdueHours =
+                indicator.lag_hours === null ? null : indicator.lag_hours - comparisonBaseHours;
+              const runHealth = indicator.run_health_status || null;
+
+              return (
+                <tr key={indicator.code} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HEALTH_STYLES[indicator.health]}`}
+                    >
+                      {HEALTH_LABELS[indicator.health]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm font-medium">{indicator.country}</td>
+                  <td className="px-4 py-3 text-sm font-mono text-zinc-700">{indicator.code}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                      <p className="font-medium text-zinc-900">{indicator.name}</p>
+                      {runHealth && (
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${RUN_HEALTH_STATUS_STYLES[runHealth]}`}
+                        >
+                          실행 {RUN_HEALTH_STATUS_LABELS[runHealth]}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-zinc-500">{indicator.note || indicator.description}</p>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-zinc-600">{indicator.source}</td>
+                  <td className="px-4 py-3 text-xs text-zinc-700">{indicator.latest_source || '-'}</td>
+                  <td className="px-4 py-3 text-sm text-zinc-700">
+                    {formatInterval(indicator.expected_interval_hours)} ({indicator.frequency})
+                  </td>
+                  <td className="px-4 py-3 text-sm text-zinc-700">{indicator.last_observation_date ?? '-'}</td>
+                  <td className="px-4 py-3 text-sm text-zinc-700">
+                    {formatTimestamp(indicator.last_collected_at)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-zinc-700">{formatHours(indicator.lag_hours)}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {overdueHours === null ? (
+                      <span className="text-zinc-500">-</span>
+                    ) : overdueHours > 0 ? (
+                      <span className="font-medium text-red-600">+{formatHours(overdueHours)} 초과</span>
+                    ) : (
+                      <span className="font-medium text-emerald-600">
+                        {formatHours(Math.abs(overdueHours))} 여유
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={11} className="px-4 py-10 text-center text-zinc-500">
+                  {emptyMessage}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -295,6 +452,53 @@ export const AdminIndicatorManagement: React.FC = () => {
           </div>
         </div>
 
+        {(graphEmbeddingIndicator || graphVectorIndicator || graphNewsSyncIndicator) && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <p className="text-xs text-blue-700">그래프 임베딩 커버리지</p>
+              <p className="text-2xl font-semibold text-blue-700">
+                {formatPercent(graphEmbeddingIndicator?.latest_value ?? null)}
+              </p>
+              <p className="text-xs text-blue-900/70 mt-1">
+                {graphEmbeddingIndicator?.note || '임베딩 상태 정보 없음'}
+              </p>
+            </div>
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+              <p className="text-xs text-indigo-700">벡터 인덱스 상태</p>
+              <p
+                className={`text-2xl font-semibold ${
+                  graphVectorIndicator?.latest_value === 1 ? 'text-emerald-700' : 'text-amber-700'
+                }`}
+              >
+                {graphVectorIndicator?.latest_value === 1 ? 'ONLINE' : 'CHECK'}
+              </p>
+              <p className="text-xs text-indigo-900/70 mt-1">
+                {graphVectorIndicator?.note || '벡터 인덱스 정보 없음'}
+              </p>
+            </div>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-xs text-amber-700">그래프 뉴스 동기화 상태</p>
+              <p
+                className={`text-2xl font-semibold ${
+                  graphNewsSyncIndicator?.run_health_status === 'failed'
+                    ? 'text-red-700'
+                    : graphNewsSyncIndicator?.run_health_status === 'warning'
+                    ? 'text-amber-700'
+                    : 'text-emerald-700'
+                }`}
+              >
+                {graphNewsSyncIndicator?.run_health_status
+                  ? RUN_HEALTH_STATUS_LABELS[graphNewsSyncIndicator.run_health_status]
+                  : '확인 필요'}
+              </p>
+              <p className="text-xs text-amber-900/70 mt-1">
+                성공률 {formatPercent(graphNewsSyncIndicator?.latest_value ?? null, 2)} ·{' '}
+                {graphNewsSyncIndicator?.note || '동기화 상태 정보 없음'}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white border border-zinc-200 rounded-2xl p-4 md:p-5 mb-6 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <input
@@ -350,88 +554,14 @@ export const AdminIndicatorManagement: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
-            <h3 className="text-base font-semibold">지표 리스트</h3>
-            <p className="text-sm text-zinc-500">{filteredIndicators.length}개 표시 중</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1320px]">
-              <thead className="bg-slate-50">
-                <tr className="text-left text-xs uppercase tracking-wider text-zinc-500">
-                  <th className="px-4 py-3">상태</th>
-                  <th className="px-4 py-3">국가</th>
-                  <th className="px-4 py-3">코드</th>
-                  <th className="px-4 py-3">지표명</th>
-                  <th className="px-4 py-3">소스</th>
-                  <th className="px-4 py-3">최근 소스</th>
-                  <th className="px-4 py-3">수집 간격</th>
-                  <th className="px-4 py-3">최근 데이터 날짜</th>
-                  <th className="px-4 py-3">최근 수집 시각</th>
-                  <th className="px-4 py-3">현재 지연</th>
-                  <th className="px-4 py-3">비교 결과</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200">
-                {filteredIndicators.map((indicator) => {
-                  const comparisonBaseHours =
-                    indicator.stale_threshold_hours ?? indicator.expected_interval_hours;
-                  const overdueHours =
-                    indicator.lag_hours === null
-                      ? null
-                      : indicator.lag_hours - comparisonBaseHours;
+        {renderIndicatorTable(nonGraphIndicators, '지표 리스트', '조건에 맞는 지표가 없습니다.')}
 
-                  return (
-                    <tr key={indicator.code} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${HEALTH_STYLES[indicator.health]}`}
-                        >
-                          {HEALTH_LABELS[indicator.health]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium">{indicator.country}</td>
-                      <td className="px-4 py-3 text-sm font-mono text-zinc-700">{indicator.code}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <p className="font-medium text-zinc-900">{indicator.name}</p>
-                        <p className="text-xs text-zinc-500">{indicator.note || indicator.description}</p>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-zinc-600">{indicator.source}</td>
-                      <td className="px-4 py-3 text-xs text-zinc-700">{indicator.latest_source || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-zinc-700">
-                        {formatInterval(indicator.expected_interval_hours)} ({indicator.frequency})
-                      </td>
-                      <td className="px-4 py-3 text-sm text-zinc-700">
-                        {indicator.last_observation_date ?? '-'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-zinc-700">
-                        {formatTimestamp(indicator.last_collected_at)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-zinc-700">{formatHours(indicator.lag_hours)}</td>
-                      <td className="px-4 py-3 text-sm">
-                        {overdueHours === null ? (
-                          <span className="text-zinc-500">-</span>
-                        ) : overdueHours > 0 ? (
-                          <span className="font-medium text-red-600">+{formatHours(overdueHours)} 초과</span>
-                        ) : (
-                          <span className="font-medium text-emerald-600">
-                            {formatHours(Math.abs(overdueHours))} 여유
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredIndicators.length === 0 && (
-                  <tr>
-                    <td colSpan={11} className="px-4 py-10 text-center text-zinc-500">
-                      조건에 맞는 지표가 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="mt-6">
+          {renderIndicatorTable(
+            graphIndicators,
+            'Graph 지표',
+            '조건에 맞는 Graph 지표가 없습니다.'
+          )}
         </div>
 
         {Object.keys(countrySummary).length > 0 && (

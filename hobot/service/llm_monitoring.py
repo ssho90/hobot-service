@@ -4,6 +4,8 @@ LLM 호출을 추적하고 데이터베이스에 로그를 저장합니다.
 """
 import logging
 import time
+import json
+from contextvars import ContextVar
 from typing import Optional, Dict, Any, Callable
 from functools import wraps
 from datetime import datetime
@@ -29,6 +31,41 @@ except ImportError:
 from service.database.db import get_db_connection
 
 logger = logging.getLogger(__name__)
+_LLM_FLOW_CONTEXT: ContextVar[Dict[str, Any]] = ContextVar("llm_flow_context", default={})
+
+
+def set_llm_flow_context(
+    *,
+    flow_type: Optional[str] = None,
+    flow_run_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+):
+    """LLM 호출 공통 컨텍스트를 설정한다."""
+    context: Dict[str, Any] = {}
+    if flow_type:
+        context["flow_type"] = str(flow_type).strip()
+    if flow_run_id:
+        context["flow_run_id"] = str(flow_run_id).strip()
+    if user_id:
+        context["user_id"] = str(user_id).strip()
+    if isinstance(metadata, dict) and metadata:
+        context["metadata"] = metadata
+    return _LLM_FLOW_CONTEXT.set(context)
+
+
+def reset_llm_flow_context(token) -> None:
+    """LLM 호출 공통 컨텍스트를 복원한다."""
+    try:
+        _LLM_FLOW_CONTEXT.reset(token)
+    except Exception:
+        logger.debug("LLM flow context reset skipped", exc_info=True)
+
+
+def get_llm_flow_context() -> Dict[str, Any]:
+    """현재 LLM 호출 컨텍스트를 반환한다."""
+    payload = _LLM_FLOW_CONTEXT.get() or {}
+    return payload if isinstance(payload, dict) else {}
 
 
 def log_llm_usage(
@@ -41,7 +78,12 @@ def log_llm_usage(
     total_tokens: int = 0,
     service_name: Optional[str] = None,
     duration_ms: Optional[int] = None,
-    user_id: Optional[str] = None
+    user_id: Optional[str] = None,
+    flow_type: Optional[str] = None,
+    flow_run_id: Optional[str] = None,
+    agent_name: Optional[str] = None,
+    trace_order: Optional[int] = None,
+    metadata_json: Optional[Dict[str, Any]] = None,
 ):
     """
     LLM 사용 로그를 데이터베이스에 저장
@@ -57,8 +99,26 @@ def log_llm_usage(
         service_name: 서비스명 (어떤 기능에서 호출했는지)
         duration_ms: 응답 시간 (밀리초)
         user_id: 사용자 ID (인증된 사용자의 경우)
+        flow_type: 멀티에이전트 플로우 타입 (예: chatbot, dashboard_ai_analysis)
+        flow_run_id: 동일 요청(run)을 식별하는 추적 ID
+        agent_name: 호출 주체 에이전트/유틸리티 이름
+        trace_order: 동일 run 내 호출 순서
+        metadata_json: 부가 메타데이터
     """
     try:
+        flow_context = get_llm_flow_context()
+        if not flow_type:
+            raw_flow_type = flow_context.get("flow_type")
+            flow_type = str(raw_flow_type).strip() if raw_flow_type else None
+        if not flow_run_id:
+            raw_flow_run_id = flow_context.get("flow_run_id")
+            flow_run_id = str(raw_flow_run_id).strip() if raw_flow_run_id else None
+        if not user_id:
+            raw_user_id = flow_context.get("user_id")
+            user_id = str(raw_user_id).strip() if raw_user_id else None
+        if metadata_json is None and isinstance(flow_context.get("metadata"), dict):
+            metadata_json = flow_context.get("metadata")
+
         # 현재 UTC 시간을 가져온 후 UTC+9로 변환
         # 시스템 시간이 어떤 시간대든 상관없이 UTC+9로 저장
         from datetime import timezone
@@ -76,14 +136,22 @@ def log_llm_usage(
         # UTC+9 시간을 naive datetime으로 변환 (시간대 정보 제거, 값은 UTC+9 시간 유지)
         now_kst_naive = now_kst.replace(tzinfo=None)
         
+        metadata_payload = None
+        if metadata_json is not None:
+            try:
+                metadata_payload = json.dumps(metadata_json, ensure_ascii=False, default=str)
+            except Exception:
+                metadata_payload = json.dumps({"raw": str(metadata_json)}, ensure_ascii=False)
+
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO llm_usage_logs (
                     model_name, provider, request_prompt, response_prompt,
                     prompt_tokens, completion_tokens, total_tokens,
-                    service_name, duration_ms, user_id, created_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    service_name, duration_ms, user_id, created_at,
+                    flow_type, flow_run_id, agent_name, trace_order, metadata_json
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 model_name,
                 provider,
@@ -95,11 +163,17 @@ def log_llm_usage(
                 service_name,
                 duration_ms,
                 user_id,
-                now_kst_naive  # UTC+9 시간을 naive datetime으로 저장
+                now_kst_naive,  # UTC+9 시간을 naive datetime으로 저장
+                flow_type,
+                flow_run_id,
+                agent_name,
+                trace_order,
+                metadata_payload,
             ))
             conn.commit()
             logger.info(f"LLM 사용 로그 DB 저장 성공: service_name={service_name}, model_name={model_name}, "
-                       f"user_id={user_id}, total_tokens={total_tokens}, created_at={now_kst_naive}")
+                       f"user_id={user_id}, flow_type={flow_type}, flow_run_id={flow_run_id}, "
+                       f"agent_name={agent_name}, total_tokens={total_tokens}, created_at={now_kst_naive}")
     except Exception as e:
         logger.error(f"LLM 사용 로그 저장 실패 (service_name={service_name}, model_name={model_name}, user_id={user_id}): {e}", exc_info=True)
         # 예외를 다시 발생시키지 않음 (로그 저장 실패가 전체 프로세스를 중단시키지 않도록)
@@ -193,13 +267,23 @@ class LLMCallTracker:
         provider: str,
         service_name: Optional[str] = None,
         request_prompt: Optional[str] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        flow_type: Optional[str] = None,
+        flow_run_id: Optional[str] = None,
+        agent_name: Optional[str] = None,
+        trace_order: Optional[int] = None,
+        metadata_json: Optional[Dict[str, Any]] = None,
     ):
         self.model_name = model_name
         self.provider = provider
         self.service_name = service_name
         self.request_prompt = request_prompt
         self.user_id = user_id
+        self.flow_type = flow_type
+        self.flow_run_id = flow_run_id
+        self.agent_name = agent_name
+        self.trace_order = trace_order
+        self.metadata_json = metadata_json
         self.response_prompt = None
         self.prompt_tokens = 0
         self.completion_tokens = 0
@@ -229,7 +313,12 @@ class LLMCallTracker:
                 total_tokens=self.total_tokens,
                 service_name=self.service_name,
                 duration_ms=self.duration_ms,
-                user_id=self.user_id
+                user_id=self.user_id,
+                flow_type=self.flow_type,
+                flow_run_id=self.flow_run_id,
+                agent_name=self.agent_name,
+                trace_order=self.trace_order,
+                metadata_json=self.metadata_json,
             )
             logger.info(f"LLM 사용 로그 저장 완료: service_name={self.service_name}, model_name={self.model_name}, user_id={self.user_id}")
         except Exception as e:
@@ -361,7 +450,12 @@ def track_llm_call(
     provider: str,
     service_name: Optional[str] = None,
     request_prompt: Optional[str] = None,
-    user_id: Optional[str] = None
+    user_id: Optional[str] = None,
+    flow_type: Optional[str] = None,
+    flow_run_id: Optional[str] = None,
+    agent_name: Optional[str] = None,
+    trace_order: Optional[int] = None,
+    metadata_json: Optional[Dict[str, Any]] = None,
 ) -> LLMCallTracker:
     """
     LLM 호출 추적을 위한 컨텍스트 매니저 생성 헬퍼 함수
@@ -372,5 +466,15 @@ def track_llm_call(
             response = llm.invoke(prompt)
             tracker.set_response(response)
     """
-    return LLMCallTracker(model_name, provider, service_name, request_prompt, user_id)
-
+    return LLMCallTracker(
+        model_name=model_name,
+        provider=provider,
+        service_name=service_name,
+        request_prompt=request_prompt,
+        user_id=user_id,
+        flow_type=flow_type,
+        flow_run_id=flow_run_id,
+        agent_name=agent_name,
+        trace_order=trace_order,
+        metadata_json=metadata_json,
+    )

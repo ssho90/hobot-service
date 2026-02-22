@@ -176,6 +176,103 @@ class TestUSCorporateCollector(unittest.TestCase):
         self.assertEqual(result["added_symbols"][0]["symbol"], "NVDA")
         self.assertEqual(result["removed_symbols"][0]["symbol"], "TSLA")
 
+    def test_collect_top50_daily_ohlcv_aggregates_summary(self):
+        collector = USCorporateCollector(db_connection_factory=lambda: None)
+        fake_rows = [
+            {
+                "market": "US",
+                "symbol": "AAPL",
+                "trade_date": date(2026, 2, 18),
+                "open_price": 180.0,
+                "high_price": 182.0,
+                "low_price": 179.5,
+                "close_price": 181.2,
+                "adjusted_close": 181.2,
+                "volume": 100,
+                "source": "yfinance",
+                "source_ref": "AAPL:2026-02-18",
+                "as_of_date": date(2026, 2, 19),
+                "metadata_json": "{}",
+            }
+        ]
+        with patch.object(collector, "ensure_tables"), patch.object(
+            collector,
+            "resolve_top50_symbols_for_ohlcv",
+            return_value=["AAPL"],
+        ), patch.object(
+            collector,
+            "fetch_daily_ohlcv_rows_from_yfinance",
+            return_value={
+                "rows": fake_rows,
+                "rows_by_symbol": {"AAPL": 1},
+                "failed_symbols": [],
+            },
+        ), patch.object(
+            collector,
+            "upsert_top50_daily_ohlcv_rows",
+            return_value=1,
+        ):
+            result = collector.collect_top50_daily_ohlcv(
+                symbols=["AAPL"],
+                max_symbol_count=1,
+                lookback_days=10,
+                as_of_date=date(2026, 2, 19),
+            )
+
+        self.assertEqual(result["target_symbol_count"], 1)
+        self.assertEqual(result["fetched_rows"], 1)
+        self.assertEqual(result["upserted_rows"], 1)
+        self.assertEqual(result["continuity_days"], 120)
+        self.assertFalse(result["continuity_enabled"])
+        self.assertEqual(result["continuity_extra_symbol_count"], 0)
+        self.assertEqual(result["rows_by_symbol"]["AAPL"], 1)
+
+    def test_resolve_top50_symbols_for_ohlcv_merges_recent_snapshot_universe(self):
+        collector = USCorporateCollector(db_connection_factory=lambda: None)
+        with patch.object(
+            collector,
+            "load_latest_top50_snapshot_rows",
+            return_value=[
+                {"symbol": "AAPL"},
+                {"symbol": "MSFT"},
+            ],
+        ), patch.object(
+            collector,
+            "load_top50_symbols_in_snapshot_window",
+            return_value=["MSFT", "TSLA"],
+        ), patch.object(
+            collector,
+            "resolve_target_symbols",
+            return_value=["AAPL"],
+        ):
+            result = collector.resolve_top50_symbols_for_ohlcv(
+                max_symbol_count=2,
+                market="US",
+                continuity_days=120,
+                reference_end_date=date(2026, 2, 19),
+            )
+
+        self.assertEqual(result, ["AAPL", "MSFT", "TSLA"])
+
+    def test_resolve_top50_symbols_for_ohlcv_appends_extra_symbols(self):
+        collector = USCorporateCollector(db_connection_factory=lambda: None)
+        with patch.object(
+            collector,
+            "load_latest_top50_snapshot_rows",
+            return_value=[
+                {"symbol": "AAPL"},
+                {"symbol": "MSFT"},
+            ],
+        ):
+            result = collector.resolve_top50_symbols_for_ohlcv(
+                max_symbol_count=2,
+                market="US",
+                continuity_days=0,
+                extra_symbols=["TLT", "AAPL"],
+            )
+
+        self.assertEqual(result, ["AAPL", "MSFT", "TLT"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,6 @@
+- 요청 재확인: Top50 월별 변경 대응(연속성) + 장마감 이후 일봉 OHLCV 스케줄
+- 기존 코드 위치 점검 완료:
+  - us_corporate_collector.py: resolve/collect_top50_daily_ohlcv
+  - kr_corporate_collector.py: resolve/collect_top50_daily_ohlcv
+  - scheduler.py: KR/US hotpath, from_env, setup_*_scheduler
+- 다음 단계: 연속성 유니버스 로직 구현 후 스케줄 기본시각/테스트 업데이트

@@ -91,6 +91,12 @@ export interface GraphRagAnswerResponse {
   context?: GraphRagContextResponse | null;
 }
 
+export type GraphRagAnswerStreamEvent =
+  | { type: 'started'; flow_run_id?: string; message?: string }
+  | { type: 'delta'; text: string }
+  | { type: 'done'; flow_run_id?: string; response: GraphRagAnswerResponse }
+  | { type: 'error'; error: string; status_code?: number };
+
 const getHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {
@@ -136,3 +142,55 @@ export const fetchGraphRagAnswer = async (
   return await response.json();
 };
 
+export const streamGraphRagAnswer = async (
+  payload: GraphRagAnswerRequest,
+  onEvent: (event: GraphRagAnswerStreamEvent) => void
+): Promise<void> => {
+  const response = await fetch('/api/graph/rag/answer/stream', {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `API error: ${response.status}`);
+  }
+
+  if (!response.body) {
+    throw new Error('스트리밍 응답 본문이 없습니다.');
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  const emitLine = (line: string) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const parsed = JSON.parse(trimmed) as GraphRagAnswerStreamEvent;
+    onEvent(parsed);
+    if (parsed.type === 'error') {
+      throw new Error(parsed.error || '스트리밍 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    let newlineIndex = buffer.indexOf('\n');
+    while (newlineIndex !== -1) {
+      const line = buffer.slice(0, newlineIndex);
+      buffer = buffer.slice(newlineIndex + 1);
+      emitLine(line);
+      newlineIndex = buffer.indexOf('\n');
+    }
+  }
+
+  buffer += decoder.decode();
+  if (buffer.trim()) {
+    emitLine(buffer);
+  }
+};

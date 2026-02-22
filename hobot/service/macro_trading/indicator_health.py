@@ -4,8 +4,11 @@ Admin macro indicator health snapshot utilities.
 
 from __future__ import annotations
 
+import json
 import logging
-from datetime import date, datetime, time
+import os
+import re
+from datetime import date, datetime, time, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -111,6 +114,17 @@ KR_INDICATOR_REGISTRY: List[Dict[str, Any]] = [
 
 KR_CORPORATE_REGISTRY: List[Dict[str, Any]] = [
     {
+        "code": "TIER1_CORPORATE_EVENT_SYNC",
+        "name": "Tier-1 Corporate Event Sync Health",
+        "description": "KR/US Tier-1 표준 이벤트 동기화 배치 상태",
+        "country": "KR",
+        "source": "INTERNAL",
+        "frequency": "daily",
+        "unit": "%",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
         "code": "KR_TOP50_ENTITY_REGISTRY",
         "name": "KR Top50 Entity Registry",
         "description": "KR 기업 canonical registry 최신성",
@@ -139,6 +153,17 @@ KR_CORPORATE_REGISTRY: List[Dict[str, Any]] = [
         "country": "KR",
         "source": "INTERNAL",
         "frequency": "monthly",
+        "unit": "count",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "KR_TOP50_DAILY_OHLCV",
+        "name": "KR Top50 Daily OHLCV",
+        "description": "KR Top50 일별 OHLCV 최신 거래일 적재 상태",
+        "country": "KR",
+        "source": "INTERNAL",
+        "frequency": "daily",
         "unit": "count",
         "storage": "corporate",
         "collection_enabled": True,
@@ -253,6 +278,111 @@ KR_CORPORATE_REGISTRY: List[Dict[str, Any]] = [
         "storage": "corporate",
         "collection_enabled": True,
     },
+    {
+        "code": "KR_REAL_ESTATE_TRANSACTIONS",
+        "name": "KR Real Estate Transactions",
+        "description": "국내 실거래 원천 row 최신 적재 상태",
+        "country": "KR",
+        "source": "MOLIT",
+        "frequency": "daily",
+        "unit": "count",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "KR_REAL_ESTATE_MONTHLY_SUMMARY",
+        "name": "KR Real Estate Monthly Summary",
+        "description": "국내 실거래 월간 집계 최신 적재 상태",
+        "country": "KR",
+        "source": "MOLIT",
+        "frequency": "daily",
+        "unit": "count",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+]
+
+GRAPH_REGISTRY: List[Dict[str, Any]] = [
+    {
+        "code": "EQUITY_GRAPH_PROJECTION_SYNC",
+        "name": "Equity Graph Projection Sync",
+        "description": "주식 Projection(RDB->Neo4j) 동기화 실행 및 지연 상태",
+        "country": "GLOBAL",
+        "source": "INTERNAL",
+        "frequency": "daily",
+        "unit": "%",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "GRAPH_NEWS_EXTRACTION_SYNC",
+        "name": "Graph News Extraction Sync",
+        "description": "뉴스 동기화+추출+임베딩 배치 실행 성공률",
+        "country": "GLOBAL",
+        "source": "INTERNAL",
+        "frequency": "hourly",
+        "unit": "%",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "GRAPH_RAG_PHASE5_WEEKLY_REPORT",
+        "name": "Graph RAG Phase5 Weekly Regression",
+        "description": "Phase5 회귀 주간 집계 실행 상태",
+        "country": "GLOBAL",
+        "source": "INTERNAL",
+        "frequency": "weekly",
+        "unit": "%",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "GRAPH_DOCUMENT_EMBEDDING_COVERAGE",
+        "name": "Graph Document Embedding Coverage",
+        "description": "Document 노드 임베딩 커버리지(%)",
+        "country": "GLOBAL",
+        "source": "NEO4J",
+        "frequency": "hourly",
+        "unit": "%",
+        "storage": "graph",
+        "collection_enabled": True,
+    },
+    {
+        "code": "GRAPH_RAG_VECTOR_INDEX_READY",
+        "name": "Graph RAG Vector Index Readiness",
+        "description": "Neo4j vector index(document_text_embedding_idx) 상태",
+        "country": "GLOBAL",
+        "source": "NEO4J",
+        "frequency": "hourly",
+        "unit": "flag",
+        "storage": "graph",
+        "collection_enabled": True,
+    },
+]
+
+PIPELINE_REGISTRY: List[Dict[str, Any]] = [
+    {
+        "code": "ECONOMIC_NEWS_STREAM",
+        "name": "Economic News Stream",
+        "description": "economic_news 수집 파이프라인 최신 적재 상태",
+        "country": "GLOBAL",
+        "source": "INTERNAL",
+        "frequency": "hourly",
+        "unit": "count",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "TIER1_CORPORATE_EVENT_FEED",
+        "name": "Tier-1 Corporate Event Feed",
+        "description": "corporate_event_feed 최신 적재 상태",
+        "country": "GLOBAL",
+        "source": "INTERNAL",
+        "frequency": "hourly",
+        "unit": "count",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
 ]
 
 US_CORPORATE_REGISTRY: List[Dict[str, Any]] = [
@@ -285,6 +415,17 @@ US_CORPORATE_REGISTRY: List[Dict[str, Any]] = [
         "country": "US",
         "source": "INTERNAL",
         "frequency": "monthly",
+        "unit": "count",
+        "storage": "corporate",
+        "collection_enabled": True,
+    },
+    {
+        "code": "US_TOP50_DAILY_OHLCV",
+        "name": "US Top50 Daily OHLCV",
+        "description": "US Top50 일별 OHLCV 최신 거래일 적재 상태",
+        "country": "US",
+        "source": "INTERNAL",
+        "frequency": "daily",
         "unit": "count",
         "storage": "corporate",
         "collection_enabled": True,
@@ -346,9 +487,44 @@ US_CORPORATE_REGISTRY: List[Dict[str, Any]] = [
     },
 ]
 
+RUN_HEALTH_JOB_CODES = {
+    "KR_TOP50_EARNINGS_WATCH_SUCCESS_RATE",
+    "US_TOP50_EARNINGS_WATCH_SUCCESS_RATE",
+    "TIER1_CORPORATE_EVENT_SYNC",
+    "GRAPH_NEWS_EXTRACTION_SYNC",
+    "EQUITY_GRAPH_PROJECTION_SYNC",
+    "GRAPH_RAG_PHASE5_WEEKLY_REPORT",
+}
+
 
 def _frequency_to_interval_hours(frequency: str) -> int:
     return FREQUENCY_TO_INTERVAL_HOURS.get((frequency or "").lower(), 24)
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        if value is None:
+            return default
+        return int(value)
+    except Exception:
+        return default
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        if value is None:
+            return default
+        return float(value)
+    except Exception:
+        return default
+
+
+def _safe_int_env(name: str, default: int) -> int:
+    return _safe_int(os.getenv(name), default)
+
+
+def _safe_float_env(name: str, default: float) -> float:
+    return _safe_float(os.getenv(name), default)
 
 
 def _as_float(value: Any) -> Optional[float]:
@@ -367,6 +543,14 @@ def _as_float(value: Any) -> Optional[float]:
 def _to_iso(value: Any) -> Optional[str]:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
+    if hasattr(value, "isoformat"):
+        try:
+            return value.isoformat()
+        except Exception:
+            return None
+    if isinstance(value, str):
+        text = value.strip()
+        return text or None
     return None
 
 
@@ -471,6 +655,23 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
               )
         """,
         },
+        "US_TOP50_DAILY_OHLCV": {
+            "table": "us_top50_daily_ohlcv",
+            "query": """
+            SELECT
+                MAX(latest.trade_date) AS last_observation_date,
+                MAX(latest.updated_at) AS last_collected_at,
+                COUNT(*) AS latest_value,
+                COUNT(DISTINCT latest.symbol) AS symbol_count
+            FROM us_top50_daily_ohlcv latest
+            WHERE latest.market = 'US'
+              AND latest.trade_date = (
+                  SELECT MAX(trade_date)
+                  FROM us_top50_daily_ohlcv
+                  WHERE market = 'US'
+              )
+        """,
+        },
         "US_TOP50_FINANCIALS": {
             "table": "us_corporate_financials",
             "query": """
@@ -532,11 +733,152 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
                 latest.success_count,
                 latest.failure_count,
                 latest.last_status,
-                latest.last_error
+                latest.last_error,
+                latest.details_json
             FROM macro_collection_run_reports latest
             WHERE latest.job_code = 'US_TOP50_EARNINGS_WATCH'
             ORDER BY latest.report_date DESC, latest.updated_at DESC
             LIMIT 1
+        """,
+        },
+        "GRAPH_NEWS_EXTRACTION_SYNC": {
+            "table": "macro_collection_run_reports",
+            "query": """
+            SELECT
+                latest.report_date AS last_observation_date,
+                latest.last_run_finished_at AS last_collected_at,
+                CASE
+                    WHEN (latest.success_count + latest.failure_count) > 0
+                        THEN ROUND((latest.success_count * 100.0) / (latest.success_count + latest.failure_count), 2)
+                    WHEN latest.success_run_count > 0
+                        THEN 100
+                    ELSE 0
+                END AS latest_value,
+                latest.run_count,
+                latest.success_run_count,
+                latest.failed_run_count,
+                latest.success_count,
+                latest.failure_count,
+                latest.last_status,
+                latest.last_error,
+                latest.details_json
+            FROM macro_collection_run_reports latest
+            WHERE latest.job_code = 'GRAPH_NEWS_EXTRACTION_SYNC'
+            ORDER BY latest.report_date DESC, latest.updated_at DESC
+            LIMIT 1
+        """,
+        },
+        "EQUITY_GRAPH_PROJECTION_SYNC": {
+            "table": "macro_collection_run_reports",
+            "query": """
+            SELECT
+                latest.report_date AS last_observation_date,
+                latest.last_run_finished_at AS last_collected_at,
+                CASE
+                    WHEN (latest.success_count + latest.failure_count) > 0
+                        THEN ROUND((latest.success_count * 100.0) / (latest.success_count + latest.failure_count), 2)
+                    WHEN latest.success_run_count > 0
+                        THEN 100
+                    ELSE 0
+                END AS latest_value,
+                latest.run_count,
+                latest.success_run_count,
+                latest.failed_run_count,
+                latest.success_count,
+                latest.failure_count,
+                latest.last_status,
+                latest.last_error,
+                latest.details_json
+            FROM macro_collection_run_reports latest
+            WHERE latest.job_code = 'EQUITY_GRAPH_PROJECTION_SYNC'
+            ORDER BY latest.report_date DESC, latest.updated_at DESC
+            LIMIT 1
+        """,
+        },
+        "GRAPH_RAG_PHASE5_WEEKLY_REPORT": {
+            "table": "macro_collection_run_reports",
+            "query": """
+            SELECT
+                latest.report_date AS last_observation_date,
+                latest.last_run_finished_at AS last_collected_at,
+                CASE
+                    WHEN (latest.success_count + latest.failure_count) > 0
+                        THEN ROUND((latest.success_count * 100.0) / (latest.success_count + latest.failure_count), 2)
+                    WHEN latest.success_run_count > 0
+                        THEN 100
+                    ELSE 0
+                END AS latest_value,
+                latest.run_count,
+                latest.success_run_count,
+                latest.failed_run_count,
+                latest.success_count,
+                latest.failure_count,
+                latest.last_status,
+                latest.last_error,
+                latest.details_json
+            FROM macro_collection_run_reports latest
+            WHERE latest.job_code = 'GRAPH_RAG_PHASE5_WEEKLY_REPORT'
+            ORDER BY latest.report_date DESC, latest.updated_at DESC
+            LIMIT 1
+        """,
+        },
+        "TIER1_CORPORATE_EVENT_SYNC": {
+            "table": "macro_collection_run_reports",
+            "query": """
+            SELECT
+                latest.report_date AS last_observation_date,
+                latest.last_run_finished_at AS last_collected_at,
+                CASE
+                    WHEN (latest.success_count + latest.failure_count) > 0
+                        THEN ROUND((latest.success_count * 100.0) / (latest.success_count + latest.failure_count), 2)
+                    WHEN latest.success_run_count > 0
+                        THEN 100
+                    ELSE 0
+                END AS latest_value,
+                latest.run_count,
+                latest.success_run_count,
+                latest.failed_run_count,
+                latest.success_count,
+                latest.failure_count,
+                latest.last_status,
+                latest.last_error,
+                latest.details_json
+            FROM macro_collection_run_reports latest
+            WHERE latest.job_code = 'TIER1_CORPORATE_EVENT_SYNC'
+            ORDER BY latest.report_date DESC, latest.updated_at DESC
+            LIMIT 1
+        """,
+        },
+        "ECONOMIC_NEWS_STREAM": {
+            "table": "economic_news",
+            "query": """
+            SELECT
+                MAX(DATE(COALESCE(latest.observed_at, latest.release_date, latest.published_at, latest.created_at))) AS last_observation_date,
+                MAX(latest.updated_at) AS last_collected_at,
+                COUNT(*) AS latest_value,
+                COUNT(DISTINCT COALESCE(latest.source_type, latest.source, 'unknown')) AS source_count,
+                COUNT(DISTINCT COALESCE(latest.category, 'unknown')) AS category_count
+            FROM economic_news latest
+            WHERE DATE(COALESCE(latest.observed_at, latest.release_date, latest.published_at, latest.created_at)) = (
+                SELECT MAX(DATE(COALESCE(observed_at, release_date, published_at, created_at)))
+                FROM economic_news
+            )
+        """,
+        },
+        "TIER1_CORPORATE_EVENT_FEED": {
+            "table": "corporate_event_feed",
+            "query": """
+            SELECT
+                MAX(latest.event_date) AS last_observation_date,
+                MAX(latest.updated_at) AS last_collected_at,
+                COUNT(*) AS latest_value,
+                COUNT(DISTINCT latest.symbol) AS symbol_count,
+                COUNT(DISTINCT latest.country_code) AS country_count
+            FROM corporate_event_feed latest
+            WHERE latest.event_date = (
+                SELECT MAX(event_date)
+                FROM corporate_event_feed
+            )
         """,
         },
         "KR_TOP50_ENTITY_REGISTRY": {
@@ -583,6 +925,23 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
               AND latest.snapshot_date = (
                   SELECT MAX(snapshot_date)
                   FROM kr_top50_universe_snapshot
+                  WHERE market = 'KOSPI'
+              )
+        """,
+        },
+        "KR_TOP50_DAILY_OHLCV": {
+            "table": "kr_top50_daily_ohlcv",
+            "query": """
+            SELECT
+                MAX(latest.trade_date) AS last_observation_date,
+                MAX(latest.updated_at) AS last_collected_at,
+                COUNT(*) AS latest_value,
+                COUNT(DISTINCT latest.stock_code) AS symbol_count
+            FROM kr_top50_daily_ohlcv latest
+            WHERE latest.market = 'KOSPI'
+              AND latest.trade_date = (
+                  SELECT MAX(trade_date)
+                  FROM kr_top50_daily_ohlcv
                   WHERE market = 'KOSPI'
               )
         """,
@@ -643,7 +1002,8 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
                 latest.success_count,
                 latest.failure_count,
                 latest.last_status,
-                latest.last_error
+                latest.last_error,
+                latest.details_json
             FROM macro_collection_run_reports latest
             WHERE latest.job_code = 'KR_TOP50_EARNINGS_WATCH'
             ORDER BY latest.report_date DESC, latest.updated_at DESC
@@ -713,6 +1073,10 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
                 COUNT(*) AS latest_value
             FROM kr_corporate_disclosures
             WHERE is_earnings_event = 1
+               OR event_type IN ('earnings_announcement', 'periodic_report')
+               OR report_nm LIKE '%%분기보고서%%'
+               OR report_nm LIKE '%%반기보고서%%'
+               OR report_nm LIKE '%%사업보고서%%'
         """,
         },
         "KR_DART_EARNINGS_EXPECTATION": {
@@ -723,6 +1087,36 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
                 MAX(updated_at) AS last_collected_at,
                 COUNT(*) AS latest_value
             FROM kr_corporate_earnings_expectations
+        """,
+        },
+        "KR_REAL_ESTATE_TRANSACTIONS": {
+            "table": "kr_real_estate_transactions",
+            "query": """
+            SELECT
+                MAX(latest.contract_date) AS last_observation_date,
+                MAX(latest.updated_at) AS last_collected_at,
+                COUNT(*) AS latest_value,
+                COUNT(DISTINCT LEFT(latest.region_code, 5)) AS region_count
+            FROM kr_real_estate_transactions latest
+            WHERE latest.contract_date = (
+                SELECT MAX(contract_date)
+                FROM kr_real_estate_transactions
+            )
+        """,
+        },
+        "KR_REAL_ESTATE_MONTHLY_SUMMARY": {
+            "table": "kr_real_estate_monthly_summary",
+            "query": """
+            SELECT
+                MAX(latest.as_of_date) AS last_observation_date,
+                MAX(latest.updated_at) AS last_collected_at,
+                COUNT(*) AS latest_value,
+                COUNT(DISTINCT latest.lawd_cd) AS region_count
+            FROM kr_real_estate_monthly_summary latest
+            WHERE latest.stat_ym = (
+                SELECT MAX(stat_ym)
+                FROM kr_real_estate_monthly_summary
+            )
         """,
         },
     }
@@ -758,6 +1152,88 @@ def _load_latest_corporate_rows() -> Dict[str, Dict[str, Any]]:
     return latest_rows
 
 
+def _load_latest_graph_rows() -> Dict[str, Dict[str, Any]]:
+    latest_rows: Dict[str, Dict[str, Any]] = {}
+    vector_index_name = (
+        str(os.getenv("GRAPH_RAG_VECTOR_INDEX_NAME") or "document_text_embedding_idx").strip()
+        or "document_text_embedding_idx"
+    )
+    try:
+        from service.graph.neo4j_client import get_neo4j_client
+
+        client = get_neo4j_client()
+        rows = client.run_read(
+            """
+            MATCH (d:Document)
+            RETURN count(d) AS total_docs,
+                   sum(CASE WHEN d.text_embedding IS NOT NULL THEN 1 ELSE 0 END) AS embedded_docs,
+                   sum(CASE WHEN coalesce(d.embedding_status, '') = 'failed' THEN 1 ELSE 0 END) AS failed_docs,
+                   max(d.embedding_updated_at) AS last_collected_at,
+                   max(coalesce(d.updated_at, d.published_at)) AS last_observation_date
+            """
+        )
+        row = rows[0] if rows else {}
+        total_docs = int(row.get("total_docs") or 0)
+        embedded_docs = int(row.get("embedded_docs") or 0)
+        failed_docs = int(row.get("failed_docs") or 0)
+        coverage_pct = round((embedded_docs * 100.0 / total_docs), 2) if total_docs > 0 else 0.0
+
+        latest_rows["GRAPH_DOCUMENT_EMBEDDING_COVERAGE"] = {
+            "last_observation_date": row.get("last_observation_date"),
+            "last_collected_at": row.get("last_collected_at"),
+            "latest_value": coverage_pct,
+            "total_docs": total_docs,
+            "embedded_docs": embedded_docs,
+            "failed_docs": failed_docs,
+        }
+
+        index_row: Dict[str, Any] = {}
+        try:
+            index_rows = client.run_read(
+                """
+                SHOW VECTOR INDEXES
+                YIELD name, state, populationPercent
+                WHERE name = $index_name
+                RETURN name, state, populationPercent
+                LIMIT 1
+                """,
+                {"index_name": vector_index_name},
+            )
+            if index_rows:
+                index_row = dict(index_rows[0])
+        except Exception:
+            try:
+                index_rows = client.run_read(
+                    """
+                    SHOW INDEXES
+                    YIELD name, type, state, populationPercent
+                    WHERE name = $index_name AND type = 'VECTOR'
+                    RETURN name, state, populationPercent
+                    LIMIT 1
+                    """,
+                    {"index_name": vector_index_name},
+                )
+                if index_rows:
+                    index_row = dict(index_rows[0])
+            except Exception as index_exc:
+                logger.warning("Failed to load vector index status: %s", index_exc)
+
+        index_state = str(index_row.get("state") or "missing").upper()
+        population_percent = _as_float(index_row.get("populationPercent"))
+        latest_rows["GRAPH_RAG_VECTOR_INDEX_READY"] = {
+            "last_observation_date": date.today(),
+            "last_collected_at": datetime.now(),
+            "latest_value": 1 if index_state == "ONLINE" else 0,
+            "index_state": index_state,
+            "population_percent": population_percent,
+            "index_name": vector_index_name,
+        }
+    except Exception as exc:
+        logger.warning("Failed to load graph indicator rows: %s", exc)
+
+    return latest_rows
+
+
 def _normalize_expectation_source(source: Any) -> str:
     normalized = str(source or "").strip().lower()
     if normalized in {"feed", "consensus_feed"}:
@@ -767,6 +1243,112 @@ def _normalize_expectation_source(source: Any) -> str:
     if normalized in {"manual", "admin", "user"}:
         return "manual"
     return normalized or "unknown"
+
+
+def _parse_json_object(value: Any) -> Dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return {}
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            return {}
+    return {}
+
+
+def _normalize_run_health_status(value: Any) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"healthy", "warning", "failed"}:
+        return normalized
+    if normalized in {"warn", "degraded", "stale"}:
+        return "warning"
+    if normalized in {"error", "fatal"}:
+        return "failed"
+    return ""
+
+
+def _derive_graph_news_sync_health(row: Dict[str, Any]) -> tuple[str, str]:
+    details = _parse_json_object(row.get("details_json"))
+    explicit_status = _normalize_run_health_status(row.get("last_status"))
+    if explicit_status == "failed":
+        return "failed", "last_status=failed"
+
+    extraction_success_docs = _safe_int(details.get("extraction_success_docs"))
+    extraction_failed_docs = _safe_int(details.get("extraction_failed_docs"))
+    embedding_success_docs = _safe_int(details.get("embedding_embedded_docs"))
+    embedding_failed_docs = _safe_int(details.get("embedding_failed_docs"))
+    success_count = max(
+        _safe_int(row.get("success_count")),
+        extraction_success_docs + embedding_success_docs,
+    )
+    failure_count = max(
+        _safe_int(row.get("failure_count")),
+        extraction_failed_docs + embedding_failed_docs,
+    )
+    total_count = success_count + failure_count
+    failure_rate_pct = (failure_count * 100.0 / total_count) if total_count > 0 else 0.0
+
+    warn_failure_count = max(_safe_int_env("GRAPH_NEWS_SYNC_WARN_FAILURE_COUNT", 10), 1)
+    fail_failure_count = max(
+        _safe_int_env("GRAPH_NEWS_SYNC_FAIL_FAILURE_COUNT", 50),
+        warn_failure_count,
+    )
+    warn_failure_rate_pct = max(
+        _safe_float_env("GRAPH_NEWS_SYNC_WARN_FAILURE_RATE_PCT", 5.0),
+        0.0,
+    )
+    fail_failure_rate_pct = max(
+        _safe_float_env("GRAPH_NEWS_SYNC_FAIL_FAILURE_RATE_PCT", 20.0),
+        warn_failure_rate_pct,
+    )
+
+    sync_failed = bool(details.get("sync_failed"))
+    embedding_status = str(details.get("embedding_status") or "").strip().lower()
+
+    if (
+        sync_failed
+        or failure_count >= fail_failure_count
+        or failure_rate_pct >= fail_failure_rate_pct
+    ):
+        return (
+            "failed",
+            f"failure_count={failure_count}, failure_rate={failure_rate_pct:.1f}%",
+        )
+
+    if (
+        explicit_status == "warning"
+        or embedding_status in {"failed", "partial_success"}
+        or failure_count >= warn_failure_count
+        or failure_rate_pct >= warn_failure_rate_pct
+    ):
+        return (
+            "warning",
+            f"failure_count={failure_count}, failure_rate={failure_rate_pct:.1f}%",
+        )
+
+    return "healthy", f"failure_count={failure_count}, failure_rate={failure_rate_pct:.1f}%"
+
+
+def _derive_run_health_status(code: str, row: Dict[str, Any]) -> tuple[str, str]:
+    if code == "GRAPH_NEWS_EXTRACTION_SYNC":
+        return _derive_graph_news_sync_health(row)
+
+    explicit_status = _normalize_run_health_status(row.get("last_status"))
+    if explicit_status:
+        return explicit_status, f"last_status={explicit_status}"
+
+    success_count = _safe_int(row.get("success_count"))
+    failure_count = _safe_int(row.get("failure_count"))
+    if failure_count <= 0:
+        return "healthy", "failure_count=0"
+    if success_count <= 0:
+        return "failed", f"success_count={success_count}, failure_count={failure_count}"
+    return "warning", f"success_count={success_count}, failure_count={failure_count}"
 
 
 def _load_latest_expectation_source_breakdown() -> Optional[str]:
@@ -816,10 +1398,74 @@ def _load_latest_expectation_source_breakdown() -> Optional[str]:
 def _coerce_reference_timestamp(
     last_collected_at: Optional[datetime], last_observation_date: Optional[date]
 ) -> Optional[datetime]:
-    reference_at = last_collected_at if isinstance(last_collected_at, datetime) else None
+    def _normalize_datetime(value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value
+        try:
+            return value.astimezone(timezone.utc).replace(tzinfo=None)
+        except Exception:
+            return value.replace(tzinfo=None)
 
-    if isinstance(last_observation_date, date):
-        observation_dt = datetime.combine(last_observation_date, time.min)
+    def _parse_datetime(value: Any) -> Optional[datetime]:
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return _normalize_datetime(value)
+        if isinstance(value, date):
+            return datetime.combine(value, time.min)
+        if hasattr(value, "to_pydatetime"):
+            try:
+                converted = value.to_pydatetime()
+                if isinstance(converted, datetime):
+                    return _normalize_datetime(converted)
+                if isinstance(converted, date):
+                    return datetime.combine(converted, time.min)
+            except Exception:
+                pass
+        if hasattr(value, "to_native"):
+            try:
+                converted = value.to_native()
+                if isinstance(converted, datetime):
+                    return _normalize_datetime(converted)
+                if isinstance(converted, date):
+                    return datetime.combine(converted, time.min)
+            except Exception:
+                pass
+        if isinstance(value, str):
+            text = value.strip()
+            if not text:
+                return None
+            if text.endswith("Z"):
+                text = f"{text[:-1]}+00:00"
+            match = re.match(
+                r"^(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2})(\.\d+)?([+-]\d{2}:\d{2})?$",
+                text,
+            )
+            if match:
+                prefix, frac, tz_text = match.groups()
+                if frac:
+                    frac = f".{frac[1:7]}"
+                text = f"{prefix}{frac or ''}{tz_text or ''}"
+            try:
+                parsed = datetime.fromisoformat(text)
+                return _normalize_datetime(parsed)
+            except ValueError:
+                pass
+            try:
+                parsed_date = date.fromisoformat(text[:10])
+                return datetime.combine(parsed_date, time.min)
+            except ValueError:
+                return None
+        if hasattr(value, "isoformat"):
+            try:
+                return _parse_datetime(value.isoformat())
+            except Exception:
+                return None
+        return None
+
+    reference_at = _parse_datetime(last_collected_at)
+    observation_dt = _parse_datetime(last_observation_date)
+    if observation_dt is not None:
         if reference_at is None or observation_dt > reference_at:
             reference_at = observation_dt
 
@@ -834,7 +1480,10 @@ def _build_health(
     frequency: str = "",
     now_at: Optional[datetime] = None,
 ) -> Dict[str, Any]:
-    current_time = now_at or datetime.now()
+    # Most DB timestamps are stored in UTC-naive form.
+    # Use UTC-naive "now" by default to avoid systematic +9h lag overestimation
+    # when the app server runs in KST.
+    current_time = now_at or datetime.now(timezone.utc).replace(tzinfo=None)
 
     if not collection_enabled:
         return {
@@ -899,9 +1548,12 @@ def get_macro_indicator_health_snapshot() -> Dict[str, Any]:
         + KR_INDICATOR_REGISTRY
         + US_CORPORATE_REGISTRY
         + KR_CORPORATE_REGISTRY
+        + PIPELINE_REGISTRY
+        + GRAPH_REGISTRY
     )
     fred_latest_rows = _load_latest_fred_rows()
     corporate_latest_rows = _load_latest_corporate_rows()
+    graph_latest_rows = _load_latest_graph_rows()
     expectation_source_breakdown = _load_latest_expectation_source_breakdown()
 
     indicators: List[Dict[str, Any]] = []
@@ -914,6 +1566,8 @@ def get_macro_indicator_health_snapshot() -> Dict[str, Any]:
         storage = str(item.get("storage") or "fred").lower()
         if storage == "corporate":
             row = corporate_latest_rows.get(code)
+        elif storage == "graph":
+            row = graph_latest_rows.get(code)
         else:
             # KR/US macro indicators are persisted into fred_data canonical table.
             row = fred_latest_rows.get(code)
@@ -928,6 +1582,16 @@ def get_macro_indicator_health_snapshot() -> Dict[str, Any]:
             collection_enabled,
             frequency=item.get("frequency", ""),
         )
+        run_health_status: Optional[str] = None
+        run_health_reason: Optional[str] = None
+        if row and code in RUN_HEALTH_JOB_CODES:
+            run_health_status, run_health_reason = _derive_run_health_status(code, row)
+            if run_health_status in {"warning", "failed"} and health.get("health") == "healthy":
+                health = {
+                    **health,
+                    "health": "stale",
+                    "is_stale": True,
+                }
 
         note = ""
         if not collection_enabled:
@@ -952,7 +1616,28 @@ def get_macro_indicator_health_snapshot() -> Dict[str, Any]:
             if status:
                 note_parts.append(f"상태 {status}")
             note = ", ".join(note_parts)
-        elif code in {"KR_TOP50_EARNINGS_WATCH_SUCCESS_RATE", "US_TOP50_EARNINGS_WATCH_SUCCESS_RATE"}:
+        elif code in {"KR_TOP50_DAILY_OHLCV", "US_TOP50_DAILY_OHLCV"}:
+            symbol_count = int(row.get("symbol_count") or 0)
+            note = f"최근 거래일 커버리지 {symbol_count}종목"
+        elif code == "ECONOMIC_NEWS_STREAM":
+            source_count = int(row.get("source_count") or 0)
+            category_count = int(row.get("category_count") or 0)
+            latest_count = int(row.get("latest_value") or 0)
+            note = f"최근 관측일 {latest_count}건, 소스 {source_count}개, 카테고리 {category_count}개"
+        elif code == "TIER1_CORPORATE_EVENT_FEED":
+            symbol_count = int(row.get("symbol_count") or 0)
+            country_count = int(row.get("country_count") or 0)
+            latest_count = int(row.get("latest_value") or 0)
+            note = f"최근 이벤트일 {latest_count}건, 종목 {symbol_count}개, 국가 {country_count}개"
+        elif code == "KR_REAL_ESTATE_TRANSACTIONS":
+            region_count = int(row.get("region_count") or 0)
+            latest_count = int(row.get("latest_value") or 0)
+            note = f"최근 계약일 {latest_count}건, 지역 {region_count}개"
+        elif code == "KR_REAL_ESTATE_MONTHLY_SUMMARY":
+            region_count = int(row.get("region_count") or 0)
+            latest_count = int(row.get("latest_value") or 0)
+            note = f"최근 통계월 {latest_count}건, 지역 {region_count}개"
+        elif code in RUN_HEALTH_JOB_CODES:
             run_count = int(row.get("run_count") or 0)
             success_run_count = int(row.get("success_run_count") or 0)
             failed_run_count = int(row.get("failed_run_count") or 0)
@@ -965,13 +1650,112 @@ def get_macro_indicator_health_snapshot() -> Dict[str, Any]:
             ]
             if total_count > 0:
                 note_parts.append(f"요청 성공 {success_count}/{total_count}")
-            last_status = str(row.get("last_status") or "").strip()
-            if last_status and last_status != "healthy":
-                note_parts.append(f"최근상태 {last_status}")
+            if run_health_status:
+                note_parts.append(f"실행상태 {run_health_status}")
+            elif str(row.get("last_status") or "").strip():
+                note_parts.append(f"최근상태 {str(row.get('last_status') or '').strip()}")
             last_error = str(row.get("last_error") or "").strip()
             if last_error:
                 note_parts.append(f"최근오류 {last_error[:80]}")
+            if code == "TIER1_CORPORATE_EVENT_SYNC":
+                details = _parse_json_object(row.get("details_json"))
+                health_status = str(details.get("health_status") or "").strip()
+                retry_failure_count = int(details.get("retry_failure_count") or 0)
+                dlq_recorded_count = int(details.get("dlq_recorded_count") or 0)
+                normalized_rows = int(details.get("normalized_rows") or 0)
+                if normalized_rows > 0:
+                    note_parts.append(f"표준이벤트 {normalized_rows}건")
+                note_parts.append(f"재시도실패/DLQ {retry_failure_count}/{dlq_recorded_count}")
+                if health_status:
+                    note_parts.append(f"헬스상태 {health_status}")
+            elif code == "GRAPH_NEWS_EXTRACTION_SYNC":
+                details = _parse_json_object(row.get("details_json"))
+                extraction_success_docs = int(details.get("extraction_success_docs") or 0)
+                extraction_failed_docs = int(details.get("extraction_failed_docs") or 0)
+                embedding_success_docs = int(details.get("embedding_embedded_docs") or 0)
+                embedding_failed_docs = int(details.get("embedding_failed_docs") or 0)
+                embedding_status = str(details.get("embedding_status") or "").strip()
+                sync_documents = int(details.get("sync_documents") or 0)
+                if sync_documents > 0:
+                    note_parts.append(f"동기화 문서 {sync_documents}건")
+                note_parts.append(f"추출 성공/실패 {extraction_success_docs}/{extraction_failed_docs}")
+                note_parts.append(f"임베딩 성공/실패 {embedding_success_docs}/{embedding_failed_docs}")
+                if embedding_status:
+                    note_parts.append(f"임베딩상태 {embedding_status}")
+            elif code == "EQUITY_GRAPH_PROJECTION_SYNC":
+                details = _parse_json_object(row.get("details_json"))
+                lag_hours = _as_float(details.get("lag_hours"))
+                latest_graph_date = str(details.get("latest_graph_date") or "").strip()
+                max_trade_date = str(details.get("max_trade_date") or "").strip()
+                max_event_date = str(details.get("max_event_date") or "").strip()
+                projection_health_status = str(details.get("projection_health_status") or "").strip()
+                if lag_hours is None:
+                    note_parts.append("lag unavailable")
+                else:
+                    note_parts.append(f"lag {lag_hours:.1f}h")
+                if latest_graph_date:
+                    note_parts.append(f"최신 그래프일 {latest_graph_date}")
+                if max_trade_date:
+                    note_parts.append(f"max_trade {max_trade_date}")
+                if max_event_date:
+                    note_parts.append(f"max_event {max_event_date}")
+                if projection_health_status:
+                    note_parts.append(f"projection상태 {projection_health_status}")
+            elif code == "GRAPH_RAG_PHASE5_WEEKLY_REPORT":
+                details = _parse_json_object(row.get("details_json"))
+                total_runs = int(details.get("total_runs") or 0)
+                warning_runs = int(details.get("warning_runs") or 0)
+                failed_runs = int(details.get("failed_runs") or 0)
+                avg_pass_rate_pct = _as_float(details.get("avg_pass_rate_pct"))
+                routing_mismatch_count = int(details.get("routing_mismatch_count") or 0)
+                avg_structured_citation_count = _as_float(
+                    details.get("avg_structured_citation_count")
+                )
+                status_reason = str(details.get("status_reason") or "").strip()
+                top_failure_categories = details.get("top_failure_categories")
+                top_failed_cases = details.get("top_failed_cases")
+                if total_runs > 0:
+                    note_parts.append(f"주간 집계 {total_runs}회")
+                    note_parts.append(f"경고/실패 {warning_runs}/{failed_runs}")
+                if avg_pass_rate_pct is not None:
+                    note_parts.append(f"평균통과율 {avg_pass_rate_pct:.2f}%")
+                note_parts.append(f"routing_mismatch {routing_mismatch_count}건")
+                if avg_structured_citation_count is not None:
+                    note_parts.append(
+                        f"평균 structured_citation {avg_structured_citation_count:.3f}"
+                    )
+                if isinstance(top_failure_categories, list) and top_failure_categories:
+                    first_failure = top_failure_categories[0]
+                    if isinstance(first_failure, dict):
+                        category_name = str(first_failure.get("category") or "").strip()
+                        category_count = int(first_failure.get("count") or 0)
+                        if category_name:
+                            note_parts.append(f"Top실패 {category_name}:{category_count}")
+                if isinstance(top_failed_cases, list) and top_failed_cases:
+                    first_case = top_failed_cases[0]
+                    if isinstance(first_case, dict):
+                        first_case_id = str(first_case.get("case_id") or "").strip()
+                        first_case_count = int(first_case.get("count") or 0)
+                        if first_case_id:
+                            note_parts.append(f"Top케이스 {first_case_id}:{first_case_count}")
+                if status_reason:
+                    note_parts.append(f"상태사유 {status_reason}")
+            if run_health_reason:
+                note_parts.append(f"판정근거 {run_health_reason}")
             note = ", ".join(note_parts)
+        elif code == "GRAPH_DOCUMENT_EMBEDDING_COVERAGE":
+            total_docs = int(row.get("total_docs") or 0)
+            embedded_docs = int(row.get("embedded_docs") or 0)
+            failed_docs = int(row.get("failed_docs") or 0)
+            note = f"임베딩 {embedded_docs}/{total_docs}건, 실패 {failed_docs}건"
+        elif code == "GRAPH_RAG_VECTOR_INDEX_READY":
+            index_name = str(row.get("index_name") or "document_text_embedding_idx")
+            index_state = str(row.get("index_state") or "missing")
+            population_percent = _as_float(row.get("population_percent"))
+            if population_percent is None:
+                note = f"인덱스 {index_name}, 상태 {index_state}"
+            else:
+                note = f"인덱스 {index_name}, 상태 {index_state}, 구축률 {population_percent:.1f}%"
 
         latest_source = None
         if code == "KR_DART_EARNINGS_EXPECTATION":
@@ -997,6 +1781,8 @@ def get_macro_indicator_health_snapshot() -> Dict[str, Any]:
                 "is_stale": health["is_stale"],
                 "note": note,
                 "latest_source": latest_source,
+                "run_health_status": run_health_status,
+                "run_health_reason": run_health_reason,
             }
         )
 

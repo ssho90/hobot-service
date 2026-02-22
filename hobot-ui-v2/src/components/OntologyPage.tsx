@@ -5,6 +5,7 @@ import { generateCypherFromNaturalLanguage, explainQueryResults, getOntologyQuer
 import {
     fetchGraphRagAnswer,
     fetchGraphRagContext,
+    streamGraphRagAnswer,
     type GraphRagAnswerResponse,
     type GraphRagCitation,
     type GraphRagEvidence,
@@ -132,6 +133,39 @@ const getCitationConfidence = (citation: GraphRagCitation): 'high' | 'medium' | 
     if (labels.includes('Fact')) return 'high';
     if (labels.includes('Claim')) return 'medium';
     return 'low';
+};
+
+const buildFriendlyMacroMessage = (response: GraphRagAnswerResponse): string => {
+    const summary = (response.answer.conclusion || '').trim() || '요약할 결론을 찾지 못했어요.';
+    const uncertainty = (response.answer.uncertainty || '').trim();
+    const seen = new Set<string>();
+    const keyPoints = (response.answer.key_points || [])
+        .map((point) => String(point || '').replace(/^\s*[-*]\s*/, '').trim())
+        .filter((point) => point.length > 0)
+        .filter((point) => {
+            const key = point.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        })
+        .slice(0, 6);
+
+    const lines: string[] = [
+        '😊 한눈에 요약',
+        summary,
+    ];
+
+    if (keyPoints.length > 0) {
+        lines.push('', '📌 핵심 포인트');
+        keyPoints.forEach((point) => lines.push(`• ${point}`));
+    }
+
+    if (uncertainty) {
+        lines.push('', '⚠️ 참고해요', uncertainty);
+    }
+
+    lines.push('', '💬 원하시면 기간(최근 1주/1달)이나 비교 종목까지 같이 정리해드릴게요!');
+    return lines.join('\n');
 };
 
 const contextToGraphData = (context: GraphRagContextResponse): { nodes: any[]; links: any[] } => {
@@ -629,7 +663,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
     };
 
     const handleMacroQuestion = async (question: string) => {
-        const response = await fetchGraphRagAnswer({
+        const payload = {
             question,
             time_range: macroTimeRange,
             country: macroCountry === 'all' ? undefined : macroCountry,
@@ -640,7 +674,59 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
             top_k_documents: macroTopK,
             top_k_stories: Math.max(10, Math.floor(macroTopK * 0.5)),
             top_k_evidences: macroTopK,
-        });
+        } as const;
+
+        const assistantMessageId = `${Date.now()}-assistant`;
+        const assistantTimestamp = new Date();
+        setChatMessages((prev) => [
+            ...prev,
+            {
+                id: assistantMessageId,
+                type: 'assistant',
+                content: '',
+                timestamp: assistantTimestamp,
+            },
+        ]);
+
+        let finalResponse: GraphRagAnswerResponse | null = null;
+
+        try {
+            await streamGraphRagAnswer(payload, (event) => {
+                if (event.type === 'delta') {
+                    setChatMessages((prev) =>
+                        prev.map((message) =>
+                            message.id === assistantMessageId
+                                ? { ...message, content: `${message.content}${event.text}` }
+                                : message
+                        )
+                    );
+                    return;
+                }
+                if (event.type === 'done') {
+                    finalResponse = event.response;
+                    return;
+                }
+                if (event.type === 'error') {
+                    throw new Error(event.error || '스트리밍 처리 중 오류가 발생했습니다.');
+                }
+            });
+        } catch (streamError) {
+            // 스트리밍 실패 시 기존 단건 API로 폴백
+            finalResponse = await fetchGraphRagAnswer(payload);
+            const fallbackContent = buildFriendlyMacroMessage(finalResponse);
+            setChatMessages((prev) =>
+                prev.map((message) =>
+                    message.id === assistantMessageId
+                        ? { ...message, content: fallbackContent }
+                        : message
+                )
+            );
+        }
+
+        if (!finalResponse) {
+            throw new Error('답변 결과를 수신하지 못했습니다.');
+        }
+        const response = finalResponse;
 
         setMacroAnswer(response);
         setMacroSuggestedQueries(response.suggested_queries);
@@ -657,27 +743,23 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
             clearPathHighlight();
         }
 
-        const keyPointsText = response.answer.key_points.length > 0
-            ? `\n\n핵심 포인트:\n${response.answer.key_points.map((point) => `- ${point}`).join('\n')}`
-            : '';
-        const uncertaintyText = response.answer.uncertainty
-            ? `\n\n불확실성: ${response.answer.uncertainty}`
-            : '';
-
-        const assistantMessage: ChatMessage = {
-            id: (Date.now() + 1).toString(),
-            type: 'assistant',
-            content: `${response.answer.conclusion}${keyPointsText}${uncertaintyText}`,
-            timestamp: new Date(),
-            rag: {
-                model: response.model,
-                uncertainty: response.answer.uncertainty,
-                keyPoints: response.answer.key_points,
-                citations: response.citations,
-            },
-        };
-
-        setChatMessages((prev) => [...prev, assistantMessage]);
+        const fallbackFriendly = buildFriendlyMacroMessage(response);
+        setChatMessages((prev) =>
+            prev.map((message) =>
+                message.id === assistantMessageId
+                    ? {
+                        ...message,
+                        content: message.content || fallbackFriendly,
+                        rag: {
+                            model: response.model,
+                            uncertainty: response.answer.uncertainty,
+                            keyPoints: response.answer.key_points,
+                            citations: response.citations,
+                        },
+                    }
+                    : message
+            )
+        );
     };
 
     const handleSendMessage = async () => {

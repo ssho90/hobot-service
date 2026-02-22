@@ -12,13 +12,14 @@ from __future__ import annotations
 import io
 import json
 import logging
+import math
 import os
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any, Dict, Iterable, List, Optional, Sequence
-from urllib.parse import urlencode
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
@@ -39,7 +40,7 @@ DEFAULT_EARNINGS_EXPECTATION_LOOKBACK_YEARS = 3
 DEFAULT_REQUIRE_EXPECTATION_FEED = True
 DEFAULT_ALLOW_BASELINE_FALLBACK = False
 DEFAULT_EXPECTATION_FEED_URL = "internal://kr-top50-ondemand"
-DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT = 50
+DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT = 100
 INTERNAL_EXPECTATION_FEED_URLS = {
     DEFAULT_EXPECTATION_FEED_URL,
     "internal://default",
@@ -48,6 +49,8 @@ INTERNAL_EXPECTATION_FEED_URLS = {
 DEFAULT_DART_CORPCODE_MAX_AGE_DAYS = 30
 DEFAULT_DART_BATCH_SIZE = 100
 DEFAULT_DART_DISCLOSURE_PAGE_COUNT = 100
+DEFAULT_KR_TOP50_DAILY_OHLCV_LOOKBACK_DAYS = 365
+DEFAULT_KR_TOP50_OHLCV_CONTINUITY_DAYS = 120
 EARNINGS_SURPRISE_MEET_THRESHOLD_PCT = 2.0
 
 EARNINGS_DISCLOSURE_KEYWORDS = (
@@ -85,6 +88,8 @@ def _safe_int(value: Any) -> Optional[int]:
     if isinstance(value, int):
         return value
     if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
         return int(value)
     text = str(value).strip().replace(",", "")
     if not text or text == "-":
@@ -127,12 +132,18 @@ def _safe_float(value: Any) -> Optional[float]:
     if value is None:
         return None
     if isinstance(value, (float, int)):
-        return float(value)
+        parsed = float(value)
+        if not math.isfinite(parsed):
+            return None
+        return parsed
     text = str(value).strip().replace(",", "")
     if not text or text == "-":
         return None
     try:
-        return float(text)
+        parsed = float(text)
+        if not math.isfinite(parsed):
+            return None
+        return parsed
     except ValueError:
         return None
 
@@ -167,6 +178,24 @@ class KRCorporateCollector:
         if "crtfc_key" in safe:
             safe["crtfc_key"] = "***REDACTED***"
         return safe
+
+    @staticmethod
+    def _build_naver_page_url(base_url: str, page: int) -> str:
+        normalized_page = max(int(page), 1)
+        split = urlsplit(str(base_url or NAVER_KOSPI_MARKET_CAP_URL).strip() or NAVER_KOSPI_MARKET_CAP_URL)
+        query_dict = parse_qs(split.query, keep_blank_values=True)
+        query_dict["page"] = [str(normalized_page)]
+        rebuilt_query = urlencode(query_dict, doseq=True)
+        return urlunsplit((split.scheme, split.netloc, split.path, rebuilt_query, split.fragment))
+
+    @staticmethod
+    def _decode_naver_html(payload: bytes) -> str:
+        for encoding in ("euc-kr", "cp949", "utf-8"):
+            try:
+                return payload.decode(encoding)
+            except UnicodeDecodeError:
+                continue
+        return payload.decode("utf-8", errors="ignore")
 
     def _fetch_json(self, url: str, params: Dict[str, Any]) -> Any:
         query = urlencode({k: v for k, v in params.items() if v is not None}, doseq=True)
@@ -399,6 +428,31 @@ class KRCorporateCollector:
                     INDEX idx_market_snapshot (market, snapshot_date),
                     INDEX idx_market_stock (market, stock_code),
                     INDEX idx_market_corp (market, corp_code)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS kr_top50_daily_ohlcv (
+                    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                    market VARCHAR(16) NOT NULL DEFAULT 'KOSPI',
+                    stock_code CHAR(6) NOT NULL,
+                    trade_date DATE NOT NULL,
+                    open_price DOUBLE NULL,
+                    high_price DOUBLE NULL,
+                    low_price DOUBLE NULL,
+                    close_price DOUBLE NULL,
+                    adjusted_close DOUBLE NULL,
+                    volume BIGINT NULL,
+                    source VARCHAR(32) NOT NULL DEFAULT 'yfinance',
+                    source_ref VARCHAR(128) NOT NULL DEFAULT '',
+                    as_of_date DATE NULL,
+                    metadata_json JSON NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_kr_top50_daily_ohlcv (market, stock_code, trade_date),
+                    INDEX idx_kr_top50_daily_ohlcv_date (market, trade_date),
+                    INDEX idx_kr_top50_daily_ohlcv_stock (market, stock_code)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 """
             )
@@ -706,6 +760,8 @@ class KRCorporateCollector:
             return "corporate_disclosure"
         if _contains_earnings_keyword(name):
             return "earnings_announcement"
+        if "기업설명회" in name or "IR" in name or "투자설명회" in name:
+            return "ir_event"
         if "사업보고서" in name or "반기보고서" in name or "분기보고서" in name:
             return "periodic_report"
         return "corporate_disclosure"
@@ -1103,27 +1159,53 @@ class KRCorporateCollector:
         limit: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
         url: str = NAVER_KOSPI_MARKET_CAP_URL,
     ) -> List[Dict[str, Any]]:
-        request = Request(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (compatible; hobot-kr-corporate-collector/1.0)",
-                "Referer": "https://finance.naver.com/",
-            },
-        )
-        with urlopen(request, timeout=25) as response:  # nosec B310
-            payload = response.read()
+        resolved_limit = max(int(limit or DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT), 1)
+        per_page_guess = 50
+        max_pages = max((resolved_limit + per_page_guess - 1) // per_page_guess, 1)
+        # Keep a small buffer to survive sparse/duplicate pages.
+        max_pages = min(max_pages + 2, 20)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; hobot-kr-corporate-collector/1.0)",
+            "Referer": "https://finance.naver.com/",
+        }
 
-        decoded_html: Optional[str] = None
-        for encoding in ("euc-kr", "cp949", "utf-8"):
-            try:
-                decoded_html = payload.decode(encoding)
+        collected_rows: List[Dict[str, Any]] = []
+        seen_stock_codes: set[str] = set()
+        for page in range(1, max_pages + 1):
+            page_url = self._build_naver_page_url(url, page)
+            request = Request(page_url, headers=headers)
+            with urlopen(request, timeout=25) as response:  # nosec B310
+                payload = response.read()
+            decoded_html = self._decode_naver_html(payload)
+            page_rows = self.parse_naver_market_cap_stock_rows(decoded_html, limit=resolved_limit)
+            if not page_rows:
+                if page == 1:
+                    break
+                # Stop paging when further pages are empty.
                 break
-            except UnicodeDecodeError:
-                continue
-        if not decoded_html:
-            decoded_html = payload.decode("utf-8", errors="ignore")
 
-        return self.parse_naver_market_cap_stock_rows(decoded_html, limit=limit)
+            added_in_page = 0
+            for row in page_rows:
+                stock_code = _normalize_stock_code(row.get("stock_code"))
+                if not stock_code or stock_code in seen_stock_codes:
+                    continue
+                seen_stock_codes.add(stock_code)
+                collected_rows.append(
+                    {
+                        "rank_position": len(collected_rows) + 1,
+                        "stock_code": stock_code,
+                        "stock_name": row.get("stock_name"),
+                    }
+                )
+                added_in_page += 1
+                if len(collected_rows) >= resolved_limit:
+                    return collected_rows[:resolved_limit]
+
+            if added_in_page == 0:
+                # Defensive break for repeated duplicate pages.
+                break
+
+        return collected_rows[:resolved_limit]
 
     def fetch_top_stock_codes_from_naver(
         self,
@@ -1241,6 +1323,48 @@ class KRCorporateCollector:
             )
             rows = cursor.fetchall() or []
         return list(rows)
+
+    def load_top50_stock_codes_in_snapshot_window(
+        self,
+        *,
+        market: str = KR_TOP50_DEFAULT_MARKET,
+        start_date: date,
+        end_date: Optional[date] = None,
+        limit: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
+    ) -> List[str]:
+        self.ensure_tables()
+        resolved_market = str(market or KR_TOP50_DEFAULT_MARKET).strip().upper() or KR_TOP50_DEFAULT_MARKET
+        resolved_start_date = self._coerce_snapshot_date(start_date)
+        resolved_end_date = self._coerce_snapshot_date(end_date or date.today())
+        if not resolved_start_date or not resolved_end_date or resolved_start_date > resolved_end_date:
+            return []
+
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT stock_code
+                FROM kr_top50_universe_snapshot
+                WHERE market = %s
+                  AND snapshot_date BETWEEN %s AND %s
+                  AND rank_position <= %s
+                ORDER BY snapshot_date DESC, rank_position ASC
+                """,
+                (
+                    resolved_market,
+                    resolved_start_date,
+                    resolved_end_date,
+                    max(int(limit), 1),
+                ),
+            )
+            rows = cursor.fetchall() or []
+
+        normalized_stock_codes = [
+            code
+            for code in (_normalize_stock_code(row.get("stock_code")) for row in rows)
+            if code
+        ]
+        return list(dict.fromkeys(normalized_stock_codes))
 
     def build_top50_snapshot_diff(
         self,
@@ -1483,6 +1607,433 @@ class KRCorporateCollector:
             "saved_rows": int(affected),
         }
 
+    @staticmethod
+    def _resolve_kr_yfinance_suffix(market: str) -> str:
+        normalized_market = str(market or KR_TOP50_DEFAULT_MARKET).strip().upper()
+        if normalized_market in {"KOSDAQ", "KQ"}:
+            return ".KQ"
+        return ".KS"
+
+    def resolve_top50_stock_codes_for_ohlcv(
+        self,
+        *,
+        stock_codes: Optional[Iterable[str]] = None,
+        extra_stock_codes: Optional[Iterable[str]] = None,
+        max_stock_count: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
+        market: str = KR_TOP50_DEFAULT_MARKET,
+        source_url: str = KR_TOP50_DEFAULT_SOURCE_URL,
+        continuity_days: int = DEFAULT_KR_TOP50_OHLCV_CONTINUITY_DAYS,
+        reference_end_date: Optional[date] = None,
+    ) -> List[str]:
+        resolved_limit = max(int(max_stock_count), 1)
+        normalized_extra_stock_codes = [
+            code
+            for code in (_normalize_stock_code(value) for value in (extra_stock_codes or []))
+            if code
+        ]
+        normalized_extra_stock_codes = list(dict.fromkeys(normalized_extra_stock_codes))
+
+        def _merge_with_extra(base_codes: Sequence[str]) -> List[str]:
+            merged = list(dict.fromkeys([*base_codes, *normalized_extra_stock_codes]))
+            return merged
+
+        explicit_stock_codes = [
+            code
+            for code in (_normalize_stock_code(value) for value in (stock_codes or []))
+            if code
+        ]
+        explicit_stock_codes = list(dict.fromkeys(explicit_stock_codes))
+        if explicit_stock_codes:
+            return _merge_with_extra(explicit_stock_codes[:resolved_limit])
+
+        snapshot_rows = self.load_latest_top50_snapshot_rows(
+            market=market,
+            limit=resolved_limit,
+        )
+        snapshot_stock_codes = [
+            code
+            for code in (_normalize_stock_code(row.get("stock_code")) for row in snapshot_rows)
+            if code
+        ]
+        snapshot_stock_codes = list(dict.fromkeys(snapshot_stock_codes))
+        resolved_continuity_days = max(int(continuity_days), 0)
+        if snapshot_stock_codes:
+            if resolved_continuity_days <= 0:
+                return _merge_with_extra(snapshot_stock_codes[:resolved_limit])
+
+            continuity_end_date = self._coerce_snapshot_date(reference_end_date or date.today()) or date.today()
+            continuity_start_date = continuity_end_date - timedelta(days=resolved_continuity_days - 1)
+            continuity_stock_codes = self.load_top50_stock_codes_in_snapshot_window(
+                market=market,
+                start_date=continuity_start_date,
+                end_date=continuity_end_date,
+                limit=resolved_limit,
+            )
+            if continuity_stock_codes:
+                merged_stock_codes = list(
+                    dict.fromkeys([*snapshot_stock_codes, *continuity_stock_codes])
+                )
+                if merged_stock_codes:
+                    return _merge_with_extra(merged_stock_codes)
+            return _merge_with_extra(snapshot_stock_codes[:resolved_limit])
+
+        if resolved_continuity_days > 0:
+            continuity_end_date = self._coerce_snapshot_date(reference_end_date or date.today()) or date.today()
+            continuity_start_date = continuity_end_date - timedelta(days=resolved_continuity_days - 1)
+            continuity_stock_codes = self.load_top50_stock_codes_in_snapshot_window(
+                market=market,
+                start_date=continuity_start_date,
+                end_date=continuity_end_date,
+                limit=resolved_limit,
+            )
+            if continuity_stock_codes:
+                return _merge_with_extra(continuity_stock_codes)
+
+        try:
+            crawled_stock_codes = self.fetch_top_stock_codes_from_naver(
+                limit=resolved_limit,
+                url=source_url,
+            )
+        except Exception as exc:
+            logger.warning("Failed to fetch KR top stock codes for OHLCV fallback: %s", exc)
+            return _merge_with_extra([])
+        normalized_crawled = [
+            code
+            for code in (_normalize_stock_code(value) for value in crawled_stock_codes)
+            if code
+        ]
+        return _merge_with_extra(list(dict.fromkeys(normalized_crawled))[:resolved_limit])
+
+    def fetch_daily_ohlcv_rows_from_yfinance(
+        self,
+        *,
+        stock_codes: Sequence[str],
+        market: str = KR_TOP50_DEFAULT_MARKET,
+        start_date: date,
+        end_date: date,
+        as_of_date: date,
+    ) -> Dict[str, Any]:
+        try:
+            import yfinance as yf
+        except Exception:
+            logger.warning("yfinance is unavailable. KR Top50 daily OHLCV collection will be skipped.")
+            return {
+                "rows": [],
+                "rows_by_stock_code": {},
+                "failed_stock_codes": [
+                    {"stock_code": "__all__", "reason": "yfinance_unavailable"}
+                ],
+            }
+
+        resolved_market = str(market or KR_TOP50_DEFAULT_MARKET).strip().upper() or KR_TOP50_DEFAULT_MARKET
+        normalized_stock_codes = [
+            code
+            for code in (_normalize_stock_code(value) for value in (stock_codes or []))
+            if code
+        ]
+        normalized_stock_codes = list(dict.fromkeys(normalized_stock_codes))
+        if not normalized_stock_codes:
+            return {"rows": [], "rows_by_stock_code": {}, "failed_stock_codes": []}
+
+        suffix = self._resolve_kr_yfinance_suffix(resolved_market)
+        yf_symbol_to_stock = {
+            f"{stock_code}{suffix}": stock_code
+            for stock_code in normalized_stock_codes
+        }
+        yf_symbols = list(yf_symbol_to_stock.keys())
+        request_end_date = end_date + timedelta(days=1)
+        try:
+            downloaded = yf.download(
+                tickers=yf_symbols,
+                start=start_date.isoformat(),
+                end=request_end_date.isoformat(),
+                interval="1d",
+                auto_adjust=False,
+                progress=False,
+                group_by="ticker",
+                threads=True,
+            )
+        except Exception as exc:
+            logger.warning("yfinance KR OHLCV download failed(symbol_count=%s): %s", len(yf_symbols), exc)
+            return {
+                "rows": [],
+                "rows_by_stock_code": {},
+                "failed_stock_codes": [
+                    {"stock_code": stock_code, "reason": f"download_failed:{exc}"}
+                    for stock_code in normalized_stock_codes
+                ],
+            }
+
+        rows: List[Dict[str, Any]] = []
+        rows_by_stock_code: Dict[str, int] = {}
+        failed_stock_codes: List[Dict[str, str]] = []
+        single_symbol_mode = len(yf_symbols) == 1
+
+        for yf_symbol in yf_symbols:
+            stock_code = yf_symbol_to_stock.get(yf_symbol)
+            if not stock_code:
+                continue
+
+            symbol_frame = None
+            try:
+                columns = getattr(downloaded, "columns", None)
+                if hasattr(columns, "nlevels") and int(columns.nlevels) > 1:
+                    level0_values = list(columns.get_level_values(0))
+                    if yf_symbol in level0_values:
+                        symbol_frame = downloaded[yf_symbol]
+                    else:
+                        try:
+                            symbol_frame = downloaded.xs(yf_symbol, axis=1, level=-1)
+                        except Exception:
+                            symbol_frame = None
+                elif single_symbol_mode:
+                    symbol_frame = downloaded
+            except Exception:
+                symbol_frame = None
+
+            if symbol_frame is None or getattr(symbol_frame, "empty", True):
+                failed_stock_codes.append({"stock_code": stock_code, "reason": "no_ohlcv_rows"})
+                continue
+
+            stock_row_count = 0
+            try:
+                for index_value, value_row in symbol_frame.iterrows():
+                    trade_date = index_value.date() if isinstance(index_value, datetime) else None
+                    if trade_date is None and isinstance(index_value, date):
+                        trade_date = index_value
+                    if trade_date is None and hasattr(index_value, "to_pydatetime"):
+                        try:
+                            dt_value = index_value.to_pydatetime()
+                            trade_date = dt_value.date() if isinstance(dt_value, datetime) else dt_value
+                        except Exception:
+                            trade_date = None
+                    if not isinstance(trade_date, date):
+                        continue
+                    if trade_date < start_date or trade_date > end_date:
+                        continue
+
+                    open_price = _safe_float(value_row.get("Open"))
+                    high_price = _safe_float(value_row.get("High"))
+                    low_price = _safe_float(value_row.get("Low"))
+                    close_price = _safe_float(value_row.get("Close"))
+                    adjusted_close = _safe_float(value_row.get("Adj Close"))
+                    if adjusted_close is None:
+                        adjusted_close = close_price
+                    volume_raw = _safe_int(value_row.get("Volume"))
+                    volume = volume_raw if volume_raw is not None and volume_raw >= 0 else None
+                    if (
+                        open_price is None
+                        and high_price is None
+                        and low_price is None
+                        and close_price is None
+                        and adjusted_close is None
+                        and volume is None
+                    ):
+                        continue
+
+                    rows.append(
+                        {
+                            "market": resolved_market,
+                            "stock_code": stock_code,
+                            "trade_date": trade_date,
+                            "open_price": open_price,
+                            "high_price": high_price,
+                            "low_price": low_price,
+                            "close_price": close_price,
+                            "adjusted_close": adjusted_close,
+                            "volume": volume,
+                            "source": "yfinance",
+                            "source_ref": f"{stock_code}:{trade_date.isoformat()}",
+                            "as_of_date": as_of_date,
+                            "metadata_json": json.dumps(
+                                {
+                                    "yf_symbol": yf_symbol,
+                                    "market": resolved_market,
+                                },
+                                ensure_ascii=False,
+                                default=str,
+                            ),
+                        }
+                    )
+                    stock_row_count += 1
+            except Exception as exc:
+                failed_stock_codes.append({"stock_code": stock_code, "reason": f"parse_failed:{exc}"})
+                continue
+
+            if stock_row_count <= 0:
+                failed_stock_codes.append({"stock_code": stock_code, "reason": "no_rows_in_window"})
+                continue
+            rows_by_stock_code[stock_code] = stock_row_count
+
+        return {
+            "rows": rows,
+            "rows_by_stock_code": rows_by_stock_code,
+            "failed_stock_codes": failed_stock_codes,
+        }
+
+    def upsert_top50_daily_ohlcv_rows(self, rows: Sequence[Dict[str, Any]]) -> int:
+        if not rows:
+            return 0
+        self.ensure_tables()
+        query = """
+            INSERT INTO kr_top50_daily_ohlcv (
+                market,
+                stock_code,
+                trade_date,
+                open_price,
+                high_price,
+                low_price,
+                close_price,
+                adjusted_close,
+                volume,
+                source,
+                source_ref,
+                as_of_date,
+                metadata_json
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                open_price = VALUES(open_price),
+                high_price = VALUES(high_price),
+                low_price = VALUES(low_price),
+                close_price = VALUES(close_price),
+                adjusted_close = VALUES(adjusted_close),
+                volume = VALUES(volume),
+                source = VALUES(source),
+                source_ref = VALUES(source_ref),
+                as_of_date = VALUES(as_of_date),
+                metadata_json = VALUES(metadata_json),
+                updated_at = CURRENT_TIMESTAMP
+        """
+        payload = [
+            (
+                row.get("market"),
+                row.get("stock_code"),
+                row.get("trade_date"),
+                row.get("open_price"),
+                row.get("high_price"),
+                row.get("low_price"),
+                row.get("close_price"),
+                row.get("adjusted_close"),
+                row.get("volume"),
+                row.get("source") or "yfinance",
+                row.get("source_ref") or "",
+                row.get("as_of_date"),
+                row.get("metadata_json"),
+            )
+            for row in rows
+        ]
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.executemany(query, payload)
+            return int(cursor.rowcount or 0)
+
+    def collect_top50_daily_ohlcv(
+        self,
+        *,
+        stock_codes: Optional[Iterable[str]] = None,
+        extra_stock_codes: Optional[Iterable[str]] = None,
+        max_stock_count: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
+        market: str = KR_TOP50_DEFAULT_MARKET,
+        source_url: str = KR_TOP50_DEFAULT_SOURCE_URL,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        lookback_days: int = DEFAULT_KR_TOP50_DAILY_OHLCV_LOOKBACK_DAYS,
+        continuity_days: int = DEFAULT_KR_TOP50_OHLCV_CONTINUITY_DAYS,
+        as_of_date: Optional[date] = None,
+    ) -> Dict[str, Any]:
+        self.ensure_tables()
+        run_as_of = as_of_date or date.today()
+        resolved_end_date = end_date or run_as_of
+        explicit_stock_codes = [
+            code
+            for code in (_normalize_stock_code(value) for value in (stock_codes or []))
+            if code
+        ]
+        explicit_stock_codes = list(dict.fromkeys(explicit_stock_codes))
+        normalized_extra_stock_codes = [
+            code
+            for code in (_normalize_stock_code(value) for value in (extra_stock_codes or []))
+            if code
+        ]
+        normalized_extra_stock_codes = list(dict.fromkeys(normalized_extra_stock_codes))
+        resolved_continuity_days = max(int(continuity_days), 0)
+        if start_date:
+            resolved_start_date = start_date
+        else:
+            resolved_lookback = max(int(lookback_days), 1)
+            resolved_start_date = resolved_end_date - timedelta(days=resolved_lookback - 1)
+        if resolved_start_date > resolved_end_date:
+            raise ValueError("start_date must be <= end_date")
+
+        resolved_stock_codes = self.resolve_top50_stock_codes_for_ohlcv(
+            stock_codes=explicit_stock_codes or None,
+            extra_stock_codes=normalized_extra_stock_codes or None,
+            max_stock_count=max_stock_count,
+            market=market,
+            source_url=source_url,
+            continuity_days=resolved_continuity_days,
+            reference_end_date=resolved_end_date,
+        )
+        if not resolved_stock_codes:
+            raise ValueError("No target KR stock codes resolved for daily OHLCV collection.")
+
+        resolved_market = str(market or KR_TOP50_DEFAULT_MARKET).strip().upper() or KR_TOP50_DEFAULT_MARKET
+        latest_snapshot_stock_codes: List[str] = []
+        if not explicit_stock_codes:
+            latest_snapshot_rows = self.load_latest_top50_snapshot_rows(
+                market=market,
+                limit=max(int(max_stock_count), 1),
+            )
+            latest_snapshot_stock_codes = [
+                code
+                for code in (_normalize_stock_code(row.get("stock_code")) for row in latest_snapshot_rows)
+                if code
+            ]
+            latest_snapshot_stock_codes = list(dict.fromkeys(latest_snapshot_stock_codes))
+        latest_snapshot_set = set(latest_snapshot_stock_codes)
+        continuity_extra_stock_codes = [
+            stock_code for stock_code in resolved_stock_codes
+            if latest_snapshot_set and stock_code not in latest_snapshot_set
+        ]
+
+        summary: Dict[str, Any] = {
+            "market": resolved_market,
+            "as_of_date": run_as_of.isoformat(),
+            "start_date": resolved_start_date.isoformat(),
+            "end_date": resolved_end_date.isoformat(),
+            "lookback_days": max((resolved_end_date - resolved_start_date).days + 1, 1),
+            "continuity_days": resolved_continuity_days,
+            "continuity_enabled": bool(resolved_continuity_days > 0 and not explicit_stock_codes),
+            "target_stock_count": len(resolved_stock_codes),
+            "target_stock_codes": resolved_stock_codes,
+            "extra_stock_code_count": len(normalized_extra_stock_codes),
+            "extra_stock_codes": normalized_extra_stock_codes,
+            "latest_snapshot_stock_count": len(latest_snapshot_stock_codes),
+            "continuity_extra_stock_count": len(continuity_extra_stock_codes),
+            "continuity_extra_stock_codes": continuity_extra_stock_codes,
+            "rows_by_stock_code": {},
+            "fetched_rows": 0,
+            "upserted_rows": 0,
+            "failed_stock_codes": [],
+            "started_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+        fetch_result = self.fetch_daily_ohlcv_rows_from_yfinance(
+            stock_codes=resolved_stock_codes,
+            market=resolved_market,
+            start_date=resolved_start_date,
+            end_date=resolved_end_date,
+            as_of_date=run_as_of,
+        )
+        rows = list(fetch_result.get("rows") or [])
+        summary["rows_by_stock_code"] = dict(fetch_result.get("rows_by_stock_code") or {})
+        summary["failed_stock_codes"] = list(fetch_result.get("failed_stock_codes") or [])
+        summary["fetched_rows"] = len(rows)
+        summary["upserted_rows"] = self.upsert_top50_daily_ohlcv_rows(rows)
+        summary["finished_at"] = datetime.now(timezone.utc).isoformat()
+        return summary
+
     def resolve_corp_codes_from_stock_codes(self, stock_codes: Sequence[str]) -> List[str]:
         normalized_stock_codes = [
             stock_code
@@ -1657,6 +2208,9 @@ class KRCorporateCollector:
         market: str = KR_TOP50_DEFAULT_MARKET,
         top_limit: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
         lookback_days: int = 30,
+        hydrate_disclosures_if_empty: bool = True,
+        hydrate_per_corp_max_pages: int = 2,
+        hydrate_page_count: int = DEFAULT_DART_DISCLOSURE_PAGE_COUNT,
         persist: bool = True,
     ) -> Dict[str, Any]:
         self.ensure_tables()
@@ -1664,6 +2218,8 @@ class KRCorporateCollector:
         resolved_market = str(market or KR_TOP50_DEFAULT_MARKET).strip().upper() or KR_TOP50_DEFAULT_MARKET
         resolved_top_limit = max(int(top_limit), 1)
         resolved_lookback_days = max(int(lookback_days), 1)
+        resolved_hydrate_pages = max(int(hydrate_per_corp_max_pages), 1)
+        resolved_hydrate_page_count = max(min(int(hydrate_page_count), 100), 1)
         start_date = resolved_report_date - timedelta(days=resolved_lookback_days - 1)
 
         snapshot_rows = self.load_latest_top50_snapshot_rows(
@@ -1682,14 +2238,16 @@ class KRCorporateCollector:
         ]
         target_corp_codes = list(dict.fromkeys(target_corp_codes))
 
-        disclosures: Dict[tuple[str, str, int], Dict[str, Any]] = {}
-        if target_corp_codes:
+        def _load_disclosures_map() -> Dict[tuple[str, str, int], Dict[str, Any]]:
+            disclosures_map: Dict[tuple[str, str, int], Dict[str, Any]] = {}
+            if not target_corp_codes:
+                return disclosures_map
+
             placeholders = ", ".join(["%s"] * len(target_corp_codes))
             query = f"""
-                SELECT corp_code, rcept_no, rcept_dt, period_year, fiscal_quarter
+                SELECT corp_code, rcept_no, rcept_dt, period_year, fiscal_quarter, report_nm, event_type, is_earnings_event
                 FROM kr_corporate_disclosures
-                WHERE is_earnings_event = 1
-                  AND corp_code IN ({placeholders})
+                WHERE corp_code IN ({placeholders})
                   AND rcept_dt BETWEEN %s AND %s
                   AND period_year IS NOT NULL
                   AND fiscal_quarter IS NOT NULL
@@ -1700,25 +2258,64 @@ class KRCorporateCollector:
                 cursor = conn.cursor()
                 cursor.execute(query, tuple(params))
                 rows = cursor.fetchall() or []
+
             for row in rows:
                 corp_code = _normalize_corp_code(row.get("corp_code"))
                 period_year = str(row.get("period_year") or "").strip()
                 fiscal_quarter = _safe_int(row.get("fiscal_quarter"))
+                report_nm = str(row.get("report_nm") or "").strip()
+                event_type = str(row.get("event_type") or "").strip().lower()
+                is_earnings_event = int(row.get("is_earnings_event") or 0)
                 rcept_dt = row.get("rcept_dt")
                 if not corp_code or len(period_year) != 4 or fiscal_quarter not in (1, 2, 3, 4):
                     continue
                 if not isinstance(rcept_dt, date):
                     continue
+
+                is_periodic = ("분기보고서" in report_nm) or ("반기보고서" in report_nm) or ("사업보고서" in report_nm)
+                if not (
+                    is_earnings_event == 1
+                    or event_type in {"earnings_announcement", "periodic_report"}
+                    or is_periodic
+                ):
+                    continue
+
                 key = (corp_code, period_year, fiscal_quarter)
                 # 동일 분기 이벤트가 여러건이면 가장 이른 공시 시점을 SLA 기준으로 사용
-                if key not in disclosures:
-                    disclosures[key] = {
+                if key not in disclosures_map:
+                    disclosures_map[key] = {
                         "corp_code": corp_code,
                         "period_year": period_year,
                         "fiscal_quarter": fiscal_quarter,
                         "rcept_dt": rcept_dt,
                         "rcept_no": str(row.get("rcept_no") or "").strip() or None,
                     }
+            return disclosures_map
+
+        disclosures = _load_disclosures_map()
+        hydrate_summary: Optional[Dict[str, Any]] = None
+        hydrate_attempted = False
+        if not disclosures and bool(hydrate_disclosures_if_empty) and target_corp_codes:
+            hydrate_attempted = True
+            try:
+                hydrate_summary = self.collect_disclosure_events(
+                    start_date=start_date,
+                    end_date=resolved_report_date,
+                    corp_codes=target_corp_codes,
+                    max_corp_count=len(target_corp_codes),
+                    refresh_corp_codes=False,
+                    page_count=resolved_hydrate_page_count,
+                    per_corp_max_pages=resolved_hydrate_pages,
+                    only_earnings=False,
+                    auto_expectations=False,
+                    as_of_date=resolved_report_date,
+                )
+            except Exception as exc:
+                hydrate_summary = {
+                    "status": "failed",
+                    "error": str(exc),
+                }
+            disclosures = _load_disclosures_map()
 
         earliest_financial_at: Dict[tuple[str, str, int], datetime] = {}
         if disclosures:
@@ -1811,6 +2408,8 @@ class KRCorporateCollector:
                 "start_date": start_date.isoformat(),
                 "end_date": resolved_report_date.isoformat(),
                 "target_corp_count": len(target_corp_codes),
+                "hydrate_attempted": hydrate_attempted,
+                "hydrate_summary": hydrate_summary,
                 "violation_samples": violation_samples,
             },
         }
@@ -2883,7 +3482,7 @@ class KRCorporateCollector:
         reprt_code: str = "11011",
         corp_codes: Optional[Iterable[str]] = None,
         stock_codes: Optional[Iterable[str]] = None,
-        max_corp_count: int = 50,
+        max_corp_count: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
         refresh_corp_codes: bool = True,
         corp_code_max_age_days: int = DEFAULT_DART_CORPCODE_MAX_AGE_DAYS,
         as_of_date: Optional[date] = None,
@@ -2958,7 +3557,7 @@ class KRCorporateCollector:
         end_date: date,
         corp_codes: Optional[Iterable[str]] = None,
         stock_codes: Optional[Iterable[str]] = None,
-        max_corp_count: int = 50,
+        max_corp_count: int = DEFAULT_EXPECTATION_FEED_TOP_CORP_COUNT,
         refresh_corp_codes: bool = False,
         corp_code_max_age_days: int = DEFAULT_DART_CORPCODE_MAX_AGE_DAYS,
         page_count: int = DEFAULT_DART_DISCLOSURE_PAGE_COUNT,

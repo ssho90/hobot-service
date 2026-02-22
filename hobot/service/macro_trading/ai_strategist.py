@@ -7,6 +7,7 @@ import ast
 import json
 import logging
 import re
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any, List, TypedDict
@@ -16,7 +17,12 @@ from langgraph.graph import StateGraph, START, END
 
 from service.llm import llm_gemini_pro, llm_gemini_flash
 from service.database.db import get_db_connection
-from service.llm_monitoring import track_llm_call
+from service.llm_monitoring import (
+    get_llm_flow_context,
+    reset_llm_flow_context,
+    set_llm_flow_context,
+    track_llm_call,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1574,10 +1580,23 @@ def _invoke_llm_json(
     model_name: str,
     service_name: str,
     max_retries: int = 1,
+    user_id: Optional[str] = None,
+    flow_type: Optional[str] = None,
+    flow_run_id: Optional[str] = None,
+    agent_name: Optional[str] = None,
+    trace_order: Optional[int] = None,
+    metadata_json: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """LLM 호출 후 JSON 응답 파싱 (형식 오류 시 1회 재시도)"""
     current_prompt = prompt
     last_error: Optional[Exception] = None
+    context_payload = get_llm_flow_context()
+    effective_user_id = user_id or context_payload.get("user_id")
+    effective_flow_type = flow_type or context_payload.get("flow_type")
+    effective_flow_run_id = flow_run_id or context_payload.get("flow_run_id")
+    effective_agent_name = agent_name
+    if not effective_agent_name and service_name.startswith("ai_strategist_agent_"):
+        effective_agent_name = service_name.replace("ai_strategist_agent_", "", 1)
 
     for attempt in range(max_retries + 1):
         llm = _create_strategy_llm(model_name)
@@ -1586,6 +1605,12 @@ def _invoke_llm_json(
             provider="Google",
             service_name=service_name,
             request_prompt=current_prompt,
+            user_id=effective_user_id,
+            flow_type=effective_flow_type,
+            flow_run_id=effective_flow_run_id,
+            agent_name=effective_agent_name,
+            trace_order=trace_order,
+            metadata_json=metadata_json,
         ) as tracker:
             response = llm.invoke(current_prompt)
             tracker.set_response(response)
@@ -2186,6 +2211,7 @@ def _invoke_parallel_sub_allocator_agents(
     constraints: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Equity/Bond/Alt 전담 Sub-Agent 병렬 실행 후 결과 통합"""
+    flow_context = get_llm_flow_context()
     target_allocation = get_model_portfolio_allocation(mp_id) or {}
     grouped_ids = _get_sub_model_candidates_by_group()
 
@@ -2232,6 +2258,10 @@ def _invoke_parallel_sub_allocator_agents(
                 model_name,
                 f"ai_strategist_agent_sub_allocator_{candidate_group}",
                 1,
+                user_id=flow_context.get("user_id"),
+                flow_type=flow_context.get("flow_type"),
+                flow_run_id=flow_context.get("flow_run_id"),
+                agent_name=f"sub_allocator_{candidate_group}",
             )
         except Exception as asset_error:
             logger.warning("%s Sub-Agent 호출 실패: %s", asset_label, asset_error)
@@ -2858,6 +2888,7 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
         risk_report: Dict[str, Any] = {}
         try:
             logger.info("1단계: Multi-Agent MP 분석 시작 (Quant + Narrative 병렬)")
+            flow_context = get_llm_flow_context()
             quant_prompt = create_quant_agent_prompt(
                 fred_signals=fred_signals or {},
                 previous_decision=previous_decision,
@@ -2878,6 +2909,10 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
                     model_name,
                     "ai_strategist_agent_quant",
                     1,
+                    flow_context.get("user_id"),
+                    flow_context.get("flow_type"),
+                    flow_context.get("flow_run_id"),
+                    "quant_agent",
                 )
                 narrative_future = executor.submit(
                     _invoke_llm_json,
@@ -2885,6 +2920,10 @@ def analyze_and_decide(fred_signals: Optional[Dict] = None, economic_news: Optio
                     model_name,
                     "ai_strategist_agent_narrative",
                     1,
+                    flow_context.get("user_id"),
+                    flow_context.get("flow_type"),
+                    flow_context.get("flow_run_id"),
+                    "narrative_agent",
                 )
                 quant_report = quant_future.result()
                 narrative_report = narrative_future.result()
@@ -3631,11 +3670,25 @@ def save_strategy_decision(
         return False
 
 
-def run_ai_analysis():
+def run_ai_analysis(triggered_by_user_id: Optional[str] = None):
     """AI 분석 실행 (스케줄러용) - LangGraph 기반"""
+    flow_run_id = f"dashboard-{uuid.uuid4().hex[:24]}"
+    effective_user_id = str(triggered_by_user_id or "").strip() or "system"
+    flow_context_token = set_llm_flow_context(
+        flow_type="dashboard_ai_analysis",
+        flow_run_id=flow_run_id,
+        user_id=effective_user_id,
+        metadata={
+            "entrypoint": "run_ai_analysis",
+            "route": TRADING_ANALYSIS_ROUTE,
+            "scope_version": TRADING_SCOPE_VERSION,
+            "analysis_country_code": US_ANALYSIS_COUNTRY_CODE,
+        },
+    )
     try:
         logger.info("=" * 60)
         logger.info("AI 전략 분석 시작")
+        logger.info("멀티에이전트 추적 run_id=%s user_id=%s", flow_run_id, effective_user_id)
         logger.info(
             "[Phase0][TradingScope] run_ai_analysis route=%s scope_version=%s analysis_country_code=%s",
             TRADING_ANALYSIS_ROUTE,
@@ -3684,3 +3737,5 @@ def run_ai_analysis():
         import traceback
         logger.error(f"전체 traceback:\n{traceback.format_exc()}")
         return False
+    finally:
+        reset_llm_flow_context(flow_context_token)

@@ -60,10 +60,26 @@ from service.macro_trading.collectors.corporate_entity_collector import (
     DEFAULT_ENTITY_COUNTRIES,
     get_corporate_entity_collector,
 )
+from service.macro_trading.collectors.corporate_event_collector import (
+    CorporateEventCollector,
+    get_corporate_event_collector,
+)
 from service.macro_trading.collectors.news_collector import (
     NewsCollector,
     get_news_collector,
     NewsCollectorError
+)
+from service.macro_trading.collectors.policy_document_collector import (
+    PolicyDocumentCollector,
+    PolicyDocumentCollectorError,
+    PolicyFeedSource,
+    DEFAULT_POLICY_FEED_SOURCES,
+    FED_POLICY_RSS_URL,
+    BOK_POLICY_RSS_URL,
+    MOLIT_HOUSING_POLICY_RSS_URL,
+    KREB_HOUSING_POLICY_RSS_URL,
+    KHF_HOUSING_POLICY_RSS_URL,
+    get_policy_document_collector,
 )
 
 __all__ = [
@@ -112,7 +128,19 @@ __all__ = [
     'DEFAULT_ENTITY_SYNC_SOURCE',
     'DEFAULT_ENTITY_COUNTRIES',
     'get_corporate_entity_collector',
+    'CorporateEventCollector',
+    'get_corporate_event_collector',
     'NewsCollector',
     'get_news_collector',
-    'NewsCollectorError'
+    'NewsCollectorError',
+    'PolicyDocumentCollector',
+    'PolicyDocumentCollectorError',
+    'PolicyFeedSource',
+    'DEFAULT_POLICY_FEED_SOURCES',
+    'FED_POLICY_RSS_URL',
+    'BOK_POLICY_RSS_URL',
+    'MOLIT_HOUSING_POLICY_RSS_URL',
+    'KREB_HOUSING_POLICY_RSS_URL',
+    'KHF_HOUSING_POLICY_RSS_URL',
+    'get_policy_document_collector',
 ]

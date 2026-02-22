@@ -26,6 +26,9 @@ class TestKRDartDplus1SlaScheduler(unittest.TestCase):
                 market="KOSPI",
                 top_limit=50,
                 lookback_days=30,
+                hydrate_disclosures_if_empty=False,
+                hydrate_per_corp_max_pages=3,
+                hydrate_page_count=20,
                 persist=True,
             )
 
@@ -35,6 +38,9 @@ class TestKRDartDplus1SlaScheduler(unittest.TestCase):
         self.assertEqual(kwargs["market"], "KOSPI")
         self.assertEqual(kwargs["top_limit"], 50)
         self.assertEqual(kwargs["lookback_days"], 30)
+        self.assertFalse(kwargs["hydrate_disclosures_if_empty"])
+        self.assertEqual(kwargs["hydrate_per_corp_max_pages"], 3)
+        self.assertEqual(kwargs["hydrate_page_count"], 20)
         self.assertTrue(kwargs["persist"])
 
     def test_validate_kr_dart_disclosure_dplus1_sla_from_env(self):
@@ -44,6 +50,9 @@ class TestKRDartDplus1SlaScheduler(unittest.TestCase):
                 "KR_DART_DPLUS1_SLA_MARKET": "KOSPI",
                 "KR_DART_DPLUS1_SLA_TOP_LIMIT": "40",
                 "KR_DART_DPLUS1_SLA_LOOKBACK_DAYS": "14",
+                "KR_DART_DPLUS1_SLA_HYDRATE_IF_EMPTY": "0",
+                "KR_DART_DPLUS1_SLA_HYDRATE_PAGES": "4",
+                "KR_DART_DPLUS1_SLA_HYDRATE_PAGE_COUNT": "15",
                 "KR_DART_DPLUS1_SLA_PERSIST": "0",
             },
             clear=False,
@@ -58,6 +67,9 @@ class TestKRDartDplus1SlaScheduler(unittest.TestCase):
         self.assertEqual(kwargs["market"], "KOSPI")
         self.assertEqual(kwargs["top_limit"], 40)
         self.assertEqual(kwargs["lookback_days"], 14)
+        self.assertFalse(kwargs["hydrate_disclosures_if_empty"])
+        self.assertEqual(kwargs["hydrate_per_corp_max_pages"], 4)
+        self.assertEqual(kwargs["hydrate_page_count"], 15)
         self.assertFalse(kwargs["persist"])
 
     def test_setup_kr_dart_dplus1_sla_scheduler_registers_job(self):
