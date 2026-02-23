@@ -2940,7 +2940,7 @@ def _make_prompt(
         )
         return f"""
 [Role]
-You are a macro analysis assistant grounded strictly in provided graph context.
+당신은 다수의 도메인 전문가(Domain Agents)가 분석한 결과(DomainInsights)를 취합하여 최종 의사결정을 내리는 수석 분석가(Supervisor/Critic)입니다.
 
 [Question]
 {question}
@@ -2951,38 +2951,30 @@ You are a macro analysis assistant grounded strictly in provided graph context.
 [GraphContextCompact]
 {json.dumps(compact_context, ensure_ascii=False, indent=2)}
 
-[StructuredDataContextCompact]
+[DomainInsights (StructuredDataContext)]
 {structured_data_block}
 
 [USMacroReference0830]
 {macro_reference_block}
 
 [Rules]
-1. Only use facts present in GraphContextCompact and StructuredDataContextCompact.
-2. If evidence is weak or missing, say "근거 불충분" explicitly.
-3. Explain at least one impact chain in Event -> Theme -> Indicator form when possible.
-4. Every key claim must be traceable to evidence_id/doc_id in GraphContextCompact or table/template_id in StructuredDataContextCompact.
-5. Do not invent entities, events, indicators, dates, or numbers.
-6. Output JSON only (no markdown).
-7. Follow routing guidance: {route_guidance}
-8. For KR-focused questions, when US context is needed, prioritize USMacroReference0830 over unrelated global events.
-9. Never expose internal IDs/tokens (e.g., EVT_xxx, EV_xxx, EVID_xxx, CLM_xxx, LAWD code only). Use plain Korean labels (지역명/사건 설명).
-10. If StructuredDataContextCompact has real-estate monthly trend (months_available >= 6), include explicit time-series trend interpretation.
-11. If StructuredDataContextCompact.agent_insights exists, treat it as primary domain analysis and synthesize across agents before adding extra context.
-12. Keep answer concise: do not restate raw context dumps.
-13. If StructuredDataContextCompact.datasets has equity_analysis, include short/long trend (MA20/60/120 기반) and earnings pre/post reaction explicitly.
+1. [DomainInsights] 데이터를 최우선 판단 근거로 삼는다. 여기에 포함된 각 도메인의 'primary_trend', 'confidence_score', 'analytical_summary', 'key_drivers'를 종합하라.
+2. 여러 도메인 간(예: 거시경제 'BULL' vs 부동산 'BEAR')에 primary_trend가 상충(Conflict)하는 경우, 어떤 요인이 현재 더 지배적인지 비판적 사고(Reflective Reasoning)를 통해 조율하고 명시하라. 절대 기계적으로 둘다 맞다는 식으로 합치거나 무시하지 마라.
+3. 근거가 부족하거나 'NEUTRAL' 일색인 경우, 현재 데이터로는 명확한 뷰를 내기 어렵다는 점(한계)을 솔직하게 명시하라.
+4. 주어진 데이터 밖의 사실이나 수치(Hallucination)를 절대로 혼합하여 지어내지 마라.
+5. 오직 JSON 구조로만 출력할 것(Markdown 랩핑 금지). 내부 코드/아이디(예: EVT_xxx, CLM_xxx 등)는 노출하지 말고 사람이 이해할 수 있는 자연어와 실제 지표 이름으로 명확히 풀어 써라.
+6. 라우팅 가이드라인을 반드시 준수하라: {route_guidance}
 
 [Output JSON Schema]
 {{
-  "conclusion": "핵심 결론",
-  "uncertainty": "불확실성/한계",
-  "key_points": ["핵심 포인트 1", "핵심 포인트 2"],
+  "conclusion": "도메인 간 상충/조율 과정을 거친 종합적인 최종 분석 답변 (명확하고 예리하게 2~3문장 이내)",
+  "uncertainty": "분석의 한계 사항이나 데이터 불확실성/리스크 요인",
+  "key_points": ["종합된 핵심 분석 포인트 1", "포인트 2", "포인트 3"],
+  "conflict_resolution": "도메인 간 시각 차이나 상충 여부가 있었는지, 그리고 어떻게 조율 및 판단했는지 설명 (이견이 없으면 '모두 한 방향(BULL/BEAR)으로 일치함' 작성)",
   "impact_pathways": [
     {{
-      "event_id": "EVT_xxx",
-      "theme_id": "inflation",
-      "indicator_code": "CPIAUCSL",
-      "explanation": "영향 경로 설명"
+      "theme_id": "어떤 테마/이벤트가 트리거가 되었는가",
+      "explanation": "해당 테마가 파급 경로를 거쳐 자산 가격 및 심리에 도달하는 인과관계 서술"
     }}
   ],
   "cited_evidence_ids": ["EVID_xxx"],
@@ -4736,13 +4728,39 @@ def _build_agent_execution_prompt(
     context_meta: Dict[str, Any],
 ) -> str:
     role_map = {
-        "macro_economy_agent": "거시경제 분석 전문가",
-        "equity_analyst_agent": "주식/기업 분석 전문가",
-        "real_estate_agent": "부동산 정량 분석 전문가",
-        "ontology_master_agent": "지식그래프 구조 분석 전문가",
-        "general_knowledge_agent": "일반 질의 응답 전문가",
+        "macro_economy_agent": "거시경제 분석 전문가(Macro Analyst)",
+        "equity_analyst_agent": "주식 및 기업 분석 전문가(Equity Analyst)",
+        "real_estate_agent": "부동산 정량 분석 전문가(Real Estate Analyst)",
+        "ontology_master_agent": "지식그래프 및 파급효과 분석 전문가(Ontology Master)",
+        "general_knowledge_agent": "일반 데이터 분석 전문가",
     }
-    role = role_map.get(agent_name, "도메인 분석 전문가")
+    role = role_map.get(agent_name, "도메인 데이터 분석 전문가")
+
+    domain_rules = ""
+    if agent_name == "equity_analyst_agent":
+        domain_rules = (
+            "1. OHLCV, 이동평균선(MA), 실적 반응 등 수치를 기반으로 경제 국면(Regime)을 파악하고 향후 기대 추세를 'BULL', 'BEAR', 'NEUTRAL' 중 하나로 설정하라.\n"
+            "2. FRED 거시지표나 기업 실적 서프라이즈 여부가 존재하는지 살피고, 그것이 투자 심리에 미친 영향을 key_drivers로 명시하라.\n"
+            "3. 숫자를 단순 나열하지 않고, 그 수치가 시장 심리와 자산 가치에 어떤 의미(So What)를 갖는지 해석하라."
+        )
+    elif agent_name == "real_estate_agent":
+        domain_rules = (
+            "1. 캡레이트(임대수익률), 전세가율, 거래량 추이, 재고율(미분양) 등을 종합하여 실제 매수/매도 수급 압력을 계산하라.\n"
+            "2. LTV, 취득세 등 정책 규제 문건이 포함되었다면, 대출 금리와 묶어서 실제 현금흐름/시뮬레이션 결과를 추론하라.\n"
+            "3. 종합적인 지역/물건의 단기적 방향성을 'BULL', 'BEAR', 'NEUTRAL' 중 하나로 설정하라."
+        )
+    elif agent_name == "ontology_master_agent":
+        domain_rules = (
+            "1. 노드 간의 단순 연결 관계를 요약하지 말고, 인과관계(A->B->C)와 파급효과(Ripple Effect)를 도출하라.\n"
+            "2. 개별 이벤트(M&A, 파업, 스캔들 등)가 밸류체인 및 공급망 전체에 미칠 연쇄적인 충격의 정도(Impact Score)를 가늠하라.\n"
+            "3. 위험도를 기반으로 전반적 분위기를 'BULL', 'BEAR', 'NEUTRAL' 중 하나로 설정하라."
+        )
+    else:
+        domain_rules = (
+            "1. 툴 실행 결과에 담긴 핵심 수치 흐름을 바탕으로 단기적 방향성을 'BULL', 'BEAR', 'NEUTRAL' 중 하나로 설정하라.\n"
+            "2. 제공된 결과 밖의 사실을 결합하지 말고, 가장 확신할 수 있는 논리를 key_drivers로 뽑아내라."
+        )
+
     compact_meta = {
         "selected_type": route_decision.get("selected_type"),
         "selected_question_id": route_decision.get("selected_question_id"),
@@ -4753,72 +4771,88 @@ def _build_agent_execution_prompt(
 
     return f"""
 [Role]
-당신은 {role}입니다. 주어진 도구 실행 결과만 근거로 간결하게 분석하세요.
+당신은 {role}입니다. 제공된 ToolProbe 데이터와 규칙을 엄격히 준수하여 구조화된 도메인 인사이트를 분석하세요.
 
 [Question]
 {request.question}
 
-[Branch]
-{branch_name}
+[Branch / Agent]
+{branch_name} / {agent_name}
 
 [Route]
-{json.dumps(compact_meta, ensure_ascii=False, indent=2)}
+{json.dumps(compact_meta, ensure_ascii=False, indent=2, default=str)}
 
 [ToolProbe]
-{json.dumps(tool_probe, ensure_ascii=False, indent=2)}
+{json.dumps(tool_probe, ensure_ascii=False, indent=2, default=str)}
 
 [ContextCounts]
-{json.dumps(compact_counts, ensure_ascii=False, indent=2)}
+{json.dumps(compact_counts, ensure_ascii=False, indent=2, default=str)}
 
 [Rules]
-1. 제공된 ToolProbe 범위를 벗어난 수치/사실을 만들지 않는다.
-2. 핵심 분석은 1~3문장 요약 + 핵심 포인트 최대 4개.
-3. 내부 식별자(EVT_/EV_/EVID_/CLM_)는 사용자 문장에 노출하지 않는다.
-4. JSON만 출력한다.
+0. ToolProbe 데이터에 없는 새로운 수치나 사실, 외부 정보를 절대로 절대로 지어내지 않는다. (Hallucination 금지)
+{domain_rules}
+4. 내부 식별자(EVT_/EVID_/CLM_ 등)나 SQL 테이블 이름 등은 최종 출력에 노출하지 말고, 사람이 이해할 수 있는 자연어로 풀어서 설명한다.
+5. 오직 지정된 [Output JSON] 형식에 맞춰 응답하며, 마크다운(```json 등)으로 감싸지 않는다.
 
 [Output JSON]
 {{
-  "summary": "도메인 요약",
-  "key_points": ["포인트1", "포인트2"],
-  "risks": ["리스크1"],
-  "confidence": "High|Medium|Low"
+  "domain_source": "{agent_name.replace('_agent', '').upper()}",
+  "confidence_score": 0.85, 
+  "primary_trend": "BULL",   
+  "quantitative_metrics": {{
+    "핵심지표명1": "핵심지표값1",
+    "핵심지표명2": "핵심지표값2"
+  }},
+  "key_drivers": ["트렌드를 결정지은 핵심 논리 1", "핵심 사유 2", "리스크 요인 3"],
+  "analytical_summary": "수치들의 의미(So What)와 최종 결론을 2~3문장으로 날카롭게 요약한 분석 의견"
 }}
 """.strip()
 
 
 def _normalize_agent_execution_payload(raw_json: Dict[str, Any], raw_text: str) -> Dict[str, Any]:
-    summary = str(raw_json.get("summary") or "").strip()
-    key_points_raw = raw_json.get("key_points")
-    risks_raw = raw_json.get("risks")
-    confidence = str(raw_json.get("confidence") or "Low").strip() or "Low"
+    summary = str(raw_json.get("analytical_summary") or raw_json.get("summary") or "").strip()
+    key_drivers_raw = raw_json.get("key_drivers") or raw_json.get("key_points")
+    primary_trend = str(raw_json.get("primary_trend") or "NEUTRAL").upper()
+    domain_source = str(raw_json.get("domain_source") or "GENERAL").upper()
+    
+    confidence_score_raw = raw_json.get("confidence_score")
+    confidence_score = 0.5
+    try:
+        if confidence_score_raw is not None:
+            confidence_score = float(confidence_score_raw)
+            confidence_score = max(0.0, min(1.0, confidence_score))
+    except Exception:
+        pass
 
-    key_points: List[str] = []
-    if isinstance(key_points_raw, list):
-        for item in key_points_raw[:4]:
+    key_drivers: List[str] = []
+    if isinstance(key_drivers_raw, list):
+        for item in key_drivers_raw[:4]:
             text = str(item or "").strip()
             if text:
-                key_points.append(text)
+                key_drivers.append(text)
 
-    risks: List[str] = []
-    if isinstance(risks_raw, list):
-        for item in risks_raw[:3]:
-            text = str(item or "").strip()
-            if text:
-                risks.append(text)
+    metrics_raw = raw_json.get("quantitative_metrics")
+    quantitative_metrics: Dict[str, str] = {}
+    if isinstance(metrics_raw, dict):
+        for k, v in metrics_raw.items():
+            if str(k).strip():
+                quantitative_metrics[str(k).strip()] = str(v).strip()
 
     if not summary:
         summary = str(raw_text or "").strip()
     if not summary:
         summary = "도메인 분석 결과를 생성하지 못했습니다."
 
-    if confidence not in {"High", "Medium", "Low"}:
-        confidence = "Low"
+    if primary_trend not in {"BULL", "BEAR", "NEUTRAL"}:
+        primary_trend = "NEUTRAL"
 
     return {
-        "summary": summary,
-        "key_points": key_points,
-        "risks": risks,
-        "confidence": confidence,
+        "domain_source": domain_source,
+        "primary_trend": primary_trend,
+        "confidence_score": confidence_score,
+        "key_drivers": key_drivers,
+        "quantitative_metrics": quantitative_metrics,
+        "analytical_summary": summary,
     }
 
 
@@ -4869,66 +4903,84 @@ def _execute_branch_agents(
             "reason": "agent_llm_disabled",
         }
         if agent_llm_enabled:
-            try:
-                agent_model = configured_model or DOMAIN_AGENT_MODEL
-                agent_prompt = _build_agent_execution_prompt(
-                    agent_name=agent_name,
-                    branch_name=branch_name,
-                    request=request,
-                    route_decision=route_decision,
-                    tool_probe=tool_probe,
-                    context_meta=context_meta,
-                )
-                agent_llm = _resolve_agent_llm(
-                    model_name=agent_model,
-                    timeout_sec=request.timeout_sec,
-                )
-                metadata_json = {
-                    "log_type": "agent_execution",
-                    "branch": branch_name,
-                    "dispatch_mode": dispatch_mode,
-                    "agent": agent_name,
-                    "tool": str(tool_probe.get("tool") or ""),
-                    "tool_status": str(tool_probe.get("status") or ""),
-                    "row_count": int(tool_probe.get("row_count") or 0),
-                    "metric_value": int(tool_probe.get("metric_value") or 0),
-                }
-                with track_llm_call(
-                    model_name=agent_model,
-                    provider="Google",
-                    service_name="graph_rag_agent_execution",
-                    request_prompt=agent_prompt,
-                    user_id=user_id,
-                    flow_type=flow_type,
-                    flow_run_id=flow_run_id,
-                    agent_name=agent_name,
-                    metadata_json=metadata_json,
-                ) as tracker:
-                    agent_response = agent_llm.invoke(agent_prompt)
-                    tracker.set_response(agent_response)
+            agent_model = configured_model or DOMAIN_AGENT_MODEL
+            agent_prompt = _build_agent_execution_prompt(
+                agent_name=agent_name,
+                branch_name=branch_name,
+                request=request,
+                route_decision=route_decision,
+                tool_probe=tool_probe,
+                context_meta=context_meta,
+            )
+            agent_llm = _resolve_agent_llm(
+                model_name=agent_model,
+                timeout_sec=request.timeout_sec,
+            )
+            metadata_json = {
+                "log_type": "agent_execution",
+                "branch": branch_name,
+                "dispatch_mode": dispatch_mode,
+                "agent": agent_name,
+                "tool": str(tool_probe.get("tool") or ""),
+                "tool_status": str(tool_probe.get("status") or ""),
+                "row_count": int(tool_probe.get("row_count") or 0),
+                "metric_value": int(tool_probe.get("metric_value") or 0),
+            }
 
-                agent_raw_text = _normalize_llm_text(getattr(agent_response, "content", None)).strip()
-                if not agent_raw_text:
-                    agent_raw_text = _normalize_llm_text(agent_response).strip()
-                agent_raw_json = _extract_json_block(agent_raw_text)
-                agent_payload = _normalize_agent_execution_payload(agent_raw_json, agent_raw_text)
-                agent_llm_result = {
-                    "enabled": True,
-                    "status": "ok",
-                    "reason": "agent_llm_executed",
-                    "model": agent_model,
-                    "payload": agent_payload,
-                    "raw_model_output": agent_raw_json or {"raw_text": agent_raw_text},
-                }
-            except Exception as error:
-                agent_llm_result = {
-                    "enabled": True,
-                    "status": "degraded",
-                    "reason": "agent_llm_failed",
-                    "model": configured_model or DOMAIN_AGENT_MODEL,
-                    "error_type": type(error).__name__,
-                    "error": str(error),
-                }
+            max_retries = max(_safe_int(os.getenv("GRAPH_RAG_AGENT_MAX_RETRIES"), 2), 1)
+            for attempt in range(max_retries):
+                try:
+                    with track_llm_call(
+                        model_name=agent_model,
+                        provider="Google",
+                        service_name="graph_rag_agent_execution",
+                        request_prompt=agent_prompt,
+                        user_id=user_id,
+                        flow_type=flow_type,
+                        flow_run_id=flow_run_id,
+                        agent_name=agent_name,
+                        metadata_json=metadata_json,
+                    ) as tracker:
+                        agent_response = agent_llm.invoke(agent_prompt)
+                        tracker.set_response(agent_response)
+
+                    agent_raw_text = _normalize_llm_text(getattr(agent_response, "content", None)).strip()
+                    if not agent_raw_text:
+                        agent_raw_text = _normalize_llm_text(agent_response).strip()
+                    agent_raw_json = _extract_json_block(agent_raw_text)
+                    agent_payload = _normalize_agent_execution_payload(agent_raw_json, agent_raw_text)
+
+                    # Validate if summary is valid, if not throw to trigger retry
+                    if "생성하지 못했습니다" in agent_payload.get("analytical_summary", "") and attempt < max_retries - 1:
+                        raise ValueError("Agent returned empty or invalid json summary")
+
+                    agent_llm_result = {
+                        "enabled": True,
+                        "status": "ok",
+                        "reason": "agent_llm_executed",
+                        "model": agent_model,
+                        "payload": agent_payload,
+                        "raw_model_output": agent_raw_json or {"raw_text": agent_raw_text},
+                    }
+                    break
+                except Exception as error:
+                    if attempt == max_retries - 1:
+                        empty_payload = _normalize_agent_execution_payload({}, "")
+                        empty_payload["domain_source"] = agent_name.replace('_agent', '').upper()
+                        empty_payload["primary_trend"] = "NEUTRAL"
+                        empty_payload["analytical_summary"] = "현재 데이터를 분석할 수 없습니다. (LLM 에러/지연)"
+                        empty_payload["key_drivers"] = ["에이전트 응답 지연/스키마 불일치 오류"]
+                        agent_llm_result = {
+                            "enabled": True,
+                            "status": "degraded",
+                            "reason": "agent_llm_failed_after_retry",
+                            "model": configured_model or DOMAIN_AGENT_MODEL,
+                            "error_type": type(error).__name__,
+                            "error": str(error),
+                            "payload": empty_payload,
+                        }
+                    else:
+                        time.sleep(1)
         run_result["agent_llm"] = agent_llm_result
         agent_runs.append(run_result)
 
