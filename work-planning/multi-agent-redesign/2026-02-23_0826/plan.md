@@ -88,7 +88,9 @@
 
 ## 4. 진행 순서 (Workflow)
 
-1. `workflow/01_domain_agent_refactoring.md` - Phase 1 도메인 자율화 변경 및 프롬프트 재작성 (완료)
-2. `workflow/02_structured_output_interface.md` - Phase 2 API 규격화 (Pydantic Schema 완성) 및 파서 수정 (Phase 1에 병합 진행 중)
-3. `workflow/03_super_agent_orchestration.md` - Phase 3 프롬프트 및 로직 고도화 구현
-4. `workflow/04_fallback_and_validation.md` - Phase 4, Phase 5 (안정화 및 정량 검증) 방어 로직 심기
+1. `workflow/01_domain_agent_refactoring.md` - Phase 1 도메인 자율화 변경 및 프롬프트 재작성 (✅ 완료)
+2. `workflow/02_structured_output_interface.md` - Phase 2 API 규격화 (DomainInsight JSON Schema 완성) 및 파서 수정 (✅ 완료 - Phase 1에 병합)
+3. `workflow/03_super_agent_orchestration.md` - Phase 3 프롬프트 및 로직 고도화 구현 (✅ 완료)
+4. `workflow/04_fallback_and_validation.md` - Phase 4 (안정화: Retry/Fallback/롤백 플래그) (✅ 완료)
+5. `workflow/05_domain_insight_bridge_fix.md` - Phase 2 보완: DomainInsight 스키마 브릿지 수정 (✅ 완료)
+6. Phase 5 (정량 검증): 골든셋 회귀 테스트 및 KPI 측정 (🔲 미착수)

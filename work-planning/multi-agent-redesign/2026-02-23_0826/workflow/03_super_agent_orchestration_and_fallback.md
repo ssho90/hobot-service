@@ -21,5 +21,8 @@
 
 ## 3. 진행 현황
 - [x] Phase 3 & 4 목표 및 예외 전략 설정 완료
-- [ ] `_execute_branch_agents` 내에 Retry/Fallback 블록 구현
-- [ ] `_make_prompt` 슈퍼에이전트 프롬프트에 도메인 인사이트 합성 지침 및 충돌해결 (Debate) 로직 부여
+- [x] `_execute_branch_agents` 내에 Retry/Fallback 블록 구현 - max_retries 루프 + empty_payload fallback 완료
+- [x] `_make_prompt` 슈퍼에이전트 프롬프트에 도메인 인사이트 합성 지침 및 충돌해결 (Debate) 로직 부여 - Supervisor/Critic 역할 + conflict_resolution 충돌 조율 강제
+- [x] `_build_structured_data_context_for_supervisor` 내 agent_insights 생성 로직을 DomainInsight 스키마로 전환 (Phase 2 브릿지)
+- [x] `_compact_structured_data_for_prompt` 내 agent_insights compact 로직을 DomainInsight 필드로 전환
+- [x] `USE_STRUCTURED_HANDOFF` 런타임 롤백 플래그 구현 (Phase 4 롤백 차단기)

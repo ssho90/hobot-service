@@ -729,7 +729,7 @@ class GraphRagAnswerRequest(BaseModel):
             if selected_type == "real_estate_detail":
                 top_k_events = min(top_k_events, 5)
                 top_k_documents = min(top_k_documents, 8)
-                top_k_stories = min(top_k_stories, 4)
+                top_k_stories = max(5, min(top_k_stories, 4)) # Pydantic 우회를 위해 최소 5 보장
                 top_k_evidences = min(top_k_evidences, 8)
 
         return GraphRagContextRequest(
@@ -1986,15 +1986,37 @@ def _compact_structured_data_for_prompt(structured_data_context: Optional[Dict[s
         for insight in agent_insights_raw[:max_agent_insights]:
             if not isinstance(insight, dict):
                 continue
-            key_points_raw = insight.get("key_points") if isinstance(insight.get("key_points"), list) else []
-            risks_raw = insight.get("risks") if isinstance(insight.get("risks"), list) else []
+
+            # DomainInsight 스키마 필드 compact (Phase 2)
+            key_drivers_raw = (
+                insight.get("key_drivers")
+                if isinstance(insight.get("key_drivers"), list)
+                else insight.get("key_points")
+                if isinstance(insight.get("key_points"), list)
+                else []
+            )
+            quantitative_metrics_raw = (
+                insight.get("quantitative_metrics")
+                if isinstance(insight.get("quantitative_metrics"), dict)
+                else {}
+            )
+            # 지표 compact: 최대 5개, 값 truncate
+            metrics_compact: Dict[str, str] = {}
+            for mk, mv in list(quantitative_metrics_raw.items())[:5]:
+                if str(mk).strip():
+                    metrics_compact[str(mk).strip()] = _truncate_prompt_text(str(mv), 60)
+
             insights.append(
                 {
-                    "agent": str(insight.get("agent") or "").strip(),
-                    "summary": _truncate_prompt_text(insight.get("summary"), 220),
-                    "key_points": [_truncate_prompt_text(point, 100) for point in key_points_raw[:2]],
-                    "risks": [_truncate_prompt_text(risk, 100) for risk in risks_raw[:2]],
-                    "confidence": str(insight.get("confidence") or "").strip() or "Low",
+                    "domain_source": str(insight.get("domain_source") or insight.get("agent") or "").strip(),
+                    "primary_trend": str(insight.get("primary_trend") or "NEUTRAL").upper(),
+                    "confidence_score": insight.get("confidence_score", 0.5),
+                    "key_drivers": [_truncate_prompt_text(d, 120) for d in key_drivers_raw[:4]],
+                    "quantitative_metrics": metrics_compact,
+                    "analytical_summary": _truncate_prompt_text(
+                        insight.get("analytical_summary") or insight.get("summary"), 260
+                    ),
+                    "agent_status": str(insight.get("agent_status") or "ok").strip(),
                 }
             )
         if insights:
@@ -2090,6 +2112,7 @@ def _build_compact_graph_context_for_prompt(
     evidences: List[GraphEvidence],
     evidence_text_max_chars: int,
     include_links: bool,
+    diet_mode: bool = False,
 ) -> Dict[str, Any]:
     event_nodes = [node for node in context.nodes if node.type == "Event"][: context_limits["events"]]
     indicator_nodes = [node for node in context.nodes if node.type == "EconomicIndicator"][: context_limits["indicators"]]
@@ -2168,6 +2191,15 @@ def _build_compact_graph_context_for_prompt(
             for evidence in evidences
         ],
     }
+
+    if diet_mode:
+        compact_context["events"] = [{"event_id": e.get("event_id")} for e in compact_context.get("events", []) if e.get("event_id")]
+        compact_context["indicators"] = [{"indicator_code": i.get("indicator_code")} for i in compact_context.get("indicators", []) if i.get("indicator_code")]
+        compact_context["themes"] = [{"theme_id": t.get("theme_id")} for t in compact_context.get("themes", []) if t.get("theme_id")]
+        compact_context["stories"] = [{"story_id": s.get("story_id")} for s in compact_context.get("stories", []) if s.get("story_id")]
+        compact_context["evidences"] = [{"evidence_id": ev.get("evidence_id"), "doc_id": ev.get("doc_id")} for ev in compact_context.get("evidences", []) if ev.get("evidence_id")]
+        compact_context["links"] = []
+
     return compact_context
 
 
@@ -2547,27 +2579,63 @@ def _build_structured_data_context(
             agent_llm = agent_run.get("agent_llm")
             if not isinstance(agent_llm, dict):
                 continue
-            if str(agent_llm.get("status") or "").strip() != "ok":
+            agent_llm_status = str(agent_llm.get("status") or "").strip()
+            if agent_llm_status not in {"ok", "degraded"}:
                 continue
             payload = agent_llm.get("payload")
             if not isinstance(payload, dict):
                 continue
-            summary = str(payload.get("summary") or "").strip()
-            key_points_raw = payload.get("key_points") if isinstance(payload.get("key_points"), list) else []
-            risks_raw = payload.get("risks") if isinstance(payload.get("risks"), list) else []
-            key_points = [str(item).strip() for item in key_points_raw if str(item).strip()][:4]
-            risks = [str(item).strip() for item in risks_raw if str(item).strip()][:3]
-            if not summary and not key_points and not risks:
+
+            # DomainInsight 스키마 필드 추출 (Phase 2 structured output)
+            analytical_summary = str(
+                payload.get("analytical_summary") or payload.get("summary") or ""
+            ).strip()
+            domain_source = str(
+                payload.get("domain_source") or agent_name.replace("_agent", "").upper()
+            ).strip()
+            primary_trend = str(payload.get("primary_trend") or "NEUTRAL").upper()
+            if primary_trend not in {"BULL", "BEAR", "NEUTRAL"}:
+                primary_trend = "NEUTRAL"
+
+            confidence_score_raw = payload.get("confidence_score")
+            confidence_score = 0.5
+            try:
+                if confidence_score_raw is not None:
+                    confidence_score = float(confidence_score_raw)
+                    confidence_score = max(0.0, min(1.0, confidence_score))
+            except Exception:
+                pass
+
+            key_drivers_raw = (
+                payload.get("key_drivers")
+                if isinstance(payload.get("key_drivers"), list)
+                else payload.get("key_points")
+                if isinstance(payload.get("key_points"), list)
+                else []
+            )
+            key_drivers = [str(item).strip() for item in key_drivers_raw if str(item).strip()][:5]
+
+            quantitative_metrics_raw = payload.get("quantitative_metrics")
+            quantitative_metrics: Dict[str, str] = {}
+            if isinstance(quantitative_metrics_raw, dict):
+                for k, v in quantitative_metrics_raw.items():
+                    if str(k).strip():
+                        quantitative_metrics[str(k).strip()] = str(v).strip()
+
+            if not analytical_summary and not key_drivers:
                 continue
             agent_insights.append(
                 {
+                    "domain_source": domain_source,
                     "agent": agent_name,
                     "branch": str(agent_run.get("branch") or "").strip(),
                     "model": str(agent_llm.get("model") or "").strip(),
-                    "summary": summary,
-                    "key_points": key_points,
-                    "risks": risks,
-                    "confidence": str(payload.get("confidence") or "").strip() or "Low",
+                    "primary_trend": primary_trend,
+                    "confidence_score": confidence_score,
+                    "key_drivers": key_drivers,
+                    "quantitative_metrics": quantitative_metrics,
+                    "analytical_summary": analytical_summary,
+                    "agent_status": agent_llm_status,
                 }
             )
 
@@ -2918,6 +2986,7 @@ def _make_prompt(
         evidences=evidences,
         evidence_text_max_chars=evidence_text_max_chars,
         include_links=include_links,
+        diet_mode=has_agent_insights,
     )
 
     route_prompt_meta = _compact_route_for_prompt(route_meta)
@@ -4726,6 +4795,7 @@ def _build_agent_execution_prompt(
     route_decision: Dict[str, Any],
     tool_probe: Dict[str, Any],
     context_meta: Dict[str, Any],
+    graph_context: Optional[Dict[str, Any]] = None,
 ) -> str:
     role_map = {
         "macro_economy_agent": "거시경제 분석 전문가(Macro Analyst)",
@@ -4787,6 +4857,9 @@ def _build_agent_execution_prompt(
 
 [ContextCounts]
 {json.dumps(compact_counts, ensure_ascii=False, indent=2, default=str)}
+
+[GraphDataExtract]
+{json.dumps(graph_context, ensure_ascii=False, indent=2, default=str)[:8000] if graph_context else "{{}}"}
 
 [Rules]
 0. ToolProbe 데이터에 없는 새로운 수치나 사실, 외부 정보를 절대로 절대로 지어내지 않는다. (Hallucination 금지)
@@ -4865,6 +4938,7 @@ def _execute_branch_agents(
     request: GraphRagAnswerRequest,
     route_decision: Dict[str, Any],
     context_meta: Dict[str, Any],
+    graph_context: Optional[Dict[str, Any]] = None,
     flow_type: Optional[str] = None,
     flow_run_id: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -4881,6 +4955,12 @@ def _execute_branch_agents(
         }
 
     agent_runs: List[Dict[str, Any]] = []
+
+    # Phase 4 롤백 차단기: USE_STRUCTURED_HANDOFF=false 이면 DomainInsight LLM 파이프라인 우회
+    use_structured_handoff = _is_env_flag_enabled("USE_STRUCTURED_HANDOFF", default=True)
+    if not use_structured_handoff:
+        agent_llm_enabled = False
+        logger.info("[GraphRAGAgent] USE_STRUCTURED_HANDOFF=false → DomainInsight LLM 파이프라인 비활성화 (롤백 모드)")
     agent_model_policy = route_decision.get("agent_model_policy")
     if not isinstance(agent_model_policy, dict):
         agent_model_policy = _build_agent_model_policy()
@@ -4911,6 +4991,7 @@ def _execute_branch_agents(
                 route_decision=route_decision,
                 tool_probe=tool_probe,
                 context_meta=context_meta,
+                graph_context=graph_context,
             )
             agent_llm = _resolve_agent_llm(
                 model_name=agent_model,
@@ -4999,6 +5080,7 @@ def _execute_supervisor_plan(
     route_decision: Dict[str, Any],
     supervisor_execution: Dict[str, Any],
     context_meta: Dict[str, Any],
+    graph_context: Optional[Dict[str, Any]] = None,
     flow_type: Optional[str] = None,
     flow_run_id: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -5066,6 +5148,7 @@ def _execute_supervisor_plan(
                 request=request,
                 route_decision=route_decision,
                 context_meta=context_meta,
+                graph_context=graph_context,
                 flow_type=flow_type,
                 flow_run_id=flow_run_id,
                 user_id=user_id,
@@ -5080,6 +5163,7 @@ def _execute_supervisor_plan(
                 request=request,
                 route_decision=route_decision,
                 context_meta=context_meta,
+                graph_context=graph_context,
                 flow_type=flow_type,
                 flow_run_id=flow_run_id,
                 user_id=user_id,
@@ -5096,6 +5180,7 @@ def _execute_supervisor_plan(
             request=request,
             route_decision=route_decision,
             context_meta=context_meta,
+            graph_context=graph_context,
             flow_type=flow_type,
             flow_run_id=flow_run_id,
             user_id=user_id,
@@ -5109,6 +5194,7 @@ def _execute_supervisor_plan(
             request=request,
             route_decision=route_decision,
             context_meta=context_meta,
+            graph_context=graph_context,
             flow_type=flow_type,
             flow_run_id=flow_run_id,
             user_id=user_id,
@@ -5127,6 +5213,7 @@ def _execute_supervisor_plan(
                 request=request,
                 route_decision=route_decision,
                 context_meta=context_meta,
+                graph_context=graph_context,
                 flow_type=flow_type,
                 flow_run_id=flow_run_id,
                 user_id=user_id,
@@ -5144,6 +5231,7 @@ def _execute_supervisor_plan(
                 request=request,
                 route_decision=route_decision,
                 context_meta=context_meta,
+                graph_context=graph_context,
                 flow_type=flow_type,
                 flow_run_id=flow_run_id,
                 user_id=user_id,
@@ -6772,11 +6860,19 @@ def generate_graph_rag_answer(
     context = context_response or build_graph_rag_context(
         effective_request.to_context_request(route=route_decision)
     )
+    agent_graph_payload = {
+        "events": [{"event_id": n.properties.get("event_id"), "summary": n.label} for n in context.nodes if n.type == "Event"][:20],
+        "indicators": [{"indicator_code": n.properties.get("indicator_code"), "name": n.label} for n in context.nodes if n.type == "EconomicIndicator"][:10],
+        "themes": [{"theme_id": n.properties.get("theme_id")} for n in context.nodes if n.type == "MacroTheme"][:5],
+        "evidences": [{"text": e.text, "doc_title": e.doc_title} for e in context.evidences][:15] if isinstance(context.evidences, list) else []
+    }
+
     supervisor_execution["execution_result"] = _execute_supervisor_plan(
         request=effective_request,
         route_decision=route_decision,
         supervisor_execution=supervisor_execution,
         context_meta=context.meta if isinstance(context.meta, dict) else {},
+        graph_context=agent_graph_payload,
         flow_type="chatbot",
         flow_run_id=effective_flow_run_id,
         user_id=effective_user_id,

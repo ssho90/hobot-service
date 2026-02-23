@@ -33,5 +33,5 @@ LLM 프롬프팅이나 결과 해석을 수행하지 않고 원시 레코드(SQL
 ## 4. 진행 현황
 - [x] 현재 코드베이스(Agent Stub 파이프라인)의 한계점 확인
 - [x] Phase 1: 역할에 따른 도메인 에이전트 수정 계획 확정
-- [ ] Pydantic 모델을 통한 각 도메인 에이전트 응답 구조 정의 (`Structured Outputs` 도입)
-- [ ] `live_executor.py` 및 `{domain}_agent.py` 레벨에서 LLM 체인 연동 코드 이식
+- [x] Pydantic 모델을 통한 각 도메인 에이전트 응답 구조 정의 (`Structured Outputs` 도입) - `_build_agent_execution_prompt`에 DomainInsight JSON 스키마 정의 완료
+- [x] `live_executor.py` 및 `{domain}_agent.py` 레벨에서 LLM 체인 연동 코드 이식 - `_execute_branch_agents`에서 도메인 LLM 호출 + Retry/Fallback 구현 완료
