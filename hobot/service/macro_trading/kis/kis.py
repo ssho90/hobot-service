@@ -410,9 +410,11 @@ def get_balance_info_api(user_id: Optional[str] = None):
         # 자산군별 정보 계산
         asset_class_info = calculate_asset_class_pnl(holdings, cash_balance)
         
-        # 순수 입금 금액 추정 (총 평가금액 - 총 평가손익)
-        # 단, 실현손익이 포함된 재투자 금액은 '입금'으로 간주될 수 있음 (거래내역 없이 정확한 원금 추적 불가)
-        net_invested_amount = total_eval_amt - total_profit_loss
+        # 순수 입금 금액 (투자원금 추정 방식)
+        # KIS의 "잔고조회" 결과에서 매입금액합계(pchs_amt_smtl_amt) + 예수금(prvs_rcdl_excc_amt)
+        # 실현된 수익/비용이 예수금에 포함되나, OpenAPI에서 직접 입출금 내역을 지원하지 않아 HTS 방식을 차용함.
+        net_invested_amount = total_purchase_amt + cash_balance
+
 
         return {
             "status": "success",

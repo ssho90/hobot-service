@@ -177,7 +177,7 @@ export const TradingDashboard: React.FC = () => {
                                     <div className="p-2 bg-slate-100 rounded-lg">
                                         <BarChart3 className="h-5 w-5 text-zinc-500" />
                                     </div>
-                                    <span className="text-zinc-500 text-sm">순 입금금액 (추정)</span>
+                                    <span className="text-zinc-500 text-sm">투자원금</span>
                                 </div>
                                 <p className="text-2xl font-bold text-zinc-900">
                                     {formatCurrency(balance.net_invested_amount ?? (balance.total_eval_amount - balance.total_profit_loss))}

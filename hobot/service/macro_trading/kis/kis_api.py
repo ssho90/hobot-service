@@ -371,6 +371,42 @@ class KISAPI:
             logging.error(f"KIS API HTTP 에러 - status_code: {res.status_code}, response: {error_text}")
             return None
 
+    def get_deposit_withdrawal_list(self, start_date, end_date, ctx_area_fk100="", ctx_area_nk100=""):
+        """계좌 입출금 내역 조회 (CTRP6067R)"""
+        try:
+            cano, acnt_prdt_cd = self._parse_account_no()
+        except ValueError as e:
+            return {"rt_cd": "1", "msg1": str(e)}
+            
+        time.sleep(0.1)
+        path = "/uapi/domestic-stock/v1/trading/inquire-invest-deposit-withdrawal-list"
+        url = f"{self.base_url}{path}"
+        
+        # 모의투자시 지원되지 않을 수 있으나 예비로 V를 붙임
+        tr_id = "VCTRP6067R" if self.is_simulation else "CTRP6067R"
+        headers = self._get_common_headers(tr_id)
+        
+        params = {
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt_prdt_cd,
+            "INQR_STRT_DT": start_date,
+            "INQR_END_DT": end_date,
+            "INQR_RE_DT_EX_YN": "N",
+            "FNCG_AMT_AUTO_RDPT_YN": "N",
+            "FUND_STTL_ICLD_YN": "N",
+            "CTX_AREA_FK100": ctx_area_fk100,
+            "CTX_AREA_NK100": ctx_area_nk100
+        }
+        
+        logging.info(f"KIS API 입출금내역조회 요청 - URL: {url}, TR_ID: {tr_id}")
+        res = self._request_with_token_refresh('GET', url, headers=headers, params=params)
+        
+        if res.status_code == 200:
+            return res.json()
+        else:
+            logging.error(f"KIS API 입출금내역조회 실패 - status: {res.status_code}, response: {res.text}")
+            return None
+
     def get_buyable_cash(self):
         """주문 가능 현금 조회 (매수가능조회 API 사용)"""
         try:
