@@ -9,6 +9,7 @@ import { GeminiAnalyst } from './GeminiAnalyst';
 import { AnalysisHistoryModal } from './AnalysisHistoryModal';
 import { BriefingSummaryModal } from './BriefingSummaryModal';
 import { EconomicNewsModal } from './EconomicNewsModal';
+import { DashboardChatbot } from './DashboardChatbot';
 import { getTimeAgo } from '../utils/formatters';
 
 const extractTextFromStructuredContent = (value: unknown): string => {
@@ -355,6 +356,7 @@ const Dashboard: React.FC = () => {
         createdAt={marketBriefing?.created_at || ''}
       />
       <EconomicNewsModal isOpen={isNewsModalOpen} onClose={() => setIsNewsModalOpen(false)} />
+      <DashboardChatbot />
 
       <footer className="border-t border-zinc-200 bg-white py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm text-zinc-500">

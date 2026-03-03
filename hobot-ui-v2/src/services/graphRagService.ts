@@ -97,6 +97,51 @@ export type GraphRagAnswerStreamEvent =
   | { type: 'done'; flow_run_id?: string; response: GraphRagAnswerResponse }
   | { type: 'error'; error: string; status_code?: number };
 
+const formatApiErrorDetail = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => formatApiErrorDetail(item))
+      .filter((item) => item.length > 0)
+      .join(' / ');
+  }
+
+  if (value && typeof value === 'object') {
+    const errorObject = value as Record<string, unknown>;
+    const msg = typeof errorObject.msg === 'string' ? errorObject.msg : '';
+    const loc = Array.isArray(errorObject.loc)
+      ? errorObject.loc.map((part) => String(part)).join('.')
+      : '';
+
+    if (loc && msg) return `${loc}: ${msg}`;
+    if (msg) return msg;
+
+    if ('detail' in errorObject) {
+      const nested = formatApiErrorDetail(errorObject.detail);
+      if (nested) return nested;
+    }
+
+    try {
+      return JSON.stringify(errorObject);
+    } catch {
+      return '';
+    }
+  }
+
+  return '';
+};
+
+const buildApiError = async (response: Response): Promise<Error> => {
+  const errorData = await response.json().catch(() => null);
+  const detail =
+    errorData && typeof errorData === 'object' && 'detail' in (errorData as Record<string, unknown>)
+      ? (errorData as Record<string, unknown>).detail
+      : errorData;
+  const parsedMessage = formatApiErrorDetail(detail);
+  return new Error(parsedMessage || `API error: ${response.status}`);
+};
+
 const getHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {
@@ -118,8 +163,7 @@ export const fetchGraphRagContext = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `API error: ${response.status}`);
+    throw await buildApiError(response);
   }
 
   return await response.json();
@@ -135,8 +179,7 @@ export const fetchGraphRagAnswer = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `API error: ${response.status}`);
+    throw await buildApiError(response);
   }
 
   return await response.json();
@@ -153,8 +196,7 @@ export const streamGraphRagAnswer = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `API error: ${response.status}`);
+    throw await buildApiError(response);
   }
 
   if (!response.body) {
