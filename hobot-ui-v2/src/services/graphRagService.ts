@@ -73,7 +73,7 @@ export interface GraphRagAnswerPayload {
 }
 
 export interface GraphRagAnswerRequest extends GraphRagRequestBase {
-  model?: 'gemini-3-flash-preview' | 'gemini-3-pro-preview';
+  model?: 'gemini-3-flash-preview' | 'gemini-3.1-pro-preview';
   timeout_sec?: number;
   max_prompt_evidences?: number;
   include_context?: boolean;

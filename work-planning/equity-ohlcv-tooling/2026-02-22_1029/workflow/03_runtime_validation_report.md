@@ -56,7 +56,7 @@
   - `query_rewrite_utility` (`gemini-2.5-flash`): `1,448` / `7,504ms`
   - `query_normalization_utility` (`gemini-2.5-flash`): `1,208` / `4,550ms`
   - `equity_analyst_agent` (`gemini-3-flash-preview`): `4,172` / `27,691ms`
-  - `supervisor_agent` (`gemini-3-pro-preview`): `5,907` / `18,346ms`
+  - `supervisor_agent` (`gemini-3.1-pro-preview`): `5,907` / `18,346ms`
   - `citation_postprocess_utility` (`gemini-2.5-flash`): `2,365` / `9,541ms`
 
 ### run_id: `codex-eq-final-c272e25105` (NVDA)
@@ -66,5 +66,5 @@
   - `query_rewrite_utility` (`gemini-2.5-flash`): `1,032` / `4,600ms`
   - `query_normalization_utility` (`gemini-2.5-flash`): `1,085` / `3,896ms`
   - `equity_analyst_agent` (`gemini-3-flash-preview`): `1,463` / `9,364ms`
-  - `supervisor_agent` (`gemini-3-pro-preview`): `6,382` / `22,401ms`
+  - `supervisor_agent` (`gemini-3.1-pro-preview`): `6,382` / `22,401ms`
   - `citation_postprocess_utility` (`gemini-2.5-flash`): `5,800` / `22,120ms`

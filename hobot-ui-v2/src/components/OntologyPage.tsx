@@ -62,7 +62,7 @@ interface MacroPresetQuery {
     query: string;
 }
 
-type MacroAnswerModel = 'gemini-3-flash-preview' | 'gemini-3-pro-preview';
+type MacroAnswerModel = 'gemini-3-flash-preview' | 'gemini-3.1-pro-preview';
 const MACRO_ANSWER_MODEL_STORAGE_KEY = 'ontology.macro.answerModel';
 const MOBILE_LAYOUT_BREAKPOINT = 1024;
 
@@ -279,7 +279,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
         }
 
         const stored = window.localStorage.getItem(MACRO_ANSWER_MODEL_STORAGE_KEY);
-        if (stored === 'gemini-3-flash-preview' || stored === 'gemini-3-pro-preview') {
+        if (stored === 'gemini-3-flash-preview' || stored === 'gemini-3.1-pro-preview') {
             return stored;
         }
         return 'gemini-3-flash-preview';
@@ -1164,7 +1164,7 @@ const OntologyPage: React.FC<{ mode?: 'architecture' | 'macro' }> = ({ mode = 'a
                                     className="mt-1 w-full rounded border border-gray-200 bg-white px-2 py-1.5 text-xs"
                                 >
                                     <option value="gemini-3-flash-preview">gemini-3-flash-preview (기본)</option>
-                                    <option value="gemini-3-pro-preview">gemini-3-pro-preview</option>
+                                    <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
                                 </select>
                             </label>
                         </div>

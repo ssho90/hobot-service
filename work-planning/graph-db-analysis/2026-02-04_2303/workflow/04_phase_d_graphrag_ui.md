@@ -74,7 +74,7 @@ Response:
 #### 구현 메모 (2026-02-07)
 - 신규 파일: `hobot/service/graph/rag/response_generator.py`
 - 신규 API: `POST /api/graph/rag/answer`
-- 모델 제한: `gemini-3-flash-preview`, `gemini-3-pro-preview`만 허용 (그 외 입력 시 `gemini-3-pro-preview` 폴백)
+- 모델 제한: `gemini-3-flash-preview`, `gemini-3.1-pro-preview`만 허용 (그 외 입력 시 `gemini-3.1-pro-preview` 폴백)
 - 출력 구성: `answer(conclusion/uncertainty/key_points/impact_pathways)` + `citations(evidence/doc)` + `suggested_queries`
 - 테스트 추가: `hobot/tests/test_phase_d_response_generator.py`
 

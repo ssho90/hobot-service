@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 # 🛸 Antigravity Global Behavior & Workflow Guidelines (Updated)
 
 ## 🤖 1. CORE DIRECTIVES (핵심 원칙)

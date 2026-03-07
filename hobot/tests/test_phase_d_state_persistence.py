@@ -81,7 +81,7 @@ class TestPhaseDStatePersistence(unittest.TestCase):
         result = writer.persist_run(
             question="최근 인플레이션 리스크는?",
             response_text="인플레이션 압력이 높아졌습니다.",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             as_of_date=date(2026, 2, 7),
             citations=[
                 {"evidence_id": "EVID_1", "node_ids": ["event:EVT_001", "document:te:100"]},

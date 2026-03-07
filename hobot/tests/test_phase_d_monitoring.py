@@ -87,7 +87,7 @@ class TestPhaseDMonitoring(unittest.TestCase):
             time_range="30d",
             country="US",
             as_of_date=date(2026, 2, 7),
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             status="success",
             duration_ms=1234,
             evidence_count=5,

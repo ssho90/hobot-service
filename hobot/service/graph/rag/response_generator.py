@@ -49,10 +49,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/graph/rag", tags=["graph-rag"])
 
-ALLOWED_GRAPH_RAG_MODELS = {"gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3-pro-preview"}
-DEFAULT_GRAPH_RAG_MODEL = "gemini-3-pro-preview"
-SUPERVISOR_AGENT_MODEL = "gemini-3-pro-preview"
-ONTOLOGY_MASTER_AGENT_MODEL = "gemini-3-pro-preview"
+ALLOWED_GRAPH_RAG_MODELS = {"gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-pro-preview"}
+DEFAULT_GRAPH_RAG_MODEL = "gemini-3.1-pro-preview"
+SUPERVISOR_AGENT_MODEL = "gemini-3.1-pro-preview"
+ONTOLOGY_MASTER_AGENT_MODEL = "gemini-3.1-pro-preview"
 DOMAIN_AGENT_MODEL = "gemini-3-flash-preview"
 ROUTER_INTENT_MODEL = "gemini-2.5-flash"
 LIGHTWEIGHT_UTILITY_MODEL = "gemini-2.5-flash"

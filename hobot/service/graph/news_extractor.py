@@ -108,7 +108,7 @@ class NewsExtractor:
     """
     LLM 기반 뉴스 추출기
     """
-    ALLOWED_MODELS = {"gemini-3-flash-preview", "gemini-3-pro-preview"}
+    ALLOWED_MODELS = {"gemini-3-flash-preview", "gemini-3.1-pro-preview"}
     DEFAULT_MODEL = "gemini-3-flash-preview"
 
     VALID_EVENT_TYPES = {"policy", "economic_release", "market_event", "geopolitical", "corporate", "other"}

@@ -104,7 +104,7 @@
 #### 3.1 매도 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/sell_strategy_planner.py`
 - **역할**: LLM을 활용한 매도 전략 수립
-- **사용 모델**: `gemini-3-pro-preview`
+- **사용 모델**: `gemini-3.1-pro-preview`
 - **주요 함수**:
   - `plan_sell_strategy(current_state, target_mp, target_sub_mp, drift_info)`: 매도 전략 수립 (LLM 호출)
   - `build_sell_prompt()`: 매도 전략 수립용 프롬프트 생성
@@ -120,7 +120,7 @@
 #### 3.2 매수 전략 수립 모듈
 - **파일**: `hobot/service/macro_trading/rebalancing/buy_strategy_planner.py`
 - **역할**: LLM을 활용한 매수 전략 수립
-- **사용 모델**: `gemini-3-pro-preview`
+- **사용 모델**: `gemini-3.1-pro-preview`
 - **주요 함수**:
   - `plan_buy_strategy(current_state, target_mp, target_sub_mp, drift_info, cash_available)`: 매수 전략 수립 (LLM 호출)
   - `build_buy_prompt()`: 매수 전략 수립용 프롬프트 생성

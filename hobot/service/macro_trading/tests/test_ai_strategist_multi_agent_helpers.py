@@ -197,7 +197,7 @@ class TestAIStrategistMultiAgentHelpers(unittest.TestCase):
                 manual_approval_required=True,
                 dry_run_mode=False,
             ),
-            llm=SimpleNamespace(model="gemini-3-pro-preview", temperature=0.2),
+            llm=SimpleNamespace(model="gemini-3.1-pro-preview", temperature=0.2),
         )
 
         objective, constraints = ai_strategist._build_objective_constraints_from_config(
@@ -303,7 +303,7 @@ class TestAIStrategistMultiAgentHelpers(unittest.TestCase):
             narrative_report={},
             risk_report={},
             previous_sub_mp={"bonds": "Bnd-N", "cash": "Cash-N"},
-            model_name="gemini-3-pro-preview",
+            model_name="gemini-3.1-pro-preview",
             objective={},
             constraints={},
         )

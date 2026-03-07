@@ -538,15 +538,15 @@
   - [x] 노드 구현:
     - [x] `collect_fred_node`: FRED 시그널 수집
     - [x] `collect_news_node`: 경제 뉴스 수집 (지난 20일, 특정 국가)
-    - [x] `summarize_news_node`: 뉴스 LLM 요약 (gemini-3.0-pro)
-    - [x] `analyze_node`: AI 분석 및 전략 결정 (gemini-3-pro-preview)
+    - [x] `summarize_news_node`: 뉴스 LLM 요약 (gemini-3.1-pro)
+    - [x] `analyze_node`: AI 분석 및 전략 결정 (gemini-3.1-pro-preview)
     - [x] `save_decision_node`: 결과 저장
   - [x] 워크플로우 그래프 구성 및 순차 실행 보장
   - [x] 에러 핸들링 및 상태 관리
 
 - [x] **3.1.6** 뉴스 정제 및 요약
   - [x] 지난 20일간 특정 국가 뉴스 수집 (Crypto, Commodity, Euro Area, China, United States)
-  - [x] gemini-3.0-pro를 사용한 뉴스 요약
+  - [x] gemini-3.1-pro를 사용한 뉴스 요약
   - [x] 주요 경제 지표 변화, 경제 흐름, 주요 이벤트 도출
   - [x] 정제된 요약을 AI 분석 프롬프트에 포함
 
@@ -568,14 +568,14 @@ START
   - LLM 요약 제외 (별도 노드에서 처리)
   ↓
 [노드 3] summarize_news_node
-  - gemini-3.0-pro로 뉴스 요약
+  - gemini-3.1-pro로 뉴스 요약
   - 주요 경제 지표 변화 도출
   - 경제 흐름 및 트렌드 분석
   - 주요 이벤트 추출
   ↓
 [노드 4] analyze_node
   - FRED 시그널 + 정제된 뉴스 요약 종합 분석
-  - gemini-3-pro-preview로 포트폴리오 목표 비중 결정
+  - gemini-3.1-pro-preview로 포트폴리오 목표 비중 결정
   - 자산군별 추천 섹터/카테고리 제시
   ↓
 [노드 5] save_decision_node
@@ -596,8 +596,8 @@ END
 - [x] 폴백 전략의 구체적인 룰 정의 (아래 참조)
 - [x] LLM 호출 빈도: 주기적 (08:30) (결정 완료)
 - [x] 뉴스 수집 기간: 지난 20일 (결정 완료)
-- [x] 뉴스 요약 모델: gemini-3.0-pro (결정 완료)
-- [x] 전략 결정 모델: gemini-3-pro-preview (결정 완료)
+- [x] 뉴스 요약 모델: gemini-3.1-pro (결정 완료)
+- [x] 전략 결정 모델: gemini-3.1-pro-preview (결정 완료)
 - [x] 워크플로우 관리: LangGraph 사용 (결정 완료)
 
 

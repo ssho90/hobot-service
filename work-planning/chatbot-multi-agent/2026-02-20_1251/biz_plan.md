@@ -17,7 +17,7 @@ flowchart TD
     User(("사용자 질의"))
     Router["Router / Intent Classifier\n(gemini-2.5-flash)"]
     Rewrite["Query Rewrite / 파라미터 정규화\n(gemini-2.5-flash)"]
-    Supervisor{"Supervisor Agent\n(gemini-3-pro-preview)"}
+    Supervisor{"Supervisor Agent\n(gemini-3.1-pro-preview)"}
     Answer((최종 답변))
     CitationFmt["Citation / 포맷 후처리\n(gemini-2.5-flash)"]
     WebSearch{{Web Search Fallback}}
@@ -28,7 +28,7 @@ flowchart TD
             Macro["Macro Economy Agent\n(gemini-3-flash-preview)"]
             Equity["Equity Analyst Agent\n(gemini-3-flash-preview)"]
             RealEstate["Real Estate Agent\n(gemini-3-flash-preview)"]
-            Ontology["Ontology Master Agent\n(gemini-3-pro-preview)"]
+            Ontology["Ontology Master Agent\n(gemini-3.1-pro-preview)"]
         end
         General["GeneralKnowledge Agent\n(gemini-3-flash-preview)"]
     end
@@ -115,7 +115,7 @@ Supervisor-하위 에이전트 간 공유 상태를 `TypedDict` 또는 `Pydantic
 * `final_as_of_date`, `as_of_validation_passed`, `citations[]`, `structured_citations[]`
 
 ### 2.5 에이전트별 LLM 정책 (확정)
-1. `gemini-3-pro-preview` (고급 추론)
+1. `gemini-3.1-pro-preview` (고급 추론)
    * `Supervisor Agent`
    * `Ontology Master Agent`
 2. `gemini-3-flash-preview` (중급 추론 + 속도)
@@ -442,7 +442,7 @@ LLM이 RDB와 Neo4j 중 어느 것을 호출할지 헷갈리는 문제를 막기
 7. 에이전트별 LLM 정책 고정 완료
    * 코드: `hobot/service/graph/rag/response_generator.py`
    * 반영:
-     * `Supervisor/Ontology -> gemini-3-pro-preview`
+     * `Supervisor/Ontology -> gemini-3.1-pro-preview`
      * `Macro/Equity/RealEstate/GeneralKnowledge -> gemini-3-flash-preview`
      * `Router/Rewrite/Normalization/CitationPostprocess -> gemini-2.5-flash`
    * 테스트: `hobot/tests/test_phase_d_response_generator.py`에 라우터 모델 및 `agent_model_policy` 검증 추가.

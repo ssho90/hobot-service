@@ -37,9 +37,9 @@ class RebalancingConfig(BaseModel):
 
 class LLMConfig(BaseModel):
     """LLM 설정"""
-    ALLOWED_MODELS: ClassVar[set[str]] = {"gemini-3-flash-preview", "gemini-3-pro-preview"}
+    ALLOWED_MODELS: ClassVar[set[str]] = {"gemini-3-flash-preview", "gemini-3.1-pro-preview"}
 
-    model: str = Field(..., description="모델명 (gemini-3-flash-preview | gemini-3-pro-preview)")
+    model: str = Field(..., description="모델명 (gemini-3-flash-preview | gemini-3.1-pro-preview)")
     temperature: float = Field(..., ge=0, le=2, description="Temperature (0-2)")
     max_tokens: int = Field(..., ge=1, le=100000, description="최대 토큰 수")
 
@@ -50,7 +50,7 @@ class LLMConfig(BaseModel):
         if model not in cls.ALLOWED_MODELS:
             raise ValueError(
                 "지원하지 않는 모델입니다. "
-                "허용값: gemini-3-flash-preview, gemini-3-pro-preview"
+                "허용값: gemini-3-flash-preview, gemini-3.1-pro-preview"
             )
         return model
 

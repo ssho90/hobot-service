@@ -4442,7 +4442,7 @@ class TimeTravelRequest(BaseModel):
 
 class TestPromptRequest(BaseModel):
     prompt: str
-    model: str = "gemini-3-pro-preview" # Default model
+    model: str = "gemini-3.1-pro-preview" # Default model
 
 @api_router.get("/test/status")
 async def get_test_status(current_user: dict = Depends(require_admin)):

@@ -3,7 +3,9 @@ MySQL 데이터베이스 관리 모듈
 """
 import os
 import json
+import logging
 import threading
+import time
 from typing import Optional, Dict, List, Any
 from contextlib import contextmanager
 from datetime import datetime
@@ -11,6 +13,12 @@ import pymysql
 from pymysql.cursors import DictCursor
 from pymysql.err import OperationalError, IntegrityError
 import uuid
+
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.pool import QueuePool
+from sqlalchemy.exc import OperationalError as SAOperationalError
+
+logger = logging.getLogger(__name__)
 
 # MySQL 연결 설정 (환경 변수에서 가져오기)
 DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -23,8 +31,55 @@ DB_CHARSET = os.getenv("DB_CHARSET", "utf8mb4")
 # 백업 디렉토리 (시스템 경로)
 BACKUP_DIR = "/var/backups/hobot"
 
-# 파일 접근 동기화를 위한 Lock
-_db_lock = threading.Lock()
+# 스레드 로컈: init_database 내부 실행 스레드에서만 True
+# 전역 플래그가 아니라 스레드별 플래그라
+# init 코드를 실행 중인 바로 그 스레드만 True가 됨
+_tl = threading.local()
+
+# ──────────────────────────────────────────────
+# SQLAlchemy 커넥션 풀 (QueuePool)
+# pool_size    : 풀에 상시 유지할 커넥션 수
+# max_overflow : 급증 시 추가로 허용할 커넥션 수  → 최대 pool_size + max_overflow 개
+# pool_timeout : 풀이 꽉 찼을 때 커넥션을 기다리는 최대 시간(초)
+# pool_recycle : idle 커넥션을 교체할 주기(초) - SSH 터널 타임아웃 대비
+# pool_pre_ping: 커넥션 사용 전 PING으로 죽은 커넥션 자동 교체
+# ──────────────────────────────────────────────
+_engine = None
+_engine_lock = threading.Lock()
+
+
+def _get_engine():
+    """SQLAlchemy 엔진을 지연 생성하고 싱글턴으로 반환"""
+    global _engine
+    if _engine is not None:
+        return _engine
+    with _engine_lock:
+        if _engine is not None:
+            return _engine
+        url = (
+            f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}"
+            f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+            f"?charset={DB_CHARSET}"
+        )
+        _engine = create_engine(
+            url,
+            poolclass=QueuePool,
+            pool_size=5,        # 상시 유지 커넥션
+            max_overflow=3,     # 급증 시 최대 8개까지
+            pool_timeout=10,    # 풀 대기 타임아웃 (초)
+            pool_recycle=1800,  # 30분마다 커넥션 교체 (SSH 터널 대비)
+            pool_pre_ping=True, # 사용 전 ping으로 끊긴 커넥션 자동 교체
+            connect_args={
+                # cursorclass는 SQLAlchemy 초기화 쿼리(SELECT @@version)와 충돌하여
+                # 여기에 넣지 않고 get_db_connection()에서 수동으로 교체
+                "connect_timeout": 5,
+            },
+        )
+        logger.info(
+            "✅ DB 커넥션 풀 생성 완료 "
+            f"(pool_size=5, max_overflow=3, host={DB_HOST}:{DB_PORT})"
+        )
+        return _engine
 
 
 def ensure_backup_dir():
@@ -51,13 +106,11 @@ def ensure_backup_dir():
 
 
 @contextmanager
-def get_db_connection():
-    """데이터베이스 연결 컨텍스트 매니저"""
-    # 데이터베이스 초기화 확인 (재귀 호출 방지를 위해 init_database 내부에서는 호출하지 않음)
-    # init_database 내부에서 get_db_connection을 호출하므로, 여기서는 초기화만 확인
-    if not _initializing:  # 초기화 중이 아닐 때만 호출
-        ensure_database_initialized()
-    
+def _direct_db_connection():
+    """
+    풀을 거치지 않는 pymysql 직접 커넥션.
+    init_database() 내부 전용 - 절대 외부에서 호출하지 말 것.
+    """
     conn = None
     try:
         conn = pymysql.connect(
@@ -69,11 +122,11 @@ def get_db_connection():
             charset=DB_CHARSET,
             cursorclass=DictCursor,
             autocommit=False,
-            connect_timeout=5  # 5초 타임아웃
+            connect_timeout=5,
         )
         yield conn
         conn.commit()
-    except Exception as e:
+    except Exception:
         if conn:
             conn.rollback()
         raise
@@ -82,9 +135,44 @@ def get_db_connection():
             conn.close()
 
 
+@contextmanager
+def get_db_connection():
+    """데이터베이스 연결 컨텍스트 매니저 (SQLAlchemy QueuePool 사용)
+
+    - 동일한 `with get_db_connection() as conn:` 인터페이스 유지
+    - 항상 커넥션 풀에서 꺼내 사용 후 반환 (TCP 신규 연결 최소화)
+    - DictCursor는 풀에서 커넥션 획득 후 수동으로 설정
+      (SQLAlchemy 초기화 쿼리가 숫자 인덱스로 접근하므로 connect_args에 넣으면 충돌)
+    """
+    ensure_database_initialized()
+
+    conn = None
+    try:
+        engine = _get_engine()
+        # raw_connection(): 풀에서 pymysql 커넥션을 직접 꺼내 사용
+        # conn.close() 호출 시 TCP를 끔지 않고 풀에 반환
+        conn = engine.raw_connection()
+        # SQLAlchemy 엔진은 DictCursor를 모르면서 커넥션을 생성하므로
+        # 커서 클래스를 DictCursor로 수동 교체
+        conn.cursorclass = DictCursor
+        conn.autocommit(False)
+        yield conn
+        conn.commit()
+    except Exception:
+        if conn:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        raise
+    finally:
+        if conn:
+            conn.close()  # 풀로 반환 (TCP 연결은 유지)
+
+
 def init_database():
     """데이터베이스 및 테이블 초기화"""
-    # 먼저 데이터베이스가 없으면 생성
+    # 1단계: 데이터베이스가 없으면 생성 (database 지정 없이 접속)
     try:
         conn = pymysql.connect(
             host=DB_HOST,
@@ -92,18 +180,21 @@ def init_database():
             user=DB_USER,
             password=DB_PASSWORD,
             charset=DB_CHARSET,
-            connect_timeout=5  # 5초 타임아웃
+            connect_timeout=5,
         )
         with conn.cursor() as cursor:
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} CHARACTER SET {DB_CHARSET} COLLATE {DB_CHARSET}_unicode_ci")
+            cursor.execute(
+                f"CREATE DATABASE IF NOT EXISTS {DB_NAME} "
+                f"CHARACTER SET {DB_CHARSET} COLLATE {DB_CHARSET}_unicode_ci"
+            )
         conn.commit()
         conn.close()
     except Exception as e:
         print(f"⚠️  데이터베이스 생성 실패: {e}")
         raise
-    
-    # 테이블 생성
-    with get_db_connection() as conn:
+
+    # 2단계: 테이블 생성 - 내부 전용 direct 커넥션 사용 (풀 비의존)
+    with _direct_db_connection() as conn:
         cursor = conn.cursor()
         
         # 사용자 테이블
@@ -880,28 +971,44 @@ def list_backups():
 # 데이터베이스 초기화는 지연 초기화로 변경
 # 모듈 import 시점에는 실행하지 않고, 실제 사용 시점에 초기화
 _db_initialized = False
-_initializing = False  # 재귀 호출 방지 플래그
+_init_lock = threading.Lock()   # 멀티스레드 동시 초기화 방지 Lock
+_init_failed_at: float = 0.0    # 마지막 초기화 실패 시각 (monotonic)
+_INIT_RETRY_INTERVAL = 60.0     # 초기화 실패 후 재시도 대기 시간 (초)
+
 
 def ensure_database_initialized():
-    """데이터베이스가 초기화되었는지 확인하고, 필요시 초기화"""
-    global _db_initialized, _initializing
-    
-    # 이미 초기화되었으면 바로 리턴
+    """데이터베이스가 초기화되었는지 확인하고, 필요시 초기화.
+
+    - threading.Lock 으로 멀티스레드 동시 초기화 경쟁 방지 (Double-checked locking)
+    - 초기화 실패 시 _INIT_RETRY_INTERVAL(60초) Cool-down 후 재시도
+      → 매 요청마다 DB 커넥션을 낭비하는 (1040 Too many connections) 문제 해결
+    - init_database()는 내부에서 _direct_db_connection()을 사용하므로
+      재귀 감지(_initializing)가 더 이상 필요 없음
+    """
+    global _db_initialized, _init_failed_at
+
+    # 빠른 경로: 이미 초기화 완료
     if _db_initialized:
         return
-    
-    # 현재 초기화 중이면 리턴 (재귀 호출 방지)
-    if _initializing:
+
+    # 빠른 경로: Cool-down 중이면 스킵 (매 요청마다 재시도 방지)
+    if _init_failed_at and (time.monotonic() - _init_failed_at) < _INIT_RETRY_INTERVAL:
         return
-    
-    # 초기화 시작
-    _initializing = True
-    try:
-        init_database()
-        _db_initialized = True
-    except Exception as e:
-        print(f"⚠️  데이터베이스 초기화 실패: {e}")
-        print("MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")
-        # 초기화 실패해도 예외를 발생시키지 않음 (서비스 시작은 계속)
-    finally:
-        _initializing = False
+
+    with _init_lock:
+        # Lock 획득 후 다시 확인 (다른 스레드가 먼저 초기화했을 수 있음)
+        if _db_initialized:
+            return
+        if _init_failed_at and (time.monotonic() - _init_failed_at) < _INIT_RETRY_INTERVAL:
+            return
+
+        try:
+            init_database()
+            _db_initialized = True
+            _init_failed_at = 0.0  # 성공 시 실패 기록 초기화
+        except Exception as e:
+            _init_failed_at = time.monotonic()  # 실패 시각 기록 → Cool-down 시작
+            print(f"⚠️  데이터베이스 초기화 실패: {e}")
+            print(f"MySQL 서버가 실행 중인지, 연결 정보가 올바른지 확인하세요.")
+            print(f"   → {_INIT_RETRY_INTERVAL:.0f}초 후 재시도합니다.")
+            # 초기화 실패해도 예외를 발생시키지 않음 (서비스 시작은 계속)

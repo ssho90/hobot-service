@@ -364,7 +364,7 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
     def test_generate_answer_uses_cited_evidences(self):
         request = GraphRagAnswerRequest(
             question="최근 인플레이션 리스크는?",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             include_context=True,
             persist_macro_state=False,
             persist_analysis_run=False,
@@ -394,7 +394,7 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
             llm=llm,
         )
 
-        self.assertEqual(response.model, "gemini-3-pro-preview")
+        self.assertEqual(response.model, "gemini-3.1-pro-preview")
         self.assertEqual(response.answer.conclusion, "인플레이션 압력이 단기적으로 높아졌습니다.")
         self.assertGreaterEqual(len(response.citations), 3)
         self.assertLessEqual(len(response.citations), 10)
@@ -432,14 +432,14 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
             llm=llm,
         )
 
-        self.assertEqual(response.model, "gemini-3-pro-preview")
+        self.assertEqual(response.model, "gemini-3.1-pro-preview")
         self.assertGreaterEqual(len(response.citations), 3)
         self.assertEqual(response.citations[0].doc_id, "te:101")
 
     def test_generate_answer_handles_list_content(self):
         request = GraphRagAnswerRequest(
             question="최근 인플레이션 리스크는?",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             persist_macro_state=False,
             persist_analysis_run=False,
         )
@@ -517,7 +517,7 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
         )
         request = GraphRagAnswerRequest(
             question="최근 리스크 점검",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             as_of_date=date(2026, 2, 20),
             persist_macro_state=False,
             persist_analysis_run=False,
@@ -547,13 +547,13 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
     def test_resolve_model_fallback(self):
         self.assertEqual(
             resolve_graph_rag_model("gpt-4o"),
-            "gemini-3-pro-preview",
+            "gemini-3.1-pro-preview",
         )
 
     def test_generate_answer_calls_state_persistence_hooks(self):
         request = GraphRagAnswerRequest(
             question="최근 인플레이션 리스크는?",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             persist_macro_state=True,
             persist_analysis_run=True,
         )
@@ -1122,7 +1122,7 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
             question="팔란티어 급락 원인 설명해줘",
             question_id="Q1",
             country_code="US",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             persist_macro_state=False,
             persist_analysis_run=False,
         )
@@ -2141,8 +2141,8 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
         self.assertEqual(llm_agent.get("model"), "gemini-2.5-flash")
         self.assertEqual(llm_agent.get("selected_type"), "indicator_lookup")
         model_policy = route.get("agent_model_policy") or {}
-        self.assertEqual(model_policy.get("supervisor_agent"), "gemini-3-pro-preview")
-        self.assertEqual(model_policy.get("ontology_master_agent"), "gemini-3-pro-preview")
+        self.assertEqual(model_policy.get("supervisor_agent"), "gemini-3.1-pro-preview")
+        self.assertEqual(model_policy.get("ontology_master_agent"), "gemini-3.1-pro-preview")
         self.assertEqual(model_policy.get("macro_economy_agent"), "gemini-3-flash-preview")
         self.assertEqual(model_policy.get("equity_analyst_agent"), "gemini-3-flash-preview")
         self.assertEqual(model_policy.get("real_estate_agent"), "gemini-3-flash-preview")
@@ -2154,7 +2154,7 @@ class TestPhaseDResponseGenerator(unittest.TestCase):
     def test_general_knowledge_route_skips_context_and_forces_flash_model(self):
         request = GraphRagAnswerRequest(
             question="오늘 날씨 어때?",
-            model="gemini-3-pro-preview",
+            model="gemini-3.1-pro-preview",
             country_code="US",
             persist_macro_state=False,
             persist_analysis_run=False,

@@ -26,10 +26,10 @@ from service.llm_monitoring import (
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_PHASE_A_TO_E_LLM_MODELS = {"gemini-3-flash-preview", "gemini-3-pro-preview"}
-DEFAULT_NEWS_SUMMARY_MODEL = "gemini-3-pro-preview"
+ALLOWED_PHASE_A_TO_E_LLM_MODELS = {"gemini-3-flash-preview", "gemini-3.1-pro-preview"}
+DEFAULT_NEWS_SUMMARY_MODEL = "gemini-3.1-pro-preview"
 DEFAULT_MARKET_BRIEFING_MODEL = "gemini-3-flash-preview"
-DEFAULT_STRATEGY_MODEL = "gemini-3-pro-preview"
+DEFAULT_STRATEGY_MODEL = "gemini-3.1-pro-preview"
 DEFAULT_MIN_CONFIDENCE_TO_SWITCH_MP = 0.6
 US_ANALYSIS_COUNTRY_CODE = "US"
 US_ANALYSIS_COUNTRY_NAME = "United States"
@@ -678,7 +678,7 @@ def collect_fred_signals() -> Optional[Dict[str, Any]]:
 def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) -> Optional[str]:
     """
     LLM을 사용하여 뉴스를 정제하고 요약
-    gemini-3-pro-preview를 사용하여 주요 경제 지표와 흐름을 도출
+    gemini-3.1-pro-preview를 사용하여 주요 경제 지표와 흐름을 도출
     """
     try:
         if not news_list:
@@ -720,7 +720,7 @@ def summarize_news_with_llm(news_list: List[Dict], target_countries: List[str]) 
 """
         
         summary_model = _resolve_phase_llm_model(
-            "gemini-3-pro-preview",
+            "gemini-3.1-pro-preview",
             default_model=DEFAULT_NEWS_SUMMARY_MODEL,
         )
         logger.info("뉴스 요약 LLM 실행 중... model=%s", summary_model)
