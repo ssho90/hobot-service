@@ -135,6 +135,18 @@ def _direct_db_connection():
             conn.close()
 
 
+def _apply_dict_cursor(connection: Any) -> None:
+    """프록시 여부와 관계없이 실제 DBAPI 커넥션에 DictCursor를 적용한다."""
+    driver_connection = getattr(connection, "driver_connection", None)
+    if driver_connection is None:
+        driver_connection = getattr(connection, "dbapi_connection", None)
+    if driver_connection is None:
+        driver_connection = getattr(connection, "connection", None)
+    if driver_connection is None:
+        driver_connection = connection
+    driver_connection.cursorclass = DictCursor
+
+
 @contextmanager
 def get_db_connection():
     """데이터베이스 연결 컨텍스트 매니저 (SQLAlchemy QueuePool 사용)
@@ -152,9 +164,8 @@ def get_db_connection():
         # raw_connection(): 풀에서 pymysql 커넥션을 직접 꺼내 사용
         # conn.close() 호출 시 TCP를 끔지 않고 풀에 반환
         conn = engine.raw_connection()
-        # SQLAlchemy 엔진은 DictCursor를 모르면서 커넥션을 생성하므로
-        # 커서 클래스를 DictCursor로 수동 교체
-        conn.cursorclass = DictCursor
+        # SQLAlchemy는 프록시 커넥션을 반환하므로 실제 드라이버 커넥션에 적용해야 한다.
+        _apply_dict_cursor(conn)
         conn.autocommit(False)
         yield conn
         conn.commit()
