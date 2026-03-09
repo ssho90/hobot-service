@@ -27,6 +27,8 @@ DB_USER = os.getenv("DB_USER", "root")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_NAME = os.getenv("DB_NAME", "hobot")
 DB_CHARSET = os.getenv("DB_CHARSET", "utf8mb4")
+DEFAULT_STRATEGY_PROFILE_ID = "DEFAULT_US_MACRO_PROFILE"
+DEFAULT_STRATEGY_PROFILE_NAME = "Default US Macro Profile"
 
 # 백업 디렉토리 (시스템 경로)
 BACKUP_DIR = "/var/backups/hobot"
@@ -297,6 +299,43 @@ def init_database():
             """)
         except Exception:
             pass
+
+        # 전략 프로필 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS strategy_profiles (
+                strategy_profile_id VARCHAR(100) PRIMARY KEY COMMENT '전략 프로필 ID',
+                name VARCHAR(255) NOT NULL COMMENT '전략 프로필 이름',
+                description TEXT COMMENT '전략 프로필 설명',
+                is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '활성화 여부',
+                default_mp_threshold_percent DECIMAL(5,2) NOT NULL DEFAULT 3.00 COMMENT '기본 MP 임계값(%)',
+                default_sub_mp_threshold_percent DECIMAL(5,2) NOT NULL DEFAULT 5.00 COMMENT '기본 Sub-MP 임계값(%)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                INDEX idx_strategy_profiles_active (is_active)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 전략 프로필'
+        """)
+
+        # 사용자별 리밸런싱 설정 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_rebalancing_settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id VARCHAR(255) NOT NULL COMMENT '사용자 ID',
+                strategy_profile_id VARCHAR(100) NOT NULL COMMENT '전략 프로필 ID',
+                auto_rebalance_enabled BOOLEAN NOT NULL DEFAULT FALSE COMMENT '자동 리밸런싱 활성화',
+                mp_threshold_percent_override DECIMAL(5,2) NULL COMMENT '사용자별 MP 임계값 override(%)',
+                sub_mp_threshold_percent_override DECIMAL(5,2) NULL COMMENT '사용자별 Sub-MP 임계값 override(%)',
+                kill_switch_enabled BOOLEAN NOT NULL DEFAULT FALSE COMMENT '사용자별 kill switch',
+                max_daily_turnover_percent DECIMAL(5,2) NULL COMMENT '일일 최대 회전율 제한(%)',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY uniq_user_rebalancing_settings_user_id (user_id),
+                KEY idx_user_rebalancing_settings_profile (strategy_profile_id),
+                CONSTRAINT fk_user_rebalancing_settings_user
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                CONSTRAINT fk_user_rebalancing_settings_profile
+                    FOREIGN KEY (strategy_profile_id) REFERENCES strategy_profiles(strategy_profile_id) ON DELETE RESTRICT
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자별 자동 리밸런싱 설정'
+        """)
         
         # Crypto 설정 테이블
         cursor.execute("""
@@ -537,6 +576,7 @@ def init_database():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS ai_strategy_decisions (
                 id INT PRIMARY KEY AUTO_INCREMENT COMMENT '고유 ID',
+                strategy_profile_id VARCHAR(100) NULL COMMENT '전략 프로필 ID',
                 decision_date DATETIME NOT NULL COMMENT '의사결정 일시',
                 analysis_summary TEXT COMMENT 'AI 분석 요약',
                 target_allocation JSON NOT NULL COMMENT '목표 자산 배분 (Stocks, Bonds, Alternatives, Cash)',
@@ -546,15 +586,32 @@ def init_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
                 INDEX idx_decision_date (decision_date) COMMENT '의사결정 일시 인덱스 (최신 조회용)',
-                INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스'
+                INDEX idx_created_at (created_at) COMMENT '생성 일시 인덱스',
+                INDEX idx_strategy_profile_decision_date (strategy_profile_id, decision_date)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI 전략 결정 이력'
         """)
-        
+
         # recommended_stocks 컬럼 추가 (마이그레이션)
         try:
             cursor.execute("ALTER TABLE ai_strategy_decisions ADD COLUMN recommended_stocks JSON COMMENT '자산군별 추천 종목'")
         except Exception:
             pass  # 이미 존재하는 경우 무시
+
+        try:
+            cursor.execute(
+                "ALTER TABLE ai_strategy_decisions "
+                "ADD COLUMN strategy_profile_id VARCHAR(100) NULL COMMENT '전략 프로필 ID'"
+            )
+        except Exception:
+            pass
+
+        try:
+            cursor.execute(
+                "ALTER TABLE ai_strategy_decisions "
+                "ADD INDEX idx_strategy_profile_decision_date (strategy_profile_id, decision_date)"
+            )
+        except Exception:
+            pass
         
         # 모델 포트폴리오 (MP) 테이블
         cursor.execute("""
@@ -665,6 +722,163 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='시스템 가상 시간 및 설정'
         """)
 
+        # 거래일별 공식 관찰 신호 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_signal_observations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                business_date DATE NOT NULL COMMENT '공식 관찰값 기준 거래일',
+                strategy_profile_id VARCHAR(100) NOT NULL COMMENT '전략 프로필 ID',
+                decision_id INT NULL COMMENT '소스 AI 결정 ID',
+                decision_date DATETIME NOT NULL COMMENT '소스 AI 결정 시각',
+                mp_signature CHAR(64) NOT NULL COMMENT '정규화된 MP signature',
+                sub_mp_signatures_json JSON NOT NULL COMMENT '자산군별 Sub-MP signature',
+                effective_target_signature_candidate CHAR(64) NOT NULL COMMENT '관찰 기준 전체 target signature',
+                target_payload_json JSON NOT NULL COMMENT '정규화된 target payload snapshot',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY uniq_signal_observation_profile_business_date (strategy_profile_id, business_date),
+                KEY idx_signal_observation_profile_signature (strategy_profile_id, effective_target_signature_candidate),
+                CONSTRAINT fk_signal_observation_profile
+                    FOREIGN KEY (strategy_profile_id) REFERENCES strategy_profiles(strategy_profile_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='거래일별 공식 리밸런싱 신호 관찰값'
+        """)
+
+        # 리밸런싱 신호 후보 상태 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_signal_candidates (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                scope_type VARCHAR(20) NOT NULL DEFAULT 'GLOBAL' COMMENT 'GLOBAL/LOCAL scope',
+                strategy_profile_id VARCHAR(100) NOT NULL COMMENT '전략 프로필 ID',
+                asset_class VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'LOCAL scope 자산군. GLOBAL은 빈 문자열',
+                candidate_signature CHAR(64) NOT NULL COMMENT '후보 target signature',
+                first_seen_date DATE NOT NULL COMMENT '처음 관찰된 거래일',
+                last_seen_date DATE NOT NULL COMMENT '마지막 관찰된 거래일',
+                consecutive_days INT NOT NULL DEFAULT 1 COMMENT '연속 관찰 거래일 수',
+                status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/CONFIRMED/CANCELLED/APPLIED',
+                supersedes_target_signature CHAR(64) NULL COMMENT '대체 대상 active target signature',
+                latest_decision_id INT NULL COMMENT '후보 기준 최신 decision_id',
+                target_payload_json JSON NOT NULL COMMENT '후보 target payload snapshot',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY uniq_signal_candidate (strategy_profile_id, scope_type, asset_class, candidate_signature),
+                KEY idx_signal_candidate_status (strategy_profile_id, status),
+                CONSTRAINT fk_signal_candidate_profile
+                    FOREIGN KEY (strategy_profile_id) REFERENCES strategy_profiles(strategy_profile_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 신호 안정화 후보 상태'
+        """)
+
+        # 현재 확정 목표 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS effective_rebalancing_targets (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                target_signature CHAR(64) NOT NULL COMMENT '확정 target signature',
+                strategy_profile_id VARCHAR(100) NOT NULL COMMENT '전략 프로필 ID',
+                mp_signature CHAR(64) NOT NULL COMMENT '확정 MP signature',
+                sub_mp_signatures_json JSON NOT NULL COMMENT '확정 자산군별 Sub-MP signature',
+                source_candidate_id INT NULL COMMENT '소스 candidate ID',
+                source_decision_id INT NULL COMMENT '소스 AI 결정 ID',
+                effective_from_date DATE NOT NULL COMMENT '효력 발생 거래일',
+                status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE/SUPERSEDED',
+                target_payload_json JSON NOT NULL COMMENT '확정 target payload snapshot',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                KEY idx_effective_target_profile_status (strategy_profile_id, status),
+                KEY idx_effective_target_profile_date (strategy_profile_id, effective_from_date),
+                CONSTRAINT fk_effective_target_profile
+                    FOREIGN KEY (strategy_profile_id) REFERENCES strategy_profiles(strategy_profile_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='현재 확정된 리밸런싱 목표'
+        """)
+
+        # 리밸런싱 테스트 세션 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_test_sessions (
+                session_id VARCHAR(64) PRIMARY KEY COMMENT '테스트 세션 ID',
+                name VARCHAR(255) NOT NULL COMMENT '세션 이름',
+                mode VARCHAR(32) NOT NULL COMMENT 'PAPER_TIME_TRAVEL/PAPER_REALTIME/DUMMY_UNIT',
+                status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE/COMPLETED/CANCELLED',
+                strategy_profile_id VARCHAR(100) NOT NULL COMMENT '전략 프로필 ID',
+                fixture_name VARCHAR(255) NULL COMMENT 'fixture 이름',
+                fixture_payload_json JSON NULL COMMENT 'fixture 원본 payload',
+                start_business_date DATE NOT NULL COMMENT '시작 기준 거래일',
+                current_virtual_business_date DATE NOT NULL COMMENT '현재 가상 거래일',
+                current_virtual_time DATETIME NULL COMMENT '현재 가상 시각',
+                auto_execute_enabled BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'advance 시 자동 실행 여부',
+                created_by VARCHAR(255) NULL COMMENT '생성한 관리자 ID',
+                closed_by VARCHAR(255) NULL COMMENT '종료한 관리자 ID',
+                last_advanced_at DATETIME NULL COMMENT '마지막 +1 business day 실행 시각',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                KEY idx_rebalancing_test_sessions_status (status),
+                KEY idx_rebalancing_test_sessions_profile (strategy_profile_id),
+                CONSTRAINT fk_rebalancing_test_sessions_profile
+                    FOREIGN KEY (strategy_profile_id) REFERENCES strategy_profiles(strategy_profile_id) ON DELETE RESTRICT
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 테스트 세션'
+        """)
+
+        # 테스트 세션 사용자 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_test_session_users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                session_id VARCHAR(64) NOT NULL COMMENT '테스트 세션 ID',
+                user_id VARCHAR(255) NOT NULL COMMENT '테스트 대상 사용자 ID',
+                is_paper_account BOOLEAN NOT NULL DEFAULT FALSE COMMENT '모의투자 계좌 여부',
+                baseline_status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/CAPTURED/FAILED/SKIPPED',
+                baseline_snapshot_json JSON NULL COMMENT '세션 시작 시 baseline snapshot',
+                baseline_message TEXT NULL COMMENT 'baseline 관련 메시지',
+                baseline_captured_at DATETIME NULL COMMENT 'baseline 저장 시각',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY uniq_rebalancing_test_session_user (session_id, user_id),
+                KEY idx_rebalancing_test_session_users_user (user_id),
+                CONSTRAINT fk_rebalancing_test_session_users_session
+                    FOREIGN KEY (session_id) REFERENCES rebalancing_test_sessions(session_id) ON DELETE CASCADE,
+                CONSTRAINT fk_rebalancing_test_session_users_user
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 테스트 세션별 사용자'
+        """)
+
+        # 테스트 세션 일별 결과 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_test_day_results (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                session_id VARCHAR(64) NOT NULL COMMENT '테스트 세션 ID',
+                business_date DATE NOT NULL COMMENT '가상 거래일',
+                status VARCHAR(32) NOT NULL DEFAULT 'PLANNED' COMMENT 'PLANNED/RUNNING/COMPLETED/FAILED/PENDING_MARKET_WINDOW',
+                run_signal_confirmation BOOLEAN NOT NULL DEFAULT TRUE COMMENT '신호 확정 배치 실행 여부',
+                run_rebalancing_execution BOOLEAN NOT NULL DEFAULT FALSE COMMENT '리밸런싱 실행 여부',
+                fixture_payload_json JSON NULL COMMENT '해당 날짜에 적용된 fixture payload',
+                real_executed_at DATETIME NULL COMMENT '실제 실행 시각',
+                market_window_status VARCHAR(32) NULL COMMENT 'OPEN/CLOSED/NOT_REQUESTED',
+                user_results_json JSON NULL COMMENT '사용자별 실행 결과',
+                logs_json JSON NULL COMMENT '단계별 로그',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY uniq_rebalancing_test_day_result (session_id, business_date),
+                KEY idx_rebalancing_test_day_results_status (session_id, status),
+                CONSTRAINT fk_rebalancing_test_day_results_session
+                    FOREIGN KEY (session_id) REFERENCES rebalancing_test_sessions(session_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 테스트 일별 결과'
+        """)
+
+        # 테스트 assertion 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_test_assertions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                session_id VARCHAR(64) NOT NULL COMMENT '테스트 세션 ID',
+                business_date DATE NULL COMMENT '가상 거래일',
+                assertion_key VARCHAR(100) NOT NULL COMMENT 'assertion 식별자',
+                status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/PASSED/FAILED',
+                expected_json JSON NULL COMMENT '예상값',
+                actual_json JSON NULL COMMENT '실제값',
+                message TEXT NULL COMMENT '비교 메시지',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                KEY idx_rebalancing_test_assertions_session (session_id, business_date),
+                CONSTRAINT fk_rebalancing_test_assertions_session
+                    FOREIGN KEY (session_id) REFERENCES rebalancing_test_sessions(session_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 테스트 assertion 결과'
+        """)
+
         # 리밸런싱 진행 상태 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS rebalancing_state (
@@ -690,6 +904,33 @@ def init_database():
                 migrate_portfolios_from_code()
         except Exception as e:
             print(f"⚠️  포트폴리오 마이그레이션 실패 (무시하고 계속): {e}")
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO strategy_profiles (
+                    strategy_profile_id,
+                    name,
+                    description,
+                    is_active,
+                    default_mp_threshold_percent,
+                    default_sub_mp_threshold_percent
+                ) VALUES (%s, %s, %s, TRUE, 3.00, 5.00)
+                ON DUPLICATE KEY UPDATE
+                    name = VALUES(name),
+                    description = VALUES(description),
+                    is_active = TRUE,
+                    default_mp_threshold_percent = VALUES(default_mp_threshold_percent),
+                    default_sub_mp_threshold_percent = VALUES(default_sub_mp_threshold_percent)
+                """,
+                (
+                    DEFAULT_STRATEGY_PROFILE_ID,
+                    DEFAULT_STRATEGY_PROFILE_NAME,
+                    "기본 미국 거시 자산배분 자동 리밸런싱 프로필",
+                ),
+            )
+        except Exception as e:
+            print(f"⚠️  기본 strategy_profile 초기화 실패 (무시하고 계속): {e}")
 
 
 def is_migration_completed():

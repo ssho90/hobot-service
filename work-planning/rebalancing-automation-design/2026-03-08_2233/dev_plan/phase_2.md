@@ -24,25 +24,37 @@
 ## 체크리스트
 
 ### To-Do
-- [ ] 테스트 세션 테이블 정의
-- [ ] 일별 결과 테이블 정의
-- [ ] assertion 저장 테이블 정의
-- [ ] fixture 주입 구조 정의
+- [x] 테스트 세션 테이블 정의
+- [x] 일별 결과 테이블 정의
+- [x] assertion 저장 테이블 정의
+- [x] fixture 주입 구조 정의
 - [ ] 모의투자 테스트 사용자/계좌 운영 방식 정의
   - 전용 계좌
   - baseline 복구 방식
 
 ### In Progress
-- [ ] `TimeProvider` 재사용 방식 검토
-- [ ] admin API 흐름 설계
+- [x] `TimeProvider` 재사용 방식 검토
+- [x] admin API 흐름 설계
   - 세션 시작
   - `+1 business day`
   - 결과 조회
+- [ ] signal confirmation 실제 배치 연결
+- [ ] fixture -> signal confirmation 입력 경로 연결
+- [ ] 실거래/모의투자 장시간 제약에 대한 holiday 캘린더 보강
 
 ### Done
-- [ ] 테스트 정책 확정
+- [x] 테스트 정책 확정
   - 공식 테스트는 모의투자 계좌 사용
   - 달력 대기는 제거
+- [x] `TimeProvider`에 `virtual_business_date` / `active_test_session` 상태 추가
+- [x] `ScenarioFixtureLoader` 추가
+- [x] `PaperTradingBrokerAdapter` 추가
+- [x] `TestSessionService` 추가
+- [x] admin API 추가
+  - fixture 목록
+  - active session 조회
+  - session 생성/조회/종료
+  - `advance-business-day`
 
 ## 완료 기준
 - 테스트 세션을 생성할 수 있다.
@@ -53,3 +65,4 @@
 ## 리스크
 - 실제 모의투자 주문은 현재 실제 시장 시간 제약을 받는다.
 - baseline 상태 복구가 없으면 반복 테스트 재현성이 떨어질 수 있다.
+- 현재 Phase 2는 signal confirmation을 `SKIPPED_NOT_IMPLEMENTED`로 기록만 하며, 실제 자동 배치 연결은 다음 단계에서 이어야 한다.

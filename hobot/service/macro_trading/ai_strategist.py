@@ -3555,8 +3555,15 @@ def save_strategy_decision(
 ) -> bool:
     """전략 결정 결과를 DB에 저장"""
     try:
+        from service.macro_trading.rebalancing.signal_tracker import (
+            DEFAULT_STRATEGY_PROFILE_ID,
+            track_signal_observation,
+        )
+
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            decision_timestamp = datetime.now()
+            strategy_profile_id = DEFAULT_STRATEGY_PROFILE_ID
             
             # analysis_summary에 reasoning 포함
             analysis_summary_with_reasoning = decision.analysis_summary
@@ -3642,24 +3649,38 @@ def save_strategy_decision(
                     "reasoning": decision.sub_mp.reasoning,
                     "reasoning_by_asset": decision.sub_mp.reasoning_by_asset or {},
                 }
+                sub_mp_details_snapshot = get_sub_mp_details(save_data["sub_mp"])
+                if sub_mp_details_snapshot:
+                    save_data["sub_mp_details_snapshot"] = sub_mp_details_snapshot
             
             cursor.execute("""
                 INSERT INTO ai_strategy_decisions (
+                    strategy_profile_id,
                     decision_date,
                     analysis_summary,
                     target_allocation,
                     recommended_stocks,
                     quant_signals,
                     account_pnl
-                ) VALUES (%s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
-                datetime.now(),
+                strategy_profile_id,
+                decision_timestamp,
                 analysis_summary_with_reasoning,
                 json.dumps(save_data),  # mp_id와 target_allocation을 함께 저장
                 json.dumps(decision.recommended_stocks.model_dump()) if decision.recommended_stocks else None,
                 json.dumps(fred_signals) if fred_signals else None,
                 None  # account_pnl은 더 이상 사용하지 않음
             ))
+
+            decision_id = cursor.lastrowid
+            track_signal_observation(
+                cursor=cursor,
+                strategy_profile_id=strategy_profile_id,
+                decision_id=decision_id,
+                decision_date=decision_timestamp,
+                target_payload=save_data,
+            )
             
             conn.commit()
             logger.info(f"전략 결정 결과 저장 완료: MP={decision.mp_id}")

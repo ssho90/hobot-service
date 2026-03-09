@@ -88,68 +88,29 @@ def health_check(user_id: Optional[str] = None):
 
 def get_active_etf_mapping_from_db() -> Dict[str, str]:
     """
-    최신 AI 전략 결정에 따른 ETF 티커 -> 자산군 매핑 정보를 DB에서 조회
+    현재 적용 target 기준 ETF 티커 -> 자산군 매핑 정보를 조회
     
     Returns:
         Dict[str, str]: 티커(ticker) -> 자산군(asset_class) 매핑
         예: {"005930": "stocks", "305080": "bonds"}
     """
     try:
-        mapping = {}
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            
-            # 1. 최신 AI 전략 결정의 target_allocation 조회
-            cursor.execute("""
-                SELECT target_allocation
-                FROM ai_strategy_decisions
-                ORDER BY decision_date DESC
-                LIMIT 1
-            """)
-            row = cursor.fetchone()
-            if not row:
-                return {}
-            
-            target_alloc_raw = row['target_allocation']
-            if isinstance(target_alloc_raw, str):
-                target_alloc = json.loads(target_alloc_raw)
-            else:
-                target_alloc = target_alloc_raw
-            
-            # "sub_mp" 필드 확인 (예: {"stocks": "Eq-D", "bonds": "Bnd-L", ...})
-            sub_mp_map = target_alloc.get('sub_mp')
-            if not sub_mp_map:
-                # sub_mp가 없으면 매핑 불가
-                return {}
-            
-            # 2. 각 자산군별 Sub-MP ID에 대해 티커 목록 조회
-            # 메타데이터(reasoning, reasoning_by_asset 등)는 제외
-            for asset_class in ("stocks", "bonds", "alternatives", "cash"):
-                sub_mp_id = sub_mp_map.get(asset_class)
-                if not isinstance(sub_mp_id, str) or not sub_mp_id:
-                    continue
+        from service.macro_trading.rebalancing.target_retriever import get_current_target_data
 
-                # Sub-MP ID로 sub_portfolio_models의 ID 조회
-                cursor.execute("SELECT id FROM sub_portfolio_models WHERE sub_model_id = %s", (sub_mp_id,))
-                model_row = cursor.fetchone()
-                if not model_row:
-                    continue
-                
-                model_id = model_row['id']
-                
-                # 3. sub_portfolio_compositions에서 티커 조회
-                cursor.execute("""
-                    SELECT ticker 
-                    FROM sub_portfolio_compositions 
-                    WHERE sub_portfolio_model_id = %s
-                """, (model_id,))
-                
-                tickers = cursor.fetchall()
-                for t_row in tickers:
-                    ticker = t_row.get('ticker')
-                    if ticker:
-                        mapping[ticker] = asset_class.lower() # 소문자로 통일 (stocks, bonds, ...)
-                        
+        mapping = {}
+
+        target_data = get_current_target_data()
+        if not target_data:
+            return {}
+
+        sub_mp_details = target_data.get("sub_mp_details") or {}
+        for asset_class in ("stocks", "bonds", "alternatives", "cash"):
+            asset_payload = sub_mp_details.get(asset_class) or {}
+            for etf in asset_payload.get("etf_details", []):
+                ticker = str(etf.get("ticker") or "").strip()
+                if ticker:
+                    mapping[ticker] = asset_class
+
         return mapping
     except Exception as e:
         logging.error(f"Error fetching ETF mapping from DB: {e}")

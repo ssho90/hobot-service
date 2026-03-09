@@ -4444,6 +4444,26 @@ class TestPromptRequest(BaseModel):
     prompt: str
     model: str = "gemini-3.1-pro-preview" # Default model
 
+
+class RebalancingTestSessionCreateRequest(BaseModel):
+    name: str
+    user_ids: List[str]
+    start_business_date: str
+    mode: str = "PAPER_TIME_TRAVEL"
+    strategy_profile_id: str = "DEFAULT_US_MACRO_PROFILE"
+    fixture_name: Optional[str] = None
+    capture_baseline: bool = True
+    auto_execute_enabled: bool = False
+
+
+class RebalancingTestAdvanceRequest(BaseModel):
+    run_signal_confirmation: bool = True
+    run_rebalancing_execution: bool = False
+
+
+class RebalancingTestCloseRequest(BaseModel):
+    status: str = "COMPLETED"
+
 @api_router.get("/test/status")
 async def get_test_status(current_user: dict = Depends(require_admin)):
     """테스트 환경 상태 조회 (가상 시간, 리밸런싱 진행 상태)"""
@@ -4478,6 +4498,8 @@ async def get_test_status(current_user: dict = Depends(require_admin)):
         return {
             "virtual_time": current_time.isoformat(),
             "is_virtual": abs((current_time - datetime.now()).total_seconds()) > 5,
+            "virtual_business_date": TimeProvider.get_virtual_business_date().isoformat(),
+            "active_test_session_id": TimeProvider.get_active_test_session_id(),
             "rebalancing_logs": rebalancing_logs
         }
     except Exception as e:
@@ -4502,10 +4524,15 @@ async def set_virtual_time(
 async def next_day_time_travel(
     current_user: dict = Depends(require_admin)
 ):
-    """다음 날 08:00로 시간 이동 (+1 Day)"""
+    """다음 거래일 08:00로 시간 이동 (+1 business day)"""
     try:
-        target_dt = TimeProvider.add_days(1, default_time="08:00")
-        return {"status": "success", "current_time": target_dt.isoformat(), "message": "Moved to next day 08:00"}
+        target_dt = TimeProvider.add_business_days(1, default_time="08:00")
+        return {
+            "status": "success",
+            "current_time": target_dt.isoformat(),
+            "virtual_business_date": TimeProvider.get_virtual_business_date().isoformat(),
+            "message": "Moved to next business day 08:00",
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -4517,6 +4544,138 @@ async def reset_virtual_time(
     try:
         TimeProvider.reset_to_real_time()
         return {"status": "success", "message": "Reset to real time", "current_time": datetime.now().isoformat()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/test/rebalancing-sessions/fixtures")
+async def list_rebalancing_test_fixtures(current_user: dict = Depends(require_admin)):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        return {
+            "status": "success",
+            "fixtures": TestSessionService.list_available_fixtures(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/test/rebalancing-sessions/active")
+async def get_active_rebalancing_test_session(current_user: dict = Depends(require_admin)):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        session = TestSessionService.get_active_session()
+        return {
+            "status": "success",
+            "session": session,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/test/rebalancing-sessions")
+async def create_rebalancing_test_session(
+    req: RebalancingTestSessionCreateRequest,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        session = TestSessionService.create_session(
+            name=req.name,
+            user_ids=req.user_ids,
+            start_business_date=req.start_business_date,
+            mode=req.mode,
+            strategy_profile_id=req.strategy_profile_id,
+            fixture_name=req.fixture_name,
+            capture_baseline=req.capture_baseline,
+            auto_execute_enabled=req.auto_execute_enabled,
+            created_by=current_user.get("id"),
+        )
+        return {"status": "success", "session": session}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/test/rebalancing-sessions/{session_id}")
+async def get_rebalancing_test_session(
+    session_id: str,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        session = TestSessionService.get_session_details(session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Test session not found")
+        return {"status": "success", "session": session}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/test/rebalancing-sessions/{session_id}/day-results")
+async def list_rebalancing_test_day_results(
+    session_id: str,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        return {
+            "status": "success",
+            "day_results": TestSessionService.list_day_results(session_id),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/test/rebalancing-sessions/{session_id}/advance-business-day")
+async def advance_rebalancing_test_business_day(
+    session_id: str,
+    req: RebalancingTestAdvanceRequest,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        result = await TestSessionService.advance_business_day(
+            session_id=session_id,
+            advanced_by=current_user.get("id"),
+            run_signal_confirmation=req.run_signal_confirmation,
+            run_rebalancing_execution=req.run_rebalancing_execution,
+        )
+        return {"status": "success", **result}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/test/rebalancing-sessions/{session_id}/close")
+async def close_rebalancing_test_session(
+    session_id: str,
+    req: RebalancingTestCloseRequest,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        session = TestSessionService.close_session(
+            session_id=session_id,
+            closed_by=current_user.get("id"),
+            status=req.status,
+        )
+        return {"status": "success", "session": session}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
