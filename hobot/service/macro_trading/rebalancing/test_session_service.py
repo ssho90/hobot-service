@@ -9,6 +9,10 @@ from service.database.db import get_db_connection
 from service.macro_trading.kis.user_credentials import get_user_kis_credentials
 from service.macro_trading.rebalancing.paper_broker_adapter import PaperTradingBrokerAdapter
 from service.macro_trading.rebalancing.scenario_fixture_loader import ScenarioFixtureLoader
+from service.macro_trading.rebalancing.signal_confirmation_service import (
+    build_signal_confirmation_assertions,
+    run_fixture_signal_confirmation,
+)
 from service.macro_trading.rebalancing.signal_tracker import DEFAULT_STRATEGY_PROFILE_ID
 
 
@@ -188,14 +192,51 @@ class TestSessionService:
         day_status = DAY_STATUS_PLANNED
 
         if run_signal_confirmation:
+            signal_result = run_fixture_signal_confirmation(
+                strategy_profile_id=session["strategy_profile_id"],
+                business_date=next_business_date,
+                fixture_payload=fixture_payload,
+                session_context={
+                    "session_id": session_id,
+                    "fixture_name": session.get("fixture_name"),
+                    "advanced_by": advanced_by,
+                },
+            )
             logs.append(
                 {
                     "step": "signal_confirmation",
-                    "status": "SKIPPED_NOT_IMPLEMENTED",
-                    "message": "Phase 2 foundation에서는 세션/가상 날짜/실행 결과 저장만 우선 구현",
+                    "status": signal_result.get("status"),
+                    "result": signal_result,
                 }
             )
+            for assertion in build_signal_confirmation_assertions(
+                session_id=session_id,
+                business_date=next_business_date,
+                result=signal_result,
+                fixture_payload=fixture_payload,
+            ):
+                cls.record_assertion(
+                    session_id=assertion["session_id"],
+                    business_date=assertion["business_date"],
+                    assertion_key=assertion["assertion_key"],
+                    status=assertion["status"],
+                    expected=assertion["expected"],
+                    actual=assertion["actual"],
+                    message=assertion["message"],
+                )
+            if signal_result.get("status") == "ERROR":
+                day_status = DAY_STATUS_FAILED
 
+        if should_execute_rebalancing:
+            if day_status == DAY_STATUS_FAILED:
+                logs.append(
+                    {
+                        "step": "rebalancing_execution",
+                        "status": "SKIPPED_SIGNAL_FAILURE",
+                        "message": "signal confirmation 실패로 인해 리밸런싱 실행을 건너뜀",
+                    }
+                )
+                should_execute_rebalancing = False
         if should_execute_rebalancing:
             market_window_status = "OPEN" if PaperTradingBrokerAdapter.is_us_market_open() else "CLOSED"
             if market_window_status != "OPEN":
@@ -224,7 +265,11 @@ class TestSessionService:
 
                     try:
                         adapter = PaperTradingBrokerAdapter(user_id)
-                        execution_result = await adapter.execute_rebalancing(max_phase=5)
+                        execution_result = await adapter.execute_rebalancing(
+                            max_phase=5,
+                            strategy_profile_id=session["strategy_profile_id"],
+                            business_date=next_business_date,
+                        )
                         user_results.append(
                             {
                                 "user_id": user_id,
@@ -405,6 +450,42 @@ class TestSessionService:
             )
             day_rows = cursor.fetchall() or []
         return [cls._normalize_row(row) for row in day_rows]
+
+    @classmethod
+    def list_assertions(
+        cls,
+        session_id: str,
+        business_date: Optional[Any] = None,
+    ) -> List[Dict[str, Any]]:
+        normalized_business_date = cls._coerce_date(business_date) if business_date else None
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            if normalized_business_date:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM rebalancing_test_assertions
+                    WHERE session_id = %s
+                      AND business_date = %s
+                    ORDER BY created_at DESC, id DESC
+                    """,
+                    (
+                        session_id,
+                        normalized_business_date,
+                    ),
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM rebalancing_test_assertions
+                    WHERE session_id = %s
+                    ORDER BY created_at DESC, id DESC
+                    """,
+                    (session_id,),
+                )
+            rows = cursor.fetchall() or []
+        return [cls._normalize_row(row) for row in rows]
 
     @classmethod
     def get_day_result(cls, session_id: str, business_date: Any) -> Optional[Dict[str, Any]]:

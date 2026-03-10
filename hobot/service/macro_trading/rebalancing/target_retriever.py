@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Any, Optional
 from service.database.db import get_db_connection
 from service.macro_trading.rebalancing.signal_tracker import (
+    build_signal_bundle,
     DEFAULT_STRATEGY_PROFILE_ID,
     normalize_target_payload,
 )
@@ -73,6 +74,7 @@ def get_effective_target_data(
             cursor.execute(
                 """
                 SELECT
+                    target_signature,
                     target_payload_json,
                     effective_from_date
                 FROM effective_rebalancing_targets
@@ -89,6 +91,7 @@ def get_effective_target_data(
             return None
 
         return _build_target_data(
+            target_signature=target_row.get("target_signature"),
             target_payload=target_row["target_payload_json"],
             decision_date=target_row["effective_from_date"],
         )
@@ -141,14 +144,23 @@ def get_latest_target_data(
         return None
 
 
-def _build_target_data(target_payload: Any, decision_date: Any) -> Optional[Dict[str, Any]]:
+def _build_target_data(
+    target_payload: Any,
+    decision_date: Any,
+    target_signature: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
     normalized_payload = normalize_target_payload(target_payload)
+    signal_bundle = build_signal_bundle(normalized_payload)
     target_alloc_norm = normalize_alloc(normalized_payload.get("target_allocation"))
     sub_mp_details = _resolve_sub_mp_details(normalized_payload)
     return {
         "mp_target": target_alloc_norm,
         "sub_mp_details": sub_mp_details,
         "decision_date": decision_date,
+        "target_payload": normalized_payload,
+        "target_signature": target_signature or signal_bundle["effective_target_signature"],
+        "mp_signature": signal_bundle["mp_signature"],
+        "sub_mp_signatures": signal_bundle["sub_mp_signatures"],
     }
 
 

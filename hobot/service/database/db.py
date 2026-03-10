@@ -879,6 +879,58 @@ def init_database():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리밸런싱 테스트 assertion 결과'
         """)
 
+        # 사용자별 멀티데이 리밸런싱 run 상태 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_runs (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                run_id VARCHAR(64) NOT NULL COMMENT '리밸런싱 run ID',
+                user_id VARCHAR(255) NOT NULL COMMENT '사용자 ID',
+                strategy_profile_id VARCHAR(100) NOT NULL COMMENT '전략 프로필 ID',
+                target_signature CHAR(64) NOT NULL COMMENT 'run이 추적하는 확정 target signature',
+                status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE/PAUSED/COMPLETED/CANCELLED/SUPERSEDED/FAILED',
+                parent_run_id VARCHAR(64) NULL COMMENT 'supersede 이전 부모 run ID',
+                superseded_by_run_id VARCHAR(64) NULL COMMENT '대체한 자식 run ID',
+                planned_execution_days INT NOT NULL DEFAULT 5 COMMENT '기본 계획 실행일 수',
+                executed_days INT NOT NULL DEFAULT 0 COMMENT '실행 완료한 일 수',
+                remaining_execution_days INT NOT NULL DEFAULT 5 COMMENT '남은 실행일 수',
+                start_business_date DATE NOT NULL COMMENT 'run 시작 거래일',
+                last_executed_business_date DATE NULL COMMENT '마지막 실행 거래일',
+                last_error TEXT NULL COMMENT '마지막 오류 메시지',
+                target_payload_json JSON NOT NULL COMMENT 'run 생성 시점 target payload snapshot',
+                notes_json JSON NULL COMMENT '부가 메타데이터',
+                completed_at DATETIME NULL COMMENT '완료 시각',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+                UNIQUE KEY uniq_rebalancing_runs_run_id (run_id),
+                KEY idx_rebalancing_runs_user_status (user_id, strategy_profile_id, status),
+                KEY idx_rebalancing_runs_target_status (strategy_profile_id, target_signature, status),
+                CONSTRAINT fk_rebalancing_runs_user
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                CONSTRAINT fk_rebalancing_runs_profile
+                    FOREIGN KEY (strategy_profile_id) REFERENCES strategy_profiles(strategy_profile_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자별 멀티데이 리밸런싱 run'
+        """)
+
+        # 멀티데이 리밸런싱 run 일자별 스냅샷 테이블
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rebalancing_run_snapshots (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                run_id VARCHAR(64) NOT NULL COMMENT '리밸런싱 run ID',
+                business_date DATE NOT NULL COMMENT '스냅샷 기준 거래일',
+                snapshot_type VARCHAR(32) NOT NULL COMMENT 'PLANNING/EXECUTION_RESULT/STATE_TRANSITION',
+                current_state_json JSON NULL COMMENT '그날 포트폴리오 스냅샷',
+                full_trade_plan_json JSON NULL COMMENT '전체 잔량 기준 순매매 계획',
+                sliced_trade_plan_json JSON NULL COMMENT '해당 거래일 slice 순매매 계획',
+                execution_result_json JSON NULL COMMENT '실제 실행 결과',
+                metadata_json JSON NULL COMMENT '부가 메타데이터',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+                UNIQUE KEY uniq_rebalancing_run_snapshot (run_id, business_date, snapshot_type),
+                KEY idx_rebalancing_run_snapshots_run_date (run_id, business_date),
+                CONSTRAINT fk_rebalancing_run_snapshots_run
+                    FOREIGN KEY (run_id) REFERENCES rebalancing_runs(run_id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='멀티데이 리밸런싱 run 스냅샷'
+        """)
+
         # 리밸런싱 진행 상태 테이블
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS rebalancing_state (

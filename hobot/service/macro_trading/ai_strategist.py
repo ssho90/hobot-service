@@ -3555,9 +3555,9 @@ def save_strategy_decision(
 ) -> bool:
     """전략 결정 결과를 DB에 저장"""
     try:
-        from service.macro_trading.rebalancing.signal_tracker import (
+        from service.macro_trading.rebalancing.signal_confirmation_service import (
             DEFAULT_STRATEGY_PROFILE_ID,
-            track_signal_observation,
+            register_strategy_decision_signal,
         )
 
         with get_db_connection() as conn:
@@ -3674,7 +3674,7 @@ def save_strategy_decision(
             ))
 
             decision_id = cursor.lastrowid
-            track_signal_observation(
+            signal_result = register_strategy_decision_signal(
                 cursor=cursor,
                 strategy_profile_id=strategy_profile_id,
                 decision_id=decision_id,
@@ -3683,7 +3683,13 @@ def save_strategy_decision(
             )
             
             conn.commit()
-            logger.info(f"전략 결정 결과 저장 완료: MP={decision.mp_id}")
+            logger.info(
+                "전략 결정 결과 저장 완료: MP=%s candidate_status=%s consecutive_days=%s promoted=%s",
+                decision.mp_id,
+                signal_result.get("candidate_status"),
+                signal_result.get("consecutive_days"),
+                signal_result.get("promoted"),
+            )
             return True
             
     except Exception as e:

@@ -14,6 +14,13 @@
 
 ## 2026-03-10
 - 세션: [03_phase2_time_travel_foundation.md](./03_phase2_time_travel_foundation.md)
-- 핵심 요약: `PAPER_TIME_TRAVEL` 세션, `virtual_business_date`, `+1 business day`, fixture loader, paper broker adapter, admin API를 구현했다.
-- 이슈/해결: signal confirmation 실제 실행 경로는 아직 없어서, 일별 결과에는 `SKIPPED_NOT_IMPLEMENTED`로 남기고 세션/상태/실행 결과 저장 기반부터 먼저 구축했다.
-- 다음 목표: signal confirmation job과 fixture 주입 경로를 연결하고, 이후 Phase 3 멀티데이 run 상태머신으로 이어간다.
+- 세션: [04_phase2_signal_confirmation_unification.md](./04_phase2_signal_confirmation_unification.md)
+- 핵심 요약: `PAPER_TIME_TRAVEL` 세션, `virtual_business_date`, `+1 business day`, fixture loader, paper broker adapter, admin API를 구현했고, 이어서 운영 AI 분석 저장 경로와 fixture signal confirmation 경로를 공통 서비스로 통합했다.
+- 이슈/해결: 표준 `unittest` 대신 in-memory DB stub과 직접 로드 검증을 사용해 `synthetic/live decision -> observation -> candidate -> effective target` 공통 경로를 확인했다.
+- 다음 목표: Phase 3 멀티데이 run 상태머신과 5일 분할집행 로직으로 이어간다.
+
+## 2026-03-11
+- 세션: [05_phase3_run_state_machine_foundation.md](./05_phase3_run_state_machine_foundation.md)
+- 핵심 요약: 사용자별 `rebalancing_runs`/`rebalancing_run_snapshots`, 당일 slice 계산, `execute_rebalancing_for_user()` 기반 5일 분할집행 foundation, run 조회 API를 구현했다.
+- 이슈/해결: 기존 엔진이 전체 수량 일괄 주문 구조라 상태머신을 붙일 수 없었는데, preview run과 persisted run을 분리해 `max_phase<5`에서는 상태 오염 없이 slice 계획만 확인하도록 정리했다.
+- 다음 목표: partial fill 정밀 반영, completion tolerance, MP/Sub-MP 충돌 시 pause/defer/supersede 실제 상태 전이 구현

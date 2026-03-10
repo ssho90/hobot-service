@@ -30,15 +30,22 @@
   - day result 저장
   - assertion 저장
   - session 종료
+- 신규 `signal_confirmation_service.py`
+  - fixture 기반 synthetic decision 저장
+  - Phase 1 `track_signal_observation()` 재사용
+  - 3거래일 confirm assertion 생성
 - `main.py`
   - `/api/test/rebalancing-sessions/fixtures`
   - `/api/test/rebalancing-sessions/active`
   - `/api/test/rebalancing-sessions`
   - `/api/test/rebalancing-sessions/{session_id}`
   - `/api/test/rebalancing-sessions/{session_id}/day-results`
+  - `/api/test/rebalancing-sessions/{session_id}/assertions`
   - `/api/test/rebalancing-sessions/{session_id}/advance-business-day`
   - `/api/test/rebalancing-sessions/{session_id}/close`
   - 기존 `/api/test/status`, `/api/test/time-travel/next-day` 보강
+- 샘플 fixture
+  - `sample_signal_confirmation_3day.json`
 
 ## 검증
 - 수정 파일 AST parse 성공
@@ -49,16 +56,16 @@
 - `ScenarioFixtureLoader.resolve_fixture_for_business_date()` 직접 검증
 - `PaperTradingBrokerAdapter.is_us_market_open()` 직접 검증
 - `TestSessionService`는 stub dependency로 import 가능 여부 확인
+- `SignalConfirmationService` 3일 연속 호출 시 `PENDING -> PENDING -> APPLIED` confirm 경로 직접 검증
 
 ## 남은 범위
-- signal confirmation 실제 배치 연결
-- fixture를 AI signal input으로 주입하는 경로
 - 미국 휴장일 캘린더 보강
 - baseline 복구 정책
 - assertion report 생성 자동화
+- 운영 scheduler signal confirmation과 공통 서비스화
 
 ## 이슈/메모
-- 현재 `advance_business_day`는 signal confirmation을 아직 실행하지 않고 `SKIPPED_NOT_IMPLEMENTED`로 기록한다.
+- 현재 `advance_business_day`는 signal confirmation을 fixture 기반 synthetic decision으로 실제 실행한다.
 - `run_rebalancing_execution=true`일 때만 모의투자 실행을 시도하며, 시장 시간이 아니면 `PENDING_MARKET_WINDOW`로 저장한다.
 - 표준 `unittest`는 여전히 패키지 eager import 문제로 불안정해서, 직접 로드 검증을 사용했다.
 

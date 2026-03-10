@@ -38,8 +38,9 @@
   - 세션 시작
   - `+1 business day`
   - 결과 조회
-- [ ] signal confirmation 실제 배치 연결
-- [ ] fixture -> signal confirmation 입력 경로 연결
+- [x] signal confirmation 실제 배치 연결
+  - fixture 기반 synthetic decision -> observation/effective target 경로 연결
+- [x] fixture -> signal confirmation 입력 경로 연결
 - [ ] 실거래/모의투자 장시간 제약에 대한 holiday 캘린더 보강
 
 ### Done
@@ -50,11 +51,16 @@
 - [x] `ScenarioFixtureLoader` 추가
 - [x] `PaperTradingBrokerAdapter` 추가
 - [x] `TestSessionService` 추가
+- [x] `SignalConfirmationService` 추가
 - [x] admin API 추가
   - fixture 목록
   - active session 조회
   - session 생성/조회/종료
   - `advance-business-day`
+- [x] 샘플 3일 confirm fixture 추가
+- [x] signal confirmation assertion 조회 API 추가
+- [x] 운영 AI 분석 저장 경로를 signal confirmation 공통 서비스로 정리
+  - `save_strategy_decision()`과 fixture 테스트가 동일한 observation/effective target 경로를 사용
 
 ## 완료 기준
 - 테스트 세션을 생성할 수 있다.
@@ -65,4 +71,5 @@
 ## 리스크
 - 실제 모의투자 주문은 현재 실제 시장 시간 제약을 받는다.
 - baseline 상태 복구가 없으면 반복 테스트 재현성이 떨어질 수 있다.
-- 현재 Phase 2는 signal confirmation을 `SKIPPED_NOT_IMPLEMENTED`로 기록만 하며, 실제 자동 배치 연결은 다음 단계에서 이어야 한다.
+- 현재 signal confirmation은 fixture 기반 synthetic decision 경로로만 연결되어 있다.
+- 운영 AI 분석 저장과 테스트 fixture는 이제 동일 signal confirmation 서비스로 동작한다.

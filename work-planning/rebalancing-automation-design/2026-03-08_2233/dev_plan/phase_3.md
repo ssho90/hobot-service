@@ -6,6 +6,9 @@
 
 ## 대상 파일
 - `hobot/service/database/db.py`
+- `hobot/main.py`
+- `hobot/service/macro_trading/rebalancing/test_session_service.py`
+- `hobot/service/macro_trading/rebalancing/paper_broker_adapter.py`
 - `hobot/service/macro_trading/rebalancing/rebalancing_engine.py`
 - `hobot/service/macro_trading/rebalancing/order_executor.py`
 - 신규 `hobot/service/macro_trading/rebalancing/run_repository.py`
@@ -22,25 +25,31 @@
 ## 체크리스트
 
 ### To-Do
-- [ ] run 상태 enum 확정
+- [ ] completion tolerance 규칙 구현
+- [ ] partial fill 상세 체결 반영 로직 구현
+  - 주문 응답 기반 잔량 계산
+  - 미체결/부분체결 주문 정산
+- [ ] run별 UI/리포트 조회 화면 정리
+
+### In Progress
+- [ ] `OrderExecutor` 일자별 결과 저장 방식 설계
+  - 실제 체결 이벤트 단위로 snapshot 세분화 필요
+
+### Done
+- [x] run 상태 enum 확정
   - `ACTIVE`
   - `PAUSED`
   - `COMPLETED`
   - `CANCELLED`
   - `SUPERSEDED`
   - `FAILED`
-- [ ] 당일 slice 계산 함수 구현
-- [ ] completion tolerance 규칙 구현
-- [ ] partial fill 반영 로직 구현
-- [ ] pause/resume 상태 전이 구현
-- [ ] supersede 시 parent-child 관계 저장 구현
-
-### In Progress
-- [ ] `execute_rebalancing_for_user()` 단위 설계
-- [ ] `OrderExecutor` 일자별 결과 저장 방식 설계
-
-### Done
-- [ ] 충돌 정책 정의
+- [x] 당일 slice 계산 함수 구현
+- [x] `execute_rebalancing_for_user()` 기반 멀티데이 run foundation 구현
+- [x] `rebalancing_runs` / `rebalancing_run_snapshots` 테이블 정의
+- [x] pause/resume 상태 전이 helper 구현
+- [x] supersede 시 parent-child 관계 저장 구현
+- [x] 테스트용 run 조회 API 추가
+- [x] 충돌 정책 정의
   - MP 우선
   - Sub-MP는 defer/absorb 가능
 

@@ -4637,6 +4637,68 @@ async def list_rebalancing_test_day_results(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/test/rebalancing-sessions/{session_id}/assertions")
+async def list_rebalancing_test_assertions(
+    session_id: str,
+    business_date: Optional[str] = Query(default=None),
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.test_session_service import TestSessionService
+
+        return {
+            "status": "success",
+            "assertions": TestSessionService.list_assertions(
+                session_id=session_id,
+                business_date=business_date,
+            ),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/test/rebalancing-runs/{run_id}")
+async def get_rebalancing_run_detail(
+    run_id: str,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.run_repository import RebalancingRunRepository
+
+        repository = RebalancingRunRepository()
+        run = repository.get_run(run_id)
+        if not run:
+            raise HTTPException(status_code=404, detail="Rebalancing run not found")
+        return {"status": "success", "run": run}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/test/rebalancing-runs/{run_id}/snapshots")
+async def list_rebalancing_run_snapshots(
+    run_id: str,
+    current_user: dict = Depends(require_admin),
+):
+    try:
+        from service.macro_trading.rebalancing.run_repository import RebalancingRunRepository
+
+        repository = RebalancingRunRepository()
+        run = repository.get_run(run_id)
+        if not run:
+            raise HTTPException(status_code=404, detail="Rebalancing run not found")
+        return {
+            "status": "success",
+            "run": run,
+            "snapshots": repository.list_run_snapshots(run_id),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/test/rebalancing-sessions/{session_id}/advance-business-day")
 async def advance_rebalancing_test_business_day(
     session_id: str,

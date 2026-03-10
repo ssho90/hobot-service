@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from service.macro_trading.kis.kis import get_balance_info_api
 from service.macro_trading.kis.user_credentials import get_user_kis_credentials
 from service.macro_trading.rebalancing.rebalancing_engine import execute_rebalancing
+from service.macro_trading.rebalancing.signal_tracker import DEFAULT_STRATEGY_PROFILE_ID
 
 
 logger = logging.getLogger(__name__)
@@ -32,9 +33,25 @@ class PaperTradingBrokerAdapter:
             raise ValueError(snapshot.get("message") if snapshot else "Failed to fetch paper account snapshot")
         return snapshot
 
-    async def execute_rebalancing(self, max_phase: int = 5) -> Dict[str, Any]:
-        logger.info("Executing paper rebalancing for user=%s max_phase=%s", self.user_id, max_phase)
-        return await execute_rebalancing(self.user_id, max_phase=max_phase)
+    async def execute_rebalancing(
+        self,
+        max_phase: int = 5,
+        strategy_profile_id: str = DEFAULT_STRATEGY_PROFILE_ID,
+        business_date: Any = None,
+    ) -> Dict[str, Any]:
+        logger.info(
+            "Executing paper rebalancing for user=%s max_phase=%s strategy_profile_id=%s business_date=%s",
+            self.user_id,
+            max_phase,
+            strategy_profile_id,
+            business_date,
+        )
+        return await execute_rebalancing(
+            self.user_id,
+            max_phase=max_phase,
+            strategy_profile_id=strategy_profile_id,
+            business_date=business_date,
+        )
 
     @classmethod
     def is_us_market_open(cls, reference_time: Optional[datetime] = None) -> bool:

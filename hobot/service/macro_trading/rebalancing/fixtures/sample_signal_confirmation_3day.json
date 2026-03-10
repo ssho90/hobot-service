@@ -1,0 +1,169 @@
+{
+  "by_business_date": {
+    "2026-03-10": {
+      "signal_confirmation": {
+        "signal_label": "day1_mp4_eqd",
+        "analysis_summary": "Sample fixture day 1",
+        "target_payload": {
+          "mp_id": "MP-4",
+          "target_allocation": {
+            "Stocks": 20.0,
+            "Bonds": 50.0,
+            "Alternatives": 20.0,
+            "Cash": 10.0
+          },
+          "sub_mp": {
+            "stocks": "Eq-D",
+            "bonds": "Bnd-L",
+            "alternatives": "Alt-I",
+            "cash": "Cash-N"
+          },
+          "sub_mp_details_snapshot": {
+            "stocks": {
+              "sub_mp_id": "Eq-D",
+              "etf_details": [
+                {"ticker": "QQQ", "weight": 0.6},
+                {"ticker": "VTV", "weight": 0.4}
+              ]
+            },
+            "bonds": {
+              "sub_mp_id": "Bnd-L",
+              "etf_details": [
+                {"ticker": "TLT", "weight": 1.0}
+              ]
+            },
+            "alternatives": {
+              "sub_mp_id": "Alt-I",
+              "etf_details": [
+                {"ticker": "GLD", "weight": 1.0}
+              ]
+            },
+            "cash": {
+              "sub_mp_id": "Cash-N",
+              "etf_details": [
+                {"ticker": "CASH", "weight": 1.0}
+              ]
+            }
+          }
+        }
+      },
+      "expected": {
+        "signal_confirmation": {
+          "candidate_status": "PENDING",
+          "consecutive_days": 1,
+          "promoted": false
+        }
+      }
+    },
+    "2026-03-11": {
+      "signal_confirmation": {
+        "signal_label": "day2_mp4_eqd",
+        "analysis_summary": "Sample fixture day 2",
+        "target_payload": {
+          "mp_id": "MP-4",
+          "target_allocation": {
+            "Stocks": 20.0,
+            "Bonds": 50.0,
+            "Alternatives": 20.0,
+            "Cash": 10.0
+          },
+          "sub_mp": {
+            "stocks": "Eq-D",
+            "bonds": "Bnd-L",
+            "alternatives": "Alt-I",
+            "cash": "Cash-N"
+          },
+          "sub_mp_details_snapshot": {
+            "stocks": {
+              "sub_mp_id": "Eq-D",
+              "etf_details": [
+                {"ticker": "QQQ", "weight": 0.6},
+                {"ticker": "VTV", "weight": 0.4}
+              ]
+            },
+            "bonds": {
+              "sub_mp_id": "Bnd-L",
+              "etf_details": [
+                {"ticker": "TLT", "weight": 1.0}
+              ]
+            },
+            "alternatives": {
+              "sub_mp_id": "Alt-I",
+              "etf_details": [
+                {"ticker": "GLD", "weight": 1.0}
+              ]
+            },
+            "cash": {
+              "sub_mp_id": "Cash-N",
+              "etf_details": [
+                {"ticker": "CASH", "weight": 1.0}
+              ]
+            }
+          }
+        }
+      },
+      "expected": {
+        "signal_confirmation": {
+          "candidate_status": "PENDING",
+          "consecutive_days": 2,
+          "promoted": false
+        }
+      }
+    },
+    "2026-03-12": {
+      "signal_confirmation": {
+        "signal_label": "day3_mp4_eqd",
+        "analysis_summary": "Sample fixture day 3",
+        "target_payload": {
+          "mp_id": "MP-4",
+          "target_allocation": {
+            "Stocks": 20.0,
+            "Bonds": 50.0,
+            "Alternatives": 20.0,
+            "Cash": 10.0
+          },
+          "sub_mp": {
+            "stocks": "Eq-D",
+            "bonds": "Bnd-L",
+            "alternatives": "Alt-I",
+            "cash": "Cash-N"
+          },
+          "sub_mp_details_snapshot": {
+            "stocks": {
+              "sub_mp_id": "Eq-D",
+              "etf_details": [
+                {"ticker": "QQQ", "weight": 0.6},
+                {"ticker": "VTV", "weight": 0.4}
+              ]
+            },
+            "bonds": {
+              "sub_mp_id": "Bnd-L",
+              "etf_details": [
+                {"ticker": "TLT", "weight": 1.0}
+              ]
+            },
+            "alternatives": {
+              "sub_mp_id": "Alt-I",
+              "etf_details": [
+                {"ticker": "GLD", "weight": 1.0}
+              ]
+            },
+            "cash": {
+              "sub_mp_id": "Cash-N",
+              "etf_details": [
+                {"ticker": "CASH", "weight": 1.0}
+              ]
+            }
+          }
+        }
+      },
+      "expected": {
+        "signal_confirmation": {
+          "candidate_status": "APPLIED",
+          "consecutive_days": 3,
+          "promoted": true
+        }
+      }
+    }
+  }
+}
