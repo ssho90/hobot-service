@@ -5,7 +5,82 @@ import pandas as pd
 import time
 import os
 import logging
+import hashlib
+import tempfile
 from datetime import datetime
+
+KIS_REQUEST_TIMEOUT_SECONDS = 30
+_EXTRA_CA_ENV_KEYS = ("REQUESTS_CA_BUNDLE", "SSL_CERT_FILE")
+
+
+def _resolve_extra_ca_bundle_path():
+    """추가 CA 번들 경로가 있으면 반환"""
+    for env_key in _EXTRA_CA_ENV_KEYS:
+        raw_value = str(os.getenv(env_key, "") or "").strip()
+        if raw_value:
+            return raw_value
+    return None
+
+
+def _paths_point_to_same_file(left, right):
+    try:
+        return os.path.samefile(left, right)
+    except (FileNotFoundError, OSError, TypeError):
+        return False
+
+
+def _build_kis_verify_bundle_path():
+    """
+    KIS 요청에 사용할 verify 경로를 반환한다.
+
+    - 기본값: requests/certifi 기본 번들
+    - 추가 CA가 있으면 기본 번들 + 추가 CA를 합친 임시 PEM 파일
+    """
+    default_bundle_path = requests.certs.where()
+    extra_bundle_path = _resolve_extra_ca_bundle_path()
+
+    if not extra_bundle_path:
+        return default_bundle_path
+
+    if _paths_point_to_same_file(default_bundle_path, extra_bundle_path):
+        return default_bundle_path
+
+    try:
+        with open(default_bundle_path, "rb") as default_file:
+            default_bundle_bytes = default_file.read()
+        with open(extra_bundle_path, "rb") as extra_file:
+            extra_bundle_bytes = extra_file.read()
+    except OSError as exc:
+        logging.warning(
+            "KIS 추가 CA 번들을 읽지 못해 기본 certifi 번들을 사용합니다. path=%s error=%s",
+            extra_bundle_path,
+            exc,
+        )
+        return default_bundle_path
+
+    if extra_bundle_bytes in default_bundle_bytes:
+        return default_bundle_path
+
+    bundle_digest = hashlib.sha256(
+        default_bundle_bytes + b"\n" + extra_bundle_bytes
+    ).hexdigest()[:16]
+    merged_bundle_path = os.path.join(
+        tempfile.gettempdir(),
+        f"hobot_kis_ca_bundle_{bundle_digest}.pem",
+    )
+
+    if not os.path.exists(merged_bundle_path):
+        with open(merged_bundle_path, "wb") as merged_file:
+            merged_file.write(default_bundle_bytes.rstrip() + b"\n")
+            merged_file.write(extra_bundle_bytes.lstrip())
+        logging.info(
+            "KIS verify 번들 생성: default=%s extra=%s merged=%s",
+            default_bundle_path,
+            extra_bundle_path,
+            merged_bundle_path,
+        )
+
+    return merged_bundle_path
 
 class KISAPI:
     # 토큰 파일 경로
@@ -19,12 +94,14 @@ class KISAPI:
         self.app_secret = app_secret
         self.account_no = account_no
         self.is_simulation = is_simulation
+        self._session = requests.Session()
         
         # base_url이 제공되지 않으면 모의투자 여부에 따라 자동 설정
         if base_url:
             self.base_url = base_url
         else:
             self.base_url = "https://openapivts.koreainvestment.com:29443" if is_simulation else "https://openapi.koreainvestment.com:9443"
+        self._verify_bundle_path = _build_kis_verify_bundle_path()
             
         self.access_token = self._get_access_token()
 
@@ -86,6 +163,18 @@ class KISAPI:
             print(f"Error parsing issued_date: {e}")
             return False
 
+    def _send_request(self, method, url, headers=None, params=None, data=None):
+        """KIS API 요청 공통 helper"""
+        return self._session.request(
+            method=method.upper(),
+            url=url,
+            headers=headers,
+            params=params,
+            data=data,
+            timeout=KIS_REQUEST_TIMEOUT_SECONDS,
+            verify=self._verify_bundle_path,
+        )
+
     def _get_access_token(self):
         """접근 토큰 발급 (파일에 저장된 토큰이 있으면 재사용)"""
         # 파일에서 토큰 로드 시도
@@ -103,7 +192,7 @@ class KISAPI:
         }
         path = "/oauth2/tokenP"
         url = f"{self.base_url}{path}"
-        res = requests.post(url, headers=headers, data=json.dumps(body))
+        res = self._send_request("POST", url, headers=headers, data=json.dumps(body))
         if res.status_code == 200:
             token = res.json()["access_token"]
             issued_date = datetime.now().isoformat()
@@ -154,7 +243,7 @@ class KISAPI:
         url = f"{self.base_url}{path}"
         
         try:
-            res = requests.post(url, headers=headers, data=json.dumps(body))
+            res = self._send_request("POST", url, headers=headers, data=json.dumps(body))
             
             # Rate Limit (EGW00133) check
             if res.status_code != 200:
@@ -168,7 +257,7 @@ class KISAPI:
                     logging.warning("토큰 발급 빈도 제한(1분) 감지. 60초 대기 후 재시도합니다...")
                     time.sleep(60)
                     # Retry once
-                    res = requests.post(url, headers=headers, data=json.dumps(body))
+                    res = self._send_request("POST", url, headers=headers, data=json.dumps(body))
 
             if res.status_code == 200:
                 token = res.json()["access_token"]
@@ -188,10 +277,7 @@ class KISAPI:
     def _request_with_token_refresh(self, method, url, headers, params=None, data=None):
         """토큰 만료 시 자동 갱신하여 요청 재시도"""
         try:
-            if method.upper() == 'GET':
-                res = requests.get(url, headers=headers, params=params)
-            else:
-                res = requests.post(url, headers=headers, data=data)
+            res = self._send_request(method, url, headers=headers, params=params, data=data)
             
             # 토큰 만료 체크 (HTTP 500 또는 API 응답 코드 확인)
             # KIS API는 토큰 만료 시 500 에러와 함께 msg_cd: EGW00123 반환
@@ -207,10 +293,13 @@ class KISAPI:
                         
                         # 재시도
                         logging.info("토큰 갱신 후 요청 재시도")
-                        if method.upper() == 'GET':
-                            return requests.get(url, headers=headers, params=params)
-                        else:
-                            return requests.post(url, headers=headers, data=data)
+                        return self._send_request(
+                            method,
+                            url,
+                            headers=headers,
+                            params=params,
+                            data=data,
+                        )
                 except Exception:
                     pass
             
@@ -580,4 +669,3 @@ class KISAPI:
         # 임시 구현: 빈 리스트 반환
         # 실제로는 KIS API 문서를 참고하여 구현 필요
         return []
-
