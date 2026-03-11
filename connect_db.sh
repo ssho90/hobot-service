@@ -6,7 +6,8 @@ EC2_USER="ec2-user" # ssh 접속 계정 (Ubuntu 환경의 경우 ubuntu, Amazon 
 EC2_IP="3.34.13.230"
 
 # 포트 매핑 (로컬 포트 -> EC2 내부 MySQL 포트)
-LOCAL_PORT=3306  # 로컬에서 기본 MySQL 포트(3306)로 터널링
+# hobot/.env의 DB_PORT=3307 설정과 맞춘다.
+LOCAL_PORT=3307  # 로컬 앱이 사용하는 포트로 터널링
 REMOTE_PORT=3306 # EC2에 설치된 MySQL의 기본 포트
 
 echo "==========================================================="

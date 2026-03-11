@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/Header';
+import { DevAgentation } from './components/dev/DevAgentation';
 
 const RegisterPage = lazy(() => import('./components/RegisterPage'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -67,6 +68,7 @@ function App() {
     <AuthProvider>
       <Router>
         <AppLayout />
+        <DevAgentation />
       </Router>
     </AuthProvider>
   );

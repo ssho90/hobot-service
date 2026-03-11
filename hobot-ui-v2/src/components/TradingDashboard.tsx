@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useBalance, useRebalancing } from '../hooks/useMacroData';
 import { formatCurrency, formatPercent, safeNumber } from '../utils/formatters';
-import { Wallet, TrendingUp, TrendingDown, RefreshCw, PieChart, BarChart3, AlertCircle, Loader2 } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, RefreshCw, PieChart, BarChart3, AlertCircle, Loader2, Pencil, Check, X, RotateCcw } from 'lucide-react';
 import { TotalAssetTrendChart } from './TotalAssetTrendChart';
 import { RebalancingTestModal } from './RebalancingTestModal';
 
 // Color palette for charts
 const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#06b6d4'];
+const MANUAL_INVESTED_AMOUNT_KEY_PREFIX = 'trading-dashboard:manual-invested-amount:v1';
+
+const getManualInvestedAmountStorageKey = (userId: string) =>
+    `${MANUAL_INVESTED_AMOUNT_KEY_PREFIX}:${userId}`;
 
 const StackedBar = ({ items, total = 100 }: { items: { label: string; value: number; color?: string }[]; total?: number }) => {
     return (
@@ -35,7 +39,7 @@ const StackedBar = ({ items, total = 100 }: { items: { label: string; value: num
 };
 
 export const TradingDashboard: React.FC = () => {
-    const { isAuthenticated, loading: authLoading } = useAuth();
+    const { user, isAuthenticated, loading: authLoading } = useAuth();
     const [activeTab, setActiveTab] = useState<'account' | 'rebalancing'>('account');
     const { data: balance, loading: balanceLoading, error: balanceError, refreshing: balanceRefreshing, refresh: refreshBalance } = useBalance();
     const { data: rebalancing, loading: rebalancingLoading, error: rebalancingError, refreshing: rebalancingRefreshing, refresh: refreshRebalancing } = useRebalancing({
@@ -46,6 +50,40 @@ export const TradingDashboard: React.FC = () => {
     const [showMpDetails, setShowMpDetails] = useState(false);
     const [showSubMpDetails, setShowSubMpDetails] = useState<Record<string, boolean>>({});
     const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+    const [manualInvestedAmount, setManualInvestedAmount] = useState<number | null>(null);
+    const [isInvestedAmountEditing, setIsInvestedAmountEditing] = useState(false);
+    const [investedAmountInput, setInvestedAmountInput] = useState('');
+    const [investedAmountError, setInvestedAmountError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!user) {
+            setManualInvestedAmount(null);
+            setIsInvestedAmountEditing(false);
+            setInvestedAmountInput('');
+            setInvestedAmountError(null);
+            return;
+        }
+
+        try {
+            const storedValue = localStorage.getItem(getManualInvestedAmountStorageKey(user.id));
+            if (!storedValue) {
+                setManualInvestedAmount(null);
+                return;
+            }
+
+            const parsedValue = Number(storedValue);
+            if (Number.isFinite(parsedValue) && parsedValue >= 0) {
+                setManualInvestedAmount(parsedValue);
+                return;
+            }
+
+            localStorage.removeItem(getManualInvestedAmountStorageKey(user.id));
+            setManualInvestedAmount(null);
+        } catch (error) {
+            console.error('Failed to load manual invested amount:', error);
+            setManualInvestedAmount(null);
+        }
+    }, [user]);
 
     const toggleSubMpDetails = (assetClass: string) => {
         setShowSubMpDetails(prev => ({ ...prev, [assetClass]: !prev[assetClass] }));
@@ -61,6 +99,70 @@ export const TradingDashboard: React.FC = () => {
         } else {
             refreshBalance();
         }
+    };
+
+    const computedInvestedAmount = balance
+        ? balance.net_invested_amount ?? (balance.total_eval_amount - balance.total_profit_loss)
+        : 0;
+    const displayedInvestedAmount = manualInvestedAmount ?? computedInvestedAmount;
+    const displayedProfitLoss = manualInvestedAmount !== null
+        ? safeNumber(balance?.total_eval_amount) - displayedInvestedAmount
+        : safeNumber(balance?.total_profit_loss);
+    const displayedReturnRate = manualInvestedAmount !== null
+        ? (displayedInvestedAmount > 0 ? (displayedProfitLoss / displayedInvestedAmount) * 100 : 0)
+        : safeNumber(balance?.total_return_rate ?? balance?.total_profit_loss_rate);
+
+    const handleOpenInvestedAmountEditor = () => {
+        setInvestedAmountInput(String(Math.max(Math.round(displayedInvestedAmount), 0)));
+        setInvestedAmountError(null);
+        setIsInvestedAmountEditing(true);
+    };
+
+    const handleCloseInvestedAmountEditor = () => {
+        setIsInvestedAmountEditing(false);
+        setInvestedAmountInput('');
+        setInvestedAmountError(null);
+    };
+
+    const handleSaveInvestedAmount = () => {
+        if (!user) return;
+
+        const normalizedInput = investedAmountInput.replace(/,/g, '').trim();
+        if (!normalizedInput) {
+            setInvestedAmountError('금액을 입력해주세요.');
+            return;
+        }
+
+        const parsedValue = Number(normalizedInput);
+        if (!Number.isFinite(parsedValue) || parsedValue < 0) {
+            setInvestedAmountError('0 이상의 숫자를 입력해주세요.');
+            return;
+        }
+
+        const nextValue = Math.round(parsedValue);
+
+        try {
+            localStorage.setItem(getManualInvestedAmountStorageKey(user.id), String(nextValue));
+            setManualInvestedAmount(nextValue);
+            setInvestedAmountError(null);
+            setIsInvestedAmountEditing(false);
+        } catch (error) {
+            console.error('Failed to save manual invested amount:', error);
+            setInvestedAmountError('금액 저장에 실패했습니다.');
+        }
+    };
+
+    const handleResetInvestedAmount = () => {
+        if (!user) return;
+
+        try {
+            localStorage.removeItem(getManualInvestedAmountStorageKey(user.id));
+            setManualInvestedAmount(null);
+        } catch (error) {
+            console.error('Failed to reset manual invested amount:', error);
+        }
+
+        handleCloseInvestedAmountEditor();
     };
 
     const isRecentUpdate = (dateStr?: string) => {
@@ -172,7 +274,29 @@ export const TradingDashboard: React.FC = () => {
                                 <p className="text-2xl font-bold text-zinc-900">{formatCurrency(balance.total_eval_amount)}</p>
                             </div>
 
-                            <div className="bg-white border border-zinc-200 rounded-2xl p-6 relative group shadow-sm">
+                            <div className="bg-white border border-zinc-200 rounded-2xl p-6 relative shadow-sm">
+                                <div className="absolute top-4 right-4 flex items-center gap-2">
+                                    {manualInvestedAmount !== null && !isInvestedAmountEditing && (
+                                        <button
+                                            type="button"
+                                            onClick={handleResetInvestedAmount}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                                            title="투자원금 수동 입력 초기화"
+                                        >
+                                            <RotateCcw className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                    {!isInvestedAmountEditing && (
+                                        <button
+                                            type="button"
+                                            onClick={handleOpenInvestedAmountEditor}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                                            title="투자원금 직접 입력"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="p-2 bg-slate-100 rounded-lg">
                                         <BarChart3 className="h-5 w-5 text-zinc-500" />
@@ -180,38 +304,82 @@ export const TradingDashboard: React.FC = () => {
                                     <span className="text-zinc-500 text-sm">투자원금</span>
                                 </div>
                                 <p className="text-2xl font-bold text-zinc-900">
-                                    {formatCurrency(balance.net_invested_amount ?? (balance.total_eval_amount - balance.total_profit_loss))}
+                                    {formatCurrency(displayedInvestedAmount)}
                                 </p>
-                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white text-[10px] text-zinc-600 p-2 rounded border border-zinc-200 pointer-events-none whitespace-pre-line z-10 w-48 shadow-lg">
-                                    순 입금금액 = 총 평가금액 - 총 평가손익{'\n'}
-                                    (실현손익 제외, 단순 자산 가치 역산)
-                                </div>
+                                {isInvestedAmountEditing && (
+                                    <div className="mt-4 rounded-xl border border-zinc-200 bg-slate-50 p-3">
+                                        <label className="mb-2 block text-xs font-medium text-zinc-600">
+                                            투자원금 직접 입력
+                                        </label>
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={investedAmountInput}
+                                            onChange={(event) => {
+                                                setInvestedAmountInput(event.target.value.replace(/[^\d]/g, ''));
+                                                setInvestedAmountError(null);
+                                            }}
+                                            onKeyDown={(event) => {
+                                                if (event.key === 'Enter') {
+                                                    handleSaveInvestedAmount();
+                                                }
+                                                if (event.key === 'Escape') {
+                                                    handleCloseInvestedAmountEditor();
+                                                }
+                                            }}
+                                            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-blue-500"
+                                            placeholder="예: 15000000"
+                                            autoFocus
+                                        />
+                                        {investedAmountError && (
+                                            <p className="mt-2 text-xs text-red-500">{investedAmountError}</p>
+                                        )}
+                                        <div className="mt-3 flex items-center justify-end gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleCloseInvestedAmountEditor}
+                                                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                                                title="입력 취소"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveInvestedAmount}
+                                                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white transition-colors hover:bg-blue-700"
+                                                title="입력 저장"
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className={`p-2 rounded-lg ${safeNumber(balance.total_profit_loss) >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
-                                        {safeNumber(balance.total_profit_loss) >= 0 ?
+                                    <div className={`p-2 rounded-lg ${displayedProfitLoss >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                                        {displayedProfitLoss >= 0 ?
                                             <TrendingUp className="h-5 w-5 text-emerald-600" /> :
                                             <TrendingDown className="h-5 w-5 text-red-600" />
                                         }
                                     </div>
                                     <span className="text-zinc-500 text-sm">평가손익</span>
                                 </div>
-                                <p className={`text-2xl font-bold ${safeNumber(balance.total_profit_loss) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                                    {formatCurrency(balance.total_profit_loss)}
+                                <p className={`text-2xl font-bold ${displayedProfitLoss >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                    {formatCurrency(displayedProfitLoss)}
                                 </p>
                             </div>
 
                             <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className={`p-2 rounded-lg ${safeNumber(balance.total_return_rate ?? balance.total_profit_loss_rate) >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                                    <div className={`p-2 rounded-lg ${displayedReturnRate >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
                                         <PieChart className="h-5 w-5 text-zinc-500" />
                                     </div>
                                     <span className="text-zinc-500 text-sm">수익률</span>
                                 </div>
-                                <p className={`text-2xl font-bold ${safeNumber(balance.total_return_rate ?? balance.total_profit_loss_rate) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                                    {formatPercent(balance.total_return_rate ?? balance.total_profit_loss_rate)}
+                                <p className={`text-2xl font-bold ${displayedReturnRate >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                    {formatPercent(displayedReturnRate)}
                                 </p>
                             </div>
                         </div>
